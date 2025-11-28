@@ -58,3 +58,18 @@ If you want, next I can add:
 - Prisma migrations for the DB
 - Stripe/PayPal billing routes
 - or a voice/command endpoint where you “call” your avatar by name and it responds.
+
+## AI maintenance endpoints
+
+The API now exposes scoped endpoints that proxy the AI Synthetic Intelligence ♊ engine:
+
+- `POST /api/ai/repair/env` – submit the current `.env` plus a validation report so the AI can patch missing or broken values.
+- `POST /api/ai/sign/env` – request a digital signature for a given `.env` so deployments can verify provenance.
+
+Both routes require the shared `AI_SYNTHETIC_API_KEY` (sent via `x-api-key`) and enforce the `system:admin` + `ai:repair` scopes through `auth.hybrid` and `scopeGuard`.
+
+## CI/CD autonomy
+
+- Use `node scripts/ci-auto-repair.js .env` inside your GitHub Action (or any CI runner) to call the repair endpoint whenever a workflow fails. The script reads the provided env file, posts it to the API, and prints the AI response.
+- Configure `AI_AUTOREPAIR_ENDPOINT`, `AI_SYNTHETIC_API_KEY`, and `AI_SECURITY_MODE` as repository secrets so the script authenticates securely.
+- See `docs/ci-autonomy.md` for a full walk-through, including an example `if: failure()` step and a table of required secrets.

@@ -9,8 +9,8 @@ function authHybrid(req, res, next) {
   if (apiKey && apiKey === process.env.AI_SYNTHETIC_API_KEY) {
     req.auth = {
       mode: "api-key",
-      scopes: ["ai:query", "data:read", "system:admin"],
-      subject: "ai-synthetic-engine"
+      scopes: ["ai:query", "data:read", "system:admin", "ai:repair"],
+      subject: "ai-synthetic-engine",
     };
     return next();
   }
@@ -22,7 +22,7 @@ function authHybrid(req, res, next) {
       req.auth = {
         mode: "jwt",
         subject: decoded.sub || decoded.id,
-        scopes: decoded.scopes || ["user:basic"]
+        scopes: decoded.scopes || ["user:basic"],
       };
       return next();
     } catch (e) {
