@@ -6,8 +6,15 @@
 app = 'infamous-freight-enterprises'
 primary_region = 'lax'
 
+[build]
+  dockerfile = "api/Dockerfile"
+
+[env]
+  PORT = "4000"
+  NODE_ENV = "production"
+
 [http_service]
-  internal_port = 8080
+  internal_port = 4000
   force_https = true
   auto_stop_machines = 'stop'
   auto_start_machines = true
@@ -15,7 +22,6 @@ primary_region = 'lax'
   processes = ['app']
 
 [[vm]]
-  memory = '1gb'
   cpu_kind = 'shared'
   cpus = 1
   memory_mb = 1024
