@@ -23,8 +23,10 @@ jobs:
             web/package-lock.json
 
       - name: Install API deps
-        working-directory: api
-        run: npm ci
+        run: npm ci --prefix api
+
+      - name: Install Web deps
+        run: npm ci --prefix web
 
       - name: Lint API
         working-directory: api
@@ -33,10 +35,6 @@ jobs:
       - name: Build API
         working-directory: api
         run: npm run build
-
-      - name: Install Web deps
-        working-directory: web
-        run: npm ci
 
       - name: Lint Web
         working-directory: web
