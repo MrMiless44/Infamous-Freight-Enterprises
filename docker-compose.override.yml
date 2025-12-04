@@ -1,0 +1,10 @@
+services:
+  api:
+    volumes:
+      - ./api:/app
+    command: sh -c "npm install && npm run dev"
+
+  web:
+    volumes:
+      - ./web:/app
+    command: sh -c "npm install && npm run dev"

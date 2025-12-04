@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "web/next.config.mjs", "use": "@vercel/next" }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "https://YOUR_API_DOMAIN/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/web/$1"
+    }
+  ]
+}

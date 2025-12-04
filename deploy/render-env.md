@@ -1,0 +1,15 @@
+# Render Environment Variables
+
+NEXT_PUBLIC_API_BASE=https://infamous-api.onrender.com/api
+NEXT_PUBLIC_APP_NAME=Infæmous Freight
+NEXT_PUBLIC_ENV=production
+
+# API ENV
+DATABASE_URL=auto (from Render database)
+JWT_SECRET=YOUR_RANDOM_VALUE
+AI_PROVIDER=synthetic
+AI_SYNTHETIC_API_KEY=
+AI_SYNTHETIC_ENGINE_URL=
+STRIPE_SECRET_KEY=
+PAYPAL_CLIENT_ID=
+PAYPAL_SECRET=

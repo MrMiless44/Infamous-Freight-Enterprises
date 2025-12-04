@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      String   @default("user")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Driver {
+  id         String     @id @default(cuid())
+  name       String
+  phone      String?
+  status     String     @default("inactive")
+  avatarCode String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  shipments  Shipment[]
+}
+
+model Shipment {
+  id          String   @id @default(cuid())
+  reference   String   @unique
+  origin      String
+  destination String
+  status      String   @default("created")
+  driverId    String?
+  driver      Driver?  @relation(fields: [driverId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AiEvent {
+  id        String   @id @default(cuid())
+  type      String
+  payload   Json
+  createdAt DateTime @default(now())
+}

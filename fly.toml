@@ -1,0 +1,25 @@
+app = "infamous-freight-api"
+primary_region = "iad"
+
+[build]
+  dockerfile = "api/Dockerfile"
+
+[env]
+  PORT = "4000"
+  NODE_ENV = "production"
+
+[[services]]
+  internal_port = 4000
+  protocol = "tcp"
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = "80"
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = "443"
+
+  [services.concurrency]
+    hard_limit = 50
+    soft_limit = 35
