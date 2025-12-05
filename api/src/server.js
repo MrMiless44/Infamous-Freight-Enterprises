@@ -30,7 +30,7 @@ app.use('/internal/ai-sim', aiSimRouter);
 app.get('/health', (req, res) => {
   res.json({
     ok: true,
-    service: "Infæmous Freight API",
+    service: "Infamous Freight API",
     timestamp: new Date().toISOString(),
     version: "2.0.0"
   });
@@ -47,7 +47,7 @@ app.use((err, req, res, next) => {
 
 // Start server
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Infæmous Freight API running on port ${PORT}`);
+  console.log(`🚀 Infamous Freight API running on port ${PORT}`);
   console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`   Database: ${process.env.DATABASE_URL ? '✓ Connected' : '✗ Not configured'}`);
 });
