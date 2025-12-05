@@ -4,7 +4,6 @@
 - `DATABASE_URL` – production Postgres connection string
 - `JWT_SECRET` – generated per deployment
 - `NODE_ENV` – `production`
-- `NEXT_PUBLIC_API_BASE` – public API base URL used by the web app
 
 ## AI Providers
 - `AI_PROVIDER` – set to `synthetic`, `openai`, or `anthropic`
