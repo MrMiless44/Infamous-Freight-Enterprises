@@ -24,6 +24,7 @@ model Driver {
   avatarCode  String?  // links to AI avatar theme
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  shipments   Shipment[] @relation(name: "ShipmentDriver")
 }
 
 model Shipment {
@@ -33,7 +34,7 @@ model Shipment {
   destination String
   status      String   @default("created")
   driverId    String?
-  driver      Driver?  @relation(fields: [driverId], references: [id])
+  driver      Driver?  @relation(name: "ShipmentDriver", fields: [driverId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
