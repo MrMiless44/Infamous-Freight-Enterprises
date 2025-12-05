@@ -1,8 +1,10 @@
 const express = require("express");
+const { z } = require("zod");
 const Stripe = require("stripe");
 const paypal = require("@paypal/checkout-server-sdk");
 
 const router = express.Router();
+const captureSchema = z.object({ orderId: z.string().min(1) });
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? Stripe(process.env.STRIPE_SECRET_KEY)
@@ -19,7 +21,7 @@ if (process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_SECRET) {
 }
 
 // ========= Stripe Checkout ===========
-router.post("/billing/stripe/session", async (req, res) => {
+router.post("/stripe/session", async (req, res, next) => {
   if (!stripe) return res.status(500).json({ error: "Stripe not configured" });
 
   try {
@@ -41,37 +43,54 @@ router.post("/billing/stripe/session", async (req, res) => {
 
     res.json({ ok: true, sessionId: session.id });
   } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: e.message });
+    next(e);
   }
 });
 
 // ========= PayPal Checkout ===========
-router.post("/billing/paypal/order", async (req, res) => {
+router.post("/paypal/order", async (req, res, next) => {
   if (!paypalClient) return res.status(500).json({ error: "PayPal not configured" });
 
-  const request = new paypal.orders.OrdersCreateRequest();
-  request.requestBody({
-    intent: "CAPTURE",
-    purchase_units: [
-      {
-        amount: { currency_code: "USD", value: "49.00" }
-      }
-    ]
-  });
+  try {
+    const request = new paypal.orders.OrdersCreateRequest();
+    request.requestBody({
+      intent: "CAPTURE",
+      purchase_units: [
+        {
+          amount: { currency_code: "USD", value: "49.00" }
+        }
+      ]
+    });
 
-  const order = await paypalClient.execute(request);
-  res.json({ ok: true, orderId: order.result.id });
+    const order = await paypalClient.execute(request);
+    res.json({ ok: true, orderId: order.result.id });
+  } catch (error) {
+    next(error);
+  }
 });
 
-router.post("/billing/paypal/capture", async (req, res) => {
-  const { orderId } = req.body;
+router.post("/paypal/capture", async (req, res, next) => {
+  if (!paypalClient) return res.status(500).json({ error: "PayPal not configured" });
 
-  const request = new paypal.orders.OrdersCaptureRequest(orderId);
-  request.requestBody({});
+  let payload;
+  try {
+    payload = captureSchema.parse(req.body || {});
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors });
+    }
+    return next(error);
+  }
 
-  const capture = await paypalClient.execute(request);
-  res.json({ ok: true, capture });
+  try {
+    const request = new paypal.orders.OrdersCaptureRequest(payload.orderId);
+    request.requestBody({});
+
+    const capture = await paypalClient.execute(request);
+    res.json({ ok: true, capture });
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;

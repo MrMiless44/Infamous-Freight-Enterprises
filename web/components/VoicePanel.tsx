@@ -6,13 +6,17 @@ export function VoicePanel() {
   const [text, setText] = useState("");
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function send() {
     if (!text.trim()) return;
     setLoading(true);
+    setError(null);
     try {
       const r = await api.post("/voice/command", { text });
       setResult(r);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -60,6 +64,9 @@ export function VoicePanel() {
         {loading ? "Sending…" : "Send to AI"}
       </button>
 
+      {error && (
+        <p style={{ color: "#ff8c66", marginTop: "0.8rem" }}>{error}</p>
+      )}
       {result && (
         <pre
           style={{

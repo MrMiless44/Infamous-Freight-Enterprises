@@ -1,5 +1,5 @@
 export function useApi() {
-  const base = process.env.NEXT_PUBLIC_API_BASE || "http://localhost/api";
+  const base = process.env.NEXT_PUBLIC_API_BASE || "/api";
 
   async function get(path: string) {
     const res = await fetch(base + path);

@@ -1,27 +1,44 @@
 const express = require("express");
 const multer = require("multer");
+const { z } = require("zod");
 const { sendCommand } = require("../services/aiSyntheticClient");
 
 const upload = multer({ storage: multer.memoryStorage() });
 const router = express.Router();
+const textSchema = z.object({ text: z.string().min(1) });
 
-router.post("/voice/ingest", upload.single("audio"), async (req, res) => {
+router.post("/ingest", upload.single("audio"), async (req, res, next) => {
   if (!req.file) return res.status(400).json({ error: "audio required" });
 
-  // Here you would call Whisper/OpenAI etc.
-  const transcript = "(simulated) Driver says: optimize route to Chicago";
+  try {
+    // Here you would call Whisper/OpenAI etc.
+    const transcript = "(simulated) Driver says: optimize route to Chicago";
 
-  const result = await sendCommand("voice.input", { transcript });
+    const result = await sendCommand("voice.input", { transcript });
 
-  res.json({ ok: true, transcript, ai: result });
+    res.json({ ok: true, transcript, ai: result });
+  } catch (error) {
+    next(error);
+  }
 });
 
-router.post("/voice/command", async (req, res) => {
-  const { text } = req.body || {};
-  if (!text) return res.status(400).json({ error: "text required" });
+router.post("/command", async (req, res, next) => {
+  let payload;
+  try {
+    payload = textSchema.parse(req.body || {});
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors });
+    }
+    return next(error);
+  }
 
-  const result = await sendCommand("voice.command", { text });
-  res.json({ ok: true, result });
+  try {
+    const result = await sendCommand("voice.command", { text: payload.text });
+    res.json({ ok: true, result });
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;

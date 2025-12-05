@@ -7,10 +7,13 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch((process.env.NEXT_PUBLIC_API_BASE || "http://localhost/api") + "/health")
-      .then(r => r.json())
+    fetch("/api/health")
+      .then(r => {
+        if (!r.ok) throw new Error(r.statusText);
+        return r.json();
+      })
       .then(j => setStatus(j))
-      .catch(() => setStatus({ ok: false }))
+      .catch(err => setStatus({ ok: false, error: err.message }))
       .finally(() => setLoading(false));
   }, []);
 

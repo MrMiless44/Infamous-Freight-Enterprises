@@ -5,16 +5,33 @@ export function BillingPanel() {
   const api = useApi();
   const [stripeSession, setStripeSession] = useState<string | null>(null);
   const [paypalOrder, setPaypalOrder] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   async function createStripe() {
-    const res = await api.post("/billing/stripe/session");
-    setStripeSession(res.sessionId);
-    window.location.href = `https://checkout.stripe.com/pay/${res.sessionId}`;
+    setError(null);
+    try {
+      const res = await api.post("/billing/stripe/session");
+      if (!res?.sessionId) {
+        throw new Error("Failed to create Stripe session");
+      }
+      setStripeSession(res.sessionId);
+      window.location.href = `https://checkout.stripe.com/pay/${res.sessionId}`;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Stripe checkout failed");
+    }
   }
 
   async function createPayPal() {
-    const res = await api.post("/billing/paypal/order");
-    setPaypalOrder(res.orderId);
+    setError(null);
+    try {
+      const res = await api.post("/billing/paypal/order");
+      if (!res?.orderId) {
+        throw new Error("Failed to create PayPal order");
+      }
+      setPaypalOrder(res.orderId);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "PayPal order failed");
+    }
   }
 
   return (
@@ -61,6 +78,9 @@ export function BillingPanel() {
 
       {paypalOrder && (
         <p style={{ marginTop: "1rem" }}>PayPal Order: {paypalOrder}</p>
+      )}
+      {error && (
+        <p style={{ marginTop: "1rem", color: "#ff8c66" }}>{error}</p>
       )}
     </div>
   );

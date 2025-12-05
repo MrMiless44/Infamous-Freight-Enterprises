@@ -1,23 +1,25 @@
 {
   "name": "infamous-freight-web",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint \"./pages/**/*.{ts,tsx,js,jsx}\" \"./components/**/*.{ts,tsx,js,jsx}\" \"./hooks/**/*.{ts,tsx,js,jsx}\""
   },
   "dependencies": {
     "next": "14.2.32",
     "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "swr": "^2.2.0"
+    "react-dom": "18.2.0"
   },
   "devDependencies": {
-    "@types/node": "20.19.25",
-    "@types/react": "18.3.27",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
-    "typescript": "5.9.3"
+    "@eslint/eslintrc": "^1.4.0",
+    "eslint": "^9.39.1",
+    "eslint-config-next": "16.0.7",
+    "typescript": "^5.4.0"
   }
 }

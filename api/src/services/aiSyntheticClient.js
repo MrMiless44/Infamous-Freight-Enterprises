@@ -15,6 +15,13 @@ const anthropic = process.env.ANTHROPIC_API_KEY
   ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   : null;
 
+function ensureClient(client, name) {
+  if (!client) {
+    throw new Error(`${name} client not configured`);
+  }
+  return client;
+}
+
 async function sendSynthetic(command, payload, meta) {
   const res = await axios.post(
     syntheticUrl,
@@ -30,6 +37,7 @@ async function sendSynthetic(command, payload, meta) {
 }
 
 async function sendOpenAI(command, payload) {
+  ensureClient(openai, "OpenAI");
   const prompt = `You are an AI logistics agent.\nCommand: ${command}\nPayload: ${JSON.stringify(payload)}`;
   const res = await openai.chat.completions.create({
     model: "gpt-4o-mini",
@@ -39,6 +47,7 @@ async function sendOpenAI(command, payload) {
 }
 
 async function sendAnthropic(command, payload) {
+  ensureClient(anthropic, "Anthropic");
   const prompt = `You are an AI logistics agent.\nCommand: ${command}\nPayload: ${JSON.stringify(payload)}`;
   const res = await anthropic.messages.create({
     model: "claude-3-haiku-20240307",

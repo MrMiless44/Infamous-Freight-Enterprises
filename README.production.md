@@ -169,6 +169,18 @@ Key variables:
 - `STRIPE_SECRET_KEY` - Stripe API key
 - `PAYPAL_CLIENT_ID` - PayPal client ID
 
+Before starting the API locally or in CI, run:
+
+```bash
+cd api && npm run validate:env
+```
+
+And after deployments (or during integration tests) execute:
+
+```bash
+cd api && npm run smoke:health
+```
+
 ## API Endpoints
 
 ### Health
