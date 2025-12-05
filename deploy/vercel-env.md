@@ -14,6 +14,8 @@
   - `AI_PROVIDER`
   - `OPENAI_API_KEY`
   - `ANTHROPIC_API_KEY`
+  - `AI_SYNTHETIC_API_KEY`
+  - `AI_SYNTHETIC_ENGINE_URL`
 
 ## Notes
 - Only the web app is deployed to Vercel; the API URL should point to Fly.io/Render.
