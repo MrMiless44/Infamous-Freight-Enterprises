@@ -22,7 +22,7 @@ Set these before deploying:
 
 ## 4) Deploy API to Fly.io (recommended)
 - Install & login: `brew install flyctl && flyctl auth login`
-- From repo root: `flyctl launch --config deploy/fly.toml --no-deploy`
+- From repo root: `flyctl launch --config fly.toml --no-deploy`
 - Set secrets: `flyctl secrets set JWT_SECRET="$(openssl rand -base64 32)" DATABASE_URL="<prod-db-url>" AI_PROVIDER="openai" OPENAI_API_KEY="<key>"`
 - Deploy: `flyctl deploy`
 - Smoke test: `curl https://<fly-app>.fly.dev/health`
