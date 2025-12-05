@@ -23,6 +23,9 @@ function ensureClient(client, name) {
 }
 
 async function sendSynthetic(command, payload, meta) {
+  if (!syntheticUrl || !syntheticKey) {
+    throw new Error("Synthetic AI endpoint is not configured");
+  }
   const res = await axios.post(
     syntheticUrl,
     { command, payload, meta },
@@ -51,6 +54,7 @@ async function sendAnthropic(command, payload) {
   const prompt = `You are an AI logistics agent.\nCommand: ${command}\nPayload: ${JSON.stringify(payload)}`;
   const res = await anthropic.messages.create({
     model: "claude-3-haiku-20240307",
+    max_tokens: 256,
     messages: [{ role: "user", content: prompt }]
   });
   return { provider: "anthropic", text: res.content[0].text };

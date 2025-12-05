@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-router.post("/ai-sim", (req, res) => {
+router.post("/", (req, res) => {
   const { command, payload, meta } = req.body || {};
   res.json({
     echoCommand: command,

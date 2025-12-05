@@ -5,17 +5,21 @@ import { BillingPanel } from "../components/BillingPanel";
 export default function Dashboard() {
   const [status, setStatus] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE || "/api";
+  const healthUrl = `${apiBase.replace(/\/$/, "")}/health`;
 
   useEffect(() => {
-    fetch("/api/health")
+    fetch(healthUrl)
       .then(r => {
         if (!r.ok) throw new Error(r.statusText);
         return r.json();
       })
       .then(j => setStatus(j))
-      .catch(err => setStatus({ ok: false, error: err.message }))
+      .catch(err =>
+        setStatus({ ok: false, error: err.message || "Health check failed" })
+      )
       .finally(() => setLoading(false));
-  }, []);
+  }, [healthUrl]);
 
   return (
     <main style={{ padding: "2rem" }}>
