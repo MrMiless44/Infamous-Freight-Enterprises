@@ -1,21 +1,42 @@
 import { useEffect, useState } from "react";
 import { VoicePanel } from "../components/VoicePanel";
 import { BillingPanel } from "../components/BillingPanel";
+import { useApi } from "../hooks/useApi";
+
+type HealthStatus = {
+  ok: boolean;
+  service?: string;
+  timestamp?: string;
+  version?: string;
+  error?: string;
+  [key: string]: any;
+};
 
 export default function Dashboard() {
-  const [status, setStatus] = useState<any>(null);
+  const api = useApi();
+  const [status, setStatus] = useState<HealthStatus | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/health")
-      .then(r => {
-        if (!r.ok) throw new Error(r.statusText);
-        return r.json();
-      })
-      .then(j => setStatus(j))
-      .catch(err => setStatus({ ok: false, error: err.message }))
-      .finally(() => setLoading(false));
-  }, []);
+    let active = true;
+
+    (async () => {
+      try {
+        const response = await api.get("/health");
+        if (active) setStatus(response);
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Failed to load API status";
+        if (active) setStatus({ ok: false, error: message });
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [api]);
 
   return (
     <main style={{ padding: "2rem" }}>
