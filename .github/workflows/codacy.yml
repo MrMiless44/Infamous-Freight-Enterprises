@@ -33,6 +33,12 @@ jobs:
       actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
     name: Codacy Security Scan
     runs-on: ubuntu-latest
+    # Skip on pull requests opened from forks: CODACY_PROJECT_TOKEN is not
+    # exposed to fork PR workflows, and GITHUB_TOKEN's `security-events: write`
+    # permission is downgraded to read-only for fork PRs, so the SARIF upload
+    # step would fail. Codacy still runs on push to main, schedule, and
+    # same-repo PRs, which is sufficient coverage.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     steps:
       # Checkout the repository to the GitHub Actions runner
       - name: Checkout code
