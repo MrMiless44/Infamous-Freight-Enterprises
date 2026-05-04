@@ -553,8 +553,18 @@ export function createApp() {
 
   app.use(
     helmet({
-      contentSecurityPolicy: false,
-      crossOriginEmbedderPolicy: false,
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'none'"],
+          objectSrc: ["'none'"],
+          baseUri: ["'none'"],
+          formAction: ["'none'"],
+          frameAncestors: ["'none'"],
+        },
+      },
+      crossOriginEmbedderPolicy: { policy: 'require-corp' },
+      crossOriginOpenerPolicy: { policy: 'same-origin' },
+      crossOriginResourcePolicy: { policy: 'same-origin' },
     }),
   );
 

@@ -128,6 +128,26 @@ describe('tenant-protected resource routes', () => {
   });
 });
 
+describe('security headers', () => {
+  it('includes required security headers on API responses', async () => {
+    const response = await request(createApp()).get('/api/health');
+
+    expect(response.headers['x-content-type-options']).toBe('nosniff');
+    expect(response.headers['x-frame-options']).toBe('SAMEORIGIN');
+    expect(response.headers['referrer-policy']).toBeDefined();
+    expect(response.headers['cross-origin-opener-policy']).toBe('same-origin');
+    expect(response.headers['cross-origin-resource-policy']).toBe('same-origin');
+    expect(response.headers['cross-origin-embedder-policy']).toBe('require-corp');
+    expect(response.headers['content-security-policy']).toBeDefined();
+  });
+
+  it('does not expose X-Powered-By header', async () => {
+    const response = await request(createApp()).get('/api/health');
+
+    expect(response.headers['x-powered-by']).toBeUndefined();
+  });
+});
+
 describe('configuration safety', () => {
   it('fails fast without DATABASE_URL outside test mode', () => {
     const previousNodeEnv = process.env.NODE_ENV;
