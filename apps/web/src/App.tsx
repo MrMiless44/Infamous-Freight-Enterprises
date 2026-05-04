@@ -40,9 +40,32 @@ const PartnersPage = lazy(() => import('@/pages/PartnersPage'));
 const DriversApplyPage = lazy(() => import('@/pages/DriversApplyPage'));
 
 const RouteFallback = () => (
-  <div className="h-full w-full flex items-center justify-center p-6">
-    <div className="w-8 h-8 border-2 border-infamous-orange border-t-transparent rounded-full animate-spin" />
-  </div>
+  <main
+    className="min-h-screen w-full flex items-center justify-center p-6 bg-[#0a0a0a] text-slate-100"
+    style={{
+      background:
+        'radial-gradient(circle at top left, rgba(255, 106, 0, 0.2), transparent 32rem), #0a0a0a',
+    }}
+    aria-live="polite"
+    aria-busy="true"
+  >
+    <section className="max-w-xl text-center">
+      <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-infamous-orange">
+        Infamous Freight
+      </p>
+      <h1 className="mt-3 mb-4 text-4xl sm:text-5xl font-bold leading-tight">
+        Loading freight command center...
+      </h1>
+      <p className="text-base leading-relaxed text-slate-300">
+        Dispatch, visibility, rate tools, and carrier operations are loading.
+      </p>
+      <div
+        className="mx-auto mt-6 w-8 h-8 border-2 border-infamous-orange border-t-transparent rounded-full animate-spin"
+        role="status"
+        aria-label="Loading"
+      />
+    </section>
+  </main>
 );
 
 function App() {
