@@ -1,6 +1,7 @@
 export type SubscriptionStatus =
   | 'active'
   | 'trialing'
+  | 'trial'
   | 'past_due'
   | 'unpaid'
   | 'canceled'
@@ -11,6 +12,7 @@ export type SubscriptionStatus =
 export const PAID_SUBSCRIPTION_STATUSES: ReadonlySet<SubscriptionStatus> = new Set([
   'active',
   'trialing',
+  'trial',
 ]);
 
 export const BILLING_ALLOWED_PATH_PREFIXES = [
@@ -29,6 +31,7 @@ export function normalizeSubscriptionStatus(value: unknown): SubscriptionStatus 
   switch (normalized) {
     case 'active':
     case 'trialing':
+    case 'trial':
     case 'past_due':
     case 'unpaid':
     case 'canceled':

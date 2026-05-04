@@ -35,7 +35,7 @@ function getRequiredTenantId(req: TenantRequest): string {
     throw new FreightWorkflowHttpError(
       400,
       'tenant_id_required',
-      'Provide tenantId via x-tenant-id header, query, or body.',
+      'Provide tenantId via the x-tenant-id header.',
     );
   }
 

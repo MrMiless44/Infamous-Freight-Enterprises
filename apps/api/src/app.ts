@@ -26,7 +26,7 @@ import { createStripeOneTimePaymentStore } from './stripe-one-time-payments';
 import { createFreightWorkflowRouter } from './freight-workflow-routes';
 
 type Role = 'owner' | 'admin' | 'dispatcher';
-type SubscriptionStatus = 'active' | 'trialing' | 'past_due' | 'unpaid' | 'canceled' | 'incomplete' | 'none';
+type SubscriptionStatus = 'active' | 'trialing' | 'trial' | 'past_due' | 'unpaid' | 'canceled' | 'incomplete' | 'none';
 
 type HealthResponse = {
   status: 'ok' | 'degraded';
@@ -41,7 +41,7 @@ const ALLOWED_ROLES: Role[] = ['owner', 'admin', 'dispatcher'];
 const BILLING_ROLES: Role[] = ['owner', 'admin'];
 const BILLING_PLANS: BillingPlan[] = ['starter', 'professional', 'enterprise'];
 const BILLING_INTERVALS: BillingInterval[] = ['month', 'year'];
-const PAID_SUBSCRIPTION_STATUSES: SubscriptionStatus[] = ['active', 'trialing'];
+const PAID_SUBSCRIPTION_STATUSES: SubscriptionStatus[] = ['active', 'trialing', 'trial'];
 const FREIGHT_OPERATION_RESOURCES: FreightOperationResource[] = [
   'quoteRequests',
   'loadAssignments',
@@ -67,10 +67,8 @@ class HttpError extends Error {
 
 function getTenantId(req: Request): string | null {
   const tenantHeader = req.header('x-tenant-id')?.trim();
-  const tenantBody = typeof req.body?.tenantId === 'string' ? req.body.tenantId.trim() : null;
-  const tenantQuery = typeof req.query?.tenantId === 'string' ? req.query.tenantId.trim() : null;
 
-  return tenantHeader || tenantBody || tenantQuery || null;
+  return tenantHeader || null;
 }
 
 function requireTenant(req: Request, res: Response, next: NextFunction) {
@@ -79,7 +77,7 @@ function requireTenant(req: Request, res: Response, next: NextFunction) {
   if (!tenantId) {
     return res.status(400).json({
       error: 'tenant_id_required',
-      message: 'Provide tenantId via x-tenant-id header, query, or body.',
+      message: 'Provide tenantId via the x-tenant-id header.',
     });
   }
 
@@ -112,47 +110,70 @@ function requireBillingRole(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-function getSubscriptionStatus(req: Request): SubscriptionStatus {
-  const defaultStatus =
-    process.env.DEFAULT_SUBSCRIPTION_STATUS ??
-    (process.env.NODE_ENV === 'test' ? 'active' : 'none');
+function normalizeSubscriptionStatus(status: unknown): SubscriptionStatus {
+  if (typeof status !== 'string') {
+    return 'none';
+  }
 
-  const status = (
-    req.header('x-subscription-status') ??
-    req.header('x-billing-status') ??
-    req.header('x-carrier-subscription-status') ??
-    defaultStatus
-  ).trim().toLowerCase();
+  const normalized = status.trim().toLowerCase();
 
   if (
-    status === 'active' ||
-    status === 'trialing' ||
-    status === 'past_due' ||
-    status === 'unpaid' ||
-    status === 'canceled' ||
-    status === 'incomplete' ||
-    status === 'none'
+    normalized === 'active' ||
+    normalized === 'trialing' ||
+    normalized === 'trial' ||
+    normalized === 'past_due' ||
+    normalized === 'unpaid' ||
+    normalized === 'canceled' ||
+    normalized === 'incomplete' ||
+    normalized === 'none'
   ) {
-    return status;
+    return normalized;
   }
 
   return 'none';
 }
 
-function requirePaidSubscription(req: Request, res: Response, next: NextFunction) {
-  const subscriptionStatus = getSubscriptionStatus(req);
+function allowClientSubscriptionStatusHeader(): boolean {
+  return process.env.NODE_ENV === 'test' || process.env.ALLOW_CLIENT_SUBSCRIPTION_STATUS_HEADER === 'true';
+}
 
-  if (!PAID_SUBSCRIPTION_STATUSES.includes(subscriptionStatus)) {
-    return res.status(402).json({
-      error: 'payment_required',
-      message: 'An active subscription or trial is required to access this resource.',
-      billingUrl: '/billing',
-      subscriptionStatus,
-    });
-  }
+function getHeaderSubscriptionStatus(req: Request): SubscriptionStatus {
+  const defaultStatus =
+    process.env.DEFAULT_SUBSCRIPTION_STATUS ??
+    (process.env.NODE_ENV === 'test' ? 'active' : 'none');
 
-  req.subscriptionStatus = subscriptionStatus;
-  next();
+  return normalizeSubscriptionStatus(
+    req.header('x-subscription-status') ??
+    req.header('x-billing-status') ??
+    req.header('x-carrier-subscription-status') ??
+    defaultStatus,
+  );
+}
+
+function createRequirePaidSubscription(dataStore: DataStore) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    void (async () => {
+      const tenantId = getRequiredTenantId(req);
+      const storedStatus = await dataStore.getCarrierSubscriptionStatus(tenantId);
+      const subscriptionStatus = storedStatus
+        ? normalizeSubscriptionStatus(storedStatus)
+        : allowClientSubscriptionStatusHeader()
+          ? getHeaderSubscriptionStatus(req)
+          : 'none';
+
+      if (!PAID_SUBSCRIPTION_STATUSES.includes(subscriptionStatus)) {
+        return res.status(402).json({
+          error: 'payment_required',
+          message: 'An active subscription or trial is required to access this resource.',
+          billingUrl: '/billing',
+          subscriptionStatus,
+        });
+      }
+
+      req.subscriptionStatus = subscriptionStatus;
+      next();
+    })().catch(next);
+  };
 }
 
 function initializeSentry() {
@@ -189,7 +210,7 @@ function getRequiredTenantId(req: Request): string {
     throw new HttpError(
       400,
       'tenant_id_required',
-      'Provide tenantId via x-tenant-id header, query, or body.',
+      'Provide tenantId via the x-tenant-id header.',
     );
   }
 
@@ -233,6 +254,25 @@ function getCheckoutInterval(req: Request): BillingInterval {
 function getOneTimePurchaseType(req: Request): string | undefined {
   const purchaseType = req.body?.purchaseType;
   return typeof purchaseType === 'string' && purchaseType.trim() ? purchaseType.trim() : undefined;
+}
+
+function hasLeadHoneypotValue(body: unknown): boolean {
+  if (!body || typeof body !== 'object') {
+    return false;
+  }
+
+  const record = body as Record<string, unknown>;
+  const value = record.website ?? record.url ?? record.companyWebsite;
+
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function isValidEmail(value: unknown): value is string {
+  return typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+function isValidDateString(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0 && !Number.isNaN(Date.parse(value));
 }
 
 function getCarrierIdFromBillingSync(billingSync: ReturnType<typeof getBillingSyncFromStripeEvent>): string | null {
@@ -338,16 +378,20 @@ function registerRoutes(app: express.Express, dataStore: DataStore) {
 
   // Public lead intake endpoints — no authentication required
   app.post('/api/leads/quote', wrapAsync(async (req, res) => {
+    if (hasLeadHoneypotValue(req.body)) {
+      throw new HttpError(400, 'lead_honeypot_rejected', 'Lead submission was rejected.');
+    }
+
     const { name, email, originCity, destCity, freightType, weight, pickupDate } = req.body ?? {};
 
     const missing: string[] = [];
     if (!name || typeof name !== 'string') missing.push('name');
-    if (!email || typeof email !== 'string') missing.push('email');
+    if (!isValidEmail(email)) missing.push('email');
     if (!originCity || typeof originCity !== 'string') missing.push('originCity');
     if (!destCity || typeof destCity !== 'string') missing.push('destCity');
     if (!freightType || typeof freightType !== 'string') missing.push('freightType');
     if (weight === undefined || weight === null || isNaN(parseFloat(String(weight)))) missing.push('weight');
-    if (!pickupDate || typeof pickupDate !== 'string') missing.push('pickupDate');
+    if (!isValidDateString(pickupDate)) missing.push('pickupDate');
 
     if (missing.length > 0) {
       throw new HttpError(
@@ -362,9 +406,13 @@ function registerRoutes(app: express.Express, dataStore: DataStore) {
   }));
 
   app.post('/api/leads/demo', wrapAsync(async (req, res) => {
+    if (hasLeadHoneypotValue(req.body)) {
+      throw new HttpError(400, 'lead_honeypot_rejected', 'Lead submission was rejected.');
+    }
+
     const { name, email } = req.body ?? {};
 
-    if (!email || typeof email !== 'string') {
+    if (!isValidEmail(email)) {
       throw new HttpError(400, 'demo_lead_missing_email', 'email is required.');
     }
 
@@ -382,9 +430,13 @@ function registerRoutes(app: express.Express, dataStore: DataStore) {
   }));
 
   app.post('/api/leads/discount', wrapAsync(async (req, res) => {
+    if (hasLeadHoneypotValue(req.body)) {
+      throw new HttpError(400, 'lead_honeypot_rejected', 'Lead submission was rejected.');
+    }
+
     const { email } = req.body ?? {};
 
-    if (!email || typeof email !== 'string') {
+    if (!isValidEmail(email)) {
       throw new HttpError(400, 'discount_lead_missing_email', 'email is required.');
     }
 
@@ -469,7 +521,7 @@ function registerRoutes(app: express.Express, dataStore: DataStore) {
     res.status(200).json({ data: { url } });
   }));
 
-  const protectedApi = [requireTenant, requireRole, requirePaidSubscription];
+  const protectedApi = [requireTenant, requireRole, createRequirePaidSubscription(dataStore)];
 
   app.post('/api/ai-usage/events', ...protectedApi, wrapAsync(async (req, res) => {
     if (!req.body?.feature || typeof req.body.feature !== 'string') {
