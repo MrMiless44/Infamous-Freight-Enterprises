@@ -585,9 +585,10 @@ export function createApp() {
   registerWebhookRoute(app, dataStore);
   app.use(express.json());
 
-  app.get('/health', (_req, res) => {
-    res.status(200).json(createLivenessResponse());
-  });
+  app.get('/health', wrapAsync(async (_req, res) => {
+    const readiness = await createReadinessResponse(dataStore);
+    res.status(readiness.statusCode).json(readiness.body);
+  }));
 
   app.get('/health/live', (_req, res) => {
     res.status(200).json(createLivenessResponse());
