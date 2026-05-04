@@ -4,6 +4,7 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { BRAND } from '@/lib/brand';
 
 interface Notification {
   id: string;
@@ -47,7 +48,7 @@ export function useNotifications(userId: string, companyId: string) {
         if ('Notification' in window && Notification.permission === 'granted') {
           new Notification(notification.title, {
             body: notification.message,
-            icon: '/logo.png',
+            icon: BRAND.notificationIcon,
           });
         }
       }

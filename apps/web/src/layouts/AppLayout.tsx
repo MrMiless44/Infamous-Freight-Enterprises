@@ -10,6 +10,7 @@ import {
 } from '@/lib/paywall';
 import Sidebar from '@/components/ui/Sidebar';
 import TopBar from '@/components/ui/TopBar';
+import { BRAND } from '@/lib/brand';
 import { Toaster } from 'react-hot-toast';
 
 const AppLayout: React.FC = () => {
@@ -111,7 +112,7 @@ const AppLayout: React.FC = () => {
       <div className="h-screen w-screen flex items-center justify-center bg-infamous-dark">
         <div className="text-center">
           <div className="w-12 h-12 border-3 border-infamous-orange border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-300 text-sm">Loading Infamous Freight...</p>
+          <p className="text-gray-300 text-sm">Loading {BRAND.displayName}...</p>
         </div>
       </div>
     );

@@ -4,6 +4,7 @@ import AppLayout from '@/layouts/AppLayout';
 import PublicLayout from '@/layouts/PublicLayout';
 import SeoManager from '@/components/SeoManager';
 import { AppErrorBoundary } from '@/components/SentryErrorBoundary';
+import { BRAND } from '@/lib/brand';
 
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
 const LoadsPage = lazy(() => import('@/pages/LoadsPage'));
@@ -57,7 +58,7 @@ const RouteFallback = () => (
   >
     <section className="max-w-xl text-center">
       <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-infamous-orange">
-        Infamous Freight
+        {BRAND.displayName}
       </p>
       <h1 className="mt-3 mb-4 text-4xl sm:text-5xl font-bold leading-tight">
         Loading freight command center...

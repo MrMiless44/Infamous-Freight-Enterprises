@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Zap, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { useAppStore } from '@/store/app-store';
 import { useSupabaseAuth } from '@/hooks/useSupabase';
+import BrandMark from '@/components/ui/BrandMark';
+import { BRAND } from '@/lib/brand';
 import toast from 'react-hot-toast';
 
 const LoginPage: React.FC = () => {
@@ -41,7 +43,7 @@ const LoginPage: React.FC = () => {
 
       const carrierId = authUser.user_metadata?.carrierId;
       if (!carrierId) {
-        toast.error("Your account isn't linked to a carrier yet. Email support@infamousfreight.com so we can finish setting it up.");
+        toast.error(`Your account isn't linked to a carrier yet. Email ${BRAND.supportEmail} so the setup can be completed.`);
         return;
       }
 
@@ -67,13 +69,10 @@ const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-infamous-dark flex items-center justify-center p-6">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-infamous-orange to-infamous-orange-light flex items-center justify-center mx-auto mb-4">
-            <Zap size={28} className="text-white" />
-          </div>
-          <h1 className="text-2xl font-extrabold">INFAMOUS FREIGHT</h1>
-          <p className="text-gray-500 text-sm mt-1">Freight Command Center</p>
+          <BrandMark className="justify-center mb-4 scale-125" />
+          <h1 className="text-2xl font-extrabold">{BRAND.name}</h1>
+          <p className="text-gray-500 text-sm mt-1">{BRAND.tagline}</p>
         </div>
 
         {/* Card */}
@@ -108,7 +107,7 @@ const LoginPage: React.FC = () => {
                   id="login-company"
                   type="text"
                   className="input-field"
-                  placeholder="Acme Trucking LLC"
+                  placeholder="Iron Route Logistics LLC"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                   required
