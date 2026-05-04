@@ -99,10 +99,14 @@ security: tighten CORS policy
 If you are contributing from a fork, a few CI behaviors are expected and not bugs:
 
 - **First-time contributors require maintainer approval.** GitHub will hold workflow runs from forks until a maintainer clicks **Approve and run** on the PR. This is a repository-level security setting, not a workflow misconfiguration.
-- **Some checks intentionally skip on fork PRs.** Repository secrets (e.g. `VERCEL_TOKEN`, `CODACY_PROJECT_TOKEN`, Fly tokens, npm publish tokens) are not exposed to workflows triggered by `pull_request` events from forks, and `GITHUB_TOKEN` has its `security-events: write` permission downgraded to read-only. Workflows that depend on those (currently **Vercel Preview** and **Codacy Security Scan**) skip on fork PRs and re-run after merge to `main`.
+- **Some checks intentionally skip on fork PRs.** Workflows that require repository secrets cannot run from a fork because GitHub does not expose those secrets to fork-triggered `pull_request` runs, and `GITHUB_TOKEN`'s `security-events: write` permission is downgraded to read-only. Today this affects two workflows, which are explicitly gated to skip on fork PRs:
+  - **Vercel Preview** — needs `VERCEL_TOKEN` / `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID`. Netlify is the required deploy gate, so skipping here is non-blocking.
+  - **Codacy Security Scan** — needs `CODACY_PROJECT_TOKEN` and write access to code-scanning. Codacy still runs on push to `main`, on schedule, and on same-repo PRs, so coverage of the production branch is unchanged.
+
+  Other workflows that use secrets (Fly deploy, npm publish, etc.) only run on push, release, or `workflow_dispatch`, so they are not invoked by fork PRs in the first place.
 - **The following must still pass on fork PRs before merge:** lint, API and web TypeScript typecheck, unit tests, the smoke-test workflow's required checks, and CodeQL. If any of these fail, fix them in the PR; do not merge around them.
 - **Maintainers:** when re-running a fork PR after pushing fixes, click **Approve and run** again rather than merging green-checked-but-stale runs.
 
-
+## Secrets
 
 Never commit secrets, tokens, private keys, credentials, `.env` files, or screenshots containing secrets. If a secret is exposed, rotate it immediately and open a blocker issue.
