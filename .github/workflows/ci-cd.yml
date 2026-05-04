@@ -49,6 +49,11 @@ jobs:
           pnpm -C apps/api exec tsc -p tsconfig.json --noEmit
           pnpm -C apps/web exec tsc -p tsconfig.json --noEmit
 
+      - name: Validate Fly deploy check script syntax
+        run: |
+          bash -n scripts/fly-post-deploy-check.sh
+          bash -n scripts/fly-preflight.sh
+
       - name: Test
         run: pnpm -C apps/api run test -- --runInBand
 
@@ -144,9 +149,7 @@ jobs:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
       - name: Verify Fly.io release convergence
-        run: |
-          flyctl status --app infamous-freight
-          flyctl checks list --app infamous-freight
+        run: scripts/fly-post-deploy-check.sh infamous-freight https://infamous-freight.fly.dev https://api.infamousfreight.com
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
