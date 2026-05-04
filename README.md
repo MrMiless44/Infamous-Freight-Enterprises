@@ -389,7 +389,8 @@ Example response:
 ```bash
 curl -X GET http://localhost:3000/api/loads \
   -H "x-tenant-id: demo-tenant" \
-  -H "x-user-role: dispatcher"
+  -H "x-user-role: dispatcher" \
+  -H "x-subscription-status: active"
 ```
 
 Example response:
@@ -411,6 +412,8 @@ Expected request headers for protected operational routes:
 
 - `x-tenant-id`
 - `x-user-role`
+
+Tenant IDs are accepted only from `x-tenant-id`; query string and request-body tenant values are rejected. Protected routes prefer the carrier billing status stored in the database from Stripe webhook sync. Client-set subscription headers are limited to tests or transitional environments that explicitly set `ALLOW_CLIENT_SUBSCRIPTION_STATUS_HEADER=true`.
 
 ---
 

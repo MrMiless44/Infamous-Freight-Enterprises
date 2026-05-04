@@ -94,6 +94,46 @@ describe('Stripe billing endpoints', () => {
     expect(response.body.error).toBe('stripe_secret_key_required');
   });
 
+  it('uses stored Stripe-synced carrier status for protected routes without client billing headers', async () => {
+    const app = createApp();
+    const payload = JSON.stringify({
+      id: 'evt_checkout_subscription_gate',
+      type: 'checkout.session.completed',
+      data: {
+        object: {
+          customer: 'cus_subscription_gate',
+          metadata: {
+            carrierId: 'carrier_subscription_gate',
+            plan: 'starter',
+          },
+        },
+      },
+    });
+
+    await request(app)
+      .post('/api/billing/webhook')
+      .set('stripe-signature', createStripeSignature(payload, 'whsec_test_secret'))
+      .set('Content-Type', 'application/json')
+      .send(payload)
+      .expect(200, { received: true });
+
+    const response = await request(app)
+      .post('/api/ai-usage/events')
+      .set('x-tenant-id', 'carrier_subscription_gate')
+      .set('x-user-role', 'dispatcher')
+      .send({
+        feature: 'dispatch-assistant',
+        actionCount: 1,
+      })
+      .expect(201);
+
+    expect(response.body.data).toMatchObject({
+      carrierId: 'carrier_subscription_gate',
+      feature: 'dispatch-assistant',
+      actionCount: 1,
+    });
+  });
+
   it('creates Checkout Sessions with server-side prices, metadata, and session id success redirects', async () => {
     process.env.STRIPE_SECRET_KEY = 'sk_test_checkout';
     process.env.WEB_APP_URL = 'https://www.infamousfreight.com';

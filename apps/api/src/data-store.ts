@@ -43,6 +43,23 @@ export type QuoteLeadRecord = {
   receivedAt: string;
 };
 
+type PrismaPublicLeadRecord = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  company: string | null;
+  originCity: string | null;
+  destCity: string | null;
+  freightType: string | null;
+  weight: number;
+  pickupDate: Date | null;
+  notes: string | null;
+  source: string;
+  status: string;
+  receivedAt: Date;
+};
+
 type PrismaLoadRecord = {
   id: string;
   carrierId: string;
@@ -215,6 +232,7 @@ export interface DataStore {
   submitQuoteLead(payload: Record<string, unknown>): Promise<QuoteLeadRecord>;
   syncCarrierBilling(payload: BillingSyncPayload): Promise<boolean>;
   getCarrierStripeCustomerId(tenantId: string): Promise<string | null>;
+  getCarrierSubscriptionStatus(tenantId: string): Promise<string | null>;
   healthCheck(): Promise<'connected' | 'disconnected'>;
 }
 
@@ -274,6 +292,44 @@ function getNestedPayload(
   key: string,
 ): Record<string, unknown> {
   return isRecord(payload[key]) ? payload[key] as Record<string, unknown> : payload;
+}
+
+function normalizeLeadPayload(payload: Record<string, unknown>): Omit<QuoteLeadRecord, 'id' | 'receivedAt'> {
+  const rawWeight = parseFloat(String(payload.weight ?? '0'));
+
+  return {
+    name: String(payload.name ?? ''),
+    email: String(payload.email ?? ''),
+    phone: String(payload.phone ?? ''),
+    company: String(payload.company ?? ''),
+    originCity: String(payload.originCity ?? ''),
+    destCity: String(payload.destCity ?? ''),
+    freightType: String(payload.freightType ?? ''),
+    weight: isFinite(rawWeight) ? rawWeight : 0,
+    pickupDate: String(payload.pickupDate ?? ''),
+    notes: String(payload.notes ?? ''),
+    source: String(payload.source ?? 'web-form'),
+    status: 'new',
+  };
+}
+
+function normalizePublicLead(record: PrismaPublicLeadRecord): QuoteLeadRecord {
+  return {
+    id: record.id,
+    name: record.name,
+    email: record.email,
+    phone: record.phone ?? '',
+    company: record.company ?? '',
+    originCity: record.originCity ?? '',
+    destCity: record.destCity ?? '',
+    freightType: record.freightType ?? '',
+    weight: record.weight,
+    pickupDate: record.pickupDate?.toISOString() ?? '',
+    notes: record.notes ?? '',
+    source: record.source,
+    status: record.status,
+    receivedAt: record.receivedAt.toISOString(),
+  };
 }
 
 async function assertLoadBelongsToTenant(
@@ -503,21 +559,10 @@ class MemoryDataStore implements DataStore {
   }
 
   async submitQuoteLead(payload: Record<string, unknown>): Promise<QuoteLeadRecord> {
-    const rawWeight = parseFloat(String(payload.weight ?? '0'));
+    const lead = normalizeLeadPayload(payload);
     const record: QuoteLeadRecord = {
       id: randomUUID(),
-      name: String(payload.name ?? ''),
-      email: String(payload.email ?? ''),
-      phone: String(payload.phone ?? ''),
-      company: String(payload.company ?? ''),
-      originCity: String(payload.originCity ?? ''),
-      destCity: String(payload.destCity ?? ''),
-      freightType: String(payload.freightType ?? ''),
-      weight: isFinite(rawWeight) ? rawWeight : 0,
-      pickupDate: String(payload.pickupDate ?? ''),
-      notes: String(payload.notes ?? ''),
-      source: String(payload.source ?? 'web-form'),
-      status: 'new',
+      ...lead,
       receivedAt: new Date().toISOString(),
     };
     this.leads.push(record);
@@ -547,6 +592,10 @@ class MemoryDataStore implements DataStore {
 
   async getCarrierStripeCustomerId(tenantId: string): Promise<string | null> {
     return this.carrierBilling.get(tenantId)?.stripeCustomerId ?? null;
+  }
+
+  async getCarrierSubscriptionStatus(tenantId: string): Promise<string | null> {
+    return this.carrierBilling.get(tenantId)?.status ?? null;
   }
 
   async healthCheck(): Promise<'connected' | 'disconnected'> {
@@ -925,27 +974,26 @@ class PrismaDataStore implements DataStore {
   }
 
   async submitQuoteLead(payload: Record<string, unknown>): Promise<QuoteLeadRecord> {
-    const rawWeight = parseFloat(String(payload.weight ?? '0'));
-    const record: QuoteLeadRecord = {
-      id: randomUUID(),
-      name: String(payload.name ?? ''),
-      email: String(payload.email ?? ''),
-      phone: String(payload.phone ?? ''),
-      company: String(payload.company ?? ''),
-      originCity: String(payload.originCity ?? ''),
-      destCity: String(payload.destCity ?? ''),
-      freightType: String(payload.freightType ?? ''),
-      weight: isFinite(rawWeight) ? rawWeight : 0,
-      pickupDate: String(payload.pickupDate ?? ''),
-      notes: String(payload.notes ?? ''),
-      source: String(payload.source ?? 'web-form'),
-      status: 'new',
-      receivedAt: new Date().toISOString(),
-    };
-    // Log the incoming lead so it appears in server logs and can be routed
-    // to a CRM or notification system via log aggregation (e.g. Datadog, Papertrail).
-    console.log('[quote-lead-intake]', JSON.stringify(record));
-    return record;
+    const lead = normalizeLeadPayload(payload);
+    const publicLeadDelegate = (this.prisma as unknown as Record<string, any>).publicLead;
+    const record = await publicLeadDelegate.create({
+      data: {
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone || undefined,
+        company: lead.company || undefined,
+        originCity: lead.originCity || undefined,
+        destCity: lead.destCity || undefined,
+        freightType: lead.freightType || undefined,
+        weight: lead.weight,
+        pickupDate: lead.pickupDate ? new Date(lead.pickupDate) : undefined,
+        notes: lead.notes || undefined,
+        source: lead.source,
+        status: lead.status,
+      },
+    }) as PrismaPublicLeadRecord;
+
+    return normalizePublicLead(record);
   }
 
   async syncCarrierBilling(payload: BillingSyncPayload): Promise<boolean> {
@@ -980,6 +1028,15 @@ class PrismaDataStore implements DataStore {
     });
 
     return carrier?.stripeCustomerId ?? null;
+  }
+
+  async getCarrierSubscriptionStatus(tenantId: string): Promise<string | null> {
+    const carrier = await this.prisma.carrier.findUnique({
+      where: { id: tenantId },
+      select: { status: true },
+    });
+
+    return carrier?.status ?? null;
   }
 
   async healthCheck(): Promise<'connected' | 'disconnected'> {

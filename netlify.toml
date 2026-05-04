@@ -58,6 +58,11 @@
     X-Powered-By = ""
 
 [[headers]]
+  for = "/driver-pwa/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; font-src 'self' data:; img-src 'self' data:; connect-src 'self' https://infamous-freight.fly.dev https://api.infamousfreight.com; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; worker-src 'self'"
+
+[[headers]]
   for = "/"
   [headers.values]
     Cache-Control = "no-store, no-cache, must-revalidate"

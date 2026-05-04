@@ -65,7 +65,7 @@ const OnboardingWizard: React.FC = () => {
               <input
                 type="text"
                 className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-4 py-3 text-white focus:border-[#ff3d00] focus:outline-none"
-                placeholder="Acme Trucking LLC"
+                placeholder="Iron Route Logistics LLC"
                 value={formData.company?.name || ''}
                 onChange={e => updateField('company', 'name', e.target.value)}
               />

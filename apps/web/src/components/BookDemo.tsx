@@ -117,7 +117,7 @@ function BookDemoModal({ onClose }: { onClose: () => void }) {
                       id="demo-company"
                       value={formData.company}
                       onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                      placeholder="Acme Trucking"
+                      placeholder="Iron Route Logistics"
                       className="pl-10 border-zinc-700 bg-zinc-800 text-white"
                       required
                     />
