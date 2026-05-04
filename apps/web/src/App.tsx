@@ -51,8 +51,8 @@ function App() {
       <Suspense fallback={<RouteFallback />}>
         <SeoManager />
         <Routes>
+        <Route path="/" element={<LandingPage />} />
         <Route element={<AppLayout />}>
-          <Route path="/" element={<DashboardPage />} />
           <Route path="/ops" element={<DashboardPage />} />
           <Route path="/loads" element={<LoadsPage />} />
           <Route path="/dispatch" element={<DispatchBoardPage />} />
