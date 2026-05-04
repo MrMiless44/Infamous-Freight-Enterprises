@@ -39,7 +39,7 @@
   },
   "devDependencies": {
     "@sentry/vite-plugin": "^5.2.1",
-    "@types/node": "^22.10.0",
+    "@types/node": "^25.6.0",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@vitejs/plugin-react": "^5.2.0",
