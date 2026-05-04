@@ -94,6 +94,15 @@ chore: update CI runtime
 security: tighten CORS policy
 ```
 
-## Secrets
+## Pull requests from forks
+
+If you are contributing from a fork, a few CI behaviors are expected and not bugs:
+
+- **First-time contributors require maintainer approval.** GitHub will hold workflow runs from forks until a maintainer clicks **Approve and run** on the PR. This is a repository-level security setting, not a workflow misconfiguration.
+- **Some checks intentionally skip on fork PRs.** Repository secrets (e.g. `VERCEL_TOKEN`, `CODACY_PROJECT_TOKEN`, Fly tokens, npm publish tokens) are not exposed to workflows triggered by `pull_request` events from forks, and `GITHUB_TOKEN` has its `security-events: write` permission downgraded to read-only. Workflows that depend on those (currently **Vercel Preview** and **Codacy Security Scan**) skip on fork PRs and re-run after merge to `main`.
+- **The following must still pass on fork PRs before merge:** lint, API and web TypeScript typecheck, unit tests, the smoke-test workflow's required checks, and CodeQL. If any of these fail, fix them in the PR; do not merge around them.
+- **Maintainers:** when re-running a fork PR after pushing fixes, click **Approve and run** again rather than merging green-checked-but-stale runs.
+
+
 
 Never commit secrets, tokens, private keys, credentials, `.env` files, or screenshots containing secrets. If a secret is exposed, rotate it immediately and open a blocker issue.

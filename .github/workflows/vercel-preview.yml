@@ -26,6 +26,10 @@ jobs:
   vercel-preview:
     name: Vercel Preview (non-blocking)
     runs-on: ubuntu-latest
+    # Skip on pull requests opened from forks: the VERCEL_* secrets are not
+    # exposed to fork PR workflows by GitHub, so the job has nothing to do.
+    # Same-repo PRs and pushes still run normally.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     # Do NOT block PR merges on this job — Netlify is the required deploy gate.
     continue-on-error: true
     steps:
