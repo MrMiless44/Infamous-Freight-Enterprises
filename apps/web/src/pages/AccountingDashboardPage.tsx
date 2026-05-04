@@ -32,7 +32,7 @@ interface CarrierPayRecord {
 }
 
 const mockInvoices: AccountingInvoice[] = [
-  { id: '1', number: 'INV-240427-001', shipper: 'Acme Corp', loadRef: 'LD-4815', shipperAmount: 3500, carrierPay: 2800, grossMargin: 700, grossMarginPct: 20, status: 'paid', podAttached: true, issueDate: 'Apr 1', dueDate: 'May 1', daysAge: 0 },
+  { id: '1', number: 'INV-240427-001', shipper: 'Harborside Retail Group', loadRef: 'LD-4815', shipperAmount: 3500, carrierPay: 2800, grossMargin: 700, grossMarginPct: 20, status: 'paid', podAttached: true, issueDate: 'Apr 1', dueDate: 'May 1', daysAge: 0 },
   { id: '2', number: 'INV-240427-002', shipper: 'Global Trade Inc.', loadRef: 'LD-4816', shipperAmount: 2200, carrierPay: 1750, grossMargin: 450, grossMarginPct: 20.5, status: 'sent', podAttached: true, issueDate: 'Apr 16', dueDate: 'May 16', daysAge: 11 },
   { id: '3', number: 'INV-240427-003', shipper: 'Pacific Imports', loadRef: 'LD-4817', shipperAmount: 4800, carrierPay: 3700, grossMargin: 1100, grossMarginPct: 22.9, status: 'sent', podAttached: true, issueDate: 'Apr 17', dueDate: 'May 17', daysAge: 10 },
   { id: '4', number: 'INV-240415-004', shipper: 'Midwest Supplies', loadRef: 'LD-4809', shipperAmount: 2100, carrierPay: 1680, grossMargin: 420, grossMarginPct: 20, status: 'overdue', podAttached: true, issueDate: 'Apr 10', dueDate: 'Apr 25', daysAge: 2 },

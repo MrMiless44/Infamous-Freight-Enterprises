@@ -47,7 +47,7 @@ const SettingsPage: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm text-gray-400 mb-1">Company Name</label>
-                  <input type="text" className="input-field" defaultValue="Acme Trucking LLC" />
+                  <input type="text" className="input-field" defaultValue="Iron Route Logistics LLC" />
                 </div>
                 <div>
                   <label className="block text-sm text-gray-400 mb-1">MC Number</label>

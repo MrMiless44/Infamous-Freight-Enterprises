@@ -32,7 +32,7 @@ const mockQuotes: QuoteRequest[] = [
   {
     id: '1',
     quoteNumber: 'QR-2024-001',
-    shipper: 'Acme Corporation',
+    shipper: 'Harborside Retail Group',
     pickupLocation: 'Chicago, IL',
     deliveryLocation: 'Dallas, TX',
     commodity: 'Electronics',

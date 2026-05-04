@@ -1,10 +1,11 @@
 import { NavLink } from 'react-router-dom';
 import { useAppStore } from '@/store/app-store';
 import { canAccessLaunchValidation } from '@/lib/launchValidationAccess';
+import BrandMark from '@/components/ui/BrandMark';
 import {
   LayoutDashboard, Truck, Radio, Users, FileText, MessageSquare,
   TrendingUp, ShieldCheck, Settings, ChevronLeft, ChevronRight,
-  Zap, LogOut, ClipboardCheck, ClipboardList, DollarSign, type LucideIcon
+  LogOut, ClipboardCheck, ClipboardList, DollarSign, type LucideIcon
 } from 'lucide-react';
 
 type NavItem = {
@@ -16,7 +17,7 @@ type NavItem = {
 };
 
 const baseNavItems: NavItem[] = [
-  { path: '/', label: 'Operations', icon: LayoutDashboard, end: true },
+  { path: '/ops', label: 'Ops Dashboard', icon: LayoutDashboard, end: true },
   { path: '/quotes', label: 'Quotes', icon: ClipboardList },
   { path: '/loads', label: 'Loads', icon: Truck },
   { path: '/dispatch', label: 'Dispatch Board', icon: Radio },
@@ -50,19 +51,8 @@ const Sidebar: React.FC = () => {
         sidebarOpen ? 'w-64' : 'w-16'
       }`}
     >
-      {/* Logo */}
       <div className={`flex items-center h-16 border-b border-infamous-border px-4 ${!sidebarOpen && 'justify-center'}`}>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-infamous-orange to-infamous-orange-light flex items-center justify-center flex-shrink-0">
-            <Zap size={18} className="text-white" />
-          </div>
-          {sidebarOpen && (
-            <div>
-              <span className="text-sm font-extrabold tracking-tight leading-none">INFAMOUS</span>
-              <p className="text-[10px] text-gray-500 leading-none">FREIGHT</p>
-            </div>
-          )}
-        </div>
+        <BrandMark compact={!sidebarOpen} />
         <button
           onClick={toggleSidebar}
           aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
