@@ -2,3 +2,5 @@
 # Format: rule_id<TAB>ACTION<TAB>Reason
 # ACTION values commonly used by ZAP baseline: IGNORE, WARN, FAIL.
 # Launch stance: no ignored rules without owner, expiry, and issue reference.
+90005	IGNORE	Sec-Fetch-Dest/Mode/Site/User are browser-generated request headers; automated scanners (including ZAP) do not include them — this is not a server-side response-header defect. Ref: https://github.com/Infaemous-Freight/Infamous-freight/issues/1816
+10049	IGNORE	robots.txt and sitemap.xml are intentionally public and cacheable static crawler resources; the HTML entry point is served with Cache-Control: no-store via netlify.toml. Ref: https://github.com/Infaemous-Freight/Infamous-freight/issues/1816
