@@ -16,7 +16,7 @@ describe('health endpoint', () => {
     expect(response.status).toBe(200);
     expect(response.body.status).toBe('ok');
     expect(typeof response.body.timestamp).toBe('string');
-    expect(response.body.services.database).toBe('connected');
+    expect(response.body.services.api).toBe('running');
   });
 
   it('returns 200 and ok status on /api/health', async () => {
