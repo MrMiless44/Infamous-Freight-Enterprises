@@ -85,12 +85,16 @@ jobs:
               | if . == "" then "tool-\($i)" else . end
             ' results.sarif)
             file="sarif-split/codacy-${i}-${tool}.sarif"
-            jq --argjson i "$i" '{
+            category="codacy-${tool}"
+            # Embed the unique category as runs[0].automationDetails.id inside
+            # the SARIF document itself. The Code Scanning "upload an analysis
+            # as SARIF data" REST API does not accept a top-level "category"
+            # parameter; per-run categories must be carried in the SARIF.
+            jq --argjson i "$i" --arg category "$category" '{
               "$schema": .["$schema"],
               version: .version,
-              runs: [ .runs[$i] ]
+              runs: [ .runs[$i] | .automationDetails = ((.automationDetails // {}) + {id: $category}) ]
             }' results.sarif > "$file"
-            category="codacy-${tool}"
             echo "Uploading ${file} with category ${category}"
             sarif_b64=$(gzip -c "$file" | base64 -w0)
             gh api \
@@ -100,6 +104,5 @@ jobs:
               -f commit_sha="${GITHUB_SHA}" \
               -f ref="${GITHUB_REF}" \
               -f sarif="${sarif_b64}" \
-              -f category="${category}" \
               -F validate=true
           done
