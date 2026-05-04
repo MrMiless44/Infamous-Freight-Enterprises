@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import AppLayout from '@/layouts/AppLayout';
+import PublicLayout from '@/layouts/PublicLayout';
 import SeoManager from '@/components/SeoManager';
 import { AppErrorBoundary } from '@/components/SentryErrorBoundary';
 
@@ -38,6 +39,11 @@ const FreightAssistantPage = lazy(() => import('@/pages/FreightAssistantPage'));
 const PricingPage = lazy(() => import('@/pages/PricingPage'));
 const PartnersPage = lazy(() => import('@/pages/PartnersPage'));
 const DriversApplyPage = lazy(() => import('@/pages/DriversApplyPage'));
+const ContactPage = lazy(() => import('@/pages/ContactPage'));
+const AboutPage = lazy(() => import('@/pages/AboutPage'));
+const ServicesPage = lazy(() => import('@/pages/ServicesPage'));
+const ServiceDetailPage = lazy(() => import('@/pages/ServiceDetailPage'));
+const LegalPage = lazy(() => import('@/pages/LegalPage'));
 
 const RouteFallback = () => (
   <main
@@ -74,43 +80,54 @@ function App() {
       <Suspense fallback={<RouteFallback />}>
         <SeoManager />
         <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route element={<AppLayout />}>
-          <Route path="/ops" element={<DashboardPage />} />
-          <Route path="/loads" element={<LoadsPage />} />
-          <Route path="/dispatch" element={<DispatchBoardPage />} />
-          <Route path="/drivers" element={<DriversPage />} />
-          <Route path="/invoices" element={<InvoicesPage />} />
-          <Route path="/analytics" element={<MetricsDashboard />} />
-          <Route path="/compliance" element={<CompliancePage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/billing" element={<BillingRequiredPage />} />
-          <Route path="/rate-comparison" element={<RateComparisonTool />} />
-          <Route path="/pay-per-load" element={<PayPerLoadPricing />} />
-          <Route path="/referrals" element={<ReferralProgram />} />
-          <Route path="/case-studies" element={<CaseStudies />} />
-          <Route path="/product-hunt" element={<ProductHunt />} />
-          <Route path="/gdpr" element={<GDPR />} />
-          <Route path="/launch-validation" element={<LaunchValidationPage />} />
-          <Route path="/carriers" element={<CarriersPage />} />
-          <Route path="/accounting" element={<AccountingDashboardPage />} />
-          <Route path="/quotes" element={<QuoteRequestsPage />} />
-        </Route>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/home" element={<LandingPage />} />
 
-        {/* Public routes (no layout) — see src/lib/routes.ts */}
-        <Route path="/home" element={<LandingPage />} />
-        <Route path="/request-quote" element={<PublicQuoteRequestPage />} />
-        <Route path="/track-shipment" element={<ShipmentTrackingPage />} />
-        <Route path="/customer-portal" element={<CustomerPortalPage />} />
-        <Route path="/carrier-portal" element={<CarrierPortalPage />} />
-        <Route path="/freight-assistant" element={<FreightAssistantPage />} />
-        <Route path="/pricing" element={<PricingPage />} />
-        <Route path="/partners" element={<PartnersPage />} />
-        <Route path="/drive" element={<DriversApplyPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/onboarding" element={<OnboardingWizard />} />
-      </Routes>
-    </Suspense>
+          <Route element={<PublicLayout />}>
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/services" element={<ServicesPage />} />
+            <Route path="/services/:serviceSlug" element={<ServiceDetailPage />} />
+            <Route path="/request-quote" element={<PublicQuoteRequestPage />} />
+            <Route path="/track-shipment" element={<ShipmentTrackingPage />} />
+            <Route path="/customer-portal" element={<CustomerPortalPage />} />
+            <Route path="/carrier-portal" element={<CarrierPortalPage />} />
+            <Route path="/freight-assistant" element={<FreightAssistantPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/partners" element={<PartnersPage />} />
+            <Route path="/drive" element={<DriversApplyPage />} />
+            <Route path="/terms" element={<LegalPage />} />
+            <Route path="/privacy" element={<LegalPage />} />
+            <Route path="/carrier-agreement" element={<LegalPage />} />
+            <Route path="/shipper-agreement" element={<LegalPage />} />
+          </Route>
+
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/onboarding" element={<OnboardingWizard />} />
+
+          <Route element={<AppLayout />}>
+            <Route path="/ops" element={<DashboardPage />} />
+            <Route path="/loads" element={<LoadsPage />} />
+            <Route path="/dispatch" element={<DispatchBoardPage />} />
+            <Route path="/drivers" element={<DriversPage />} />
+            <Route path="/invoices" element={<InvoicesPage />} />
+            <Route path="/analytics" element={<MetricsDashboard />} />
+            <Route path="/compliance" element={<CompliancePage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/billing" element={<BillingRequiredPage />} />
+            <Route path="/rate-comparison" element={<RateComparisonTool />} />
+            <Route path="/pay-per-load" element={<PayPerLoadPricing />} />
+            <Route path="/referrals" element={<ReferralProgram />} />
+            <Route path="/case-studies" element={<CaseStudies />} />
+            <Route path="/product-hunt" element={<ProductHunt />} />
+            <Route path="/gdpr" element={<GDPR />} />
+            <Route path="/launch-validation" element={<LaunchValidationPage />} />
+            <Route path="/carriers" element={<CarriersPage />} />
+            <Route path="/accounting" element={<AccountingDashboardPage />} />
+            <Route path="/quotes" element={<QuoteRequestsPage />} />
+          </Route>
+        </Routes>
+      </Suspense>
     </AppErrorBoundary>
   );
 }

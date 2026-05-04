@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, ClipboardList, Send } from 'lucide-react';
+import { submitNetlifyForm } from '@/lib/netlifyForms';
 
 const initialForm = {
   company: '',
@@ -21,6 +22,8 @@ const initialForm = {
 const PublicQuoteRequestPage: React.FC = () => {
   const [form, setForm] = useState(initialForm);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const completion = useMemo(() => {
     const required = ['company', 'contact', 'email', 'origin', 'destination', 'freightType', 'weight', 'pickupDate'];
@@ -32,15 +35,25 @@ const PublicQuoteRequestPage: React.FC = () => {
     setForm((current) => ({ ...current, [key]: value }));
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    setError('');
+
+    try {
+      await submitNetlifyForm('quote-request', form);
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not submit this quote request.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <main className="min-h-screen bg-[#090909] px-6 py-8 text-white">
       <div className="mx-auto max-w-6xl">
-        <Link to="/home" className="mb-8 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white">
+        <Link to="/" className="mb-8 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white">
           <ArrowLeft size={16} /> Back to Infamous Freight
         </Link>
 
@@ -64,7 +77,7 @@ const PublicQuoteRequestPage: React.FC = () => {
                 <CheckCircle2 className="mb-3 text-green-400" size={32} />
                 <h2 className="text-xl font-bold">Quote request received</h2>
                 <p className="mt-2 text-gray-300">
-                  Dispatch will review your lane, confirm equipment, check carrier capacity, and reply with pricing — usually within one business day.
+                  Dispatch will review your lane, confirm equipment, check carrier capacity, and reply with pricing.
                 </p>
                 <button
                   type="button"
@@ -78,7 +91,11 @@ const PublicQuoteRequestPage: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form name="quote-request" method="POST" data-netlify="true" netlify-honeypot="bot-field" onSubmit={handleSubmit} className="space-y-6">
+                <input type="hidden" name="form-name" value="quote-request" />
+                <p className="hidden">
+                  <label>Do not fill this out: <input name="bot-field" /></label>
+                </p>
                 <div className="grid gap-4 md:grid-cols-2">
                   {[
                     ['company', 'Company name'],
@@ -96,16 +113,19 @@ const PublicQuoteRequestPage: React.FC = () => {
                     <label key={key} className="block">
                       <span className="mb-2 block text-sm font-medium text-gray-300">{label}</span>
                       <input
+                        name={key}
                         value={form[key as keyof typeof form]}
                         onChange={(event) => updateField(key as keyof typeof initialForm, event.target.value)}
                         className="w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"
                         placeholder={label}
+                        required={['company', 'contact', 'email', 'origin', 'destination', 'freightType', 'weight', 'pickupDate'].includes(key)}
                       />
                     </label>
                   ))}
                   <label className="block">
                     <span className="mb-2 block text-sm font-medium text-gray-300">Equipment</span>
                     <select
+                      name="equipment"
                       value={form.equipment}
                       onChange={(event) => updateField('equipment', event.target.value)}
                       className="w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"
@@ -115,6 +135,8 @@ const PublicQuoteRequestPage: React.FC = () => {
                       <option>Flatbed</option>
                       <option>Power only</option>
                       <option>Box truck</option>
+                      <option>Cargo van</option>
+                      <option>Sprinter van</option>
                     </select>
                   </label>
                 </div>
@@ -122,15 +144,18 @@ const PublicQuoteRequestPage: React.FC = () => {
                 <label className="block">
                   <span className="mb-2 block text-sm font-medium text-gray-300">Special instructions</span>
                   <textarea
+                    name="instructions"
                     value={form.instructions}
                     onChange={(event) => updateField('instructions', event.target.value)}
                     className="min-h-32 w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"
-                    placeholder="Pickup windows, delivery requirements, accessorials, temperature requirements, dock notes, etc."
+                    placeholder="Pickup windows, delivery requirements, accessorials, dock notes, etc."
                   />
                 </label>
 
-                <button type="submit" className="inline-flex items-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 font-semibold text-white transition hover:opacity-90">
-                  Submit quote request <Send size={17} />
+                {error ? <p className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">{error}</p> : null}
+
+                <button type="submit" disabled={loading} className="inline-flex items-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60">
+                  {loading ? 'Submitting...' : 'Submit quote request'} <Send size={17} />
                 </button>
               </form>
             )}
@@ -152,7 +177,7 @@ const PublicQuoteRequestPage: React.FC = () => {
             <div className="rounded-3xl border border-infamous-border bg-[#111] p-6">
               <h2 className="text-lg font-bold">Tips for a faster quote</h2>
               <p className="mt-3 text-sm leading-6 text-gray-400">
-                Fill in origin, destination, freight type, weight, equipment, and pickup date — we can quote sooner with the full picture.
+                Fill in origin, destination, freight type, weight, equipment, and pickup date so dispatch can respond faster.
               </p>
             </div>
           </aside>

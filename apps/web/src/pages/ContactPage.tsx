@@ -1,0 +1,188 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, CheckCircle2, Clock3, Mail, MapPin, Phone, Send } from 'lucide-react';
+import { submitNetlifyForm } from '@/lib/netlifyForms';
+
+const initialForm = {
+  name: '',
+  company: '',
+  email: '',
+  phone: '',
+  topic: 'Freight quote',
+  message: '',
+};
+
+const contactCards = [
+  {
+    label: 'Dispatch and quotes',
+    value: 'dispatch@infamousfreight.com',
+    icon: <Mail size={20} />,
+  },
+  {
+    label: 'Driver onboarding',
+    value: 'drivers@infamousfreight.com',
+    icon: <TruckIcon />,
+  },
+  {
+    label: 'General support',
+    value: 'support@infamousfreight.com',
+    icon: <Phone size={20} />,
+  },
+];
+
+function TruckIcon() {
+  return <span aria-hidden="true">🚚</span>;
+}
+
+const ContactPage: React.FC = () => {
+  const [form, setForm] = useState(initialForm);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const update = (key: keyof typeof initialForm, value: string) => {
+    setForm((current) => ({ ...current, [key]: value }));
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      await submitNetlifyForm('contact', form);
+      setSubmitted(true);
+      setForm(initialForm);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not submit the contact request.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <main className="min-h-screen bg-[#090909] px-6 py-10 text-white">
+      <div className="mx-auto max-w-7xl">
+        <header className="mb-10 max-w-3xl">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Contact</p>
+          <h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">Talk to dispatch, onboarding, or support.</h1>
+          <p className="mt-4 text-lg leading-8 text-gray-300">
+            Send a quote question, driver onboarding request, partnership note, or support issue. The right team will follow up with next steps.
+          </p>
+        </header>
+
+        <section className="mb-8 grid gap-4 md:grid-cols-3">
+          {contactCards.map((card) => (
+            <div key={card.label} className="rounded-2xl border border-infamous-border bg-infamous-card p-5">
+              <div className="mb-3 text-infamous-orange">{card.icon}</div>
+              <p className="text-sm text-gray-500">{card.label}</p>
+              <p className="mt-1 font-semibold text-white">{card.value}</p>
+            </div>
+          ))}
+        </section>
+
+        <section className="grid gap-6 lg:grid-cols-[1fr_360px]">
+          <div className="rounded-3xl border border-infamous-border bg-infamous-card p-6 lg:p-8">
+            <h2 className="text-2xl font-bold">Send a message</h2>
+            <p className="mt-2 text-sm text-gray-400">For urgent active-load issues, include the tracking or load number in your message.</p>
+
+            {submitted ? (
+              <div className="mt-6 rounded-2xl border border-green-500/30 bg-green-500/10 p-6">
+                <CheckCircle2 className="mb-3 text-green-400" size={32} />
+                <h3 className="text-xl font-bold">Message sent</h3>
+                <p className="mt-2 text-gray-300">Thanks — your message was received. We will route it to the right team.</p>
+                <button
+                  type="button"
+                  onClick={() => setSubmitted(false)}
+                  className="mt-5 rounded-xl bg-infamous-orange px-4 py-2 font-semibold text-white"
+                >
+                  Send another message
+                </button>
+              </div>
+            ) : (
+              <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" onSubmit={handleSubmit} className="mt-6 space-y-5">
+                <input type="hidden" name="form-name" value="contact" />
+                <p className="hidden">
+                  <label>Do not fill this out: <input name="bot-field" /></label>
+                </p>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {[
+                    ['name', 'Your name'],
+                    ['company', 'Company'],
+                    ['email', 'Email'],
+                    ['phone', 'Phone'],
+                  ].map(([key, label]) => (
+                    <label key={key} className="block">
+                      <span className="mb-2 block text-sm font-medium text-gray-300">{label}</span>
+                      <input
+                        name={key}
+                        value={form[key as keyof typeof initialForm]}
+                        onChange={(event) => update(key as keyof typeof initialForm, event.target.value)}
+                        className="w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"
+                        placeholder={label}
+                        required={key === 'name' || key === 'email'}
+                      />
+                    </label>
+                  ))}
+                </div>
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-gray-300">Topic</span>
+                  <select
+                    name="topic"
+                    value={form.topic}
+                    onChange={(event) => update('topic', event.target.value)}
+                    className="w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"
+                  >
+                    <option>Freight quote</option>
+                    <option>Shipment tracking</option>
+                    <option>Driver onboarding</option>
+                    <option>Carrier support</option>
+                    <option>Partnership</option>
+                    <option>General support</option>
+                  </select>
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-gray-300">Message</span>
+                  <textarea
+                    name="message"
+                    value={form.message}
+                    onChange={(event) => update('message', event.target.value)}
+                    className="min-h-36 w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"
+                    placeholder="Tell us what you need help with."
+                    required
+                  />
+                </label>
+                {error ? <p className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">{error}</p> : null}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="inline-flex items-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {loading ? 'Sending...' : 'Send message'} <Send size={17} />
+                </button>
+              </form>
+            )}
+          </div>
+
+          <aside className="space-y-4">
+            <div className="rounded-3xl border border-infamous-border bg-[#111] p-6">
+              <Clock3 className="mb-3 text-infamous-orange" size={24} />
+              <h2 className="text-lg font-bold">Response expectations</h2>
+              <p className="mt-3 text-sm leading-6 text-gray-400">Quote and dispatch requests are prioritized first. General support and partner inquiries are routed by topic.</p>
+            </div>
+            <div className="rounded-3xl border border-infamous-border bg-[#111] p-6">
+              <MapPin className="mb-3 text-infamous-orange" size={24} />
+              <h2 className="text-lg font-bold">Service region</h2>
+              <p className="mt-3 text-sm leading-6 text-gray-400">Local and regional freight across core U.S. lanes, with emphasis on verified capacity and shipment visibility.</p>
+            </div>
+            <Link to="/request-quote" className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 font-semibold text-white">
+              Need a quote instead? <ArrowRight size={17} />
+            </Link>
+          </aside>
+        </section>
+      </div>
+    </main>
+  );
+};
+
+export default ContactPage;

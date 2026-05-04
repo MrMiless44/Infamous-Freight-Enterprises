@@ -85,9 +85,58 @@ const audienceCards = [
   },
 ];
 
+const navLinks = [
+  { label: 'Quote', href: '/request-quote' },
+  { label: 'Track', href: '/track-shipment' },
+  { label: 'Drivers', href: '/drive' },
+  { label: 'Pricing', href: '/pricing' },
+  { label: 'Partners', href: '/partners' },
+];
+
 const LandingPage: React.FC = () => {
   return (
-    <main className="min-h-screen bg-[#090909] text-white">
+    <main id="main-content" className="min-h-screen bg-[#090909] text-white">
+      <header className="sticky top-0 z-40 border-b border-infamous-border bg-[#090909]/95 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
+          <Link to="/" className="flex items-center gap-3" aria-label="Infamous Freight home">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-infamous-orange font-black text-white">
+              IF
+            </span>
+            <span>
+              <span className="block text-lg font-black leading-none">Infamous Freight</span>
+              <span className="text-xs uppercase tracking-[0.18em] text-gray-500">AI Freight Command Center</span>
+            </span>
+          </Link>
+
+          <nav className="flex flex-wrap items-center gap-2 text-sm text-gray-300" aria-label="Primary navigation">
+            {navLinks.map((item) => (
+              <Link
+                key={item.href}
+                to={item.href}
+                className="rounded-lg px-3 py-2 font-semibold transition hover:bg-infamous-card hover:text-white"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              to="/customer-portal"
+              className="rounded-xl border border-infamous-border bg-infamous-card px-4 py-2 text-sm font-semibold text-white transition hover:border-infamous-orange/50"
+            >
+              Customer Portal
+            </Link>
+            <Link
+              to="/login"
+              className="rounded-xl bg-infamous-orange px-4 py-2 text-sm font-bold text-white transition hover:opacity-90"
+            >
+              Login
+            </Link>
+          </div>
+        </div>
+      </header>
+
       <section className="border-b border-infamous-border bg-gradient-to-b from-[#17110d] to-[#090909]">
         <div className="mx-auto flex min-h-[76vh] max-w-7xl flex-col px-6 py-10 lg:flex-row lg:items-center lg:gap-12">
           <div className="max-w-3xl flex-1">
@@ -101,12 +150,18 @@ const LandingPage: React.FC = () => {
               Infamous Freight helps businesses move local and regional freight without the phone tag — pallet,
               box truck, cargo van, and sprinter loads booked, tracked, and delivered with proof on every shipment.
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link
                 to="/request-quote"
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 font-semibold text-white transition hover:opacity-90"
               >
                 Get a Freight Quote <ArrowRight size={18} />
+              </Link>
+              <Link
+                to="/login"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-infamous-orange/50 bg-infamous-orange/10 px-5 py-3 font-semibold text-white transition hover:bg-infamous-orange/20"
+              >
+                Login
               </Link>
               <Link
                 to="/drive"
@@ -160,9 +215,9 @@ const LandingPage: React.FC = () => {
               </div>
               <div className="mt-4 space-y-3">
                 {[
-                  ['IF-20491', 'Chicago, IL → Dallas, TX', 'In transit'],
-                  ['IF-20492', 'Atlanta, GA → Charlotte, NC', 'At pickup'],
-                  ['IF-20493', 'Houston, TX → Phoenix, AZ', 'Exception review'],
+                  ['IF-20491', 'Chicago, IL to Dallas, TX', 'In transit'],
+                  ['IF-20492', 'Atlanta, GA to Charlotte, NC', 'At pickup'],
+                  ['IF-20493', 'Houston, TX to Phoenix, AZ', 'Exception review'],
                 ].map(([ref, route, status]) => (
                   <div
                     key={ref}
