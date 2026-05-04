@@ -33,7 +33,7 @@ type HealthResponse = {
   timestamp: string;
   services: {
     api?: 'running';
-    database?: string;
+    database?: 'connected' | 'disconnected';
   };
 };
 
@@ -244,6 +244,18 @@ function createLivenessResponse(): HealthResponse {
     status: 'ok',
     timestamp: new Date().toISOString(),
     services: { api: 'running' },
+  };
+}
+
+
+function createTopLevelHealthResponse(readiness: HealthResponse): HealthResponse {
+  return {
+    ...readiness,
+    status: 'ok',
+    services: {
+      api: 'running',
+      ...readiness.services,
+    },
   };
 }
 
@@ -587,7 +599,7 @@ export function createApp() {
 
   app.get('/health', wrapAsync(async (_req, res) => {
     const readiness = await createReadinessResponse(dataStore);
-    res.status(readiness.statusCode).json(readiness.body);
+    res.status(200).json(createTopLevelHealthResponse(readiness.body));
   }));
 
   app.get('/health/live', (_req, res) => {

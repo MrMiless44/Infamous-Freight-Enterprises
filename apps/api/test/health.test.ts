@@ -1,5 +1,6 @@
 import request from 'supertest';
 import { createApp } from '../src/app';
+import * as dataStoreModule from '../src/data-store';
 import { resetRateLimitBucketsForTests } from '../src/rate-limit';
 
 afterEach(() => {
@@ -17,6 +18,26 @@ describe('health endpoint', () => {
     expect(response.body.status).toBe('ok');
     expect(typeof response.body.timestamp).toBe('string');
     expect(response.body.services.api).toBe('running');
+    expect(response.body.services.database).toBeDefined();
+  });
+
+
+  it('returns 200 with ok status on /health even when database is disconnected', async () => {
+    const dataStore = dataStoreModule.createDataStore();
+    dataStore.healthCheck = async () => 'disconnected';
+
+    const createDataStoreSpy = jest.spyOn(dataStoreModule, 'createDataStore').mockReturnValue(dataStore);
+
+    try {
+      const response = await request(createApp()).get('/health');
+
+      expect(response.status).toBe(200);
+      expect(response.body.status).toBe('ok');
+      expect(response.body.services.api).toBe('running');
+      expect(response.body.services.database).toBe('disconnected');
+    } finally {
+      createDataStoreSpy.mockRestore();
+    }
   });
 
   it('returns 200 and ok status on /api/health', async () => {
