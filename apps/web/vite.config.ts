@@ -6,6 +6,11 @@ import { sentryVitePlugin } from '@sentry/vite-plugin';
 const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN;
 const sentryOrg = process.env.SENTRY_ORG;
 const sentryProject = process.env.SENTRY_PROJECT;
+// Build identification surfaced into the bundle for diagnostics. Falls back to
+// 'unknown' so dev builds still type-check; CI/Netlify can populate these.
+const buildGitSha =
+  process.env.VITE_GIT_SHA ?? process.env.COMMIT_REF ?? process.env.GIT_SHA ?? 'unknown';
+const buildTime = process.env.VITE_BUILD_TIME ?? new Date().toISOString();
 // Enable Sentry uploads when credentials exist, but allow CI to opt out
 // and avoid hard build failures on auth issues.
 const hasSentryCredentials =
@@ -18,6 +23,10 @@ const uploadSourcemaps =
   enableSentryUpload || process.env.SENTRY_SOURCEMAPS === '1';
 
 export default defineConfig({
+  define: {
+    __APP_BUILD_SHA__: JSON.stringify(buildGitSha),
+    __APP_BUILD_TIME__: JSON.stringify(buildTime),
+  },
   plugins: [
     react(),
     ...(enableSentryUpload

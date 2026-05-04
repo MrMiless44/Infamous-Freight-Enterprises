@@ -612,6 +612,20 @@ export function createApp() {
     res.status(readiness.statusCode).json(readiness.body);
   }));
 
+  app.get('/api/version', (_req, res) => {
+    res.status(200).json({
+      service: 'infamous-freight-api',
+      version: process.env.APP_VERSION ?? process.env.npm_package_version ?? 'unknown',
+      commit:
+        process.env.GIT_SHA ??
+        process.env.FLY_IMAGE_REF ??
+        process.env.SOURCE_COMMIT ??
+        'unknown',
+      buildTime: process.env.BUILD_TIME ?? 'unknown',
+      node: process.version,
+    });
+  });
+
   registerRoutes(app, dataStore);
 
   app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
