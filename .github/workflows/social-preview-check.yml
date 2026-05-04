@@ -1,0 +1,42 @@
+name: Social Preview Check
+
+on:
+  pull_request:
+    paths:
+      - '.github/social-preview.png'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - name: Validate social preview asset
+        run: |
+          set -euo pipefail
+          FILE=.github/social-preview.png
+          if [ ! -f "$FILE" ]; then
+            echo "::error::$FILE not found"
+            exit 1
+          fi
+          # Verify it is a valid PNG
+          if ! file "$FILE" | grep -q "PNG image data"; then
+            echo "::error::$FILE is not a valid PNG file"
+            exit 1
+          fi
+          # Check file size (must be < 1 MB)
+          SIZE=$(stat -c%s "$FILE")
+          MAX=1048576
+          if [ "$SIZE" -ge "$MAX" ]; then
+            echo "::error::$FILE is $SIZE bytes (>= 1 MB limit). Run: oxipng -o 4 --strip safe $FILE"
+            exit 1
+          fi
+          # Check dimensions (must be exactly 1280x640)
+          DIMS=$(identify -format "%wx%h" "$FILE")
+          if [ "$DIMS" != "1280x640" ]; then
+            echo "::error::$FILE dimensions are $DIMS, expected 1280x640"
+            exit 1
+          fi
+          echo "OK: $FILE is $SIZE bytes, ${DIMS}px — all checks passed"

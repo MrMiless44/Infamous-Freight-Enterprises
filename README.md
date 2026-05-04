@@ -134,7 +134,7 @@ Infamous Freight is built to reduce that operational drag by centralizing:
 
 ### 🖼️ Social Preview
 
-The GitHub social preview image lives at [`docs/screenshots/infamousfreight-social-preview.png`](docs/screenshots/infamousfreight-social-preview.png) (1280×640 PNG, generated from `infamousfreight-header.svg`).
+The GitHub social preview image lives at [`.github/social-preview.png`](.github/social-preview.png) (1280×640 PNG, generated from `infamousfreight-header.svg`).
 
 To regenerate after updating the header SVG:
 
