@@ -22,6 +22,56 @@ type TenantRequest = Request & {
   tenantId?: string;
 };
 
+type AutoAdvanceGuardrailInput = {
+  customerApproved?: boolean;
+  marginThresholdMet?: boolean;
+  carrierVerified?: boolean;
+  carrierComplianceAccepted?: boolean;
+  insuranceActive?: boolean;
+  commodityAllowed?: boolean;
+  loadValueWithinLimit?: boolean;
+  appointmentsConfirmed?: boolean;
+  rateConfirmationMatched?: boolean;
+  noFraudFlags?: boolean;
+};
+
+const AUTO_ADVANCE_GUARDRAILS: Array<keyof AutoAdvanceGuardrailInput> = [
+  'customerApproved',
+  'marginThresholdMet',
+  'carrierVerified',
+  'carrierComplianceAccepted',
+  'insuranceActive',
+  'commodityAllowed',
+  'loadValueWithinLimit',
+  'appointmentsConfirmed',
+  'rateConfirmationMatched',
+  'noFraudFlags',
+];
+
+function parseAutoAdvanceGuardrailInput(body: unknown): AutoAdvanceGuardrailInput {
+  if (!body || typeof body !== 'object') {
+    throw new FreightWorkflowHttpError(
+      400,
+      'invalid_guardrail_payload',
+      'Guardrail payload must be a JSON object with boolean checks.',
+    );
+  }
+
+  const payload = body as Record<string, unknown>;
+
+  for (const key of AUTO_ADVANCE_GUARDRAILS) {
+    if (typeof payload[key] !== 'boolean') {
+      throw new FreightWorkflowHttpError(
+        400,
+        'invalid_guardrail_payload',
+        `Guardrail field "${key}" must be provided as a boolean.`,
+      );
+    }
+  }
+
+  return payload as AutoAdvanceGuardrailInput;
+}
+
 function wrapAsync(
   handler: (req: Request, res: Response, next: NextFunction) => Promise<void>,
 ) {
@@ -56,6 +106,31 @@ function getLoadAssignmentDecision(req: Request): LoadAssignmentDecision {
 
 export function createFreightWorkflowRouter(dataStore: DataStore): Router {
   const router = Router();
+
+  router.post('/guardrails/evaluate-auto-advance', wrapAsync(async (req: TenantRequest, res) => {
+    const tenantId = getRequiredTenantId(req);
+
+    const payload = parseAutoAdvanceGuardrailInput(req.body);
+    const failedChecks = AUTO_ADVANCE_GUARDRAILS.filter((key) => payload[key] !== true);
+    const canAutoAdvance = failedChecks.length === 0;
+    const output = {
+      canAutoAdvance,
+      failedChecks,
+      route: canAutoAdvance ? 'auto' : 'exception_queue',
+    };
+
+    await dataStore.logAiDecision({
+      tenantId,
+      agent: 'freight_guardrails',
+      action: 'evaluate_auto_advance',
+      input: payload,
+      output,
+    });
+
+    res.status(200).json({
+      data: output,
+    });
+  }));
 
   router.post('/quotes/:id/convert-to-load', wrapAsync(async (req: TenantRequest, res) => {
     const tenantId = getRequiredTenantId(req);

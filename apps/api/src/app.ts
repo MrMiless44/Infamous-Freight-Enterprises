@@ -256,7 +256,7 @@ async function createReadinessResponse(dataStore: DataStore): Promise<{ statusCo
     body: {
       status,
       timestamp: new Date().toISOString(),
-      services: { database },
+      services: { api: 'running', database },
     },
   };
 }

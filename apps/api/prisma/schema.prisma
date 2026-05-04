@@ -32,6 +32,7 @@ model Carrier {
   loadDispatches        LoadDispatch[]
   carrierPayments       CarrierPayment[]
   aiUsageEvents         AiUsageEvent[]
+  aiDecisionLogs        AiDecisionLog[]
   stripeOneTimePayments StripeOneTimePayment[]
   rateAgreement         RateAgreement?
 }
@@ -323,6 +324,21 @@ model AiUsageEvent {
   @@unique([carrierId, idempotencyKey])
   @@index([carrierId, createdAt])
   @@index([feature])
+}
+
+model AiDecisionLog {
+  id        String   @id @default(cuid())
+  carrierId String
+  agent     String
+  action    String
+  input     String
+  output    String
+  createdAt DateTime @default(now())
+
+  carrier Carrier @relation(fields: [carrierId], references: [id])
+
+  @@index([carrierId, createdAt])
+  @@index([agent, createdAt])
 }
 
 model StripeWebhookEvent {

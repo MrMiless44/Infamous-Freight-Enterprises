@@ -160,3 +160,65 @@ The following route patterns appear in older planning documents (PDF build packa
 - [`docs/API-REFERENCE.md`](API-REFERENCE.md) — Implemented API routes
 - [`docs/INTEGRATIONS-AND-SECRETS.md`](INTEGRATIONS-AND-SECRETS.md) — External integrations and secret management
 - [`docs/REPO-ACCURATE-STATUS.md`](REPO-ACCURATE-STATUS.md) — Evidence-based capability claims
+
+---
+
+## AI-First Freight Operations Model (Human-by-Exception)
+
+Infamous Freight should target **95%+ automation with human supervision for exceptions**, rather than a "no human ever" operating model.
+
+### Operating Flow
+
+```text
+Customer Request
+  → AI Load Intake Agent
+  → Rate + Margin Engine
+  → Carrier Matching + Vetting Agent
+  → Auto Tender / Negotiation Agent
+  → Dispatch + Tracking Agent
+  → Document AI (BOL, POD, Rate Con, Invoice)
+  → Billing + Collections Agent
+  → Exception Queue
+```
+
+### Compliance and Audit Baseline
+
+- Every load must be represented as a structured job in the data layer.
+- Every automated decision must write a durable event log entry for traceability.
+- Broker transaction records must remain reviewable and retained per regulatory retention windows.
+- Human review must be mandatory for legal, fraud, safety, and claim-driven edge cases.
+
+### Auto-Run Guardrails (Required)
+
+AI can only auto-book/auto-advance a load when all checks pass:
+
+1. Customer approval status valid
+2. Margin meets rule threshold
+3. Carrier identity and authority verified
+4. Carrier safety/compliance acceptable
+5. Insurance active
+6. Commodity not restricted
+7. Load value below auto-approval ceiling
+8. Appointment windows confirmed
+9. Rate confirmation matches load terms
+10. No fraud flags raised
+
+If any check fails, route directly to the exception queue.
+
+### Layered System Design
+
+1. **Data Core**: canonical tables for loads, carriers, documents, invoices, payments, claims, and audit/events.
+2. **Workflow Engine**: deterministic rules for critical transitions (for example, POD-to-invoice automation).
+3. **AI Agents**: specialized agents for intake, pricing, carrier, negotiation, dispatch, documents, billing, risk, and customer updates.
+4. **Integrations**: email/SMS/voice, load boards, TMS, accounting, ELD/GPS, compliance sources, storage, payment rails.
+5. **Exception Control**: centralized queue for risk, disputes, margin exceptions, and operational anomalies.
+
+### Delivery Plan (Phased)
+
+1. Intake + quote automation
+2. Carrier matching + constrained auto-tender
+3. Dispatch + tracking automation
+4. Document + billing automation
+5. Command center (exceptions, margin, risk, performance)
+
+This model keeps the system operationally aggressive while protecting margin, safety, compliance, and customer trust.

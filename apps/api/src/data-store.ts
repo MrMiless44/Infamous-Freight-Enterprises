@@ -43,6 +43,14 @@ export type QuoteLeadRecord = {
   receivedAt: string;
 };
 
+export type AiDecisionLogPayload = {
+  tenantId: string;
+  agent: string;
+  action: string;
+  input: Record<string, unknown>;
+  output: Record<string, unknown>;
+};
+
 type PrismaLoadRecord = {
   id: string;
   carrierId: string;
@@ -215,6 +223,7 @@ export interface DataStore {
   submitQuoteLead(payload: Record<string, unknown>): Promise<QuoteLeadRecord>;
   syncCarrierBilling(payload: BillingSyncPayload): Promise<boolean>;
   getCarrierStripeCustomerId(tenantId: string): Promise<string | null>;
+  logAiDecision(payload: AiDecisionLogPayload): Promise<void>;
   healthCheck(): Promise<'connected' | 'disconnected'>;
 }
 
@@ -547,6 +556,10 @@ class MemoryDataStore implements DataStore {
 
   async getCarrierStripeCustomerId(tenantId: string): Promise<string | null> {
     return this.carrierBilling.get(tenantId)?.stripeCustomerId ?? null;
+  }
+
+  async logAiDecision(_payload: AiDecisionLogPayload): Promise<void> {
+    return;
   }
 
   async healthCheck(): Promise<'connected' | 'disconnected'> {
@@ -980,6 +993,18 @@ class PrismaDataStore implements DataStore {
     });
 
     return carrier?.stripeCustomerId ?? null;
+  }
+
+  async logAiDecision(payload: AiDecisionLogPayload): Promise<void> {
+    await (this.prisma as unknown as Record<string, any>).aiDecisionLog.create({
+      data: {
+        carrierId: payload.tenantId,
+        agent: payload.agent,
+        action: payload.action,
+        input: JSON.stringify(payload.input),
+        output: JSON.stringify(payload.output),
+      },
+    });
   }
 
   async healthCheck(): Promise<'connected' | 'disconnected'> {

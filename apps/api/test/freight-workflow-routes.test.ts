@@ -15,6 +15,72 @@ function createTestApp(dataStore: DataStore) {
 }
 
 describe('freight workflow routes', () => {
+  it('returns exception_queue when any auto-advance guardrail fails', async () => {
+    const dataStore = { logAiDecision: jest.fn().mockResolvedValue(undefined) } as unknown as DataStore;
+    const app = createTestApp(dataStore);
+
+    const response = await request(app)
+      .post('/api/workflows/guardrails/evaluate-auto-advance')
+      .set('x-tenant-id', 'tenant-1')
+      .send({
+        customerApproved: true,
+        marginThresholdMet: true,
+        carrierVerified: false,
+        carrierComplianceAccepted: true,
+        insuranceActive: true,
+        commodityAllowed: true,
+        loadValueWithinLimit: true,
+        appointmentsConfirmed: true,
+        rateConfirmationMatched: true,
+        noFraudFlags: true,
+      })
+      .expect(200);
+
+    expect(response.body.data.canAutoAdvance).toBe(false);
+    expect(response.body.data.route).toBe('exception_queue');
+    expect(response.body.data.failedChecks).toContain('carrierVerified');
+    expect(response.body.data.failedChecks).toEqual(['carrierVerified']);
+  });
+
+  it('returns 400 when guardrail payload is incomplete', async () => {
+    const dataStore = { logAiDecision: jest.fn().mockResolvedValue(undefined) } as unknown as DataStore;
+    const app = createTestApp(dataStore);
+
+    const response = await request(app)
+      .post('/api/workflows/guardrails/evaluate-auto-advance')
+      .set('x-tenant-id', 'tenant-1')
+      .send({ customerApproved: true })
+      .expect(400);
+
+    expect(response.body.error).toBe('invalid_guardrail_payload');
+  });
+
+  it('returns auto when all auto-advance guardrails pass', async () => {
+    const dataStore = { logAiDecision: jest.fn().mockResolvedValue(undefined) } as unknown as DataStore;
+    const app = createTestApp(dataStore);
+
+    const response = await request(app)
+      .post('/api/workflows/guardrails/evaluate-auto-advance')
+      .set('x-tenant-id', 'tenant-1')
+      .send({
+        customerApproved: true,
+        marginThresholdMet: true,
+        carrierVerified: true,
+        carrierComplianceAccepted: true,
+        insuranceActive: true,
+        commodityAllowed: true,
+        loadValueWithinLimit: true,
+        appointmentsConfirmed: true,
+        rateConfirmationMatched: true,
+        noFraudFlags: true,
+      })
+      .expect(200);
+
+    expect(response.body.data.canAutoAdvance).toBe(true);
+    expect(response.body.data.route).toBe('auto');
+    expect(response.body.data.failedChecks).toEqual([]);
+  });
+
   it('returns 409 when a quote is not approved before load conversion', async () => {
     const dataStore = {
       listFreightOperations: jest.fn().mockResolvedValue([
