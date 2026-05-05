@@ -20,7 +20,7 @@
   "dependencies": {
     "@sentry/react": "^8.55.1",
     "@stripe/react-stripe-js": "^6.3.0",
-    "@stripe/stripe-js": "^2.2.0",
+    "@stripe/stripe-js": "^9.3.1",
     "@supabase/supabase-js": "^2.105.3",
     "axios": "^1.16.0",
     "class-variance-authority": "^0.7.0",
