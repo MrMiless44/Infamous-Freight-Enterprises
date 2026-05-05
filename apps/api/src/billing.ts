@@ -54,7 +54,7 @@ export type StripeEvent = {
 
 const STRIPE_SIGNATURE_TOLERANCE_SECONDS = 300;
 const STRIPE_CHECKOUT_SESSION_TOKEN = '{CHECKOUT_SESSION_ID}';
-const DEFAULT_ONE_TIME_PURCHASE_TYPE: OneTimePurchaseType = 'ai_action_pack_2000';
+const DEFAULT_ONE_TIME_PURCHASE_TYPE: OneTimePurchaseType = 'ai_addon_pack';
 
 const PRICE_BY_PLAN_INTERVAL: Record<BillingPlan, Record<BillingInterval, string>> = {
   starter: {
@@ -81,7 +81,7 @@ const PRICE_BY_ONE_TIME_PURCHASE_TYPE: Record<OneTimePurchaseType, string> = {
 };
 
 const ENV_PRICE_BY_ONE_TIME_PURCHASE_TYPE: Record<OneTimePurchaseType, string[]> = {
-  ai_addon_pack: ['STRIPE_PRICE_AI_ADDON_PACK', 'STRIPE_PRICE_ONE_TIME'],
+  ai_addon_pack: ['STRIPE_PRICE_ONE_TIME', 'STRIPE_PRICE_AI_ADDON_PACK'],
   ai_action_pack_2000: ['STRIPE_PRICE_AI_ACTION_PACK_2000', 'STRIPE_PRICE_AI_ADDON_PACK', 'STRIPE_PRICE_ONE_TIME'],
   ai_action_pack_10000: ['STRIPE_PRICE_AI_ACTION_PACK_10000'],
   ai_action_pack_50000: ['STRIPE_PRICE_AI_ACTION_PACK_50000'],
@@ -126,9 +126,17 @@ function getFirstConfiguredEnvValue(envNames: string[]): string | null {
 export function getStripeOneTimePriceId(
   purchaseType: OneTimePurchaseType = DEFAULT_ONE_TIME_PURCHASE_TYPE,
 ): string | null {
-  return getFirstConfiguredEnvValue(ENV_PRICE_BY_ONE_TIME_PURCHASE_TYPE[purchaseType])
-    || PRICE_BY_ONE_TIME_PURCHASE_TYPE[purchaseType]
-    || null;
+  const configured = getFirstConfiguredEnvValue(ENV_PRICE_BY_ONE_TIME_PURCHASE_TYPE[purchaseType]);
+
+  if (configured) {
+    return configured;
+  }
+
+  if (purchaseType === DEFAULT_ONE_TIME_PURCHASE_TYPE) {
+    return null;
+  }
+
+  return PRICE_BY_ONE_TIME_PURCHASE_TYPE[purchaseType] || null;
 }
 
 export function getBillingPortalReturnUrl(): string {

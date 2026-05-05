@@ -15,7 +15,7 @@
     "test": "node scripts/run-jest.cjs --runInBand",
     "test:coverage": "node scripts/run-jest.cjs --runInBand --coverage",
     "lint": "tsc -p tsconfig.json --noEmit",
-    "prisma:generate": "prisma generate"
+    "prisma:generate": "pnpm dlx prisma@6.19.3 generate --schema prisma/schema.prisma"
   },
   "dependencies": {
     "@prisma/client": "6.19.3",
