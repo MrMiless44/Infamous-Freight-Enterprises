@@ -81,8 +81,8 @@ const PRICE_BY_ONE_TIME_PURCHASE_TYPE: Record<OneTimePurchaseType, string> = {
 };
 
 const ENV_PRICE_BY_ONE_TIME_PURCHASE_TYPE: Record<OneTimePurchaseType, string[]> = {
-  ai_addon_pack: ['STRIPE_PRICE_AI_ADDON_PACK', 'STRIPE_PRICE_ONE_TIME'],
-  ai_action_pack_2000: ['STRIPE_PRICE_AI_ACTION_PACK_2000', 'STRIPE_PRICE_AI_ADDON_PACK', 'STRIPE_PRICE_ONE_TIME'],
+  ai_addon_pack: ['STRIPE_PRICE_ONE_TIME', 'STRIPE_PRICE_AI_ADDON_PACK'],
+  ai_action_pack_2000: ['STRIPE_PRICE_AI_ACTION_PACK_2000', 'STRIPE_PRICE_ONE_TIME', 'STRIPE_PRICE_AI_ADDON_PACK'],
   ai_action_pack_10000: ['STRIPE_PRICE_AI_ACTION_PACK_10000'],
   ai_action_pack_50000: ['STRIPE_PRICE_AI_ACTION_PACK_50000'],
   document_ai_pack_500: ['STRIPE_PRICE_DOCUMENT_AI_PACK_500'],
@@ -123,12 +123,18 @@ function getFirstConfiguredEnvValue(envNames: string[]): string | null {
   return null;
 }
 
-export function getStripeOneTimePriceId(
-  purchaseType: OneTimePurchaseType = DEFAULT_ONE_TIME_PURCHASE_TYPE,
-): string | null {
-  return getFirstConfiguredEnvValue(ENV_PRICE_BY_ONE_TIME_PURCHASE_TYPE[purchaseType])
-    || PRICE_BY_ONE_TIME_PURCHASE_TYPE[purchaseType]
-    || null;
+export function getStripeOneTimePriceId(purchaseType?: OneTimePurchaseType): string | null {
+  const resolvedPurchaseType = purchaseType ?? DEFAULT_ONE_TIME_PURCHASE_TYPE;
+  const configured = getFirstConfiguredEnvValue(ENV_PRICE_BY_ONE_TIME_PURCHASE_TYPE[resolvedPurchaseType]);
+  if (configured) {
+    return configured;
+  }
+
+  if (!purchaseType) {
+    return null;
+  }
+
+  return PRICE_BY_ONE_TIME_PURCHASE_TYPE[resolvedPurchaseType] || null;
 }
 
 export function getBillingPortalReturnUrl(): string {
@@ -441,7 +447,7 @@ export async function createStripeCheckoutSession(input: CheckoutSessionInput): 
 
 export async function createStripeOneTimeCheckoutSession(input: OneTimeCheckoutSessionInput): Promise<string> {
   const purchaseType = input.purchaseType ?? DEFAULT_ONE_TIME_PURCHASE_TYPE;
-  const price = getStripeOneTimePriceId(purchaseType);
+  const price = getStripeOneTimePriceId(input.purchaseType);
 
   if (!price) {
     throw new Error('stripe_one_time_price_required');
