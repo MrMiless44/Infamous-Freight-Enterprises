@@ -37,7 +37,10 @@ Production code is buildable. Production readiness still requires environment co
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `VITE_API_URL` | Yes | Public backend API URL. |
+| `NODE_VERSION` | Recommended | Set to `22` in Netlify build environment. |
+| `VITE_PUBLIC_SITE_URL` | Yes | Canonical frontend URL (`https://www.infamousfreight.com`). |
+| `VITE_API_BASE_URL` | Yes | Canonical backend API URL (`https://api.infamousfreight.com`). |
+| `VITE_API_URL` | Optional | Legacy alias/proxy setting for older builds. |
 | `VITE_SUPABASE_URL` | Yes | Supabase project URL. |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Yes | Supabase publishable/anon key. |
 | `VITE_SENTRY_DSN` | Optional | Frontend error tracking. |
@@ -48,8 +51,8 @@ Production code is buildable. Production readiness still requires environment co
 Expected endpoints:
 
 ```bash
-curl -i https://infamous-freight.fly.dev/health
-curl -i https://infamous-freight.fly.dev/api/health
+curl -i https://api.infamousfreight.com/health
+curl -i https://api.infamousfreight.com/api/health
 ```
 
 Expected status:
@@ -102,7 +105,7 @@ Run migrations using the repository's actual migration command once confirmed. D
 
 ### 3. Frontend/backend communication
 
-- [ ] `VITE_API_URL` points to deployed backend
+- [ ] `VITE_API_BASE_URL` points to deployed backend (`https://api.infamousfreight.com`)
 - [ ] `WEB_APP_URL` points to deployed frontend
 - [ ] `CORS_ORIGINS` includes deployed frontend origin
 - [ ] Browser can call backend without CORS failure
@@ -122,6 +125,36 @@ Run migrations using the repository's actual migration command once confirmed. D
 - [ ] Exposed Fly token rotated
 - [ ] GitHub Actions `FLY_API_TOKEN` updated with the rotated token
 
+
+### Fly secrets bootstrap
+
+Set API secrets on Fly (not in GitHub and not in browser-exposed frontend variables):
+
+```bash
+fly secrets set \
+  NODE_ENV=production \
+  DATABASE_URL="postgresql://..." \
+  CORS_ORIGINS="https://www.infamousfreight.com,https://infamousfreight.com" \
+  CORS_ORIGIN="https://www.infamousfreight.com" \
+  STRIPE_SECRET_KEY="sk_live_..." \
+  STRIPE_WEBHOOK_SECRET="whsec_..." \
+  OPENAI_API_KEY="sk-..." \
+  SENTRY_DSN="https://..."
+```
+
+Optional bulk import:
+
+```bash
+cat .env.production | fly secrets import
+```
+
+Add and verify custom API cert/domain:
+
+```bash
+fly certs add api.infamousfreight.com -a YOUR_FLY_APP_NAME
+fly certs check api.infamousfreight.com -a YOUR_FLY_APP_NAME
+```
+
 ## Deployment sequence
 
 ### Backend API on Fly.io
@@ -138,7 +171,8 @@ flyctl logs -a infamous-freight
 npm run build --workspace apps/web
 ```
 
-Deploy `apps/web/dist/` to Netlify, Vercel static hosting, or equivalent.
+Deploy `apps/web/dist/` to Netlify as the production frontend (`www.infamousfreight.com`).
+Use Vercel only for previews/experiments/legacy fallback if needed.
 
 ## Verification commands
 
@@ -153,8 +187,8 @@ npm run build --workspace apps/api
 npm test --workspace apps/api
 npm run build --workspace apps/web
 flyctl deploy --config fly.toml -a infamous-freight
-curl -i https://infamous-freight.fly.dev/health
-curl -i https://infamous-freight.fly.dev/api/health
+curl -i https://api.infamousfreight.com/health
+curl -i https://api.infamousfreight.com/api/health
 flyctl status -a infamous-freight
 flyctl logs -a infamous-freight
 ```
