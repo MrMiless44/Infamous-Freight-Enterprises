@@ -24,6 +24,11 @@ describe('Stripe billing endpoints', () => {
     delete process.env.STRIPE_SECRET_KEY;
     delete process.env.STRIPE_PRICE_ONE_TIME;
     delete process.env.STRIPE_PRICE_AI_ADDON_PACK;
+    delete process.env.STRIPE_PRICE_AI_ACTION_PACK_2000;
+    delete process.env.STRIPE_PRICE_AI_ACTION_PACK_10000;
+    delete process.env.STRIPE_PRICE_AI_ACTION_PACK_50000;
+    delete process.env.STRIPE_PRICE_DOCUMENT_AI_PACK_500;
+    delete process.env.STRIPE_PRICE_VOICE_AI_MINUTES_1000;
     delete process.env.STRIPE_CHECKOUT_SUCCESS_URL;
     delete process.env.STRIPE_CHECKOUT_CANCEL_URL;
     delete process.env.WEB_APP_URL;
@@ -197,6 +202,70 @@ describe('Stripe billing endpoints', () => {
     expect(body.get('metadata[purchaseType]')).toBe('ai_addon_pack');
     expect(body.get('metadata[priceId]')).toBe('price_one_time_test');
     expect(body.get('metadata[mode]')).toBe('payment');
+  });
+
+  it.each([
+    ['ai_action_pack_2000', 'price_1TQeyLKCNuZqDozY0tb8Mwt8'],
+    ['ai_action_pack_10000', 'price_1TQf0BKCNuZqDozYU5RBJVKo'],
+    ['ai_action_pack_50000', 'price_1TQf0TKCNuZqDozY3dghvydQ'],
+    ['document_ai_pack_500', 'price_1TQf0zKCNuZqDozYJSTRv4iY'],
+    ['voice_ai_minutes_1000', 'price_1TQf1IKCNuZqDozYebKKmHpu'],
+  ] as const)('maps %s to the correct Stripe Price ID', async (purchaseType, expectedPrice) => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_checkout';
+    process.env.WEB_APP_URL = 'https://www.infamousfreight.com';
+
+    const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      json: async () => ({ url: 'https://checkout.stripe.com/c/pay/cs_addon_123' }),
+    } as Response);
+
+    await createStripeOneTimeCheckoutSession({
+      carrierId: 'carrier_addon_matrix',
+      stripeCustomerId: 'cus_addon_matrix',
+      purchaseType,
+    });
+
+    const [, requestInit] = fetchMock.mock.calls[0];
+    const body = requestInit?.body as URLSearchParams;
+
+    expect(body.get('line_items[0][price]')).toBe(expectedPrice);
+    expect(body.get('metadata[purchaseType]')).toBe(purchaseType);
+    expect(body.get('metadata[priceId]')).toBe(expectedPrice);
+  });
+
+  it('lets environment variables override one-time add-on Price IDs', async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_checkout';
+    process.env.STRIPE_PRICE_VOICE_AI_MINUTES_1000 = 'price_voice_override';
+
+    const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      json: async () => ({ url: 'https://checkout.stripe.com/c/pay/cs_voice_123' }),
+    } as Response);
+
+    await createStripeOneTimeCheckoutSession({
+      carrierId: 'carrier_voice_override',
+      stripeCustomerId: 'cus_voice_override',
+      purchaseType: 'voice_ai_minutes_1000',
+    });
+
+    const [, requestInit] = fetchMock.mock.calls[0];
+    const body = requestInit?.body as URLSearchParams;
+
+    expect(body.get('line_items[0][price]')).toBe('price_voice_override');
+    expect(body.get('metadata[priceId]')).toBe('price_voice_override');
+  });
+
+  it('rejects unsupported one-time purchase types before creating Checkout Sessions', async () => {
+    const app = createApp();
+
+    const response = await request(app)
+      .post('/api/billing/one-time-checkout-session')
+      .set('x-tenant-id', 'carrier_invalid_addon')
+      .set('x-user-role', 'owner')
+      .send({ purchaseType: 'unknown_addon' })
+      .expect(400);
+
+    expect(response.body.error).toBe('invalid_one_time_purchase_type');
   });
 
   it('extracts one-time payment records from completed Checkout webhooks', () => {

@@ -16,6 +16,9 @@ import {
   getBillingSyncFromStripeEvent,
   getStripeOneTimePaymentFromStripeEvent,
   getStripeWebhookSecret,
+  isOneTimePurchaseType,
+  OneTimePurchaseType,
+  ONE_TIME_PURCHASE_TYPES,
   StripeEvent,
   verifyStripeWebhookSignature,
 } from './billing';
@@ -251,9 +254,22 @@ function getCheckoutInterval(req: Request): BillingInterval {
   return billingInterval;
 }
 
-function getOneTimePurchaseType(req: Request): string | undefined {
+function getOneTimePurchaseType(req: Request): OneTimePurchaseType | undefined {
   const purchaseType = req.body?.purchaseType;
-  return typeof purchaseType === 'string' && purchaseType.trim() ? purchaseType.trim() : undefined;
+
+  if (purchaseType === undefined || purchaseType === null || purchaseType === '') {
+    return undefined;
+  }
+
+  if (!isOneTimePurchaseType(purchaseType)) {
+    throw new HttpError(
+      400,
+      'invalid_one_time_purchase_type',
+      `purchaseType must be one of: ${ONE_TIME_PURCHASE_TYPES.join(', ')}.`,
+    );
+  }
+
+  return purchaseType;
 }
 
 function hasLeadHoneypotValue(body: unknown): boolean {
@@ -499,6 +515,7 @@ function registerRoutes(app: express.Express, dataStore: DataStore) {
 
   app.post('/api/billing/one-time-checkout-session', requireTenant, requireRole, requireBillingRole, wrapAsync(async (req, res) => {
     const carrierId = getRequiredTenantId(req);
+    const purchaseType = getOneTimePurchaseType(req);
     const stripeCustomerId = await dataStore.getCarrierStripeCustomerId(carrierId);
 
     if (!stripeCustomerId) {
@@ -512,7 +529,7 @@ function registerRoutes(app: express.Express, dataStore: DataStore) {
     const url = await createStripeOneTimeCheckoutSession({
       carrierId,
       stripeCustomerId,
-      purchaseType: getOneTimePurchaseType(req),
+      purchaseType,
     });
 
     res.status(200).json({ data: { url } });
@@ -732,7 +749,7 @@ export function createApp() {
     if (err.message === 'stripe_one_time_price_required') {
       return res.status(500).json({
         error: 'stripe_one_time_price_required',
-        message: 'STRIPE_PRICE_ONE_TIME or STRIPE_PRICE_AI_ADDON_PACK is required for one-time purchases.',
+        message: 'A Stripe Price ID is required for one-time purchases.',
       });
     }
 

@@ -1,120 +1,47 @@
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, Sparkles } from 'lucide-react';
+import {
+  STRIPE_ADD_ON_PLANS,
+  STRIPE_SUBSCRIPTION_PLANS,
+  StripeCatalogCta,
+  StripeCatalogPlan,
+} from '@/lib/stripeCatalog';
 
-type Plan = {
-  name: string;
-  price: string;
-  cadence?: string;
-  tagline: string;
-  features: string[];
-  cta: { label: string; href: string };
-  highlighted?: boolean;
+const isExternalHref = (href: string) => href.startsWith('http://') || href.startsWith('https://');
+
+const ctaClassName = (highlighted?: boolean) =>
+  `inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 font-semibold transition ${
+    highlighted
+      ? 'bg-infamous-orange text-white hover:opacity-90'
+      : 'border border-infamous-border bg-[#111] text-white hover:border-infamous-orange/50'
+  }`;
+
+const secondaryCtaClassName =
+  'inline-flex w-full items-center justify-center gap-2 rounded-xl border border-infamous-border px-5 py-3 text-sm font-semibold text-gray-200 transition hover:border-infamous-orange/50 hover:text-white';
+
+const PlanAction: React.FC<{ cta: StripeCatalogCta; highlighted?: boolean; secondary?: boolean }> = ({
+  cta,
+  highlighted,
+  secondary,
+}) => {
+  const className = secondary ? secondaryCtaClassName : ctaClassName(highlighted);
+
+  if (isExternalHref(cta.href)) {
+    return (
+      <a href={cta.href} target="_blank" rel="noreferrer" className={className}>
+        {cta.label} <ArrowRight size={16} />
+      </a>
+    );
+  }
+
+  return (
+    <Link to={cta.href} className={className}>
+      {cta.label} <ArrowRight size={16} />
+    </Link>
+  );
 };
 
-const shipperPlans: Plan[] = [
-  {
-    name: 'Free',
-    price: '$0',
-    tagline: 'Start with quotes, booking, and tracking — no commitment.',
-    features: [
-      'Unlimited quote requests',
-      'Standard booking and dispatch',
-      'Live shipment tracking',
-      'Proof of delivery on every load',
-      'Email support',
-    ],
-    cta: { label: 'Get a Freight Quote', href: '/request-quote' },
-  },
-  {
-    name: 'Business',
-    price: '$79',
-    cadence: '/month',
-    tagline: 'For shippers booking weekly with a couple of locations.',
-    features: [
-      'Everything in Free',
-      'Priority dispatch on open lanes',
-      'Recurring shipment scheduling',
-      'Saved routes and contacts',
-      'Reports and invoice exports',
-      'Proof-of-delivery archive',
-    ],
-    cta: { label: 'Start Business plan', href: '/request-quote?plan=business' },
-    highlighted: true,
-  },
-  {
-    name: 'Pro Logistics',
-    price: '$249',
-    cadence: '/month',
-    tagline: 'For multi-location shippers managing freight as a function.',
-    features: [
-      'Everything in Business',
-      'Multi-location and team access',
-      'Advanced tracking and exception alerts',
-      'Dedicated dispatch contact',
-      'Custom reporting cadence',
-    ],
-    cta: { label: 'Start Pro Logistics', href: '/request-quote?plan=pro' },
-  },
-  {
-    name: 'Enterprise',
-    price: 'Custom',
-    tagline: 'Higher volume, integrations, and account-level SLAs.',
-    features: [
-      'Volume pricing and committed capacity',
-      'API and TMS integration',
-      'Custom SLAs and escalations',
-      'Onboarding and training',
-    ],
-    cta: { label: 'Talk to sales', href: '/request-quote?plan=enterprise' },
-  },
-];
-
-const driverPlans: Plan[] = [
-  {
-    name: 'Driver Basic',
-    price: '$0',
-    tagline: 'Apply, get verified, and start hauling — no fee to begin.',
-    features: [
-      'Free signup and document upload',
-      'Identity, insurance, and authority verification',
-      'Access to standard load board',
-      'Faster payment after delivery',
-    ],
-    cta: { label: 'Apply to Drive', href: '/drive' },
-  },
-  {
-    name: 'Driver Pro',
-    price: '$29',
-    cadence: '/month',
-    tagline: 'For drivers who have proven they can deliver clean.',
-    features: [
-      'Early access to higher-paying loads',
-      'Route optimization tools',
-      'Faster payout option',
-      'Preferred driver badge',
-      'Document vault and reminders',
-      'Performance insights',
-    ],
-    cta: { label: 'Upgrade after first loads', href: '/drive?plan=pro' },
-    highlighted: true,
-  },
-  {
-    name: 'Fleet',
-    price: '$149',
-    cadence: '/month',
-    tagline: 'For small carriers running a handful of trucks.',
-    features: [
-      'Everything in Driver Pro',
-      'Up to 10 verified drivers',
-      'Fleet dispatch dashboard',
-      'Document and insurance tracking',
-      'Centralized payouts and reporting',
-    ],
-    cta: { label: 'Start Fleet plan', href: '/drive?plan=fleet' },
-  },
-];
-
-const PlanCard: React.FC<{ plan: Plan }> = ({ plan }) => (
+const PlanCard: React.FC<{ plan: StripeCatalogPlan }> = ({ plan }) => (
   <div
     className={`flex h-full flex-col rounded-3xl border bg-infamous-card p-6 ${
       plan.highlighted
@@ -122,7 +49,7 @@ const PlanCard: React.FC<{ plan: Plan }> = ({ plan }) => (
         : 'border-infamous-border'
     }`}
   >
-    <div className="mb-4 flex items-center justify-between">
+    <div className="mb-4 flex items-center justify-between gap-3">
       <h3 className="text-lg font-bold">{plan.name}</h3>
       {plan.highlighted ? (
         <span className="inline-flex items-center gap-1 rounded-full bg-infamous-orange/10 px-3 py-1 text-xs font-semibold text-infamous-orange">
@@ -143,17 +70,9 @@ const PlanCard: React.FC<{ plan: Plan }> = ({ plan }) => (
         </li>
       ))}
     </ul>
-    <div className="mt-6">
-      <Link
-        to={plan.cta.href}
-        className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 font-semibold transition ${
-          plan.highlighted
-            ? 'bg-infamous-orange text-white hover:opacity-90'
-            : 'border border-infamous-border bg-[#111] text-white hover:border-infamous-orange/50'
-        }`}
-      >
-        {plan.cta.label} <ArrowRight size={16} />
-      </Link>
+    <div className="mt-auto space-y-3 pt-6">
+      <PlanAction cta={plan.cta} highlighted={plan.highlighted} />
+      {plan.secondaryCta ? <PlanAction cta={plan.secondaryCta} secondary /> : null}
     </div>
   </div>
 );
@@ -169,27 +88,26 @@ const PricingPage: React.FC = () => {
         <header className="mb-10 max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Pricing</p>
           <h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">
-            Simple pricing that follows the freight.
+            Stripe-backed pricing for freight operators ready to move faster.
           </h1>
           <p className="mt-4 text-lg leading-8 text-gray-300">
-            Quoting, booking, tracking, and proof of delivery are free. Paid plans add priority dispatch, scheduling,
-            reporting, and team access for shippers and carriers that move freight every week.
+            Choose the Infamous Freight plan that matches your operation, then add AI action, document, or voice packs
+            when your team needs more automation capacity. Payments are processed securely through Stripe.
           </p>
         </header>
 
         <section className="mb-16">
           <div className="mb-6 flex flex-col justify-between gap-2 lg:flex-row lg:items-end">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Shippers</p>
-              <h2 className="mt-2 text-2xl font-bold">Built around completed shipments, not paywalls.</h2>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Platform plans</p>
+              <h2 className="mt-2 text-2xl font-bold">Monthly or annual subscriptions.</h2>
             </div>
             <p className="max-w-md text-sm text-gray-400">
-              Free for everyday booking. Upgrade only when scheduling, reporting, or multi-location control starts
-              saving real time.
+              Starter, Professional, and Enterprise use the live Stripe products and prices configured for Infamous Freight.
             </p>
           </div>
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-            {shipperPlans.map((plan) => (
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {STRIPE_SUBSCRIPTION_PLANS.map((plan) => (
               <PlanCard key={plan.name} plan={plan} />
             ))}
           </div>
@@ -198,16 +116,15 @@ const PricingPage: React.FC = () => {
         <section className="mb-16">
           <div className="mb-6 flex flex-col justify-between gap-2 lg:flex-row lg:items-end">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Drivers and carriers</p>
-              <h2 className="mt-2 text-2xl font-bold">Earn first. Upgrade after the platform proves itself.</h2>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">AI add-ons</p>
+              <h2 className="mt-2 text-2xl font-bold">One-time capacity packs for heavier workflows.</h2>
             </div>
             <p className="max-w-md text-sm text-gray-400">
-              No fee to start. Driver Pro and Fleet are for drivers and small carriers that want priority access to
-              better loads.
+              Add more AI actions, document scans, or voice minutes without changing the customer’s base subscription.
             </p>
           </div>
-          <div className="grid gap-5 md:grid-cols-3">
-            {driverPlans.map((plan) => (
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {STRIPE_ADD_ON_PLANS.map((plan) => (
               <PlanCard key={plan.name} plan={plan} />
             ))}
           </div>
@@ -216,21 +133,18 @@ const PricingPage: React.FC = () => {
         <section className="rounded-3xl border border-infamous-border bg-[#0f0f0f] p-8">
           <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">
-                Partner network
-              </p>
-              <h2 className="mt-2 text-2xl font-bold">Reach the freight ecosystem, not random eyeballs.</h2>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Need a custom invoice?</p>
+              <h2 className="mt-2 text-2xl font-bold">Use Stripe Invoicing for B2B freight customers.</h2>
               <p className="mt-3 max-w-2xl text-gray-400">
-                Fuel cards, insurance, factoring, repair, leasing, ELD, and lending providers can sponsor placements
-                inside the Infamous Freight network. Listings start at $99/month — featured, sponsored category, and
-                regional exclusive tiers are available.
+                For contract lanes, implementation work, enterprise onboarding, or custom account terms, request a quote
+                and Infamous Freight can issue a Stripe invoice instead of sending a public payment link.
               </p>
             </div>
             <Link
-              to="/partners"
+              to="/request-quote"
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-infamous-border bg-infamous-card px-5 py-3 font-semibold text-white transition hover:border-infamous-orange/50"
             >
-              See partner tiers <ArrowRight size={16} />
+              Request invoice quote <ArrowRight size={16} />
             </Link>
           </div>
         </section>

@@ -2,7 +2,7 @@
   "name": "infamous-freight",
   "version": "1.0.0",
   "private": true,
-  "description": "Infamous Freight — The freight dispatch platform built by truckers, for truckers",
+  "description": "Infamous Freight \u2014 The freight dispatch platform built by truckers, for truckers",
   "packageManager": "pnpm@10.0.0",
   "repository": {
     "type": "git",
@@ -21,11 +21,11 @@
     "test:coverage": "node scripts/ensure-api-workspace.js && pnpm -C apps/api run test:coverage",
     "prisma:generate": "node scripts/ensure-api-workspace.js && pnpm -C apps/api run prisma:generate",
     "prisma:migrate": "node scripts/ensure-api-workspace.js && pnpm -C apps/api exec prisma migrate dev --schema prisma/schema.prisma",
-    "prisma:seed": "node scripts/ensure-api-workspace.js && pnpm -C apps/api exec prisma db seed --schema prisma/schema.prisma",
+    "prisma:seed": "pnpm run prisma:generate && node scripts/ensure-api-workspace.js && pnpm -C apps/api exec prisma db seed --schema prisma/schema.prisma",
     "db:setup": "pnpm run prisma:generate && pnpm run prisma:migrate && pnpm run prisma:seed",
-    "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
-    "docker:build": "docker-compose build",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:build": "docker compose build",
     "docker:install-cli": "bash scripts/install-docker-cli.sh",
     "deploy:install-clis": "sh -c 'if [ \"$(id -u)\" -eq 0 ]; then bash scripts/install-dev-clis.sh; elif command -v sudo >/dev/null 2>&1; then sudo bash scripts/install-dev-clis.sh; else echo \"Error: scripts/install-dev-clis.sh requires root. Re-run with sudo: sudo pnpm run deploy:install-clis\" >&2; exit 1; fi'",
     "ai:check": "bash scripts/check-ai-runtime.sh",
@@ -55,7 +55,8 @@
   },
   "devDependencies": {
     "@resvg/resvg-js": "2.6.2",
-    "concurrently": "^9.0.0"
+    "concurrently": "^9.0.0",
+    "prisma": "6.19.3"
   },
   "overrides": {
     "react-is": "^18.3.1",
