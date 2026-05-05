@@ -92,3 +92,14 @@
     @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-infamous-orange/10 text-infamous-orange border border-infamous-orange/20;
   }
 }
+
+@layer utilities {
+  .freight-grid {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+    background-size: 44px 44px;
+    -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.95), transparent 84%);
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.95), transparent 84%);
+  }
+}
