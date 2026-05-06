@@ -225,8 +225,26 @@ function getRequiredTenantId(req: Request): string {
   return req.tenantId;
 }
 
+function getRouteParam(req: Request, name: string): string {
+  const value = req.params[name];
+
+  if (Array.isArray(value)) {
+    if (typeof value[0] === 'string' && value[0].length > 0) {
+      return value[0];
+    }
+  } else if (typeof value === 'string' && value.length > 0) {
+    return value;
+  }
+
+  throw new HttpError(
+    400,
+    'route_param_required',
+    `Route parameter ${name} is required.`,
+  );
+}
+
 function getFreightOperationResource(req: Request): FreightOperationResource {
-  const resource = req.params.resource;
+  const resource = getRouteParam(req, 'resource');
 
   if (!FREIGHT_OPERATION_RESOURCES.includes(resource as FreightOperationResource)) {
     throw new HttpError(
@@ -629,7 +647,7 @@ function registerRoutes(app: express.Express, dataStore: DataStore) {
     const data = await dataStore.updateFreightOperation(
       resource,
       getRequiredTenantId(req),
-      req.params.id,
+      getRouteParam(req, 'id'),
       req.body,
     );
     res.status(200).json({ data });
