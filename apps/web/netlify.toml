@@ -1,9 +1,8 @@
 # Netlify Configuration for Infamous Freight Frontend
 
 [build]
-  command = "npm run build"
-  publish = "dist"
-  functions = "functions"
+  command = "pnpm run build:web"
+  publish = "apps/web/dist"
 
 # Environment variables
 [build.environment]
@@ -97,25 +96,15 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Plugins
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-
-[[plugins]]
-  package = "netlify-plugin-sitemap"
-  [plugins.inputs]
-    baseUrl = "https://www.infamousfreight.com"
-    buildDir = "dist"
-
 # Context-specific settings
 [context.production]
-  command = "npm run build"
+  command = "pnpm run build:web"
   environment = { NODE_ENV = "production" }
 
 [context.deploy-preview]
-  command = "npm run build"
+  command = "pnpm run build:web"
   environment = { NODE_ENV = "development" }
 
 [context.branch-deploy]
-  command = "npm run build"
+  command = "pnpm run build:web"
   environment = { NODE_ENV = "development" }

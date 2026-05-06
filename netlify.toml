@@ -96,6 +96,3 @@
   for = "/driver-pwa/manifest.json"
   [headers.values]
     Cache-Control = "public, max-age=86400"
-
-[[plugins]]
-  package = "@netlify/plugin-sitemap"
