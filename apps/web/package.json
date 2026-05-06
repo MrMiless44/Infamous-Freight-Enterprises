@@ -20,7 +20,7 @@
   "dependencies": {
     "@sentry/react": "^8.55.1",
     "@stripe/react-stripe-js": "^6.3.0",
-    "@stripe/stripe-js": "^9.3.1",
+    "@stripe/stripe-js": "^9.4.0",
     "@supabase/supabase-js": "^2.105.3",
     "@vercel/analytics": "^2.0.1",
     "axios": "^1.15.2",
@@ -34,7 +34,7 @@
     "react-dropzone": "^15.0.0",
     "react-helmet-async": "2.0.5",
     "react-hot-toast": "^2.4.1",
-    "react-router-dom": "^6.20.0",
+    "react-router-dom": "^7.15.0",
     "recharts": "^3.8.1",
     "socket.io-client": "^4.7.4",
     "tailwind-merge": "^2.1.0",
