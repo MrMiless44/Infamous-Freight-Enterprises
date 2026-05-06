@@ -174,6 +174,26 @@ run_tests() {
 # DEPLOYMENT FUNCTIONS
 # ===========================================================================
 
+validate_container_image_ref() {
+  local image_ref="$1"
+
+  # Conservative validation for container image references used in deployment.
+  if [[ "$image_ref" =~ [[:space:]] ]]; then
+    error "Invalid FLY_DEPLOY_IMAGE: must not contain whitespace"
+    exit 1
+  fi
+
+  if [[ "$image_ref" != registry.fly.io/* ]]; then
+    error "Invalid FLY_DEPLOY_IMAGE: expected image in registry.fly.io/<app>:<tag> format"
+    exit 1
+  fi
+
+  if [[ "$image_ref" != *":"* && "$image_ref" != *@sha256:* ]]; then
+    error "Invalid FLY_DEPLOY_IMAGE: expected a tagged image or digest (example: registry.fly.io/app:tag)"
+    exit 1
+  fi
+}
+
 deploy_fly() {
   local env="$1"
   log "Deploying to Fly.io ($env)..."
@@ -192,8 +212,17 @@ deploy_fly() {
   export FLY_APP_NAME="$app_name"
 
   cd "$PROJECT_ROOT"
+
+  local deploy_image="${FLY_DEPLOY_IMAGE:-}"
+  local -a fly_args=(deploy --app "$app_name" --remote-only)
+  if [[ -n "$deploy_image" ]]; then
+    validate_container_image_ref "$deploy_image"
+    log "Deploying prebuilt Fly image: $deploy_image"
+    fly_args+=(--image "$deploy_image")
+  fi
+
   # Redact any lines that look like secrets from the tee'd log
-  flyctl deploy --app "$app_name" --remote-only 2>&1 \
+  flyctl "${fly_args[@]}" 2>&1 \
     | grep -v -iE '(secret|key|token|password)' \
     | tee -a "$LOG_FILE" \
     || true   # let the trap handle real failures; grep exit-codes aren't failures
@@ -450,4 +479,6 @@ main() {
   success "=========================================="
 }
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi

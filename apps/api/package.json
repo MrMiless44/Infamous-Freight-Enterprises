@@ -12,8 +12,8 @@
     "build": "npm run prisma:generate && tsc -p tsconfig.json",
     "start:dev": "tsx watch src/server.ts",
     "start:prod": "node dist/src/server.js",
-    "test": "node scripts/run-jest.cjs --runInBand",
-    "test:coverage": "node scripts/run-jest.cjs --runInBand --coverage",
+    "test": "npm run prisma:generate && node scripts/run-jest.cjs --runInBand",
+    "test:coverage": "npm run prisma:generate && node scripts/run-jest.cjs --runInBand --coverage",
     "lint": "npm run prisma:generate && tsc -p tsconfig.json --noEmit",
     "prisma:generate": "pnpm exec prisma generate --schema prisma/schema.prisma"
   },
