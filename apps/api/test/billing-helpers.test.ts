@@ -327,6 +327,10 @@ describe('getBillingPortalReturnUrl', () => {
 });
 
 describe('createStripeCheckoutSession error paths', () => {
+  beforeEach(() => {
+    delete process.env.STRIPE_SECRET_KEY;
+  });
+
   afterEach(() => {
     delete process.env.STRIPE_SECRET_KEY;
     jest.restoreAllMocks();
