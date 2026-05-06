@@ -18,7 +18,7 @@
     "prisma:generate": "pnpm dlx prisma@6.19.3 generate --schema prisma/schema.prisma"
   },
   "dependencies": {
-    "@prisma/client": "6.19.3",
+    "@prisma/client": "7.8.0",
     "@prisma/extension-accelerate": "3.0.1",
     "@sentry/node": "^10.51.0",
     "cors": "^2.8.5",
