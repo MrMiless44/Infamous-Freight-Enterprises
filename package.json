@@ -56,12 +56,12 @@
   "devDependencies": {
     "@resvg/resvg-js": "2.6.2",
     "concurrently": "^9.0.0",
-    "prisma": "6.19.3"
+    "prisma": "7.8.0"
   },
   "overrides": {
     "react-is": "^18.3.1",
     "tar-fs": "~2.1.4",
-    "prisma": "6.19.3",
+    "prisma": "7.8.0",
     "@prisma/client": "6.19.3"
   },
   "workspaces": [
