@@ -7,7 +7,6 @@ This document tracks approved SSH public keys for production operations.
 | Key ID | Added (UTC) | Algorithm | Fingerprint (SHA256) | Status | Notes |
 | --- | --- | --- | --- | --- | --- |
 | `ops-key-2026-04-30-01` | 2026-04-30 | RSA 4096 | `ENq3sUhcnOq79ETLvC9RN2Ltb/+52cXTGFaFWPicxsA` | Active | Imported from approved request |
-| `ops-key-2026-05-06-01` | 2026-05-06 | RSA 4096 | `+jmJ2MjDAwxuvW6zu8URZHNkOpAEF2YeI+QzH7PGWC4` | Active | Added from submitted key |
 
 ## Apply key to host safely
 
