@@ -14,7 +14,7 @@
     "start:prod": "node dist/src/server.js",
     "test": "node scripts/run-jest.cjs --runInBand",
     "test:coverage": "node scripts/run-jest.cjs --runInBand --coverage",
-    "lint": "tsc -p tsconfig.json --noEmit",
+    "lint": "npm run prisma:generate && tsc -p tsconfig.json --noEmit",
     "prisma:generate": "pnpm exec prisma generate --schema prisma/schema.prisma"
   },
   "dependencies": {
