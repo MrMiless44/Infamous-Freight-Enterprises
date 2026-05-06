@@ -49,11 +49,7 @@ export function createPrismaClient(): PrismaClient {
       );
     }
 
-    const accelerateBase = new PrismaClient({
-      accelerateUrl: databaseUrl,
-    } as ConstructorParameters<typeof PrismaClient>[0]);
-
-    client = accelerateBase.$extends(withAccelerate()) as unknown as PrismaClient;
+    client = new PrismaClient().$extends(withAccelerate()) as unknown as PrismaClient;
 
     if (shouldUseGlobalCache) {
       globalForPrisma.__infamousPrismaClient = client;

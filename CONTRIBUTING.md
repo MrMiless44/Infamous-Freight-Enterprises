@@ -110,14 +110,3 @@ If you are contributing from a fork, a few CI behaviors are expected and not bug
 ## Secrets
 
 Never commit secrets, tokens, private keys, credentials, `.env` files, or screenshots containing secrets. If a secret is exposed, rotate it immediately and open a blocker issue.
-
-## Dependabot PR command quick reference
-
-When reviewing an open Dependabot pull request, maintainers can use these PR comments:
-
-- `@dependabot rebase` — rebases the PR onto the latest base branch.
-- `@dependabot recreate` — recreates the PR and overwrites any manual edits made in that branch.
-- `@dependabot show <dependency name> ignore conditions` — lists all ignore rules currently applied to that dependency.
-- `@dependabot ignore this major version` — closes the PR and suppresses future updates for that major line unless manually upgraded or reopened.
-- `@dependabot ignore this minor version` — closes the PR and suppresses future updates for that minor line unless manually upgraded or reopened.
-- `@dependabot ignore this dependency` — closes the PR and suppresses future updates for the dependency unless manually upgraded or reopened.
