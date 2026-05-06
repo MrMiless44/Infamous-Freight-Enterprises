@@ -93,6 +93,7 @@ const PublicQuoteRequestPage: React.FC = () => {
             ) : (
               <form name="quote-request" method="POST" data-netlify="true" netlify-honeypot="bot-field" onSubmit={handleSubmit} className="space-y-6">
                 <input type="hidden" name="form-name" value="quote-request" />
+                <input type="hidden" name="csrf-token" value="netlify-form-quote-request-v1" />
                 <p className="hidden">
                   <label>Do not fill this out: <input name="bot-field" /></label>
                 </p>

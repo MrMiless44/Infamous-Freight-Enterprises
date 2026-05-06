@@ -102,6 +102,7 @@ const ContactPage: React.FC = () => {
             ) : (
               <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" onSubmit={handleSubmit} className="mt-6 space-y-5">
                 <input type="hidden" name="form-name" value="contact" />
+                <input type="hidden" name="csrf-token" value="netlify-form-contact-v1" />
                 <p className="hidden">
                   <label>Do not fill this out: <input name="bot-field" /></label>
                 </p>

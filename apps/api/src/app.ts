@@ -205,6 +205,55 @@ function getAllowedCorsOrigins(): string[] {
     .filter(Boolean);
 }
 
+const CSRF_SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+
+function isTrustedBrowserOrigin(req: Request, allowedOrigins: string[]): boolean {
+  const trustedOrigins = allowedOrigins.length
+    ? allowedOrigins
+    : [`${req.protocol}://${req.get('host') ?? ''}`];
+
+  const origin = req.get('origin');
+  if (origin) {
+    return trustedOrigins.includes(origin);
+  }
+
+  const referer = req.get('referer');
+  if (!referer) return false;
+
+  try {
+    return trustedOrigins.includes(new URL(referer).origin);
+  } catch {
+    return false;
+  }
+}
+
+function csrfProtectionMiddleware(allowedOrigins: string[]) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (CSRF_SAFE_METHODS.has(req.method.toUpperCase())) {
+      return next();
+    }
+
+    if (req.path === '/api/billing/webhook') {
+      return next();
+    }
+
+    const hasBrowserSessionCookies = Boolean(req.headers.cookie);
+    if (!hasBrowserSessionCookies) {
+      return next();
+    }
+
+    if (isTrustedBrowserOrigin(req, allowedOrigins)) {
+      return next();
+    }
+
+    return res.status(403).json({
+      error: 'csrf_validation_failed',
+      message: 'Request origin validation failed.',
+      requestId: req.requestId,
+    });
+  };
+}
+
 function wrapAsync(
   handler: (req: Request, res: Response, next: NextFunction) => Promise<void>,
 ) {
@@ -692,6 +741,7 @@ export function createApp() {
       credentials: true,
     }),
   );
+  app.use(csrfProtectionMiddleware(allowedOrigins));
 
   app.use('/api', createRateLimitMiddleware('api'));
   registerWebhookRoute(app, dataStore);

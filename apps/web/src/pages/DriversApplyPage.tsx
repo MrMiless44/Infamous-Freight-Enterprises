@@ -83,6 +83,7 @@ const DriversApplyPage: React.FC = () => {
             ) : (
               <form name="driver-application" method="POST" data-netlify="true" netlify-honeypot="bot-field" onSubmit={handleSubmit} className="mt-6 space-y-5">
                 <input type="hidden" name="form-name" value="driver-application" />
+                <input type="hidden" name="csrf-token" value="netlify-form-driver-application-v1" />
                 <p className="hidden"><label>Do not fill this out: <input name="bot-field" /></label></p>
                 {(['fullName', 'email', 'phone', 'city', 'state'] as const).map((key) => (
                   <label key={key} className="block">

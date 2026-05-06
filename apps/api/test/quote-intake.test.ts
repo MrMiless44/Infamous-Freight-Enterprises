@@ -138,4 +138,18 @@ describe('quote intake workflow', () => {
 
     expect(response.body.error).toBe('discount_lead_missing_email');
   });
+
+  it('rejects state-changing requests with cookies from untrusted origins', async () => {
+    const app = createApp();
+
+    const response = await request(app)
+      .post('/api/leads/quote')
+      .set('Cookie', 'session=test-session')
+      .set('Origin', 'https://attacker.example')
+      .send(validQuotePayload)
+      .expect(403);
+
+    expect(response.body.error).toBe('csrf_validation_failed');
+  });
+
 });
