@@ -84,6 +84,36 @@ None / Low / Medium / High / Critical
 # Evidence Entries
 
 ## Test
+Phase 1 - Netlify Repository Configuration Audit
+
+## Date/Time
+2026-05-06 00:00 UTC
+
+## Owner
+Automation
+
+## Command or Action
+Reviewed `netlify.toml` in the repository.
+
+## Expected Result
+Netlify builds only the web app, publishes the Vite output directory, proxies API traffic to the Fly.io API origin, applies baseline security headers, and avoids invoking Next.js build behavior.
+
+## Actual Result
+`netlify.toml` publishes `apps/web/dist`, runs `pnpm run build:web`, sets `NETLIFY_NEXT_PLUGIN_SKIP=true`, proxies `/api/*` and `/socket.io/*` to the Fly.io API origin, blocks public `*.map` requests, serves the SPA fallback to `/index.html`, applies security headers/CSP, and enables the Netlify sitemap plugin.
+
+## Status
+PASS
+
+## Severity
+None
+
+## Follow-Up
+Run a post-deploy browser check and proxied `/api/health` check after the next production deploy. Keep direct Fly.io health checks in the launch checklist until the API origin policy is explicitly changed.
+
+## Notes
+This is a repository configuration audit, not live production proof.
+
+## Test
 Phase 0 - Execution Controls
 
 ## Date/Time
@@ -207,7 +237,7 @@ date: Mon, 27 Apr 2026 09:15:59 GMT
 age: 1979276
 cache-control: public,max-age=0,must-revalidate
 ```
-Canonical frontend returned HTTP 200 from Netlify. Next.js app is live. Security headers (HSTS, X-Frame-Options, X-Content-Type-Options, Permissions-Policy, Referrer-Policy) are all present. CSP header configured. Full browser verification pending human review.
+Historical production response returned HTTP 200 from Netlify and included Next.js headers from an older deployed build. The repository source of truth is now React/Vite for the web app and Express 4 for the API. Security headers (HSTS, X-Frame-Options, X-Content-Type-Options, Permissions-Policy, Referrer-Policy) were present in that response. Full browser verification pending human review after the next Netlify deploy.
 
 ## Status
 PASS
@@ -219,7 +249,7 @@ None
 N/A
 
 ## Notes
-Last Netlify/Next.js page generation timestamp from `x-nextjs-date` header: 2026-04-23T13:42:28Z. The `age` cache header (~1,979,276 seconds ≈ 23 days) reflects how long this CDN edge node has held the cached response, which is independent of the Next.js ISR regeneration time. Full browser-side console error check and API target verification must be completed by a human tester before paid beta.
+Last historical Netlify page generation timestamp from `x-nextjs-date` header: 2026-04-23T13:42:28Z. The `age` cache header (~1,979,276 seconds ≈ 23 days) reflects how long this CDN edge node had held the cached response. Browser-side console checks and API target verification must be repeated after deploying the current React/Vite build.
 
 
 ---
@@ -544,4 +574,3 @@ Critical
 
 ## Notes
 This is a regression versus the 2026-04-27 evidence above (which recorded the canonical frontend as HTTP/2 200). Both responses in the loop carry `server: Netlify`, but only the apex→www response includes the documented security header set (`strict-transport-security`, `x-frame-options`, `x-content-type-options`, `permissions-policy`, `referrer-policy`, `content-security-policy`) — strongly suggesting the www→apex hop is being added at a layer above the `apps/web` Netlify site rather than by `netlify.toml`. Do not check off "Web app loads from production domain" in the launch-readiness checklist until B-006 is resolved and a fresh HTTP 200 + HTML response from `https://www.infamousfreight.com/` is captured here.
-

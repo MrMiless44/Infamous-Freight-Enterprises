@@ -4,15 +4,9 @@ This guide configures your Stripe products and prices for the Infamous Freight p
 
 ---
 
-## Your Stripe Credentials
+## Credential Policy
 
-| Key | Value |
-|-----|-------|
-| Publishable Key | `REDACTED_PUBLISHABLE_KEY` |
-| Secret Key | `REDACTED_SECRET_KEY` |
-| Webhook Secret | `REDACTED_WEBHOOK_SECRET` |
-
-Dashboard: https://dashboard.stripe.com
+Store Stripe credentials only in the appropriate deployment environment. Do not paste live keys into documentation, source files, issue comments, screenshots, or local command output.
 
 ---
 
@@ -40,9 +34,9 @@ Billing: Recurring
 Trial period: 14 days
 ```
 
-### Product 2: Growth Plan (Most Popular)
+### Product 2: Professional Plan (Most Popular)
 ```
-Name: Infamous Freight — Growth
+Name: Infamous Freight — Professional
 Description: For growing fleets with dispatch teams
 ```
 
@@ -99,7 +93,7 @@ Redemption limit: 50 redemptions
 
 This gives early customers:
 - Starter: $29.40/mo forever (vs $49)
-- Growth: $59.40/mo forever (vs $99)
+- Professional: $59.40/mo forever (vs $99)
 
 ---
 
@@ -108,7 +102,7 @@ This gives early customers:
 In Stripe Dashboard → Developers → Webhooks:
 
 1. Click **Add endpoint**
-2. Endpoint URL: `https://api.infamousfreight.com/stripe/webhook`
+2. Endpoint URL: `https://api.infamousfreight.com/api/billing/webhook`
 3. Select these events:
    - `checkout.session.completed`
    - `invoice.paid`
@@ -150,13 +144,13 @@ Use any future expiry date and any 3-digit CVC.
 ### Test the Checkout
 
 ```bash
-curl -X POST https://api.infamousfreight.com/stripe/checkout \
+curl -X POST https://api.infamousfreight.com/api/billing/checkout-session \
   -H "Content-Type: application/json" \
+  -H "x-tenant-id: carrier_test" \
+  -H "x-user-role: owner" \
   -d '{
-    "priceId": "price_xxx",
-    "customerEmail": "test@example.com",
-    "successUrl": "https://infamousfreight.com/success",
-    "cancelUrl": "https://infamousfreight.com/cancel"
+    "plan": "starter",
+    "billingInterval": "month"
   }'
 ```
 
@@ -164,22 +158,31 @@ curl -X POST https://api.infamousfreight.com/stripe/checkout \
 
 ## Price IDs Reference
 
-After creating products, update these IDs in your code:
+The API accepts only these plan identifiers from the client:
 
-### `apps/api/src/stripe/stripe.service.ts`
-```typescript
-const PRICE_IDS = {
-  starter_monthly: 'price_xxx',      // Replace with your price ID
-  starter_annual: 'price_xxx',       // Replace with your price ID
-  growth_monthly: 'price_xxx',       // Replace with your price ID
-  growth_annual: 'price_xxx',        // Replace with your price ID
-  pay_per_load: 'price_xxx',         // Replace with your price ID
-};
+```text
+starter
+professional
+enterprise
 ```
 
-### `apps/web/.env.production`
+Subscription Price IDs are mapped server-side in `apps/api/src/billing.ts`. Do not accept raw Price IDs from browser input.
+
+One-time add-on Price IDs can be overridden by environment variables when catalog migrations are needed:
+
+```env
+STRIPE_PRICE_ONE_TIME=price_xxx
+STRIPE_PRICE_AI_ADDON_PACK=price_xxx
+STRIPE_PRICE_AI_ACTION_PACK_2000=price_xxx
+STRIPE_PRICE_AI_ACTION_PACK_10000=price_xxx
+STRIPE_PRICE_AI_ACTION_PACK_50000=price_xxx
+STRIPE_PRICE_DOCUMENT_AI_PACK_500=price_xxx
+STRIPE_PRICE_VOICE_AI_MINUTES_1000=price_xxx
 ```
-VITE_STRIPE_PUBLIC_KEY=REDACTED_PUBLISHABLE_KEY
+
+### Web environment
+```
+VITE_API_URL=/api
 ```
 
 ---
@@ -189,7 +192,7 @@ VITE_STRIPE_PUBLIC_KEY=REDACTED_PUBLISHABLE_KEY
 | Plan | Monthly Price | Annual Price | Target Customers |
 |------|-------------|-------------|-----------------|
 | Starter | $49/mo | $470/yr | 200 |
-| Growth | $99/mo | $950/yr | 100 |
+| Professional | $99/mo | $950/yr | 100 |
 | Enterprise | Custom | Custom | 20 |
 | Pay Per Load | $2.99/load | — | 500+ |
 
@@ -203,8 +206,8 @@ VITE_STRIPE_PUBLIC_KEY=REDACTED_PUBLISHABLE_KEY
 - [ ] Products created in Stripe Dashboard
 - [ ] Monthly + annual prices set for each plan
 - [ ] Founding 50 coupon created (40% off, 50 redemptions)
-- [ ] Webhook endpoint configured (`/stripe/webhook`)
+- [ ] Webhook endpoint configured (`/api/billing/webhook`)
 - [ ] Customer portal enabled
-- [ ] Price IDs copied to code
+- [ ] Subscription Price IDs verified server-side and one-time add-on overrides configured if needed
 - [ ] Test checkout flow works
 - [ ] Production environment variables set

@@ -167,6 +167,24 @@ describe('security headers', () => {
 
     expect(response.headers['x-powered-by']).toBeUndefined();
   });
+
+  it('adds a request ID header to API responses', async () => {
+    const response = await request(createApp())
+      .get('/api/health')
+      .set('x-request-id', 'trace-test-1');
+
+    expect(response.headers['x-request-id']).toBe('trace-test-1');
+  });
+
+  it('includes request ID in error responses', async () => {
+    const response = await request(createApp())
+      .get('/api/loads')
+      .set('x-request-id', 'trace-test-2');
+
+    expect(response.status).toBe(400);
+    expect(response.headers['x-request-id']).toBe('trace-test-2');
+    expect(response.body.requestId).toBe('trace-test-2');
+  });
 });
 
 describe('configuration safety', () => {

@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosError, AxiosRequestConfig, Method } from 'axios';
 import toast from 'react-hot-toast';
 import { useAppStore } from '@/store/app-store';
 
@@ -58,6 +58,10 @@ class ApiClient {
     );
   }
 
+  // Legacy convenience methods include planned endpoints from earlier product
+  // slices. New code should prefer focused clients under src/lib that map to
+  // implemented Express routes documented in docs/API-REFERENCE.md.
+
   // Auth
   async login(email: string, password: string) {
     const { data } = await this.client.post('/auth/login', { email, password });
@@ -77,7 +81,7 @@ class ApiClient {
   }
 
   // Loads
-  async searchLoads(filters: Record<string, any>) {
+  async searchLoads(filters: Record<string, unknown>) {
     const { data } = await this.client.get('/loads/search', { params: filters });
     return data;
   }
@@ -130,7 +134,7 @@ class ApiClient {
     return data;
   }
 
-  async createInvoice(invoiceData: any) {
+  async createInvoice(invoiceData: Record<string, unknown>) {
     const { data } = await this.client.post('/invoices', invoiceData);
     return data;
   }
@@ -198,13 +202,18 @@ class ApiClient {
   }
 
   // Rate Con
-  async generateRateCon(loadData: any) {
+  async generateRateCon(loadData: Record<string, unknown>) {
     const { data } = await this.client.post('/ratecons/generate', loadData);
     return data;
   }
 
   // Generic request method
-  async request<T = any>(method: string, path: string, body?: any, config?: any): Promise<T> {
+  async request<T = unknown>(
+    method: Method,
+    path: string,
+    body?: unknown,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
     const { data } = await this.client.request({ method, url: path, data: body, ...config });
     return data;
   }

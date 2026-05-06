@@ -1,5 +1,6 @@
 import cors from 'cors';
 import helmet from 'helmet';
+import { randomUUID } from 'crypto';
 import express, { NextFunction, Request, Response } from 'express';
 import * as Sentry from '@sentry/node';
 import {
@@ -81,6 +82,7 @@ function requireTenant(req: Request, res: Response, next: NextFunction) {
     return res.status(400).json({
       error: 'tenant_id_required',
       message: 'Provide tenantId via the x-tenant-id header.',
+      requestId: req.requestId,
     });
   }
 
@@ -95,6 +97,7 @@ function requireRole(req: Request, res: Response, next: NextFunction) {
     return res.status(403).json({
       error: 'forbidden',
       message: 'A valid x-user-role is required for this endpoint.',
+      requestId: req.requestId,
     });
   }
 
@@ -107,6 +110,7 @@ function requireBillingRole(req: Request, res: Response, next: NextFunction) {
     return res.status(403).json({
       error: 'billing_forbidden',
       message: 'Billing actions require owner or admin access.',
+      requestId: req.requestId,
     });
   }
 
@@ -170,6 +174,7 @@ function createRequirePaidSubscription(dataStore: DataStore) {
           message: 'An active subscription or trial is required to access this resource.',
           billingUrl: '/billing',
           subscriptionStatus,
+          requestId: req.requestId,
         });
       }
 
@@ -303,6 +308,13 @@ function createLivenessResponse(): HealthResponse {
   };
 }
 
+function assignRequestId(req: Request, res: Response, next: NextFunction) {
+  const requestId = req.header('x-request-id')?.trim() || randomUUID();
+
+  req.requestId = requestId;
+  res.setHeader('x-request-id', requestId);
+  next();
+}
 
 function createTopLevelHealthResponse(readiness: HealthResponse): HealthResponse {
   return {
@@ -631,6 +643,7 @@ export function createApp() {
   const dataStore = createDataStore();
 
   initializeSentry();
+  app.use(assignRequestId);
 
   app.use(
     helmet({
@@ -715,6 +728,7 @@ export function createApp() {
       return res.status(err.statusCode).json({
         error: err.code,
         message: err.message,
+        requestId: _req.requestId,
       });
     }
 
@@ -722,6 +736,7 @@ export function createApp() {
       return res.status(404).json({
         error: 'freight_operation_not_found',
         message: 'Freight operation record was not found for this tenant.',
+        requestId: _req.requestId,
       });
     }
 
@@ -729,6 +744,7 @@ export function createApp() {
       return res.status(404).json({
         error: 'load_not_found_for_tenant',
         message: 'Referenced load was not found for this tenant.',
+        requestId: _req.requestId,
       });
     }
 
@@ -736,6 +752,7 @@ export function createApp() {
       return res.status(404).json({
         error: 'quote_request_not_found',
         message: 'Quote request was not found for this tenant.',
+        requestId: _req.requestId,
       });
     }
 
@@ -743,6 +760,7 @@ export function createApp() {
       return res.status(500).json({
         error: 'stripe_secret_key_required',
         message: 'STRIPE_SECRET_KEY is required for billing actions.',
+        requestId: _req.requestId,
       });
     }
 
@@ -750,6 +768,7 @@ export function createApp() {
       return res.status(500).json({
         error: 'stripe_one_time_price_required',
         message: 'A Stripe Price ID is required for one-time purchases.',
+        requestId: _req.requestId,
       });
     }
 
@@ -758,6 +777,7 @@ export function createApp() {
     res.status(500).json({
       error: 'internal_server_error',
       message: 'Unexpected API error.',
+      requestId: _req.requestId,
     });
   });
 
@@ -770,6 +790,7 @@ declare global {
       tenantId?: string;
       userRole?: Role;
       subscriptionStatus?: SubscriptionStatus;
+      requestId?: string;
     }
   }
 }

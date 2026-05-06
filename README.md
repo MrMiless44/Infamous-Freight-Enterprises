@@ -16,6 +16,17 @@ If you want one system for dispatch, tracking, paperwork, and operations control
 
 ---
 
+## Active Stack
+
+- Web: React 18, Vite, TypeScript, Tailwind CSS, deployed to Netlify from `apps/web`
+- API: Express 4, TypeScript, Prisma, deployed separately to Fly.io from `apps/api`
+- Data/auth: PostgreSQL through Prisma plus Supabase Auth integrations where configured
+- Billing: Stripe Checkout, Customer Portal, and webhook sync through the Express API
+
+`apps/web` is not a Next.js application. Netlify builds only the web app and proxies `/api/*` requests to the Fly.io API origin configured in `netlify.toml`.
+
+---
+
 ## 🔗 Quick Links
 
 - [Quick Start](#-quick-start)
@@ -64,7 +75,9 @@ Infamous Freight is built to reduce that operational drag by centralizing:
 
 ---
 
-## ⚙️ Core Features
+## ⚙️ Product Capability Areas
+
+These areas describe the product direction and repository scope. Keep customer-facing claims aligned with [`docs/REPO-ACCURATE-STATUS.md`](docs/REPO-ACCURATE-STATUS.md) and current production evidence before publishing them externally.
 
 - 🤖 **Auto-Dispatch AI** — Supports load-to-driver matching workflows and dispatch automation
 - 💰 **Rate Negotiation Bot** — Supports negotiation workflows and margin protection
