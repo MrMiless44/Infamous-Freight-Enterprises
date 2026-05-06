@@ -41,6 +41,7 @@ This directory contains operational, architectural, and launch-readiness documen
 
 - [PRODUCTION-LAUNCH-RUNBOOK.md](./PRODUCTION-LAUNCH-RUNBOOK.md) — Production launch runbook.
 - [PRODUCTION_HARDENING_EXECUTION_PLAN.md](./PRODUCTION_HARDENING_EXECUTION_PLAN.md) — Hardening execution plan.
+- [PRODUCTION_DASHBOARD_REMAINING_WORK.md](./PRODUCTION_DASHBOARD_REMAINING_WORK.md) — Remaining production dashboard, secret-management, and Stripe billing verification work.
 - [PRODUCTION_READINESS_VERIFICATION.md](./PRODUCTION_READINESS_VERIFICATION.md) — Readiness verification.
 - [PRODUCTION_TEST_DATA_PLAN.md](./PRODUCTION_TEST_DATA_PLAN.md) — Production test-data plan.
 - [ROLLBACK_PLAN.md](./ROLLBACK_PLAN.md) — Rollback procedures.
@@ -65,6 +66,7 @@ This directory contains operational, architectural, and launch-readiness documen
 - [STRIPE-SETUP.md](./STRIPE-SETUP.md) — Stripe setup guide.
 - [STRIPE_BILLING_AUTOMATION.md](./STRIPE_BILLING_AUTOMATION.md) — Billing automation reference.
 - [STRIPE_WEBHOOK_VERIFICATION.md](./STRIPE_WEBHOOK_VERIFICATION.md) — Webhook verification.
+- [PRODUCTION_DASHBOARD_REMAINING_WORK.md](./PRODUCTION_DASHBOARD_REMAINING_WORK.md) — Production billing and dashboard follow-up checklist.
 - [PAYWALL.md](./PAYWALL.md) — Paywall behavior.
 - [payments/](./payments) — Payments references.
 
