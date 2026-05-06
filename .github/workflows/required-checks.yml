@@ -1,0 +1,71 @@
+name: Required Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: required-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  required-checks:
+    name: Required Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://ci_user:ci_pass@127.0.0.1:5432/ci_db?schema=public
+      STRIPE_SECRET_KEY: sk_test_ci_1234567890
+      STRIPE_WEBHOOK_SECRET: whsec_ci_1234567890
+      SUPABASE_URL: https://ci.supabase.co
+      VITE_SUPABASE_URL: https://ci.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: service_role_ci_1234567890
+      VITE_SUPABASE_ANON_KEY: anon_ci_1234567890
+      WEB_APP_URL: http://localhost:5173
+      CORS_ORIGIN: http://localhost:5173
+      CORS_ORIGINS: http://localhost:5173
+      RATE_LIMIT_ENABLED: "true"
+      API_RATE_LIMIT_ENABLED: "true"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify required environment variables
+        run: pnpm run codex:env-check:strict
+
+      - name: Generate Prisma client
+        run: pnpm run prisma:generate
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Test
+        run: pnpm run test
