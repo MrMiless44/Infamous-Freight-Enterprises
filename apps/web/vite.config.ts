@@ -15,10 +15,21 @@ const buildTime = process.env.VITE_BUILD_TIME ?? new Date().toISOString();
 // and avoid hard build failures on auth issues.
 const hasSentryCredentials =
   Boolean(sentryAuthToken) && Boolean(sentryOrg) && Boolean(sentryProject);
+const normalizedSentryToken = typeof sentryAuthToken === 'string' ? sentryAuthToken.trim() : '';
+const isLikelyPlaceholderSentryToken =
+  normalizedSentryToken.length === 0 ||
+  normalizedSentryToken === 'your-sentry-auth-token' ||
+  normalizedSentryToken.toLowerCase() === 'changeme' ||
+  normalizedSentryToken.startsWith('${') ||
+  normalizedSentryToken.includes('***');
 const disableSentryUpload =
   process.env.SENTRY_DISABLE_UPLOAD === '1' ||
   process.env.SENTRY_DISABLE_UPLOAD === 'true';
-const enableSentryUpload = hasSentryCredentials && !disableSentryUpload;
+const enableSentryUpload =
+  hasSentryCredentials && !isLikelyPlaceholderSentryToken && !disableSentryUpload;
+if (hasSentryCredentials && isLikelyPlaceholderSentryToken) {
+  console.warn('[sentry-vite-plugin] source-map upload disabled: SENTRY_AUTH_TOKEN appears to be a placeholder or masked value.');
+}
 const uploadSourcemaps =
   enableSentryUpload || process.env.SENTRY_SOURCEMAPS === '1';
 
