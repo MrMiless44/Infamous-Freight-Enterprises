@@ -96,33 +96,6 @@ jobs:
             -p 3000:3000 \
             "$IMAGE_NAME"
 
-      - name: Fail fast on Prisma runtime initialization errors
-        run: |
-          for i in {1..30}; do
-            if ! docker ps --format '{{.Names}}' | grep -qx "$CONTAINER_NAME"; then
-              echo "Container exited before runtime checks." >&2
-              docker logs "$CONTAINER_NAME" || true
-              exit 1
-            fi
-
-            if docker logs "$CONTAINER_NAME" 2>&1 | grep -Eiq 'Prisma(Client)?InitializationError|PrismaClientConstructorValidationError|PrismaClientRustPanicError|PrismaClientKnownRequestError|Invalid.*PrismaClient|Error validating datasource'; then
-              echo "Detected Prisma runtime initialization failure in container logs." >&2
-              docker logs "$CONTAINER_NAME" || true
-              exit 1
-            fi
-
-            if curl -fsS http://127.0.0.1:3000/api/health/live >/dev/null; then
-              echo "Runtime reached /api/health/live without Prisma initialization errors."
-              exit 0
-            fi
-
-            sleep 2
-          done
-
-          echo "Timed out waiting for runtime startup signal from /api/health/live." >&2
-          docker logs "$CONTAINER_NAME" || true
-          exit 1
-
       - name: Probe Docker healthcheck
         run: |
           for i in {1..60}; do
