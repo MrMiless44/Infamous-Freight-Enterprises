@@ -81,16 +81,43 @@ Full structure & docs:
 
 ## ⚡ Quick Start
 
+### Recommended local flow
+
 ```bash
-pnpm install
+git clone <repo-url>
+cd Infamous-freight
 pnpm run env:setup
-# Edit .env files for api/, web/, root as needed
 pnpm run db:setup
 pnpm run dev
-# Recommended: docker-compose up -d
 ```
 
-- See [docs/environment/ENVIRONMENT_VARIABLES_COMPLETE.md](docs/environment/ENVIRONMENT_VARIABLES_COMPLETE.md) for full .env requirements.
+### Docker flow (alternative)
+
+```bash
+git clone <repo-url>
+cd Infamous-freight
+pnpm run env:setup
+docker-compose up -d
+```
+
+### Post-start checks
+
+```bash
+curl -X GET http://localhost:3000/health/live
+curl -X GET http://localhost:3000/health/ready
+```
+
+### Build and verify
+
+```bash
+pnpm run build
+pnpm run test
+pnpm run validate
+```
+
+- `pnpm run env:setup` installs workspace dependencies and creates local `.env` files for the root, `apps/api`, and `apps/web` from example templates.
+- `pnpm run db:setup` prepares the database and Prisma setup.
+- See [docs/environment/ENVIRONMENT_VARIABLES_COMPLETE.md](docs/environment/ENVIRONMENT_VARIABLES_COMPLETE.md) for full `.env` requirements.
 - **Never commit any secrets.**
 
 ---
