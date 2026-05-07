@@ -22,6 +22,7 @@ import { trackPublicEvent } from '@/lib/analytics';
 const navLinks = [
   { label: 'Quote', href: '/request-quote', event: 'quote_cta_click' },
   { label: 'Track', href: '/track-shipment', event: 'tracking_cta_click' },
+  { label: 'Load Board', href: '/load-board', event: 'load_board_view' },
   { label: 'Drivers', href: '/drive', event: 'driver_cta_click' },
   { label: 'Pricing', href: '/pricing', event: 'pricing_cta_click' },
   { label: 'Partners', href: '/partners', event: 'partner_cta_click' },
@@ -203,6 +204,13 @@ const LandingPage: React.FC = () => {
                 className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/[0.14] bg-white/[0.04] px-5 py-3 font-semibold text-white transition hover:border-infamous-orange/50"
               >
                 Carrier Sign Up <Truck size={18} />
+              </Link>
+              <Link
+                to="/load-board"
+                onClick={() => trackPublicEvent('load_board_view', { source: 'hero' })}
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/[0.14] bg-white/[0.04] px-5 py-3 font-semibold text-white transition hover:border-infamous-orange/50"
+              >
+                Browse Load Board <RouteIcon size={18} />
               </Link>
               <Link
                 to="/customer-portal"

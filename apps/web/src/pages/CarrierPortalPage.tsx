@@ -146,15 +146,23 @@ const CarrierPortalPage: React.FC = () => {
         </section>
 
         <section className="rounded-3xl border border-infamous-border bg-infamous-card p-6">
-          <div className="mb-5 flex items-center justify-between">
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-xl font-bold">Available loads</h2>
-            {isApproved ? (
-              <span className="rounded-full bg-green-500/10 px-3 py-1 text-xs font-semibold text-green-400">Capacity open</span>
-            ) : (
-              <span className="rounded-full bg-yellow-500/10 px-3 py-1 text-xs font-semibold text-yellow-300">
-                Booking unlocks at approval
-              </span>
-            )}
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                to="/load-board"
+                className="rounded-full border border-infamous-orange/40 bg-infamous-orange/10 px-3 py-1 text-xs font-semibold text-infamous-orange hover:bg-infamous-orange/20"
+              >
+                Open full load board
+              </Link>
+              {isApproved ? (
+                <span className="rounded-full bg-green-500/10 px-3 py-1 text-xs font-semibold text-green-400">Capacity open</span>
+              ) : (
+                <span className="rounded-full bg-yellow-500/10 px-3 py-1 text-xs font-semibold text-yellow-300">
+                  Booking unlocks at approval
+                </span>
+              )}
+            </div>
           </div>
           <div className="grid gap-4 lg:grid-cols-3">
             {demoCarrierLoads.map((load) => (

@@ -5,6 +5,7 @@ const navLinks = [
   { label: 'Services', href: '/services' },
   { label: 'Quote', href: '/request-quote' },
   { label: 'Track', href: '/track-shipment' },
+  { label: 'Load Board', href: '/load-board' },
   { label: 'Drivers', href: '/drive' },
   { label: 'Pricing', href: '/pricing' },
   { label: 'Partners', href: '/partners' },
@@ -26,6 +27,7 @@ const footerGroups = [
     title: 'Network',
     links: [
       { label: 'Apply to drive', href: '/drive' },
+      { label: 'Load board', href: '/load-board' },
       { label: 'Carrier portal', href: '/carrier-portal' },
       { label: 'Customer portal', href: '/customer-portal' },
       { label: 'Partners', href: '/partners' },

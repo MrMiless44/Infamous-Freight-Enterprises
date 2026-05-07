@@ -37,6 +37,7 @@ const PublicQuoteRequestPage = lazy(() => import('@/pages/PublicQuoteRequestPage
 const ShipmentTrackingPage = lazy(() => import('@/pages/ShipmentTrackingPage'));
 const CustomerPortalPage = lazy(() => import('@/pages/CustomerPortalPage'));
 const CarrierPortalPage = lazy(() => import('@/pages/CarrierPortalPage'));
+const PublicLoadBoardPage = lazy(() => import('@/pages/PublicLoadBoardPage'));
 const FreightAssistantPage = lazy(() => import('@/pages/FreightAssistantPage'));
 const PricingPage = lazy(() => import('@/pages/PricingPage'));
 const PartnersPage = lazy(() => import('@/pages/PartnersPage'));
@@ -95,6 +96,7 @@ function App() {
             <Route path="/track-shipment" element={<ShipmentTrackingPage />} />
             <Route path="/customer-portal" element={<CustomerPortalPage />} />
             <Route path="/carrier-portal" element={<CarrierPortalPage />} />
+            <Route path="/load-board" element={<PublicLoadBoardPage />} />
             <Route path="/freight-assistant" element={<FreightAssistantPage />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/partners" element={<PartnersPage />} />
