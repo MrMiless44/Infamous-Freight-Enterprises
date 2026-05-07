@@ -93,20 +93,60 @@ const ShipmentTrackingPage: React.FC = () => {
               <aside className="rounded-2xl border border-infamous-border bg-[#111] p-6">
                 <h3 className="text-lg font-bold">Status timeline</h3>
                 <div className="mt-5 space-y-5">
-                  {[
-                    ['Quote approved', true],
-                    ['Carrier assigned', true],
-                    ['Picked up', shipment.status !== 'At pickup'],
-                    ['In transit', shipment.status === 'In transit' || shipment.status === 'Exception review'],
-                    ['Delivered', false],
-                  ].map(([label, active]) => (
-                    <div key={String(label)} className="flex gap-3">
-                      <span className={`mt-0.5 flex h-7 w-7 items-center justify-center rounded-full ${active ? 'bg-green-500/20 text-green-400' : 'bg-gray-700 text-gray-500'}`}>
-                        {active ? <PackageCheck size={15} /> : <MapPin size={15} />}
-                      </span>
-                      <p className={`pt-1 text-sm ${active ? 'text-gray-200' : 'text-gray-500'}`}>{label}</p>
-                    </div>
-                  ))}
+                  {(() => {
+                    const order = [
+                      'Quote approved',
+                      'Carrier assigned',
+                      'Picked up',
+                      'Loaded',
+                      'In transit',
+                      'ETA confirmed',
+                      'Arrived at delivery',
+                      'Unloaded',
+                      'POD received',
+                    ];
+                    const completedThrough = (() => {
+                      switch (shipment.status) {
+                        case 'At pickup':
+                          return 1;
+                        case 'In transit':
+                          return 5;
+                        case 'Exception review':
+                          return 4;
+                        case 'Delivered':
+                          return 7;
+                        case 'POD received':
+                          return 8;
+                        default:
+                          return 1;
+                      }
+                    })();
+                    return order.map((label, index) => {
+                      const isException = shipment.status === 'Exception review' && index === 5;
+                      const active = index <= completedThrough;
+                      return (
+                        <div key={label} className="flex gap-3">
+                          <span
+                            className={`mt-0.5 flex h-7 w-7 items-center justify-center rounded-full ${
+                              isException
+                                ? 'bg-amber-500/20 text-amber-300'
+                                : active
+                                  ? 'bg-green-500/20 text-green-400'
+                                  : 'bg-gray-700 text-gray-500'
+                            }`}
+                          >
+                            {isException ? <AlertTriangle size={15} /> : active ? <PackageCheck size={15} /> : <MapPin size={15} />}
+                          </span>
+                          <div className="pt-1">
+                            <p className={`text-sm ${active ? 'text-gray-200' : 'text-gray-500'}`}>{label}</p>
+                            {isException ? (
+                              <p className="mt-1 text-xs text-amber-300">Exception flagged — recovery plan pending</p>
+                            ) : null}
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
                 </div>
               </aside>
             </div>

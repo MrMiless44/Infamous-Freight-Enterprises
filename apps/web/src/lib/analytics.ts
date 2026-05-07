@@ -9,7 +9,12 @@ export type PublicEventName =
   | 'partner_cta_click'
   | 'contact_cta_click'
   | 'form_submit_success'
-  | 'form_submit_error';
+  | 'form_submit_error'
+  | 'load_board_view'
+  | 'load_board_filter'
+  | 'load_board_book_click'
+  | 'load_board_book_submit_success'
+  | 'load_board_book_submit_error';
 
 export type PublicEventPayload = Record<string, string | number | boolean | undefined | null>;
 
