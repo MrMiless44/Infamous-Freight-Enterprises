@@ -2,10 +2,14 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
+import { resolveSentryUploadConfig } from './sentryUploadConfig';
 
-const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN;
-const sentryOrg = process.env.SENTRY_ORG;
-const sentryProject = process.env.SENTRY_PROJECT;
+const sentryConfig = resolveSentryUploadConfig({
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  disableUpload: process.env.SENTRY_DISABLE_UPLOAD,
+});
 // Build identification surfaced into the bundle for diagnostics. Falls back to
 // 'unknown' so dev builds still type-check; CI/Netlify can populate these.
 const buildGitSha =
@@ -13,25 +17,11 @@ const buildGitSha =
 const buildTime = process.env.VITE_BUILD_TIME ?? new Date().toISOString();
 // Enable Sentry uploads when credentials exist, but allow CI to opt out
 // and avoid hard build failures on auth issues.
-const hasSentryCredentials =
-  Boolean(sentryAuthToken) && Boolean(sentryOrg) && Boolean(sentryProject);
-const normalizedSentryToken = typeof sentryAuthToken === 'string' ? sentryAuthToken.trim() : '';
-const isLikelyPlaceholderSentryToken =
-  normalizedSentryToken.length === 0 ||
-  normalizedSentryToken === 'your-sentry-auth-token' ||
-  normalizedSentryToken.toLowerCase() === 'changeme' ||
-  normalizedSentryToken.startsWith('${') ||
-  normalizedSentryToken.includes('***');
-const disableSentryUpload =
-  process.env.SENTRY_DISABLE_UPLOAD === '1' ||
-  process.env.SENTRY_DISABLE_UPLOAD === 'true';
-const enableSentryUpload =
-  hasSentryCredentials && !isLikelyPlaceholderSentryToken && !disableSentryUpload;
-if (hasSentryCredentials && isLikelyPlaceholderSentryToken) {
-  console.warn('[sentry-vite-plugin] source-map upload disabled: SENTRY_AUTH_TOKEN appears to be a placeholder or masked value.');
+if (sentryConfig.hasSentryCredentials && sentryConfig.hasLikelyPlaceholderCredentials) {
+  console.warn('[sentry-vite-plugin] source-map upload disabled: SENTRY_* credentials appear to be placeholders or masked values.');
 }
 const uploadSourcemaps =
-  enableSentryUpload || process.env.SENTRY_SOURCEMAPS === '1';
+  sentryConfig.enableSentryUpload || process.env.SENTRY_SOURCEMAPS === '1';
 
 export default defineConfig({
   define: {
@@ -40,12 +30,12 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    ...(enableSentryUpload
+    ...(sentryConfig.enableSentryUpload
       ? [
           sentryVitePlugin({
-            org: sentryOrg as string,
-            project: sentryProject as string,
-            authToken: sentryAuthToken as string,
+            org: sentryConfig.normalizedSentryOrg,
+            project: sentryConfig.normalizedSentryProject,
+            authToken: sentryConfig.normalizedSentryToken,
             errorHandler: (error) => {
               const message = error.message ?? String(error);
               console.warn('[sentry-vite-plugin] source-map upload skipped:', message);
