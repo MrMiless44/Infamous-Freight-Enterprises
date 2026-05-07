@@ -73,6 +73,7 @@ This directory contains operational, architectural, and launch-readiness documen
 ## ☁️ Infrastructure & Deployment
 
 - [CUSTOM-DOMAIN.md](./CUSTOM-DOMAIN.md) — Custom-domain setup.
+- [CURRENT_RECOMMENDATIONS_UPDATE.md](./CURRENT_RECOMMENDATIONS_UPDATE.md) — Current launch recommendations and documentation updates.
 - [NETLIFY-BUILDHOOKS.md](./NETLIFY-BUILDHOOKS.md) — Netlify build hooks.
 - [netlify-deploy-checklist.md](./netlify-deploy-checklist.md) — Netlify deploy checklist.
 - [MANUS-PRODUCTION-BUILD-PACKAGE.md](./MANUS-PRODUCTION-BUILD-PACKAGE.md) — Production build package notes.

@@ -23,7 +23,7 @@ Add these DNS records at your domain registrar:
 | A | `@` | `75.2.60.5` | Auto |
 | CNAME | `www` | `infamous-freight.netlify.app` | Auto |
 
-> The ALIAS/A records point the apex (`infamousfreight.com`) directly at Netlify. The `www` CNAME is still registered so Netlify can 301 it to the apex.
+> The ALIAS/A records point the apex (`infamousfreight.com`) directly at Netlify. The `www` CNAME is also registered so Netlify can serve the canonical web host. The committed [`netlify.toml`](../netlify.toml) redirects the apex and default Netlify hostname to `https://www.infamousfreight.com`.
 
 ### For the API (Fly.io)
 
@@ -32,7 +32,7 @@ Add these DNS records at your domain registrar:
 | CNAME | `api` | `infamous-freight.fly.dev` | Auto |
 
 This gives you:
-- **Web:** `https://infamousfreight.com`
+- **Web:** `https://www.infamousfreight.com`
 - **API:** `https://api.infamousfreight.com`
 
 ---
@@ -48,10 +48,11 @@ This gives you:
 
 ### Primary Domain
 
-Set `infamousfreight.com` (the apex) as the primary domain so everything funnels to one canonical host:
+Set `www.infamousfreight.com` as the primary domain so everything funnels to one canonical host:
 
-1. In Netlify domain settings, click **Set as primary** on `infamousfreight.com`
-2. Leave `www.infamousfreight.com` registered as a domain alias — `netlify.toml` already 301s it (and the default `infamous-freight.netlify.app` URL) to the apex
+1. In Netlify domain settings, click **Set as primary** on `www.infamousfreight.com`.
+2. Leave `infamousfreight.com` registered as a domain alias. The committed `netlify.toml` already 301s the apex and the default `infamous-freight.netlify.app` URL to the `www` host.
+3. If Netlify, registrar forwarding, or another DNS provider injects a reverse `www` to apex redirect, remove that setting before launch. A reverse redirect conflicts with `netlify.toml` and can create a production redirect loop.
 
 ---
 
@@ -72,18 +73,18 @@ fly certs create api.infamousfreight.com --app infamous-freight
 
 ## Step 4: Update Frontend API URL
 
-Once your API subdomain is live, update the frontend to use it:
+Production should prefer the Netlify `/api` proxy so browser traffic validates the same route served by `netlify.toml`. Use the direct API domain only for non-proxied deployments or operational checks.
 
 ### `apps/web/.env.production`
 ```
-VITE_API_URL=https://api.infamousfreight.com
-VITE_SOCKET_URL=wss://api.infamousfreight.com
+VITE_API_URL=/api
+VITE_SOCKET_URL=
 VITE_STRIPE_PUBLIC_KEY=pk_live_...
 ```
 
 ### `apps/web/src/api-client/client.ts`
 ```typescript
-const API_BASE = import.meta.env.VITE_API_URL || 'https://api.infamousfreight.com';
+const API_BASE = import.meta.env.VITE_API_URL ?? '';
 ```
 
 ---
@@ -97,6 +98,7 @@ Update your API's CORS settings to accept requests from your custom domain:
 app.enableCors({
   origin: [
     'https://infamousfreight.com',
+    'https://www.infamousfreight.com',
     'http://localhost:5173',
   ],
   credentials: true,
@@ -111,13 +113,16 @@ Test that everything is secure:
 
 ```bash
 # Test web
-curl -sI https://infamousfreight.com | head -5
+curl -sI https://www.infamousfreight.com | head -5
 
-# Test API health
+# Confirm apex redirects to the canonical www host
+curl -sIL https://infamousfreight.com | grep -i '^location:'
+
+# Test proxied API health
+curl -s https://www.infamousfreight.com/api/health
+
+# Optional direct API checks
 curl -s https://api.infamousfreight.com/health
-
-# Test API docs
-curl -s https://api.infamousfreight.com/api/docs
 ```
 
 All should return `200 OK` with valid SSL certificates.
@@ -128,10 +133,11 @@ All should return `200 OK` with valid SSL certificates.
 
 | Service | URL |
 |---------|-----|
-| **Main App** | `https://infamousfreight.com` |
+| **Main App** | `https://www.infamousfreight.com` |
 | **API** | `https://api.infamousfreight.com` |
 | **WebSocket** | `wss://api.infamousfreight.com` |
-| **Health Check** | `https://api.infamousfreight.com/health` |
+| **Proxied Health Check** | `https://www.infamousfreight.com/api/health` |
+| **Direct Health Check** | `https://api.infamousfreight.com/health` |
 | **API Docs** | `https://api.infamousfreight.com/api/docs` |
 | **Stripe Webhook** | `https://api.infamousfreight.com/stripe/webhook` |
 
@@ -151,11 +157,11 @@ If using Cloudflare as your DNS provider, you get free DDoS protection and cachi
 ### Cloudflare Page Rules (Free Performance Boost)
 
 ```
-Rule 1: infamousfreight.com/static/*
+Rule 1: www.infamousfreight.com/static/*
   - Cache Level: Cache Everything
   - Edge Cache TTL: 1 month
 
-Rule 2: infamousfreight.com/api/*
+Rule 2: www.infamousfreight.com/api/*
   - Cache Level: Bypass
   - Security Level: High
 ```
