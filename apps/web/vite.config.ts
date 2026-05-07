@@ -65,6 +65,12 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    minify: 'terser',
+    terserOptions: {
+      format: {
+        comments: false,
+      },
+    },
     sourcemap: uploadSourcemaps ? 'hidden' : false,
     chunkSizeWarningLimit: 500,
     rollupOptions: {
