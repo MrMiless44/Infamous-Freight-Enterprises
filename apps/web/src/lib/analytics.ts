@@ -12,7 +12,9 @@ export type PublicEventName =
   | 'form_submit_error'
   | 'load_board_view'
   | 'load_board_filter'
-  | 'load_board_book_click';
+  | 'load_board_book_click'
+  | 'load_board_book_submit_success'
+  | 'load_board_book_submit_error';
 
 export type PublicEventPayload = Record<string, string | number | boolean | undefined | null>;
 

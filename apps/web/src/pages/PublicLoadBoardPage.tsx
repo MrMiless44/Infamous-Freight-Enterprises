@@ -11,6 +11,7 @@ import {
   Search,
   ShieldCheck,
   Truck,
+  X,
   Zap,
 } from 'lucide-react';
 import { demoLoadBoardLoads, type LoadBoardLoad } from '@/data/mvpFreightData';
@@ -55,6 +56,16 @@ const PublicLoadBoardPage: React.FC = () => {
   const [minPay, setMinPay] = useState('');
   const [quickPayOnly, setQuickPayOnly] = useState(false);
 
+  const [requestLoad, setRequestLoad] = useState<LoadBoardLoad | null>(null);
+  const [carrierName, setCarrierName] = useState('');
+  const [mcNumber, setMcNumber] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
+  const [askingRate, setAskingRate] = useState('');
+  const [requestNotes, setRequestNotes] = useState('');
+  const [submitState, setSubmitState] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [submitError, setSubmitError] = useState('');
+
   useEffect(() => {
     trackPublicEvent('load_board_view', { source: 'public_load_board' });
   }, []);
@@ -96,7 +107,80 @@ const PublicLoadBoardPage: React.FC = () => {
       total_pay: load.totalPay,
       rate_per_mile: load.ratePerMile,
     });
-    navigate('/carrier-portal');
+    setRequestLoad(load);
+    setSubmitState('idle');
+    setSubmitError('');
+  };
+
+  const closeRequest = () => {
+    if (submitState === 'submitting') return;
+    setRequestLoad(null);
+    setCarrierName('');
+    setMcNumber('');
+    setContactEmail('');
+    setContactPhone('');
+    setAskingRate('');
+    setRequestNotes('');
+    setSubmitState('idle');
+    setSubmitError('');
+  };
+
+  const submitRequest = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!requestLoad) return;
+
+    if (!carrierName.trim() || !mcNumber.trim() || (!contactEmail.trim() && !contactPhone.trim())) {
+      setSubmitError('Carrier name, MC#, and an email or phone are required.');
+      setSubmitState('error');
+      return;
+    }
+
+    setSubmitState('submitting');
+    setSubmitError('');
+
+    const askingRateValue = askingRate.trim() ? Number(askingRate) : null;
+
+    try {
+      const response = await fetch('/api/load-requests', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          loadId: requestLoad.id,
+          lane: `${requestLoad.origin} -> ${requestLoad.destination}`,
+          equipment: requestLoad.equipment,
+          totalPay: requestLoad.totalPay,
+          ratePerMile: requestLoad.ratePerMile,
+          carrierName: carrierName.trim(),
+          mcNumber: mcNumber.trim(),
+          contactEmail: contactEmail.trim(),
+          contactPhone: contactPhone.trim(),
+          askingRate: askingRateValue,
+          notes: requestNotes.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        const reason = typeof data?.error === 'string' ? data.error : `HTTP ${response.status}`;
+        throw new Error(reason);
+      }
+
+      setSubmitState('success');
+      trackPublicEvent('load_board_book_submit_success', {
+        load_id: requestLoad.id,
+        lane: `${requestLoad.origin} -> ${requestLoad.destination}`,
+        total_pay: requestLoad.totalPay,
+        asking_rate: askingRateValue ?? undefined,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'submit_failed';
+      setSubmitError('We could not submit the request. Please try again or call dispatch.');
+      setSubmitState('error');
+      trackPublicEvent('load_board_book_submit_error', {
+        load_id: requestLoad.id,
+        reason: message,
+      });
+    }
   };
 
   return (
@@ -475,6 +559,175 @@ const PublicLoadBoardPage: React.FC = () => {
           </p>
         </div>
       </section>
+
+      {requestLoad ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="load-request-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          onClick={closeRequest}
+        >
+          <div
+            className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#0d0d0d] shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3 border-b border-white/10 px-5 py-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-infamous-orange">
+                  Request load
+                </p>
+                <h2 id="load-request-title" className="mt-1 text-lg font-bold text-white">
+                  {requestLoad.id} · {requestLoad.origin} → {requestLoad.destination}
+                </h2>
+                <p className="mt-1 text-xs text-zinc-400">
+                  {requestLoad.equipment} · {formatMoney(requestLoad.totalPay)} · ${requestLoad.ratePerMile.toFixed(2)}/mi
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={closeRequest}
+                aria-label="Close request load dialog"
+                className="rounded-md p-1 text-zinc-400 transition hover:bg-white/10 hover:text-white"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {submitState === 'success' ? (
+              <div className="px-5 py-6 text-sm text-zinc-300">
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
+                  <CheckCircle2 size={14} /> Request received
+                </div>
+                <p>
+                  Dispatch has the request for <span className="font-semibold text-white">{requestLoad.id}</span>{' '}
+                  and will respond with a written rate confirmation if your authority and insurance are on file.
+                  Approved carriers can also track this in the carrier portal.
+                </p>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/carrier-portal')}
+                    className="inline-flex items-center gap-2 rounded-lg bg-infamous-orange px-4 py-2 text-sm font-bold text-white hover:bg-infamous-orange-light"
+                  >
+                    Open carrier portal <ArrowRight size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={closeRequest}
+                    className="rounded-lg border border-white/10 bg-transparent px-4 py-2 text-sm font-semibold text-zinc-300 hover:border-white/30 hover:text-white"
+                  >
+                    Back to board
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={submitRequest} className="px-5 py-4">
+                <p className="mb-4 text-xs text-zinc-400">
+                  Send your authority and contact info. Dispatch verifies authority and insurance before
+                  issuing a rate confirmation — this does not commit you to the load.
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="block">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Carrier name</span>
+                    <input
+                      type="text"
+                      required
+                      value={carrierName}
+                      onChange={(event) => setCarrierName(event.target.value)}
+                      className="mt-1 w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:border-infamous-orange focus:outline-none"
+                      placeholder="Acme Trucking LLC"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">MC number</span>
+                    <input
+                      type="text"
+                      required
+                      value={mcNumber}
+                      onChange={(event) => setMcNumber(event.target.value)}
+                      className="mt-1 w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:border-infamous-orange focus:outline-none"
+                      placeholder="MC-123456"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Contact email</span>
+                    <input
+                      type="email"
+                      value={contactEmail}
+                      onChange={(event) => setContactEmail(event.target.value)}
+                      className="mt-1 w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:border-infamous-orange focus:outline-none"
+                      placeholder="dispatch@yourcompany.com"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Contact phone</span>
+                    <input
+                      type="tel"
+                      value={contactPhone}
+                      onChange={(event) => setContactPhone(event.target.value)}
+                      className="mt-1 w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:border-infamous-orange focus:outline-none"
+                      placeholder="555-555-0100"
+                    />
+                  </label>
+                  <label className="block sm:col-span-2">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                      Counter-offer (optional)
+                    </span>
+                    <div className="relative mt-1">
+                      <DollarSign size={14} aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                      <input
+                        type="number"
+                        min="0"
+                        step="50"
+                        value={askingRate}
+                        onChange={(event) => setAskingRate(event.target.value)}
+                        className="w-full rounded-lg border border-white/10 bg-[#111] py-2 pl-8 pr-3 text-sm text-white placeholder:text-zinc-500 focus:border-infamous-orange focus:outline-none"
+                        placeholder={`Posted ${formatMoney(requestLoad.totalPay)} — leave blank to accept`}
+                      />
+                    </div>
+                  </label>
+                  <label className="block sm:col-span-2">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Notes for dispatch</span>
+                    <textarea
+                      rows={3}
+                      value={requestNotes}
+                      onChange={(event) => setRequestNotes(event.target.value)}
+                      className="mt-1 w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:border-infamous-orange focus:outline-none"
+                      placeholder="Driver, equipment notes, ETA constraints, accessorials…"
+                    />
+                  </label>
+                </div>
+
+                {submitState === 'error' && submitError ? (
+                  <p className="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-200">
+                    {submitError}
+                  </p>
+                ) : null}
+
+                <div className="mt-5 flex flex-wrap items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={closeRequest}
+                    disabled={submitState === 'submitting'}
+                    className="rounded-lg border border-white/10 bg-transparent px-4 py-2 text-sm font-semibold text-zinc-300 transition hover:border-white/30 hover:text-white disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitState === 'submitting'}
+                    className="inline-flex items-center gap-2 rounded-lg bg-infamous-orange px-4 py-2 text-sm font-bold text-white transition hover:bg-infamous-orange-light disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {submitState === 'submitting' ? 'Sending…' : 'Send request'}
+                    {submitState === 'submitting' ? null : <ArrowRight size={14} />}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 };
