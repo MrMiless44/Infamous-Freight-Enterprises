@@ -90,6 +90,7 @@ pnpm run dev
 # Recommended: docker-compose up -d
 ```
 
+- Follow the complete startup runbook in [docs/LOCAL_STARTUP_CHECKLIST.md](docs/LOCAL_STARTUP_CHECKLIST.md).
 - See [docs/environment/ENVIRONMENT_VARIABLES_COMPLETE.md](docs/environment/ENVIRONMENT_VARIABLES_COMPLETE.md) for full .env requirements.
 - **Never commit any secrets.**
 
@@ -149,6 +150,7 @@ Dockerfile*, docker-compose.yml, etc.
 ## 📚 Documentation
 
 - [Project Docs Index](docs/README.md)
+- [Local Startup Checklist](docs/LOCAL_STARTUP_CHECKLIST.md)
 - [Environment Variables Reference](docs/environment/ENVIRONMENT_VARIABLES_COMPLETE.md)
 - [Detailed Architecture](docs/ARCHITECTURE.md)
 - [API Reference](docs/API-REFERENCE.md)
