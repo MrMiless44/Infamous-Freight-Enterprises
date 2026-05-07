@@ -23,7 +23,7 @@ Add these DNS records at your domain registrar:
 | A | `@` | `75.2.60.5` | Auto |
 | CNAME | `www` | `infamous-freight.netlify.app` | Auto |
 
-> The ALIAS/A records point the apex (`infamousfreight.com`) directly at Netlify. The `www` CNAME is still registered so Netlify can 301 it to the apex.
+> The ALIAS/A records point the apex (`infamousfreight.com`) directly at Netlify. The `www` CNAME is the canonical web host, and Netlify redirects apex traffic to `https://www.infamousfreight.com`.
 
 ### For the API (Fly.io)
 
@@ -32,7 +32,7 @@ Add these DNS records at your domain registrar:
 | CNAME | `api` | `infamous-freight.fly.dev` | Auto |
 
 This gives you:
-- **Web:** `https://infamousfreight.com`
+- **Web:** `https://www.infamousfreight.com`
 - **API:** `https://api.infamousfreight.com`
 
 ---
@@ -48,10 +48,10 @@ This gives you:
 
 ### Primary Domain
 
-Set `infamousfreight.com` (the apex) as the primary domain so everything funnels to one canonical host:
+Set `www.infamousfreight.com` as the primary domain so everything funnels to one canonical host:
 
-1. In Netlify domain settings, click **Set as primary** on `infamousfreight.com`
-2. Leave `www.infamousfreight.com` registered as a domain alias — `netlify.toml` already 301s it (and the default `infamous-freight.netlify.app` URL) to the apex
+1. In Netlify domain settings, click **Set as primary** on `www.infamousfreight.com`
+2. Leave `infamousfreight.com` registered as a domain alias — `netlify.toml` already 301s it (and the default `infamous-freight.netlify.app` URL) to the canonical `www` host
 
 ---
 
@@ -96,6 +96,7 @@ Update your API's CORS settings to accept requests from your custom domain:
 ```typescript
 app.enableCors({
   origin: [
+    'https://www.infamousfreight.com',
     'https://infamousfreight.com',
     'http://localhost:5173',
   ],
@@ -110,7 +111,10 @@ app.enableCors({
 Test that everything is secure:
 
 ```bash
-# Test web
+# Test canonical web
+curl -sI https://www.infamousfreight.com | head -5
+
+# Test apex redirect
 curl -sI https://infamousfreight.com | head -5
 
 # Test API health
@@ -128,7 +132,7 @@ All should return `200 OK` with valid SSL certificates.
 
 | Service | URL |
 |---------|-----|
-| **Main App** | `https://infamousfreight.com` |
+| **Main App** | `https://www.infamousfreight.com` |
 | **API** | `https://api.infamousfreight.com` |
 | **WebSocket** | `wss://api.infamousfreight.com` |
 | **Health Check** | `https://api.infamousfreight.com/health` |
@@ -151,11 +155,11 @@ If using Cloudflare as your DNS provider, you get free DDoS protection and cachi
 ### Cloudflare Page Rules (Free Performance Boost)
 
 ```
-Rule 1: infamousfreight.com/static/*
+Rule 1: www.infamousfreight.com/static/*
   - Cache Level: Cache Everything
   - Edge Cache TTL: 1 month
 
-Rule 2: infamousfreight.com/api/*
+Rule 2: www.infamousfreight.com/api/*
   - Cache Level: Bypass
   - Security Level: High
 ```

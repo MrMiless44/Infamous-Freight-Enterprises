@@ -574,3 +574,40 @@ Critical
 
 ## Notes
 This is a regression versus the 2026-04-27 evidence above (which recorded the canonical frontend as HTTP/2 200). Both responses in the loop carry `server: Netlify`, but only the apex→www response includes the documented security header set (`strict-transport-security`, `x-frame-options`, `x-content-type-options`, `permissions-policy`, `referrer-policy`, `content-security-policy`) — strongly suggesting the www→apex hop is being added at a layer above the `apps/web` Netlify site rather than by `netlify.toml`. Do not check off "Web app loads from production domain" in the launch-readiness checklist until B-006 is resolved and a fresh HTTP 200 + HTML response from `https://www.infamousfreight.com/` is captured here.
+
+---
+
+# Production Redirect Remediation Follow-Up
+
+**Date:** 2026-05-07
+**Owner:** MrMiless44
+
+## Command or Action
+Re-checked production redirect behavior after the repository redirect rules were corrected to keep the apex-to-`www` canonical direction.
+
+```bash
+curl -sS -I --max-time 15 https://www.infamousfreight.com/
+curl -sS -L --max-redirs 10 --max-time 20 -o /dev/null \
+  -w "FINAL_URL=%{url_effective} HTTP=%{http_code} REDIRS=%{num_redirects}\n" \
+  https://www.infamousfreight.com/
+curl -sS -L --max-redirs 10 --max-time 20 -o /dev/null \
+  -w "FINAL_URL=%{url_effective} HTTP=%{http_code} REDIRS=%{num_redirects}\n" \
+  https://infamousfreight.com/
+curl -sS -I --max-time 15 https://www.infamousfreight.com/api/health
+```
+
+## Expected Result
+- `https://www.infamousfreight.com/` returns HTTP 200 with HTML.
+- `https://infamousfreight.com/` redirects once to `https://www.infamousfreight.com/`.
+- `https://www.infamousfreight.com/api/health` reaches the Netlify `/api/*` proxy.
+
+## Actual Result
+- `https://www.infamousfreight.com/` still returned HTTP/2 301 with `location: https://www.infamousfreight.com/`.
+- Following redirects from both `www` and apex exhausted after 10 redirects with `FINAL_URL=https://www.infamousfreight.com/ HTTP=301 REDIRS=10`.
+- `https://www.infamousfreight.com/api/health` still returned HTTP/2 301 with `location: https://www.infamousfreight.com/api/health`.
+
+## Repository Remediation
+The Netlify redirect configuration now includes explicit canonical-host pass-through rules before apex and legacy-domain redirects. The pass-through rules preserve `/api/*` and `/socket.io/*` proxying before allowing other `www` requests to reach the app, preventing any checked-in redirect rule from redirecting canonical traffic back to itself. Public `robots.txt`, `sitemap.xml`, and the custom-domain guide were also aligned to the `https://www.infamousfreight.com` canonical host.
+
+## Status
+Pending deploy and production re-test. Keep B-006 open until the deployed site returns HTTP 200 from `https://www.infamousfreight.com/` and the proxied health route no longer self-redirects.

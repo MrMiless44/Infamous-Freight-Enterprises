@@ -1,7 +1,11 @@
 # Netlify Redirect Rules for Infamous Freight
 
-# Redirect all traffic to main domain
-/* https://www.infamousfreight.com/:splat 301!
+# Preserve production proxies on the canonical host.
+https://www.infamousfreight.com/api/* https://infamous-freight.fly.dev/api/:splat 200!
+https://www.infamousfreight.com/socket.io/* https://infamous-freight.fly.dev/socket.io/:splat 200!
+
+# Allow canonical www requests to reach the app.
+https://www.infamousfreight.com/* /:splat 200!
 
 # Redirect platform subdomains
 https://api.infamousfreight.com/* https://www.infamousfreight.com/ 301!
@@ -12,7 +16,7 @@ https://driver.infamousfreight.com/* https://www.infamousfreight.com/ 301!
 https://broker.infamousfreight.com/* https://www.infamousfreight.com/ 301!
 https://carrier.infamousfreight.com/* https://www.infamousfreight.com/ 301!
 
-# Redirect www to non-www (if needed)
+# Redirect apex to canonical www
 https://infamousfreight.com/* https://www.infamousfreight.com/:splat 301!
 
 # Redirect old domain paths

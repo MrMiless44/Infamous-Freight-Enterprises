@@ -9,6 +9,24 @@
   SENTRY_DISABLE_UPLOAD = "true"
 
 [[redirects]]
+  from = "https://www.infamousfreight.com/api/*"
+  to = "https://infamous-freight.fly.dev/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "https://www.infamousfreight.com/socket.io/*"
+  to = "https://infamous-freight.fly.dev/socket.io/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "https://www.infamousfreight.com/*"
+  to = "/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "https://infamousfreight.com/*"
   to = "https://www.infamousfreight.com/:splat"
   status = 301
