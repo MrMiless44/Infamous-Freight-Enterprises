@@ -1,0 +1,57 @@
+name: Deploy Fly API
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "apps/api/**"
+      - "Dockerfile"
+      - "fly.toml"
+      - "pnpm-lock.yaml"
+      - "package.json"
+      - ".github/workflows/deploy-fly.yml"
+
+concurrency:
+  group: deploy-fly-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm -C apps/api run prisma:generate
+
+      - name: Run API tests (runInBand)
+        run: pnpm -C apps/api run test -- --runInBand
+
+      - name: Build API
+        run: pnpm -C apps/api run build
+
+      - name: Setup flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@v1
+
+      - name: Deploy API to Fly.io
+        run: flyctl deploy --remote-only --config fly.toml
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
