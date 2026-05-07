@@ -39,6 +39,9 @@ jobs:
       - name: Lint
         run: pnpm run lint
 
+      - name: Prisma version alignment
+        run: pnpm run check:prisma-versions
+
       - name: Build
         run: pnpm run build
 
@@ -57,6 +60,7 @@ jobs:
             echo "Validated commands:"
             echo "- pnpm install --frozen-lockfile"
             echo "- pnpm run lint"
+            echo "- pnpm run check:prisma-versions"
             echo "- pnpm run build"
             echo "- pnpm -C apps/api run test -- --runInBand"
             echo "- pnpm run codex:env-check"
