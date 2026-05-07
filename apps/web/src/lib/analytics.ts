@@ -1,6 +1,9 @@
 export type PublicEventName =
   | 'quote_cta_click'
   | 'tracking_cta_click'
+  | 'pricing_cta_click'
+  | 'portal_cta_click'
+  | 'tracking_search'
   | 'driver_cta_click'
   | 'login_cta_click'
   | 'partner_cta_click'

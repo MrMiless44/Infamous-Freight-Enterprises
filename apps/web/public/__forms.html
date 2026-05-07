@@ -5,7 +5,7 @@
     <title>Infamous Freight forms</title>
   </head>
   <body>
-    <form name="quote-request" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
+    <form name="quote-request" method="POST" data-netlify="true" netlify-honeypot="bot-field" enctype="multipart/form-data" hidden>
       <input type="hidden" name="form-name" value="quote-request" />
       <input name="bot-field" />
       <input name="csrf-token" />
@@ -21,6 +21,7 @@
       <input name="dimensions" />
       <input name="pickupDate" />
       <input name="deliveryDate" />
+      <input name="attachment" type="file" />
       <textarea name="instructions"></textarea>
     </form>
 

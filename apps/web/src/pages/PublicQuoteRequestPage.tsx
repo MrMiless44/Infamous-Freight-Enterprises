@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, ClipboardList, Send } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, ClipboardList, Paperclip, Send } from 'lucide-react';
+import { trackPublicEvent } from '@/lib/analytics';
 import { submitNetlifyForm } from '@/lib/netlifyForms';
 
 const initialForm = {
@@ -24,6 +25,7 @@ const PublicQuoteRequestPage: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [attachment, setAttachment] = useState<File | null>(null);
 
   const completion = useMemo(() => {
     const required = ['company', 'contact', 'email', 'origin', 'destination', 'freightType', 'weight', 'pickupDate'];
@@ -41,9 +43,18 @@ const PublicQuoteRequestPage: React.FC = () => {
     setError('');
 
     try {
-      await submitNetlifyForm('quote-request', form);
+      await submitNetlifyForm('quote-request', {
+        ...form,
+        ...(attachment ? { attachment } : {}),
+      });
+      trackPublicEvent('form_submit_success', {
+        form: 'quote-request',
+        hasAttachment: Boolean(attachment),
+        equipment: form.equipment,
+      });
       setSubmitted(true);
     } catch (err) {
+      trackPublicEvent('form_submit_error', { form: 'quote-request' });
       setError(err instanceof Error ? err.message : 'Could not submit this quote request.');
     } finally {
       setLoading(false);
@@ -84,6 +95,7 @@ const PublicQuoteRequestPage: React.FC = () => {
                   onClick={() => {
                     setSubmitted(false);
                     setForm(initialForm);
+                    setAttachment(null);
                   }}
                   className="mt-5 rounded-xl bg-infamous-orange px-4 py-2 font-semibold text-white"
                 >
@@ -91,7 +103,7 @@ const PublicQuoteRequestPage: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <form name="quote-request" method="POST" data-netlify="true" netlify-honeypot="bot-field" onSubmit={handleSubmit} className="space-y-6">
+              <form name="quote-request" method="POST" data-netlify="true" netlify-honeypot="bot-field" encType="multipart/form-data" onSubmit={handleSubmit} className="space-y-6">
                 <input type="hidden" name="form-name" value="quote-request" />
                 <input type="hidden" name="csrf-token" value="netlify-form-quote-request-v1" />
                 <p className="hidden">
@@ -117,6 +129,7 @@ const PublicQuoteRequestPage: React.FC = () => {
                         name={key}
                         type={key === 'email' ? 'email' : key.toLowerCase().includes('date') ? 'date' : 'text'}
                         autoComplete={key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'off'}
+                        inputMode={key === 'phone' ? 'tel' : key === 'weight' ? 'numeric' : key === 'email' ? 'email' : 'text'}
                         value={form[key as keyof typeof form]}
                         onChange={(event) => updateField(key as keyof typeof initialForm, event.target.value)}
                         className="w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"
@@ -143,6 +156,23 @@ const PublicQuoteRequestPage: React.FC = () => {
                     </select>
                   </label>
                 </div>
+
+                <label className="block rounded-2xl border border-dashed border-infamous-border bg-[#111] p-4 transition focus-within:border-infamous-orange">
+                  <span className="flex items-center gap-2 text-sm font-medium text-gray-300">
+                    <Paperclip size={16} className="text-infamous-orange" /> Attach freight document
+                  </span>
+                  <span className="mt-1 block text-sm text-gray-500">
+                    Optional BOL, rate confirmation, packing list, or freight photo. One file, 8 MB maximum.
+                  </span>
+                  <input
+                    name="attachment"
+                    type="file"
+                    accept=".pdf,.png,.jpg,.jpeg,.webp,.heic"
+                    onChange={(event) => setAttachment(event.target.files?.[0] ?? null)}
+                    className="mt-3 block w-full text-sm text-gray-300 file:mr-4 file:rounded-lg file:border-0 file:bg-infamous-orange file:px-4 file:py-2 file:font-semibold file:text-white"
+                  />
+                  {attachment ? <span className="mt-2 block text-xs text-gray-500">{attachment.name}</span> : null}
+                </label>
 
                 <label className="block">
                   <span className="mb-2 block text-sm font-medium text-gray-300">Special instructions</span>
