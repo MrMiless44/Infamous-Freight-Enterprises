@@ -42,10 +42,56 @@ const SEO_BY_PATH: Record<string, SeoConfig> = {
     title: `AI Freight Assistant | ${BRAND.displayName}`,
     description:
       `Use the ${BRAND.displayName} AI assistant to automate dispatch workflows, booking tasks, and operational decisions.`
-  }
+  },
+  '/services': {
+    title: `Freight Services | ${BRAND.displayName}`,
+    description: 'Review local, regional, box truck, cargo van, sprinter van, and dispatch support services.'
+  },
+  '/pricing': {
+    title: `Freight Pricing | ${BRAND.displayName}`,
+    description: 'Compare shipper, driver, and partner pricing options for Infamous Freight workflows.'
+  },
+  '/partners': {
+    title: `Logistics Partner Program | ${BRAND.displayName}`,
+    description: 'Apply for logistics-adjacent partner placements for shippers, drivers, and carriers.'
+  },
+  '/contact': {
+    title: `Contact Dispatch and Support | ${BRAND.displayName}`,
+    description: 'Contact Infamous Freight for quote questions, shipment tracking, driver onboarding, partnerships, or support.'
+  },
+  '/about': {
+    title: `About | ${BRAND.displayName}`,
+    description: 'Learn how Infamous Freight approaches verified freight operations, tracking, PODs, and cleaner handoffs.'
+  },
+  '/drive': {
+    title: `Apply to Drive | ${BRAND.displayName}`,
+    description: 'Apply to join the Infamous Freight driver network for verified local and regional freight opportunities.'
+  },
+  '/customer-portal': {
+    title: `Customer Portal | ${BRAND.displayName}`,
+    description: 'Open customer freight tools for quotes, shipment visibility, documents, and support workflows.'
+  },
+  '/carrier-portal': {
+    title: `Carrier Portal | ${BRAND.displayName}`,
+    description: 'Open carrier freight tools for onboarding, assigned loads, proof workflows, and dispatch updates.'
+  },
 };
 
-const INDEXABLE_ROUTES = new Set(['/', '/home', '/request-quote', '/track-shipment', '/freight-assistant']);
+const INDEXABLE_ROUTES = new Set([
+  '/',
+  '/home',
+  '/request-quote',
+  '/track-shipment',
+  '/freight-assistant',
+  '/services',
+  '/pricing',
+  '/partners',
+  '/contact',
+  '/about',
+  '/drive',
+  '/customer-portal',
+  '/carrier-portal',
+]);
 
 const SeoManager = () => {
   const location = useLocation();

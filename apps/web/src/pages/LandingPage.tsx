@@ -15,14 +15,15 @@ import {
   Users,
   Zap,
 } from 'lucide-react';
+import { trackPublicEvent } from '@/lib/analytics';
 
 const navLinks = [
-  { label: 'Quote', href: '/request-quote' },
-  { label: 'Track', href: '/track-shipment' },
-  { label: 'Drivers', href: '/drive' },
-  { label: 'Pricing', href: '/pricing' },
-  { label: 'Partners', href: '/partners' },
-];
+  { label: 'Quote', href: '/request-quote', event: 'quote_cta_click' },
+  { label: 'Track', href: '/track-shipment', event: 'tracking_cta_click' },
+  { label: 'Drivers', href: '/drive', event: 'driver_cta_click' },
+  { label: 'Pricing', href: '/pricing', event: 'pricing_cta_click' },
+  { label: 'Partners', href: '/partners', event: 'partner_cta_click' },
+] as const;
 
 const proofPoints = [
   { label: 'Driver verified', detail: 'FMCSA, insurance, ID', icon: <ShieldCheck size={18} /> },
@@ -136,6 +137,7 @@ const LandingPage: React.FC = () => {
               <Link
                 key={item.href}
                 to={item.href}
+                onClick={() => trackPublicEvent(item.event, { source: 'nav' })}
                 className="rounded-lg px-3 py-2 font-semibold transition hover:bg-white/[0.07] hover:text-white"
               >
                 {item.label}
@@ -146,12 +148,14 @@ const LandingPage: React.FC = () => {
           <div className="flex flex-wrap items-center gap-3">
             <Link
               to="/customer-portal"
+              onClick={() => trackPublicEvent('portal_cta_click', { portal: 'customer', source: 'header' })}
               className="rounded-lg border border-white/[0.12] bg-white/[0.04] px-4 py-2 text-sm font-semibold text-white transition hover:border-infamous-orange/50"
             >
               Customer Portal
             </Link>
             <Link
               to="/login"
+              onClick={() => trackPublicEvent('login_cta_click', { source: 'header' })}
               className="rounded-lg bg-infamous-orange px-4 py-2 text-sm font-bold text-white transition hover:bg-infamous-orange-light"
             >
               Login
@@ -179,18 +183,21 @@ const LandingPage: React.FC = () => {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link
                 to="/request-quote"
+                onClick={() => trackPublicEvent('quote_cta_click', { source: 'hero' })}
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-infamous-orange px-5 py-3 font-semibold text-white transition hover:bg-infamous-orange-light"
               >
                 Get a Freight Quote <ArrowRight size={18} />
               </Link>
               <Link
                 to="/track-shipment"
+                onClick={() => trackPublicEvent('tracking_cta_click', { source: 'hero' })}
                 className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/[0.14] bg-white/[0.04] px-5 py-3 font-semibold text-white transition hover:border-infamous-orange/50"
               >
                 Track Shipment <MapIcon size={18} />
               </Link>
               <Link
                 to="/drive"
+                onClick={() => trackPublicEvent('driver_cta_click', { source: 'hero' })}
                 className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/[0.12] bg-transparent px-5 py-3 font-semibold text-zinc-300 transition hover:border-white/[0.28] hover:text-white"
               >
                 Apply to Drive
@@ -251,7 +258,7 @@ const LandingPage: React.FC = () => {
               <div className="mt-4 grid gap-3 border-t border-white/10 pt-4 sm:grid-cols-[1fr_auto] sm:items-center">
                 <div>
                   <p className="text-sm font-semibold text-white">AI freight assistant</p>
-                  <p className="mt-1 text-sm text-zinc-500">Turns quote details into dispatch-ready load notes.</p>
+                  <p className="mt-1 text-sm text-zinc-500">Beta workspace for turning quote details into dispatch-ready load notes.</p>
                 </div>
                 <Link
                   to="/freight-assistant"
@@ -330,6 +337,11 @@ const LandingPage: React.FC = () => {
             <Link
               key={item.href}
               to={item.href}
+              onClick={() => {
+                if (item.href === '/request-quote') trackPublicEvent('quote_cta_click', { source: 'audience_card' });
+                if (item.href === '/drive') trackPublicEvent('driver_cta_click', { source: 'audience_card' });
+                if (item.href === '/pricing') trackPublicEvent('pricing_cta_click', { source: 'audience_card' });
+              }}
               className="group rounded-lg border border-white/10 bg-[#111] p-6 transition hover:border-infamous-orange/50 hover:bg-[#141414]"
             >
               <div className="mb-4 inline-flex rounded-lg bg-infamous-orange/10 p-3 text-infamous-orange">
@@ -350,6 +362,7 @@ const LandingPage: React.FC = () => {
           <Link
             key={item.href}
             to={item.href}
+            onClick={() => trackPublicEvent('portal_cta_click', { portal: item.label, source: 'portal_links' })}
             className="group flex min-h-20 items-center justify-between rounded-lg border border-white/10 bg-[#101010] p-5 transition hover:border-infamous-orange/50"
           >
             <span className="flex items-center gap-3 font-semibold text-white">
@@ -372,6 +385,7 @@ const LandingPage: React.FC = () => {
           <div className="flex flex-col gap-3 sm:flex-row">
             <Link
               to="/request-quote"
+              onClick={() => trackPublicEvent('quote_cta_click', { source: 'footer_cta' })}
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-infamous-orange px-5 py-3 font-semibold text-white transition hover:bg-infamous-orange-light"
             >
               Request Quote <ArrowRight size={18} />
