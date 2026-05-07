@@ -1,7 +1,5 @@
 <p align="center">
-  <a href="https://infamousfreight.com" target="_blank" rel="noopener noreferrer">
-    <img src="docs/screenshots/infamousfreight-header.svg" alt="Infamous Freight" width="100%">
-  </a>
+  <img src="assets/infamous-freight-header.png" alt="Infamous Freight" width="100%">
 </p>
 
 # 🚛 Infamous Freight
