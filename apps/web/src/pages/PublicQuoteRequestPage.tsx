@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, ClipboardList, Paperclip, Send } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, ClipboardList, Gauge, Paperclip, Send } from 'lucide-react';
 import { trackPublicEvent } from '@/lib/analytics';
 import { submitNetlifyForm } from '@/lib/netlifyForms';
 
@@ -14,10 +14,94 @@ const initialForm = {
   freightType: '',
   equipment: 'Dry van',
   weight: '',
+  miles: '',
   dimensions: '',
   pickupDate: '',
   deliveryDate: '',
   instructions: '',
+};
+
+// Per-mile market context rates (DAT-reported national snapshots).
+// Used only as a starting band — dispatch confirms the final rate per lane.
+const equipmentBaseRpm: Record<string, number> = {
+  'Dry van': 2.37,
+  Reefer: 2.72,
+  Flatbed: 3.05,
+  'Power only': 2.2,
+  'Box truck': 2.5,
+  'Cargo van': 1.95,
+  'Sprinter van': 1.85,
+};
+
+const minimumByEquipment: Record<string, number> = {
+  'Dry van': 350,
+  Reefer: 400,
+  Flatbed: 450,
+  'Power only': 300,
+  'Box truck': 250,
+  'Cargo van': 175,
+  'Sprinter van': 150,
+};
+
+type Estimate = {
+  low: number;
+  mid: number;
+  high: number;
+  rpm: number;
+  confidence: number;
+  reason: string;
+};
+
+const formatCurrency = (value: number) =>
+  value.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+
+const computeEstimate = (form: typeof initialForm): Estimate | null => {
+  const miles = Number(form.miles);
+  if (!miles || miles <= 0) return null;
+
+  const baseRpm = equipmentBaseRpm[form.equipment] ?? 2.5;
+  const minimum = minimumByEquipment[form.equipment] ?? 250;
+
+  let rpmAdjust = 0;
+  const weight = Number(form.weight);
+  if (weight && weight > 35000) rpmAdjust += 0.18;
+  else if (weight && weight > 20000) rpmAdjust += 0.08;
+
+  let urgencyAdjust = 0;
+  if (form.pickupDate) {
+    const pickup = new Date(form.pickupDate);
+    const now = new Date();
+    const hours = (pickup.getTime() - now.getTime()) / (1000 * 60 * 60);
+    if (hours > 0 && hours < 24) urgencyAdjust += 0.15;
+    else if (hours > 0 && hours < 48) urgencyAdjust += 0.08;
+  }
+
+  const rpm = Math.round((baseRpm + rpmAdjust) * 100) / 100;
+  const linehaul = Math.max(rpm * miles * (1 + urgencyAdjust), minimum);
+  const mid = Math.round(linehaul);
+  const low = Math.round(linehaul * 0.88);
+  const high = Math.round(linehaul * 1.12);
+
+  let confidence = 60;
+  if (form.origin.trim()) confidence += 8;
+  if (form.destination.trim()) confidence += 8;
+  if (weight) confidence += 6;
+  if (form.dimensions.trim()) confidence += 4;
+  if (form.freightType.trim()) confidence += 4;
+  if (form.pickupDate) confidence += 4;
+  if (miles > 0) confidence += 6;
+  confidence = Math.min(confidence, 95);
+
+  const reason =
+    miles < 100
+      ? 'Short-haul minimums apply for this lane.'
+      : weight && weight > 35000
+        ? 'Heavy freight adjusts the per-mile band upward.'
+        : urgencyAdjust > 0
+          ? 'Same-day or next-day pickup includes an urgency premium.'
+          : 'Estimate uses national equipment averages; lane-specific quotes may vary.';
+
+  return { low, mid, high, rpm, confidence, reason };
 };
 
 const PublicQuoteRequestPage: React.FC = () => {
@@ -32,6 +116,8 @@ const PublicQuoteRequestPage: React.FC = () => {
     const complete = required.filter((key) => form[key as keyof typeof form].trim()).length;
     return Math.round((complete / required.length) * 100);
   }, [form]);
+
+  const estimate = useMemo(() => computeEstimate(form), [form]);
 
   const updateField = (key: keyof typeof initialForm, value: string) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -51,6 +137,8 @@ const PublicQuoteRequestPage: React.FC = () => {
         form: 'quote-request',
         hasAttachment: Boolean(attachment),
         equipment: form.equipment,
+        estimateMid: estimate?.mid,
+        estimateConfidence: estimate?.confidence,
       });
       setSubmitted(true);
     } catch (err) {
@@ -119,6 +207,7 @@ const PublicQuoteRequestPage: React.FC = () => {
                     ['destination', 'Destination city/state'],
                     ['freightType', 'Freight type'],
                     ['weight', 'Weight'],
+                    ['miles', 'Lane miles (optional)'],
                     ['dimensions', 'Dimensions / pallet count'],
                     ['pickupDate', 'Pickup date'],
                     ['deliveryDate', 'Delivery date'],
@@ -129,7 +218,7 @@ const PublicQuoteRequestPage: React.FC = () => {
                         name={key}
                         type={key === 'email' ? 'email' : key.toLowerCase().includes('date') ? 'date' : 'text'}
                         autoComplete={key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'off'}
-                        inputMode={key === 'phone' ? 'tel' : key === 'weight' ? 'numeric' : key === 'email' ? 'email' : 'text'}
+                        inputMode={key === 'phone' ? 'tel' : key === 'weight' || key === 'miles' ? 'numeric' : key === 'email' ? 'email' : 'text'}
                         value={form[key as keyof typeof form]}
                         onChange={(event) => updateField(key as keyof typeof initialForm, event.target.value)}
                         className="w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"
@@ -196,6 +285,43 @@ const PublicQuoteRequestPage: React.FC = () => {
 
           <aside className="space-y-4">
             <div className="rounded-3xl border border-infamous-border bg-infamous-card p-6">
+              <div className="mb-3 flex items-center gap-2">
+                <span className="inline-flex rounded-lg bg-infamous-orange/10 p-2 text-infamous-orange">
+                  <Gauge size={18} />
+                </span>
+                <h2 className="text-lg font-bold">Instant rate estimate</h2>
+              </div>
+              {estimate ? (
+                <>
+                  <div className="rounded-2xl border border-infamous-border bg-[#111] p-4">
+                    <p className="text-xs uppercase tracking-wider text-gray-500">Estimated linehaul</p>
+                    <p className="mt-1 text-3xl font-black tracking-tight text-white">
+                      {formatCurrency(estimate.low)} <span className="text-lg text-gray-500">–</span>{' '}
+                      {formatCurrency(estimate.high)}
+                    </p>
+                    <p className="mt-2 text-xs text-gray-400">
+                      Mid: {formatCurrency(estimate.mid)} · {estimate.rpm.toFixed(2)}/mi base RPM
+                    </p>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between rounded-xl border border-infamous-border bg-[#111] px-4 py-3">
+                    <span className="text-xs uppercase tracking-wider text-gray-500">Confidence</span>
+                    <span className="font-semibold text-infamous-orange">{estimate.confidence}%</span>
+                  </div>
+                  <p className="mt-3 text-xs leading-5 text-gray-500">{estimate.reason}</p>
+                  <p className="mt-3 text-xs leading-5 text-gray-500">
+                    Market context only. Dispatch confirms the final rate based on lane, carrier capacity, and
+                    accessorials.
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm leading-6 text-gray-400">
+                  Add equipment, weight, and lane miles to see an instant rate band. Without miles, dispatch will price
+                  the load manually after review.
+                </p>
+              )}
+            </div>
+
+            <div className="rounded-3xl border border-infamous-border bg-infamous-card p-6">
               <h2 className="text-lg font-bold">What happens next?</h2>
               <div className="mt-4 space-y-4">
                 {['Lane reviewed by dispatch', 'Carrier capacity checked', 'Rate and pickup details confirmed', 'Customer receives next steps'].map((step, index) => (
@@ -210,7 +336,8 @@ const PublicQuoteRequestPage: React.FC = () => {
             <div className="rounded-3xl border border-infamous-border bg-[#111] p-6">
               <h2 className="text-lg font-bold">Tips for a faster quote</h2>
               <p className="mt-3 text-sm leading-6 text-gray-400">
-                Fill in origin, destination, freight type, weight, equipment, and pickup date so dispatch can respond faster.
+                Fill in origin, destination, freight type, weight, equipment, lane miles, and pickup date so dispatch
+                can respond faster and the instant estimate reflects the real load.
               </p>
             </div>
           </aside>

@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import {
   Truck, DollarSign, AlertTriangle, Activity,
   ChevronRight, FileText, ShieldAlert, Package, ClipboardList,
-  FileX, Ban
+  FileX, Ban, ArrowDownToLine, ArrowUpFromLine, MapPin, Wallet,
+  TrendingUp, Receipt, Banknote
 } from 'lucide-react';
 
 interface OpsMetric {
@@ -64,6 +65,25 @@ const DashboardPage: React.FC = () => {
 
   const urgentCount = opsMetrics.filter((m) => m.urgent && m.value > 0).reduce((s, m) => s + m.value, 0);
 
+  // Today's pickup/delivery flow + unassigned and at-risk counts give dispatch
+  // a one-glance read on what the next 24 hours actually look like.
+  const todaysFlow = [
+    { label: "Today's pickups",    value: 6,  icon: <ArrowUpFromLine size={18} />, color: 'text-cyan-400',          path: '/dispatch' },
+    { label: "Today's deliveries", value: 5,  icon: <ArrowDownToLine size={18} />, color: 'text-green-400',         path: '/dispatch' },
+    { label: 'Unassigned loads',   value: 3,  icon: <MapPin size={18} />,          color: 'text-infamous-orange',   path: '/dispatch' },
+    { label: 'Loads at risk',      value: 2,  icon: <AlertTriangle size={18} />,   color: 'text-red-400',           path: '/dispatch' },
+  ];
+
+  // Financial pulse: revenue, gross margin, carrier payables, shipper
+  // receivables. These are the four numbers the brief calls out for the admin
+  // home screen. Demo values; production wires to the accounting service.
+  const financialPulse = [
+    { label: 'Revenue MTD',          value: '$184,250', sub: '+12% vs last month', icon: <Banknote size={18} />,  color: 'text-green-400',         path: '/accounting' },
+    { label: 'Gross margin',         value: '14.6%',    sub: 'Target 12–18%',      icon: <TrendingUp size={18} />, color: 'text-emerald-400',      path: '/accounting' },
+    { label: 'Carrier payables',     value: '$48,900',  sub: '7 carriers · 2 QuickPay', icon: <Wallet size={18} />, color: 'text-yellow-400',     path: '/accounting' },
+    { label: 'Shipper receivables',  value: '$96,400',  sub: '4 invoices overdue', icon: <Receipt size={18} />,    color: 'text-infamous-orange',   path: '/accounting' },
+  ];
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -103,7 +123,61 @@ const DashboardPage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Active Loads Panel */}
+        {/* Today's Flow */}
+        <div className="card lg:col-span-2">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Today&apos;s flow</h2>
+            <button onClick={() => navigate('/dispatch')} className="text-sm text-infamous-orange hover:underline flex items-center gap-1">
+              Dispatch board <ChevronRight size={14} />
+            </button>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {todaysFlow.map((m) => (
+              <button
+                key={m.label}
+                onClick={() => navigate(m.path)}
+                aria-label={`${m.label}: ${m.value}`}
+                className="text-left rounded-xl border border-infamous-border bg-[#1a1a1a] hover:border-infamous-orange/30 p-4 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-orange"
+              >
+                <span aria-hidden="true" className={`${m.color} mb-3 inline-flex`}>{m.icon}</span>
+                <p className="text-2xl font-bold">{m.value}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{m.label}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Financial Pulse */}
+        <div className="card">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Financial pulse</h2>
+            <button onClick={() => navigate('/accounting')} className="text-sm text-infamous-orange hover:underline flex items-center gap-1">
+              Accounting <ChevronRight size={14} />
+            </button>
+          </div>
+          <div className="space-y-3">
+            {financialPulse.map((m) => (
+              <button
+                key={m.label}
+                onClick={() => navigate(m.path)}
+                aria-label={`${m.label}: ${m.value}`}
+                className="w-full text-left flex items-center gap-3 p-3 rounded-xl bg-[#1a1a1a] border border-infamous-border hover:border-infamous-border-light transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-orange"
+              >
+                <span aria-hidden="true" className={`${m.color}`}>{m.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-gray-500">{m.label}</p>
+                  <p className="text-base font-bold truncate">{m.value}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] text-gray-500 whitespace-nowrap">{m.sub}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 card">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">Active Loads</h2>

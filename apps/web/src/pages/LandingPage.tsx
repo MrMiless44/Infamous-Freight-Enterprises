@@ -6,7 +6,9 @@ import {
   Camera,
   ClipboardCheck,
   FileText,
+  LogIn,
   Map as MapIcon,
+  Phone,
   RadioTower,
   Route as RouteIcon,
   ShieldCheck,
@@ -20,6 +22,7 @@ import { trackPublicEvent } from '@/lib/analytics';
 const navLinks = [
   { label: 'Quote', href: '/request-quote', event: 'quote_cta_click' },
   { label: 'Track', href: '/track-shipment', event: 'tracking_cta_click' },
+  { label: 'Load Board', href: '/load-board', event: 'load_board_view' },
   { label: 'Drivers', href: '/drive', event: 'driver_cta_click' },
   { label: 'Pricing', href: '/pricing', event: 'pricing_cta_click' },
   { label: 'Partners', href: '/partners', event: 'partner_cta_click' },
@@ -174,19 +177,19 @@ const LandingPage: React.FC = () => {
               <RadioTower size={16} /> Verified freight operations for shippers, drivers, and dispatch.
             </div>
             <h1 className="max-w-4xl text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
-              Freight booked with proof, tracked without phone tag.
+              Move Freight Like You Own the Road.
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-zinc-300">
-              Infamous Freight connects quote intake, verified carrier coverage, live shipment status, POD capture,
-              and billing context so local and regional freight keeps moving cleanly.
+              Instant quotes, verified carriers, live tracking, fast payments, and end-to-end freight execution from
+              pickup to final POD.
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <Link
                 to="/request-quote"
                 onClick={() => trackPublicEvent('quote_cta_click', { source: 'hero' })}
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-infamous-orange px-5 py-3 font-semibold text-white transition hover:bg-infamous-orange-light"
               >
-                Get a Freight Quote <ArrowRight size={18} />
+                Get a Quote <ArrowRight size={18} />
               </Link>
               <Link
                 to="/track-shipment"
@@ -198,9 +201,30 @@ const LandingPage: React.FC = () => {
               <Link
                 to="/drive"
                 onClick={() => trackPublicEvent('driver_cta_click', { source: 'hero' })}
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/[0.14] bg-white/[0.04] px-5 py-3 font-semibold text-white transition hover:border-infamous-orange/50"
+              >
+                Carrier Sign Up <Truck size={18} />
+              </Link>
+              <Link
+                to="/load-board"
+                onClick={() => trackPublicEvent('load_board_view', { source: 'hero' })}
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/[0.14] bg-white/[0.04] px-5 py-3 font-semibold text-white transition hover:border-infamous-orange/50"
+              >
+                Browse Load Board <RouteIcon size={18} />
+              </Link>
+              <Link
+                to="/customer-portal"
+                onClick={() => trackPublicEvent('portal_cta_click', { portal: 'customer', source: 'hero' })}
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/[0.14] bg-white/[0.04] px-5 py-3 font-semibold text-white transition hover:border-infamous-orange/50"
+              >
+                Shipper Sign Up <Users size={18} />
+              </Link>
+              <Link
+                to="/login"
+                onClick={() => trackPublicEvent('login_cta_click', { source: 'hero' })}
                 className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/[0.12] bg-transparent px-5 py-3 font-semibold text-zinc-300 transition hover:border-white/[0.28] hover:text-white"
               >
-                Apply to Drive
+                Login <LogIn size={18} />
               </Link>
             </div>
 
@@ -372,6 +396,84 @@ const LandingPage: React.FC = () => {
             <ArrowRight size={18} className="text-zinc-500 transition group-hover:text-infamous-orange" />
           </Link>
         ))}
+      </section>
+
+      <section className="border-t border-white/10 bg-[#0d0d0d] px-5 py-14 lg:px-6">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-8 max-w-2xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Trust and compliance</p>
+            <h2 className="mt-2 text-3xl font-black">Freight is trust. Here is how Infamous earns it.</h2>
+            <p className="mt-3 text-sm leading-6 text-zinc-400">
+              Authority, insurance, vetting, claims handling, and support are documented up front so shippers and
+              carriers know exactly who they are working with.
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                icon: <ShieldCheck size={20} />,
+                label: 'FMCSA broker authority',
+                detail:
+                  'Authority status, MC#, and BMC-84 surety bond filed and active. Verification details available on request during onboarding.',
+              },
+              {
+                icon: <FileText size={20} />,
+                label: 'Insurance on file',
+                detail:
+                  'General liability and contingent cargo coverage maintained. Certificate of insurance issued to shippers prior to first load.',
+              },
+              {
+                icon: <Users size={20} />,
+                label: 'Carrier vetting',
+                detail:
+                  'Authority, insurance, safety scores, and ID verification are checked before a carrier touches a load and re-checked on policy events.',
+              },
+              {
+                icon: <ClipboardCheck size={20} />,
+                label: 'Payment policy',
+                detail:
+                  'Standard carrier pay terms documented. QuickPay and same-day options available with transparent fees, no surprises.',
+              },
+              {
+                icon: <RouteIcon size={20} />,
+                label: 'Claims and escalation',
+                detail:
+                  'Every exception (detention, lumper, damage, late delivery) opens a tracked ticket. No load disappears into phone calls.',
+              },
+              {
+                icon: <Phone size={20} />,
+                label: 'Support and office',
+                detail:
+                  'Live dispatch support during posted hours. Business address and direct phone listed on the contact page.',
+              },
+            ].map((item) => (
+              <article
+                key={item.label}
+                className="rounded-lg border border-white/10 bg-[#111] p-5"
+              >
+                <div className="mb-3 inline-flex rounded-lg bg-infamous-orange/10 p-2.5 text-infamous-orange">
+                  {item.icon}
+                </div>
+                <h3 className="text-base font-bold text-white">{item.label}</h3>
+                <p className="mt-2 text-sm leading-6 text-zinc-400">{item.detail}</p>
+              </article>
+            ))}
+          </div>
+
+          <div className="mt-6 flex flex-col gap-3 rounded-lg border border-white/10 bg-black/[0.32] p-5 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-zinc-400">
+              Need verification documents, COI, or claims process details? Reach out and the operations team will send
+              them over.
+            </p>
+            <Link
+              to="/contact"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-infamous-orange/40 bg-infamous-orange/10 px-4 py-2 text-sm font-bold text-infamous-orange transition hover:bg-infamous-orange/15"
+            >
+              Contact operations <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
       </section>
 
       <section className="border-t border-white/10 bg-[#0d0d0d] px-5 py-10 lg:px-6">

@@ -21,6 +21,18 @@
   force = true
 
 [[redirects]]
+  from = "/api/load-requests"
+  to = "/.netlify/functions/load-requests"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/load-requests/*"
+  to = "/.netlify/functions/load-requests/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/api/*"
   to = "https://infamous-freight.fly.dev/api/:splat"
   status = 200
