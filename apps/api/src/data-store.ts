@@ -174,6 +174,7 @@ export interface DataStore {
   createDriver(tenantId: string, payload: Record<string, unknown>): Promise<DriverRecord>;
   listShipments(tenantId: string): Promise<ShipmentRecord[]>;
   createShipment(tenantId: string, payload: Record<string, unknown>): Promise<ShipmentRecord>;
+  findPublicShipmentTracking(trackingNumber: string): Promise<ShipmentRecord | null>;
   listFreightOperations(
     resource: FreightOperationResource,
     tenantId: string,
@@ -401,6 +402,40 @@ class MemoryDataStore implements DataStore {
     const record = { id: randomUUID(), tenantId, ...payload };
     this.shipments.push(record);
     return record;
+  }
+
+  async findPublicShipmentTracking(trackingNumber: string): Promise<ShipmentRecord | null> {
+    const normalized = trackingNumber.trim().toLowerCase();
+    const load = this.loads.find((item) => {
+      const publicTrackingNumber = String(item.trackingNumber ?? item.id).toLowerCase();
+      return publicTrackingNumber === normalized;
+    });
+
+    if (!load) {
+      return null;
+    }
+
+    const trackingUpdates = this.freightOperations.shipmentTracking
+      .filter((item) => item.loadId === load.id)
+      .sort((a, b) => String(b.createdAt ?? '').localeCompare(String(a.createdAt ?? '')));
+    const latestTracking = trackingUpdates[0];
+
+    return {
+      id: String(load.id),
+      tenantId: String(load.tenantId),
+      trackingNumber: String(load.trackingNumber ?? load.id),
+      customer: String(load.brokerName ?? ''),
+      originCity: load.originCity,
+      originState: load.originState,
+      destCity: load.destCity,
+      destState: load.destState,
+      status: String(latestTracking?.status ?? load.status ?? 'pending'),
+      pickupDate: load.pickupDate,
+      deliveryDate: load.deliveryDate ?? null,
+      eta: latestTracking?.deliveryETA ?? load.deliveryDate ?? null,
+      equipment: load.equipmentType,
+      notes: latestTracking?.publicNotes ?? latestTracking?.notes ?? load.notes ?? '',
+    };
   }
 
   async listFreightOperations(
@@ -769,6 +804,47 @@ class PrismaDataStore implements DataStore {
       pickupDate: load.pickupDate,
       deliveryDate: load.deliveryDate ?? null,
       rate: load.rate,
+    };
+  }
+
+  async findPublicShipmentTracking(trackingNumber: string): Promise<ShipmentRecord | null> {
+    const normalized = trackingNumber.trim();
+    const load = await this.prisma.load.findFirst({
+      where: {
+        OR: [
+          { id: normalized },
+          { brokerMc: normalized },
+        ],
+      },
+      include: {
+        shipmentTracking: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+      },
+    });
+
+    if (!load) {
+      return null;
+    }
+
+    const latestTracking = load.shipmentTracking[0];
+
+    return {
+      id: load.id,
+      tenantId: load.carrierId,
+      trackingNumber: load.brokerMc ?? load.id,
+      customer: load.brokerName,
+      originCity: load.originCity,
+      originState: load.originState,
+      destCity: load.destCity,
+      destState: load.destState,
+      status: latestTracking?.status ?? load.status,
+      pickupDate: load.pickupDate,
+      deliveryDate: load.deliveryDate,
+      eta: latestTracking?.deliveryETA ?? load.deliveryDate,
+      equipment: load.equipmentType,
+      notes: load.notes ?? '',
     };
   }
 

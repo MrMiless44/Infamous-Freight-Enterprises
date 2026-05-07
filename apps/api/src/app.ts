@@ -560,6 +560,22 @@ function registerRoutes(app: express.Express, dataStore: DataStore) {
     res.status(201).json({ data });
   }));
 
+  app.get('/api/tracking/:trackingNumber', wrapAsync(async (req, res) => {
+    const trackingNumber = getRouteParam(req, 'trackingNumber').trim();
+    const data = await dataStore.findPublicShipmentTracking(trackingNumber);
+
+    if (!data) {
+      throw new HttpError(
+        404,
+        'tracking_number_not_found',
+        'No customer-visible shipment was found for that tracking number.',
+      );
+    }
+
+    const { tenantId: _tenantId, ...publicData } = data;
+    res.status(200).json({ data: publicData });
+  }));
+
   app.get('/api/billing/status', requireTenant, requireRole, wrapAsync(async (req, res) => {
     const stripeCustomerId = await dataStore.getCarrierStripeCustomerId(getRequiredTenantId(req));
     res.status(200).json({

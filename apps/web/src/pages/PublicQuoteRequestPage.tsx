@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, ClipboardList, Send } from 'lucide-react';
-import { submitNetlifyForm } from '@/lib/netlifyForms';
 
 const initialForm = {
   company: '',
@@ -41,7 +40,33 @@ const PublicQuoteRequestPage: React.FC = () => {
     setError('');
 
     try {
-      await submitNetlifyForm('quote-request', form);
+      const response = await fetch('/api/leads/quote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.contact,
+          email: form.email,
+          phone: form.phone,
+          company: form.company,
+          originCity: form.origin,
+          destCity: form.destination,
+          freightType: form.freightType,
+          weight: form.weight,
+          pickupDate: form.pickupDate,
+          notes: [
+            form.equipment ? `Equipment: ${form.equipment}` : '',
+            form.dimensions ? `Dimensions / pallet count: ${form.dimensions}` : '',
+            form.deliveryDate ? `Delivery date: ${form.deliveryDate}` : '',
+            form.instructions,
+          ].filter(Boolean).join('\n'),
+        }),
+      });
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => null) as { message?: string } | null;
+        throw new Error(body?.message ?? 'Could not submit this quote request.');
+      }
+
       setSubmitted(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not submit this quote request.');

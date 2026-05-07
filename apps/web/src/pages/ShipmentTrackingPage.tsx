@@ -1,13 +1,89 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, PackageCheck, Search, Truck } from 'lucide-react';
 import { demoShipments } from '@/data/mvpFreightData';
 
+type PublicShipment = {
+  trackingNumber: string;
+  customer: string;
+  route: string;
+  status: string;
+  pickupDate: string;
+  deliveryDate: string;
+  eta: string;
+  equipment: string;
+  notes: string;
+};
+
+function formatDate(value: unknown): string {
+  if (!value) return 'Pending';
+  const date = new Date(String(value));
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function normalizePublicShipment(data: Record<string, unknown>): PublicShipment {
+  const origin = [data.originCity, data.originState].filter(Boolean).join(', ');
+  const destination = [data.destCity, data.destState].filter(Boolean).join(', ');
+
+  return {
+    trackingNumber: String(data.trackingNumber ?? data.id ?? ''),
+    customer: String(data.customer ?? ''),
+    route: `${origin} -> ${destination}`,
+    status: String(data.status ?? 'Pending'),
+    pickupDate: formatDate(data.pickupDate),
+    deliveryDate: formatDate(data.deliveryDate),
+    eta: formatDate(data.eta),
+    equipment: String(data.equipment ?? ''),
+    notes: String(data.notes ?? 'No customer-visible dispatch notes have been posted yet.'),
+  };
+}
+
 const ShipmentTrackingPage: React.FC = () => {
   const [trackingNumber, setTrackingNumber] = useState('IF-20491');
+  const [apiShipment, setApiShipment] = useState<PublicShipment | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [lookupAttempted, setLookupAttempted] = useState(false);
 
-  const shipment = useMemo(() => {
+  const demoShipment = useMemo(() => {
     return demoShipments.find((item) => item.trackingNumber.toLowerCase() === trackingNumber.trim().toLowerCase());
+  }, [trackingNumber]);
+  const shipment = apiShipment ?? demoShipment;
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const query = trackingNumber.trim();
+
+    if (!query) {
+      setApiShipment(null);
+      setLookupAttempted(false);
+      return;
+    }
+
+    setLoading(true);
+    fetch(`/api/tracking/${encodeURIComponent(query)}`, { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) {
+          setApiShipment(null);
+          return;
+        }
+
+        const body = await response.json() as { data?: Record<string, unknown> };
+        setApiShipment(body.data ? normalizePublicShipment(body.data) : null);
+      })
+      .catch((error) => {
+        if ((error as Error).name !== 'AbortError') {
+          setApiShipment(null);
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setLookupAttempted(true);
+          setLoading(false);
+        }
+      });
+
+    return () => controller.abort();
   }, [trackingNumber]);
 
   return (
@@ -34,7 +110,7 @@ const ShipmentTrackingPage: React.FC = () => {
               placeholder="Example: IF-20491"
             />
             <button type="button" className="inline-flex items-center justify-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 font-semibold text-white">
-              <Search size={17} /> Search
+              <Search size={17} /> {loading ? 'Searching...' : 'Search'}
             </button>
           </div>
 
@@ -56,8 +132,7 @@ const ShipmentTrackingPage: React.FC = () => {
                     ['Delivery', shipment.deliveryDate],
                     ['ETA', shipment.eta],
                     ['Equipment', shipment.equipment],
-                    ['Carrier', shipment.carrier],
-                    ['Rate', shipment.rate],
+                    ['Visibility', apiShipment ? 'Live dispatch record' : 'Sample tracking record'],
                   ].map(([label, value]) => (
                     <div key={label} className="rounded-xl border border-infamous-border bg-infamous-card p-4">
                       <p className="text-xs uppercase tracking-wider text-gray-500">{label}</p>
@@ -94,8 +169,8 @@ const ShipmentTrackingPage: React.FC = () => {
             </div>
           ) : (
             <div className="mt-8 rounded-2xl border border-red-500/30 bg-red-500/10 p-6">
-              <h2 className="text-xl font-bold">Tracking number not found</h2>
-              <p className="mt-2 text-gray-300">We couldn't find that tracking number. Double-check the format (IF-##### with five digits) or contact dispatch if it should be active.</p>
+              <h2 className="text-xl font-bold">{lookupAttempted ? 'Tracking number not found' : 'Ready to search'}</h2>
+              <p className="mt-2 text-gray-300">Double-check the format or contact dispatch if this shipment should already be active.</p>
             </div>
           )}
         </section>

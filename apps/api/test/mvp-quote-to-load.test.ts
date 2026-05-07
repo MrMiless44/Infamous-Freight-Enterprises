@@ -160,4 +160,61 @@ describe('MVP quote-to-load workflow', () => {
       expect.objectContaining({ id: quoteId, status: 'pending' }),
     );
   });
+
+  it('returns customer-visible tracking without private rate data', async () => {
+    const app = createApp();
+
+    const loadResponse = await request(app)
+      .post('/api/loads')
+      .set(headers)
+      .send({
+        trackingNumber: 'IF-PUBLIC-1',
+        brokerName: 'Summit Retail Group',
+        originCity: 'Chicago',
+        originState: 'IL',
+        originLat: 41.8781,
+        originLng: -87.6298,
+        destCity: 'Dallas',
+        destState: 'TX',
+        destLat: 32.7767,
+        destLng: -96.797,
+        distance: 967,
+        rate: 3200,
+        ratePerMile: 3.31,
+        equipmentType: 'Dry Van',
+        weight: 24000,
+        pickupDate: '2026-05-04T10:00:00.000Z',
+        deliveryDate: '2026-05-06T17:00:00.000Z',
+        status: 'booked',
+        notes: 'Customer can see ETA only.',
+      })
+      .expect(201);
+
+    await request(app)
+      .post(`/api/workflows/loads/${loadResponse.body.data.id}/tracking-updates`)
+      .set(headers)
+      .send({
+        status: 'in_transit',
+        deliveryETA: '2026-05-06T16:30:00.000Z',
+        publicNotes: 'Driver checked in and is on schedule.',
+        internalNotes: 'Do not expose margin or carrier costs.',
+      })
+      .expect(201);
+
+    const trackingResponse = await request(app)
+      .get('/api/tracking/IF-PUBLIC-1')
+      .expect(200);
+
+    expect(trackingResponse.body.data).toMatchObject({
+      trackingNumber: 'IF-PUBLIC-1',
+      customer: 'Summit Retail Group',
+      originCity: 'Chicago',
+      destCity: 'Dallas',
+      status: 'in_transit',
+      notes: 'Driver checked in and is on schedule.',
+    });
+    expect(trackingResponse.body.data).not.toHaveProperty('rate');
+    expect(trackingResponse.body.data).not.toHaveProperty('tenantId');
+    expect(JSON.stringify(trackingResponse.body.data)).not.toContain('internalNotes');
+  });
 });
