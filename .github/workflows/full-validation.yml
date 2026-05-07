@@ -77,7 +77,9 @@ jobs:
     env:
       IMAGE_NAME: infamous-freight-local-check
       CONTAINER_NAME: infamous-freight-runtime-check-${{ github.run_id }}-${{ github.run_attempt }}
-      DATABASE_URL: postgresql://user:pass@127.0.0.1:5432/db
+      PG_CONTAINER_NAME: infamous-freight-postgres-${{ github.run_id }}-${{ github.run_attempt }}
+      DOCKER_NETWORK: infamous-freight-ci-${{ github.run_id }}-${{ github.run_attempt }}
+      DATABASE_URL: postgresql://user:pass@ci-postgres:5432/db
 
     steps:
       - name: Checkout
@@ -86,6 +88,31 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
 
+      - name: Start Postgres for runtime checks
+        run: |
+          docker network create "$DOCKER_NETWORK"
+
+          docker run -d \
+            --name "$PG_CONTAINER_NAME" \
+            --network "$DOCKER_NETWORK" \
+            --network-alias ci-postgres \
+            -e POSTGRES_USER=user \
+            -e POSTGRES_PASSWORD=pass \
+            -e POSTGRES_DB=db \
+            postgres:16
+
+          for i in {1..30}; do
+            if docker exec "$PG_CONTAINER_NAME" pg_isready -U user -d db >/dev/null 2>&1; then
+              echo "Postgres is ready."
+              exit 0
+            fi
+            sleep 2
+          done
+
+          echo "Postgres did not become ready in time." >&2
+          docker logs "$PG_CONTAINER_NAME" || true
+          exit 1
+
       - name: Build runtime image
         run: docker build --pull -t "$IMAGE_NAME" .
 
@@ -93,6 +120,7 @@ jobs:
         run: |
           docker run -d \
             --name "$CONTAINER_NAME" \
+            --network "$DOCKER_NETWORK" \
             -e DATABASE_URL="$DATABASE_URL" \
             -e NODE_ENV=production \
             -e PORT=3000 \
@@ -114,12 +142,21 @@ jobs:
 
             case "$health_status" in
               healthy)
+                for j in {1..6}; do
+                  if curl -fsS http://127.0.0.1:3000/api/health/ready >/dev/null; then
+                    break
+                  fi
+                  sleep 5
+                done
                 curl -fsS http://127.0.0.1:3000/api/health/ready >/dev/null
                 echo "Container healthcheck is healthy and /api/health/ready responds."
                 exit 0
                 ;;
               unhealthy)
                 echo "Container healthcheck is unhealthy." >&2
+                docker inspect --format '{{json .State.Health}}' "$CONTAINER_NAME" || true
+                docker inspect --format '{{range .State.Health.Log}}{{println .Output}}{{end}}' "$CONTAINER_NAME" || true
+                curl -i --max-time 5 http://127.0.0.1:3000/api/health/ready || true
                 docker logs "$CONTAINER_NAME" || true
                 exit 1
                 ;;
@@ -135,6 +172,9 @@ jobs:
           done
 
           echo "Docker healthcheck did not become healthy in time." >&2
+          docker inspect --format '{{json .State.Health}}' "$CONTAINER_NAME" || true
+          docker inspect --format '{{range .State.Health.Log}}{{println .Output}}{{end}}' "$CONTAINER_NAME" || true
+          curl -i --max-time 5 http://127.0.0.1:3000/api/health/ready || true
           docker inspect "$CONTAINER_NAME" || true
           docker logs "$CONTAINER_NAME" || true
           exit 1
@@ -157,4 +197,6 @@ jobs:
         if: always()
         run: |
           docker rm -f "$CONTAINER_NAME" || true
+          docker rm -f "$PG_CONTAINER_NAME" || true
+          docker network rm "$DOCKER_NETWORK" || true
           docker image rm -f "$IMAGE_NAME" || true
