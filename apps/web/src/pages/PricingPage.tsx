@@ -148,6 +148,142 @@ const PricingPage: React.FC = () => {
             </Link>
           </div>
         </section>
+
+        <section className="mt-16">
+          <div className="mb-6 max-w-2xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Carrier plans</p>
+            <h2 className="mt-2 text-2xl font-bold">Free to run loads. Premium tools when you want them.</h2>
+            <p className="mt-3 text-sm text-gray-400">
+              Carriers can find, accept, and run Infamous loads without paying a platform fee. Premium tiers add load
+              alerts, RPM tools, dispatch automation, and settlement dashboards for owner-operators and small fleets.
+            </p>
+          </div>
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            {[
+              {
+                name: 'Carrier Free',
+                price: '$0',
+                cadence: '/month',
+                tagline: 'Run Infamous loads with the basics included.',
+                features: [
+                  'Find and accept Infamous loads',
+                  'Document vault for COI, W-9, MC#',
+                  'Live tracking and POD upload',
+                  'Standard carrier pay terms',
+                ],
+              },
+              {
+                name: 'Carrier Pro',
+                price: '$29',
+                cadence: '/month',
+                tagline: 'For owner-operators who want an edge.',
+                features: [
+                  'Load alerts on saved lanes',
+                  'RPM and deadhead calculator',
+                  'Preferred lane suggestions',
+                  'Document vault and reminders',
+                ],
+              },
+              {
+                name: 'Carrier Elite',
+                price: '$79',
+                cadence: '/month',
+                tagline: 'For small fleets running multiple trucks.',
+                features: [
+                  'Everything in Pro',
+                  'AI route + backhaul planning',
+                  'Settlement dashboard',
+                  'Driver-app dispatch tools',
+                ],
+              },
+              {
+                name: 'Dispatch Partner',
+                price: '5–8%',
+                cadence: 'of gross',
+                tagline: 'Full dispatch service with paperwork support.',
+                features: [
+                  'Load sourcing and negotiation',
+                  'Rate confirmations and BOLs',
+                  'Detention and accessorial handling',
+                  'Compliance and document management',
+                ],
+              },
+            ].map((plan) => (
+              <div
+                key={plan.name}
+                className="flex h-full flex-col rounded-3xl border border-infamous-border bg-infamous-card p-6"
+              >
+                <h3 className="text-lg font-bold">{plan.name}</h3>
+                <div className="mt-3 flex items-baseline gap-1">
+                  <span className="text-4xl font-black tracking-tight">{plan.price}</span>
+                  <span className="text-sm text-gray-500">{plan.cadence}</span>
+                </div>
+                <p className="mt-3 text-sm leading-6 text-gray-400">{plan.tagline}</p>
+                <ul className="mt-5 space-y-3 text-sm">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex gap-2 text-gray-300">
+                      <Check size={16} className="mt-0.5 flex-shrink-0 text-infamous-orange" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-16 grid gap-6 lg:grid-cols-2">
+          <div className="rounded-3xl border border-infamous-border bg-[#0f0f0f] p-6">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Payment options</p>
+            <h2 className="mt-2 text-2xl font-bold">Carrier pay terms, in plain language.</h2>
+            <ul className="mt-5 space-y-3 text-sm">
+              {[
+                ['Standard carrier pay', 'Free'],
+                ['48-hour QuickPay', '2.5%'],
+                ['Same-day QuickPay', '3.5%'],
+                ['Instant payout', '4% (or pass-through + markup)'],
+                ['Shipper card payment fee', 'Pass-through'],
+                ['Shipper ACH', 'Free or $5 admin cap'],
+              ].map(([label, value]) => (
+                <li
+                  key={label}
+                  className="flex items-center justify-between gap-4 rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-gray-200"
+                >
+                  <span className="font-semibold">{label}</span>
+                  <span className="text-sm text-gray-300">{value}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-xs text-gray-500">
+              Final terms are confirmed at onboarding. Card processing fees follow Stripe&apos;s posted rates.
+            </p>
+          </div>
+
+          <div className="rounded-3xl border border-infamous-border bg-[#0f0f0f] p-6">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Dispatch services</p>
+            <h2 className="mt-2 text-2xl font-bold">Productized dispatch packages.</h2>
+            <ul className="mt-5 space-y-3 text-sm">
+              {[
+                ['Owner-operator dispatch', '5–8% of gross'],
+                ['Small fleet dispatch', '4–6% of gross'],
+                ['Dedicated dispatcher', '$599–$1,499/mo + lower %'],
+                ['Paperwork-only package', '$99–$299/mo'],
+                ['Compliance and docs', '$49–$149/mo'],
+              ].map(([label, value]) => (
+                <li
+                  key={label}
+                  className="flex items-center justify-between gap-4 rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-gray-200"
+                >
+                  <span className="font-semibold">{label}</span>
+                  <span className="text-sm text-gray-300">{value}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-xs text-gray-500">
+              Need a custom package or fleet pricing? Use the contact form to scope it directly with operations.
+            </p>
+          </div>
+        </section>
       </div>
     </main>
   );
