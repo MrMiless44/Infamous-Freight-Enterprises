@@ -6,6 +6,7 @@ COPY apps/api/package.json ./package.json
 RUN npm install
 
 COPY apps/api ./
+RUN npx prisma generate --schema prisma/schema.prisma
 RUN npx tsc -p tsconfig.build.json
 
 FROM node:22-noble AS runtime
@@ -18,6 +19,8 @@ COPY apps/api/package.json ./package.json
 RUN npm install --omit=dev
 
 COPY --from=build /app/apps/api/dist ./dist
+COPY --from=build /app/apps/api/node_modules/.prisma ./node_modules/.prisma
+COPY --from=build /app/apps/api/node_modules/@prisma ./node_modules/@prisma
 
 RUN groupadd --system --gid 1001 nodejs
 RUN useradd --system --uid 1001 --gid 1001 nodejs
