@@ -65,7 +65,7 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: uploadSourcemaps,
+    sourcemap: uploadSourcemaps ? 'hidden' : false,
     chunkSizeWarningLimit: 500,
     rollupOptions: {
       output: {
