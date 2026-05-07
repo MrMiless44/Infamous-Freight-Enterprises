@@ -48,6 +48,10 @@ jobs:
       - name: Build API
         run: pnpm -C apps/api run build
 
+
+      - name: Build Docker image
+        run: docker build -t infamous-freight-api:ci .
+
       - name: Setup flyctl
         uses: superfly/flyctl-actions/setup-flyctl@v1
 
