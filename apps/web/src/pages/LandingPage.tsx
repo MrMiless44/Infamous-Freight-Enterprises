@@ -25,9 +25,9 @@ const navLinks = [
 ];
 
 const proofPoints = [
-  { label: 'Driver verified', detail: 'FMCSA, insurance, ID', icon: <ShieldCheck size={18} /> },
-  { label: 'Load tracked', detail: 'Pickup to POD timeline', icon: <RouteIcon size={18} /> },
-  { label: 'Proof captured', detail: 'Photos, signatures, audit log', icon: <Camera size={18} /> },
+  { label: 'Carrier verified', detail: 'Authority, insurance, equipment fit', icon: <ShieldCheck size={18} /> },
+  { label: 'Lane documented', detail: 'Pickup windows, accessorials, contacts', icon: <ClipboardCheck size={18} /> },
+  { label: 'Proof captured', detail: 'POD, status notes, follow-up record', icon: <Camera size={18} /> },
 ];
 
 const loadMetrics = [
@@ -111,9 +111,16 @@ const audienceCards = [
 ];
 
 const portalLinks = [
-  { label: 'Customer Portal', href: '/customer-portal', icon: <FileText size={20} /> },
-  { label: 'Carrier Portal', href: '/carrier-portal', icon: <ShieldCheck size={20} /> },
-  { label: 'Operations Dashboard', href: '/ops', icon: <BarChart3 size={20} /> },
+  { label: 'Customer Portal', detail: 'Account access for shipment status, quote history, invoices, and support notes.', href: '/customer-portal', icon: <FileText size={20} /> },
+  { label: 'Carrier Portal', detail: 'Verified carrier and driver workspace for assigned freight and onboarding.', href: '/carrier-portal', icon: <ShieldCheck size={20} /> },
+  { label: 'Operations Dashboard', detail: 'Internal dispatch view for quotes, loads, exceptions, documents, and billing handoff.', href: '/ops', icon: <BarChart3 size={20} /> },
+];
+
+const trustDetails = [
+  ['Service areas', 'Local, metro, and regional lanes for box truck, cargo van, sprinter van, and pallet freight.'],
+  ['Operating standard', 'Dispatch confirms equipment, timing, pickup access, delivery requirements, and proof expectations before tender.'],
+  ['Compliance posture', 'Carrier authority, insurance, driver fit, and documentation are reviewed before assignment.'],
+  ['Response expectations', 'Complete quote requests receive dispatch review for rate, capacity, and next-step confirmation.'],
 ];
 
 const LandingPage: React.FC = () => {
@@ -291,6 +298,26 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      <section className="border-b border-white/10 bg-[#090909]">
+        <div className="mx-auto grid max-w-7xl gap-8 px-5 py-14 lg:grid-cols-[0.9fr_1.1fr] lg:px-6">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Proof before paperwork</p>
+            <h2 className="mt-2 text-3xl font-black">Concrete freight details before a booking decision.</h2>
+            <p className="mt-4 max-w-xl leading-7 text-zinc-400">
+              Shippers should know what will be checked before they hand over a load. Infamous Freight keeps coverage, timing, access, and documentation expectations visible from the first request.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {trustDetails.map(([label, detail]) => (
+              <article key={label} className="rounded-lg border border-white/10 bg-[#111] p-5">
+                <p className="text-sm font-bold uppercase tracking-[0.16em] text-infamous-orange">{label}</p>
+                <p className="mt-3 text-sm leading-6 text-zinc-400">{detail}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="relative border-b border-white/10 bg-[#101010]">
         <div className="absolute inset-y-0 left-0 hidden w-1/2 bg-[linear-gradient(90deg,rgba(255,61,0,0.12),transparent)] lg:block" />
         <div className="relative mx-auto grid max-w-7xl gap-8 px-5 py-16 lg:grid-cols-2 lg:items-center lg:px-6">
@@ -350,13 +377,14 @@ const LandingPage: React.FC = () => {
           <Link
             key={item.href}
             to={item.href}
-            className="group flex min-h-20 items-center justify-between rounded-lg border border-white/10 bg-[#101010] p-5 transition hover:border-infamous-orange/50"
+            className="group grid min-h-20 grid-cols-[1fr_auto] gap-3 rounded-lg border border-white/10 bg-[#101010] p-5 transition hover:border-infamous-orange/50"
           >
             <span className="flex items-center gap-3 font-semibold text-white">
               <span className="text-infamous-orange">{item.icon}</span>
               {item.label}
             </span>
             <ArrowRight size={18} className="text-zinc-500 transition group-hover:text-infamous-orange" />
+            <span className="col-span-2 mt-3 text-sm leading-6 text-zinc-400">{item.detail}</span>
           </Link>
         ))}
       </section>

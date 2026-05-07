@@ -17,4 +17,4 @@ Disallow: /login
 Disallow: /customer-portal
 Disallow: /carrier-portal
 
-Sitemap: https://infamousfreight.com/sitemap.xml
+Sitemap: https://www.infamousfreight.com/sitemap.xml

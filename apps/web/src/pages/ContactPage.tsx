@@ -16,16 +16,19 @@ const contactCards = [
   {
     label: 'Dispatch and quotes',
     value: 'dispatch@infamousfreight.com',
+    detail: 'Best for active loads, quote follow-up, pickup timing, and delivery exceptions.',
     icon: <Mail size={20} />,
   },
   {
     label: 'Driver onboarding',
     value: 'drivers@infamousfreight.com',
+    detail: 'Best for driver applications, equipment details, compliance documents, and onboarding status.',
     icon: <Truck size={20} />,
   },
   {
     label: 'General support',
     value: 'support@infamousfreight.com',
+    detail: 'Best for account help, partnerships, billing questions, and non-urgent requests.',
     icon: <Phone size={20} />,
   },
 ];
@@ -73,6 +76,7 @@ const ContactPage: React.FC = () => {
               <div className="mb-3 text-infamous-orange">{card.icon}</div>
               <p className="text-sm text-gray-500">{card.label}</p>
               <p className="mt-1 font-semibold text-white">{card.value}</p>
+              <p className="mt-3 text-sm leading-6 text-gray-400">{card.detail}</p>
             </div>
           ))}
         </section>
@@ -167,7 +171,9 @@ const ContactPage: React.FC = () => {
             <div className="rounded-3xl border border-infamous-border bg-[#111] p-6">
               <Clock3 className="mb-3 text-infamous-orange" size={24} />
               <h2 className="text-lg font-bold">Response expectations</h2>
-              <p className="mt-3 text-sm leading-6 text-gray-400">Quote and dispatch requests are prioritized first. General support and partner inquiries are routed by topic.</p>
+              <p className="mt-3 text-sm leading-6 text-gray-400">
+                Active-load and dispatch messages should include the load or tracking number and are treated as the highest-priority support path. Quote, driver onboarding, partner, and general support requests are routed by topic.
+              </p>
             </div>
             <div className="rounded-3xl border border-infamous-border bg-[#111] p-6">
               <MapPin className="mb-3 text-infamous-orange" size={24} />

@@ -1,6 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
 import { BRAND } from '@/lib/brand';
+import { servicePages } from '@/data/publicPages';
 
 type SeoConfig = {
   title: string;
@@ -19,19 +20,24 @@ const DEFAULT_SEO: SeoConfig = {
 
 const SEO_BY_PATH: Record<string, SeoConfig> = {
   '/': {
-    title: `${BRAND.displayName} — AI Freight Operating System`,
+    title: `${BRAND.displayName} | Verified Freight Quote, Dispatch, and Tracking`,
     description:
-      'Run dispatch, visibility, and carrier operations from one AI-powered operating system built for modern fleets.'
+      'Request local and regional freight quotes, track active shipments, and coordinate verified box truck, cargo van, sprinter van, and dispatch support.'
   },
   '/home': {
-    title: `${BRAND.displayName} — AI Freight Operating System`,
+    title: `${BRAND.displayName} | Verified Freight Quote, Dispatch, and Tracking`,
     description:
-      'Run dispatch, visibility, and carrier operations from one AI-powered operating system built for modern fleets.'
+      'Request local and regional freight quotes, track active shipments, and coordinate verified box truck, cargo van, sprinter van, and dispatch support.'
+  },
+  '/services': {
+    title: `Freight Services | ${BRAND.displayName}`,
+    description:
+      'Explore box truck, cargo van, sprinter van, local freight, regional freight, and dispatch support services from Infamous Freight.'
   },
   '/request-quote': {
     title: `Request a Freight Quote | ${BRAND.displayName}`,
     description:
-      `Submit shipment details and receive a fast quote with AI-assisted lane and carrier matching from ${BRAND.displayName}.`
+      `Submit pickup, delivery, equipment, freight, and accessorial details so ${BRAND.displayName} can review capacity and respond with pricing.`
   },
   '/track-shipment': {
     title: `Track Shipment in Real Time | ${BRAND.displayName}`,
@@ -45,7 +51,22 @@ const SEO_BY_PATH: Record<string, SeoConfig> = {
   }
 };
 
-const INDEXABLE_ROUTES = new Set(['/', '/home', '/request-quote', '/track-shipment', '/freight-assistant']);
+servicePages.forEach((service) => {
+  SEO_BY_PATH[`/services/${service.slug}`] = {
+    title: `${service.title} | ${BRAND.displayName}`,
+    description: service.summary,
+  };
+});
+
+const INDEXABLE_ROUTES = new Set([
+  '/',
+  '/home',
+  '/services',
+  ...servicePages.map((service) => `/services/${service.slug}`),
+  '/request-quote',
+  '/track-shipment',
+  '/freight-assistant',
+]);
 
 const SeoManager = () => {
   const location = useLocation();

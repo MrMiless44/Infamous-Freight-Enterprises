@@ -8,14 +8,29 @@ const initialForm = {
   contact: '',
   email: '',
   phone: '',
-  origin: '',
-  destination: '',
+  pickupAddress: '',
+  pickupCity: '',
+  pickupState: '',
+  pickupZip: '',
+  deliveryAddress: '',
+  deliveryCity: '',
+  deliveryState: '',
+  deliveryZip: '',
   freightType: '',
   equipment: 'Dry van',
   weight: '',
+  palletCount: '',
   dimensions: '',
+  declaredValue: '',
   pickupDate: '',
+  pickupWindow: '',
   deliveryDate: '',
+  deliveryWindow: '',
+  dockRequirements: '',
+  accessorials: '',
+  hazmat: 'No',
+  temperatureControl: 'No',
+  documentLink: '',
   instructions: '',
 };
 
@@ -26,7 +41,7 @@ const PublicQuoteRequestPage: React.FC = () => {
   const [error, setError] = useState('');
 
   const completion = useMemo(() => {
-    const required = ['company', 'contact', 'email', 'origin', 'destination', 'freightType', 'weight', 'pickupDate'];
+    const required = ['company', 'contact', 'email', 'pickupCity', 'pickupState', 'deliveryCity', 'deliveryState', 'freightType', 'weight', 'pickupDate'];
     const complete = required.filter((key) => form[key as keyof typeof form].trim()).length;
     return Math.round((complete / required.length) * 100);
   }, [form]);
@@ -103,25 +118,37 @@ const PublicQuoteRequestPage: React.FC = () => {
                     ['contact', 'Contact name'],
                     ['email', 'Email'],
                     ['phone', 'Phone'],
-                    ['origin', 'Origin city/state'],
-                    ['destination', 'Destination city/state'],
-                    ['freightType', 'Freight type'],
-                    ['weight', 'Weight'],
-                    ['dimensions', 'Dimensions / pallet count'],
+                    ['pickupAddress', 'Pickup address or facility'],
+                    ['pickupCity', 'Pickup city'],
+                    ['pickupState', 'Pickup state'],
+                    ['pickupZip', 'Pickup ZIP'],
+                    ['deliveryAddress', 'Delivery address or facility'],
+                    ['deliveryCity', 'Delivery city'],
+                    ['deliveryState', 'Delivery state'],
+                    ['deliveryZip', 'Delivery ZIP'],
+                    ['freightType', 'Commodity / freight description'],
+                    ['weight', 'Total weight'],
+                    ['palletCount', 'Pallet or piece count'],
+                    ['dimensions', 'Dimensions'],
+                    ['declaredValue', 'Declared value'],
                     ['pickupDate', 'Pickup date'],
+                    ['pickupWindow', 'Pickup window'],
                     ['deliveryDate', 'Delivery date'],
+                    ['deliveryWindow', 'Delivery window'],
+                    ['dockRequirements', 'Dock / liftgate requirements'],
+                    ['documentLink', 'BOL or photo link'],
                   ].map(([key, label]) => (
                     <label key={key} className="block">
                       <span className="mb-2 block text-sm font-medium text-gray-300">{label}</span>
                       <input
                         name={key}
-                        type={key === 'email' ? 'email' : key.toLowerCase().includes('date') ? 'date' : 'text'}
+                        type={key === 'email' ? 'email' : key.toLowerCase().includes('date') ? 'date' : key === 'documentLink' ? 'url' : 'text'}
                         autoComplete={key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'off'}
                         value={form[key as keyof typeof form]}
                         onChange={(event) => updateField(key as keyof typeof initialForm, event.target.value)}
                         className="w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"
                         placeholder={label}
-                        required={['company', 'contact', 'email', 'origin', 'destination', 'freightType', 'weight', 'pickupDate'].includes(key)}
+                        required={['company', 'contact', 'email', 'pickupCity', 'pickupState', 'deliveryCity', 'deliveryState', 'freightType', 'weight', 'pickupDate'].includes(key)}
                       />
                     </label>
                   ))}
@@ -142,16 +169,54 @@ const PublicQuoteRequestPage: React.FC = () => {
                       <option>Sprinter van</option>
                     </select>
                   </label>
+                  <label className="block">
+                    <span className="mb-2 block text-sm font-medium text-gray-300">Hazmat</span>
+                    <select
+                      name="hazmat"
+                      value={form.hazmat}
+                      onChange={(event) => updateField('hazmat', event.target.value)}
+                      className="w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"
+                    >
+                      <option>No</option>
+                      <option>Yes</option>
+                      <option>Unsure</option>
+                    </select>
+                  </label>
+                  <label className="block">
+                    <span className="mb-2 block text-sm font-medium text-gray-300">Temperature control</span>
+                    <select
+                      name="temperatureControl"
+                      value={form.temperatureControl}
+                      onChange={(event) => updateField('temperatureControl', event.target.value)}
+                      className="w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"
+                    >
+                      <option>No</option>
+                      <option>Refrigerated</option>
+                      <option>Frozen</option>
+                      <option>Protect from freeze</option>
+                    </select>
+                  </label>
                 </div>
 
                 <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-gray-300">Special instructions</span>
+                  <span className="mb-2 block text-sm font-medium text-gray-300">Accessorials and special instructions</span>
+                  <textarea
+                    name="accessorials"
+                    value={form.accessorials}
+                    onChange={(event) => updateField('accessorials', event.target.value)}
+                    className="min-h-24 w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"
+                    placeholder="Inside delivery, appointment, limited access, residential, straps, blankets, pallet jack, or other services."
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-gray-300">Additional notes</span>
                   <textarea
                     name="instructions"
                     value={form.instructions}
                     onChange={(event) => updateField('instructions', event.target.value)}
                     className="min-h-32 w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"
-                    placeholder="Pickup windows, delivery requirements, accessorials, dock notes, etc."
+                    placeholder="Reference numbers, shipper or consignee notes, appointment details, or anything dispatch should know before pricing."
                   />
                 </label>
 
@@ -180,7 +245,7 @@ const PublicQuoteRequestPage: React.FC = () => {
             <div className="rounded-3xl border border-infamous-border bg-[#111] p-6">
               <h2 className="text-lg font-bold">Tips for a faster quote</h2>
               <p className="mt-3 text-sm leading-6 text-gray-400">
-                Fill in origin, destination, freight type, weight, equipment, and pickup date so dispatch can respond faster.
+                Fill in pickup and delivery windows, freight description, weight, pallet count, accessorials, and dock requirements so dispatch can price with fewer follow-up calls.
               </p>
             </div>
           </aside>
