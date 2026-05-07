@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Clock3, Mail, MapPin, Phone, Send } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Clock3, Mail, MapPin, Phone, Send, Truck } from 'lucide-react';
 import { submitNetlifyForm } from '@/lib/netlifyForms';
 
 const initialForm = {
@@ -21,7 +21,7 @@ const contactCards = [
   {
     label: 'Driver onboarding',
     value: 'drivers@infamousfreight.com',
-    icon: <TruckIcon />,
+    icon: <Truck size={20} />,
   },
   {
     label: 'General support',
@@ -29,10 +29,6 @@ const contactCards = [
     icon: <Phone size={20} />,
   },
 ];
-
-function TruckIcon() {
-  return <span aria-hidden="true">🚚</span>;
-}
 
 const ContactPage: React.FC = () => {
   const [form, setForm] = useState(initialForm);
@@ -117,6 +113,8 @@ const ContactPage: React.FC = () => {
                       <span className="mb-2 block text-sm font-medium text-gray-300">{label}</span>
                       <input
                         name={key}
+                        type={key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'text'}
+                        autoComplete={key === 'name' ? 'name' : key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'organization'}
                         value={form[key as keyof typeof initialForm]}
                         onChange={(event) => update(key as keyof typeof initialForm, event.target.value)}
                         className="w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"

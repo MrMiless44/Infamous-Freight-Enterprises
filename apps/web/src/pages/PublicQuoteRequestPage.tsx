@@ -115,6 +115,8 @@ const PublicQuoteRequestPage: React.FC = () => {
                       <span className="mb-2 block text-sm font-medium text-gray-300">{label}</span>
                       <input
                         name={key}
+                        type={key === 'email' ? 'email' : key.toLowerCase().includes('date') ? 'date' : 'text'}
+                        autoComplete={key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'off'}
                         value={form[key as keyof typeof form]}
                         onChange={(event) => updateField(key as keyof typeof initialForm, event.target.value)}
                         className="w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"

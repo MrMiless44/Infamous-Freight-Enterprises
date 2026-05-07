@@ -1,0 +1,37 @@
+{
+  "name": "Infamous Freight Public Preview",
+  "short_name": "Infamous",
+  "description": "Request freight quotes, start carrier onboarding, contact support, and open shipment portal entry points.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#090909",
+  "theme_color": "#ff3d00",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Request quote",
+      "short_name": "Quote",
+      "url": "/request-quote"
+    },
+    {
+      "name": "Apply to drive",
+      "short_name": "Drive",
+      "url": "/drive"
+    },
+    {
+      "name": "Contact support",
+      "short_name": "Support",
+      "url": "/contact"
+    }
+  ]
+}

@@ -14,6 +14,21 @@ const initialForm = {
 };
 
 const equipmentOptions = ['Cargo van', 'Sprinter van', 'Box truck', 'Power-only', 'Dry van', 'Reefer', 'Flatbed'];
+const fieldLabels: Record<keyof Pick<typeof initialForm, 'fullName' | 'email' | 'phone' | 'city' | 'state'>, string> = {
+  fullName: 'Full name',
+  email: 'Email',
+  phone: 'Phone',
+  city: 'City',
+  state: 'State',
+};
+
+const autoCompleteByField: Record<keyof typeof fieldLabels, string> = {
+  fullName: 'name',
+  email: 'email',
+  phone: 'tel',
+  city: 'address-level2',
+  state: 'address-level1',
+};
 
 const DriversApplyPage: React.FC = () => {
   const [form, setForm] = useState(initialForm);
@@ -87,8 +102,16 @@ const DriversApplyPage: React.FC = () => {
                 <p className="hidden"><label>Do not fill this out: <input name="bot-field" /></label></p>
                 {(['fullName', 'email', 'phone', 'city', 'state'] as const).map((key) => (
                   <label key={key} className="block">
-                    <span className="mb-2 block text-sm font-medium text-gray-300">{key}</span>
-                    <input name={key} value={form[key]} onChange={(event) => update(key, event.target.value)} className="w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange" required />
+                    <span className="mb-2 block text-sm font-medium text-gray-300">{fieldLabels[key]}</span>
+                    <input
+                      name={key}
+                      type={key === 'email' ? 'email' : 'text'}
+                      autoComplete={autoCompleteByField[key]}
+                      value={form[key]}
+                      onChange={(event) => update(key, event.target.value)}
+                      className="w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"
+                      required
+                    />
                   </label>
                 ))}
                 <label className="block">
