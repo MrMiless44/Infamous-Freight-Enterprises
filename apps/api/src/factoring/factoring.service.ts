@@ -160,27 +160,27 @@ export class FactoringService {
   }
 
   private async submitToRTS(invoice: FactoredInvoice, setup: FactoringSetup): Promise<void> {
-    this.logger.log(`Submitting invoice ${invoice.invoiceId} to RTS Financial (account: ${setup.accountNumber})`);
-    // TODO: Implement RTS API integration
+    this.logger.warn(`RTS Financial API not configured — invoice ${invoice.invoiceId} (account: ${setup.accountNumber}) logged only`);
+    throw new Error('RTS Financial integration is not yet configured. Contact support to enable factoring.');
   }
 
   private async submitToOTR(invoice: FactoredInvoice, setup: FactoringSetup): Promise<void> {
-    this.logger.log(`Submitting invoice ${invoice.invoiceId} to OTR Capital (account: ${setup.accountNumber})`);
-    // TODO: Implement OTR API integration
+    this.logger.warn(`OTR Capital API not configured — invoice ${invoice.invoiceId} (account: ${setup.accountNumber}) logged only`);
+    throw new Error('OTR Capital integration is not yet configured. Contact support to enable factoring.');
   }
 
   private async submitToApex(invoice: FactoredInvoice, setup: FactoringSetup): Promise<void> {
-    this.logger.log(`Submitting invoice ${invoice.invoiceId} to Apex Capital (account: ${setup.accountNumber})`);
-    // TODO: Implement Apex API integration
+    this.logger.warn(`Apex Capital API not configured — invoice ${invoice.invoiceId} (account: ${setup.accountNumber}) logged only`);
+    throw new Error('Apex Capital integration is not yet configured. Contact support to enable factoring.');
   }
 
   private async submitToBluevine(invoice: FactoredInvoice, setup: FactoringSetup): Promise<void> {
-    this.logger.log(`Submitting invoice ${invoice.invoiceId} to Bluevine (account: ${setup.accountNumber})`);
-    // TODO: Implement Bluevine API integration
+    this.logger.warn(`Bluevine API not configured — invoice ${invoice.invoiceId} (account: ${setup.accountNumber}) logged only`);
+    throw new Error('Bluevine integration is not yet configured. Contact support to enable factoring.');
   }
 
   private async submitToECapital(invoice: FactoredInvoice, setup: FactoringSetup): Promise<void> {
-    this.logger.log(`Submitting invoice ${invoice.invoiceId} to eCapital (account: ${setup.accountNumber})`);
-    // TODO: Implement eCapital API integration
+    this.logger.warn(`eCapital API not configured — invoice ${invoice.invoiceId} (account: ${setup.accountNumber}) logged only`);
+    throw new Error('eCapital integration is not yet configured. Contact support to enable factoring.');
   }
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Gavel, Clock, TrendingUp, DollarSign, Users, ArrowUp, Shield } from 'lucide-react';
+import { Gavel, Clock, DollarSign, Users, ArrowUp, Shield } from 'lucide-react';
 
 interface Bid {
   id: string;

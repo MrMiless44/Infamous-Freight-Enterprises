@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, MicOff, Loader2, CheckCircle, Truck, MapPin, DollarSign, Clock } from 'lucide-react';
+import { Mic, MicOff, Loader2, CheckCircle, Truck, MapPin, Clock } from 'lucide-react';
 
 interface VoiceResult {
   command: string;

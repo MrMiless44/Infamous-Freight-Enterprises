@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Filter, MapPin, DollarSign, Clock, Star, Truck, Bookmark, Phone, CreditCard } from 'lucide-react';
+import { Search, Filter, DollarSign, Truck, Bookmark, Phone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Load {

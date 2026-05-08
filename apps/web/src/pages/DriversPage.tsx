@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Users, MapPin, Clock, Star, Phone, Truck, TrendingUp, Award } from 'lucide-react';
+import { Users, MapPin, Star, Phone, Truck, TrendingUp, Award } from 'lucide-react';
 
 interface Driver {
   id: string;

@@ -59,9 +59,7 @@ export class RBACService {
     };
 
     this.members.set(id, member);
-    this.logger.log(`Invited ${email} as ${role} to carrier ${carrierId}`);
-
-    // TODO: Send invitation email
+    this.logger.warn(`Invitation email not configured — ${email} invited as ${role} to carrier ${carrierId} (logged only)`);
 
     return member;
   }

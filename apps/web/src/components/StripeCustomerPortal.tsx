@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CreditCard, CheckCircle, AlertTriangle, Calendar, DollarSign, Users, Zap } from 'lucide-react';
+import { CreditCard, CheckCircle, AlertTriangle, Calendar, Users, Zap } from 'lucide-react';
 
 interface Subscription {
   plan: string;

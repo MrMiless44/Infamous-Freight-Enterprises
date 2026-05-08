@@ -84,10 +84,9 @@ export class RateConService {
   async emailToBroker(data: RateConData, brokerEmail: string, templateId?: string): Promise<{ sent: boolean; messageId?: string }> {
     const { html } = await this.generateRateCon(data, templateId);
 
-    // TODO: Integrate with SendGrid/AWS SES
-    this.logger.log(`Rate con ${data.rateConNumber} emailed to ${brokerEmail}`);
+    this.logger.warn(`Email delivery not configured — rate con ${data.rateConNumber} for ${brokerEmail} logged only`);
 
-    return { sent: true, messageId: `msg_${Date.now()}` };
+    return { sent: false };
   }
 
   async createTemplate(template: Omit<RateConTemplate, 'id'>): Promise<RateConTemplate> {

@@ -128,8 +128,7 @@ export class InvoiceService {
     inv.issueDate = new Date();
     inv.updatedAt = new Date();
 
-    // TODO: Send email to broker with PDF attachment
-    this.logger.log(`Invoice ${inv.invoiceNumber} marked as sent to ${inv.brokerEmail}`);
+    this.logger.warn(`Email delivery not configured — invoice ${inv.invoiceNumber} marked sent but not emailed to ${inv.brokerEmail}`);
 
     return inv;
   }
@@ -158,8 +157,7 @@ export class InvoiceService {
       inv.status = 'overdue';
     }
 
-    // TODO: Send reminder email
-    this.logger.log(`Reminder #${inv.remindersSent} sent for invoice ${inv.invoiceNumber}`);
+    this.logger.warn(`Email delivery not configured — reminder #${inv.remindersSent} for invoice ${inv.invoiceNumber} logged only`);
 
     return inv;
   }
@@ -222,11 +220,9 @@ export class InvoiceService {
     return report;
   }
 
-  // QuickBooks sync placeholder
   async syncToQuickBooks(invoiceId: string): Promise<{ quickBooksId: string }> {
-    // TODO: Implement QuickBooks OAuth + API sync
-    this.logger.log(`Invoice ${invoiceId} synced to QuickBooks`);
-    return { quickBooksId: `qb_${invoiceId}` };
+    this.logger.warn(`QuickBooks sync not configured — invoice ${invoiceId} not synced`);
+    throw new Error('QuickBooks integration is not yet configured. Set QUICKBOOKS_CLIENT_ID and QUICKBOOKS_CLIENT_SECRET to enable.');
   }
 
   private generateInvoiceNumber(carrierId: string): string {

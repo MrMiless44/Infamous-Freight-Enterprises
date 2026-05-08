@@ -1,12 +1,15 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import { createApp } from './app';
+import { assertEnvironment } from './env';
 
 dotenv.config();
 
 if (!process.env.DATABASE_URL) {
   process.env.DATABASE_URL = process.env.Database_URL ?? process.env.database_url ?? '';
 }
+
+assertEnvironment();
 
 const port = Number(process.env.PORT ?? 3000);
 const host = process.env.HOST ?? '0.0.0.0';

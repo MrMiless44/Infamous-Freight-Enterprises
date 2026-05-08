@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, TrendingDown, Minus, ArrowRight, Zap, Info } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Zap, Info } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 
 interface RateData {
@@ -28,7 +28,7 @@ const DynamicPricing: React.FC<DynamicPricingProps> = ({ origin = 'Chicago, IL',
   const [trend, setTrend] = useState<'up' | 'down' | 'stable'>('up');
   const [suggestedRate, setSuggestedRate] = useState(2.95);
   const [marketAvg, setMarketAvg] = useState(2.74);
-  const [confidence, setConfidence] = useState(87);
+  const [confidence] = useState(87);
 
   useEffect(() => {
     const first = mockData[0].rate;

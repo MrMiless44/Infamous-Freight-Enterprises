@@ -5,8 +5,7 @@
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, File, X, Loader2, CheckCircle, FileText, Camera } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Upload, File, X, CheckCircle, FileText, Camera } from 'lucide-react';
 
 interface DocumentUploadProps {
   loadId: string;

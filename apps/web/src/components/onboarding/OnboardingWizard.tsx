@@ -3,7 +3,6 @@ import {
   Truck,
   Users,
   MapPin,
-  Shield,
   Radio,
   CheckCircle,
   ChevronRight,
@@ -182,7 +181,7 @@ const OnboardingWizard: React.FC = () => {
           <div className="space-y-4">
             <div>
               <label className="block text-sm text-gray-400 mb-1">Primary Lanes (top 3)</label>
-              {['Lane 1', 'Lane 2', 'Lane 3'].map((label, i) => (
+              {['Lane 1', 'Lane 2', 'Lane 3'].map((_label, i) => (
                 <div key={i} className="flex gap-2 mb-2">
                   <input
                     type="text"

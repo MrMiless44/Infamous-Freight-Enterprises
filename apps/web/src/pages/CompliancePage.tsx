@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ShieldCheck, AlertTriangle, FileCheck, Clock, TrendingDown, Truck, Ban, ExternalLink } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, FileCheck, Clock, TrendingDown, Ban, ExternalLink } from 'lucide-react';
 
 interface DocExpiry {
   id: string;

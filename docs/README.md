@@ -3,7 +3,7 @@
 This directory contains operational, architectural, and launch-readiness documentation for the Infamous Freight platform. Use this index to navigate; documents are grouped by purpose rather than alphabetically.
 
 > Looking for the project overview? See the [root README](../README.md).
-> Looking for environment variables? See [`../ENVIRONMENT_VARIABLES_COMPLETE.md`](../ENVIRONMENT_VARIABLES_COMPLETE.md) and [`environment/`](./environment).
+> Looking for environment variables? See [`ENVIRONMENT_VARIABLES_COMPLETE.md`](./ENVIRONMENT_VARIABLES_COMPLETE.md) and [`environment/`](./environment).
 
 ---
 
@@ -70,13 +70,23 @@ This directory contains operational, architectural, and launch-readiness documen
 - [PAYWALL.md](./PAYWALL.md) — Paywall behavior.
 - [payments/](./payments) — Payments references.
 
-## ☁️ Infrastructure & Deployment
+## Infrastructure & Deployment
 
-- [CUSTOM-DOMAIN.md](./CUSTOM-DOMAIN.md) — Custom-domain setup.
-- [CURRENT_RECOMMENDATIONS_UPDATE.md](./CURRENT_RECOMMENDATIONS_UPDATE.md) — Current launch recommendations and documentation updates.
-- [NETLIFY-BUILDHOOKS.md](./NETLIFY-BUILDHOOKS.md) — Netlify build hooks.
+- [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md) — Production deployment checklist (single source of truth).
+- [fly-deployment-runbook.md](./fly-deployment-runbook.md) — Fly.io deployment runbook.
 - [netlify-deploy-checklist.md](./netlify-deploy-checklist.md) — Netlify deploy checklist.
+- [MONITORING_DEPLOYMENT.md](./MONITORING_DEPLOYMENT.md) — Post-deployment monitoring.
+- [DNS_DOMAIN_SETUP.md](./DNS_DOMAIN_SETUP.md) — Custom-domain and DNS setup.
+- [PAGERDUTY_SETUP.md](./PAGERDUTY_SETUP.md) — PagerDuty integration.
+- [CUSTOM-DOMAIN.md](./CUSTOM-DOMAIN.md) — Custom-domain setup.
+- [NETLIFY-BUILDHOOKS.md](./NETLIFY-BUILDHOOKS.md) — Netlify build hooks.
 - [MANUS-PRODUCTION-BUILD-PACKAGE.md](./MANUS-PRODUCTION-BUILD-PACKAGE.md) — Production build package notes.
+- [CURRENT_RECOMMENDATIONS_UPDATE.md](./CURRENT_RECOMMENDATIONS_UPDATE.md) — Current launch recommendations and documentation updates.
+
+## Integration Guides
+
+- [LOAD_BOARD_WEBHOOKS_SETUP.md](./LOAD_BOARD_WEBHOOKS_SETUP.md) — Load board webhook configuration.
+- [ENVIRONMENT_VARIABLES_COMPLETE.md](./ENVIRONMENT_VARIABLES_COMPLETE.md) — Complete environment variable reference.
 
 ## 🧰 Developer Environment
 

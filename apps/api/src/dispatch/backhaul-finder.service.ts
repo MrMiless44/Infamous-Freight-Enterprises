@@ -153,7 +153,7 @@ export class BackhaulFinderService {
     const top = cached[0];
     this.logger.log(`Notifying driver ${driverId}: ${cached.length} backhauls, best: ${top.load.origin.city}→${top.load.destination.city} @ $${top.load.ratePerMile}/mi (${top.deadheadMiles}mi deadhead)`);
 
-    // TODO: Send via WebSocket/FCM push notification
+    this.logger.warn('Push notification delivery not configured — backhaul alert logged only');
   }
 
   private haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {

@@ -209,8 +209,7 @@ export class ComplianceExpiryService {
 
   // Auto-sync with insurance providers
   async syncInsurance(carrierId: string, provider: 'progressive' | 'northland' | 'sentry'): Promise<void> {
-    this.logger.log(`Syncing insurance for ${carrierId} from ${provider}`);
-    // TODO: Implement insurance provider API integrations
+    this.logger.warn(`Insurance provider API (${provider}) not configured — sync for ${carrierId} skipped`);
   }
 
   private blocksDispatch(type: DocumentType): boolean {

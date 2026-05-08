@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  DollarSign, FileText, Send, CheckCircle, AlertTriangle,
+  FileText, Send, CheckCircle, AlertTriangle,
   Clock, TrendingUp, Download, ChevronRight, Truck
 } from 'lucide-react';
 
