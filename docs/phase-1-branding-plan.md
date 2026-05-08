@@ -1,8 +1,12 @@
 # Phase 1 — Branding Plan
 
-The first build phase for Infamous Freight is locking down brand identity across the web app and public surfaces so everything that follows ships under a consistent look and voice.
+The first build phase for Infamous Freight is locking down brand identity
+across the web app and public surfaces so everything that follows ships under a
+consistent look and voice.
 
-> Companion docs: [`platform-roadmap.md`](./platform-roadmap.md), [`customization-checklist.md`](./customization-checklist.md), [`branding/README.md`](./branding/README.md).
+> Companion docs: [`platform-roadmap.md`](./platform-roadmap.md),
+> [`customization-checklist.md`](./customization-checklist.md),
+> [`branding/README.md`](./branding/README.md).
 
 ---
 
@@ -35,29 +39,41 @@ Out of scope for Phase 1:
 
 ### 1. Tokens
 
-- [x] Lock the brand palette (primary, secondary, accent, neutral, semantic).
-- [x] Lock typographic scale (display, heading, body, mono).
-- [x] Express both as Tailwind theme extensions in `apps/web/tailwind.config.*`.
-- [x] Document tokens briefly in [`branding/README.md`](./branding/README.md) (or a token table inline).
+- Completed: lock the brand palette (primary, secondary, accent, neutral,
+  semantic).
+- Completed: lock typographic scale (display, heading, body, mono).
+- Completed: express both as Tailwind theme extensions in
+  `apps/web/tailwind.config.*`.
+- Completed: document tokens briefly in
+  [`branding/README.md`](./branding/README.md) (or a token table inline).
 
 ### 2. App shell
 
-- [x] Header / nav uses the locked logo and palette.
-- [x] Buttons, form controls, and table styles inherit the new tokens (no one-off hex values).
-- [x] Dark mode (if supported) updated alongside light mode.
-- [x] Verify the `/settings` billing panel still renders correctly with the new palette (`apps/web/src/components/billing/BillingSettingsPanel.tsx`).
+- Completed: header and nav use the locked logo and palette.
+- Completed: buttons, form controls, and table styles inherit the new tokens
+  (no one-off hex values).
+- Completed: dark mode (if supported) updated alongside light mode.
+- Completed: verify the `/settings` billing panel still renders correctly with
+  the new palette
+  (`apps/web/src/components/billing/BillingSettingsPanel.tsx`).
 
 ### 3. Public meta & assets
 
-- [x] `apps/web/index.html` — `<title>`, `<meta name="description">`, Open Graph, Twitter card.
-- [x] Favicons / app icons under `apps/web/public/`.
-- [x] Regenerate `.github/social-preview.png` from `docs/screenshots/infamousfreight-header.svg` via `pnpm run social-preview:generate` (see [`branding/README.md`](./branding/README.md)).
-- [ ] Re-upload the social preview via **Repo Settings → General → Social preview** (committing the file alone does not update GitHub's OG image).
+- Completed: `apps/web/index.html` updates for `<title>`,
+  `<meta name="description">`, Open Graph, and Twitter card.
+- Completed: favicons and app icons under `apps/web/public/`.
+- Completed: regenerate `.github/social-preview.png` from
+  `docs/screenshots/infamousfreight-header.svg` via
+  `pnpm run social-preview:generate` (see
+  [`branding/README.md`](./branding/README.md)).
+- Pending: re-upload the social preview via **Repo Settings → General → Social
+  preview** (committing the file alone does not update GitHub's OG image).
 
 ### 4. Documentation alignment
 
-- [x] `README.md` header image renders correctly.
-- [x] Screenshots under [`docs/screenshots/`](./screenshots) reflect the new look (or are clearly marked as historical).
+- Completed: `README.md` header image renders correctly.
+- Completed: screenshots under [`docs/screenshots/`](./screenshots) reflect the
+  new look (or are clearly marked as historical).
 
 ## Validation
 
@@ -72,9 +88,13 @@ pnpm -C apps/web run test
 
 Manual checks:
 
-- [x] Inspect header, nav, key page styling, and `/settings` billing source against the locked brand tokens.
-- [ ] `pnpm run build:web` produces `apps/web/dist` with no warnings related to assets.
-- [ ] After deploy, confirm `https://www.infamousfreight.com` reflects the new branding and the apex / `*.netlify.app` 301s still resolve there (per [`netlify.toml`](../netlify.toml)).
+- Completed: inspect header, nav, key page styling, and `/settings` billing
+  source against the locked brand tokens.
+- Pending: `pnpm run build:web` produces `apps/web/dist` with no warnings
+  related to assets.
+- Pending: after deploy, confirm `https://www.infamousfreight.com` reflects
+  the new branding and the apex / `*.netlify.app` 301s still resolve there
+  (per [`netlify.toml`](../netlify.toml)).
 
 ## Guardrails
 

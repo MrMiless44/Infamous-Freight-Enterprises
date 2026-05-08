@@ -4,7 +4,10 @@ Canonical brand and social preview assets for Infamous Freight Enterprise.
 
 ## Locked Brand Tokens
 
-The web app uses an industrial command-center palette designed for dispatchers, drivers, and freight operators working in low-light field conditions. These values are mirrored in `apps/web/tailwind.config.js` and `apps/web/src/index.css`.
+The web app uses an industrial command-center palette designed for
+dispatchers, drivers, and freight operators working in low-light field
+conditions. These values are mirrored in `apps/web/tailwind.config.js` and
+`apps/web/src/index.css`.
 
 | Token | Value | Use |
 |------|-------|-----|
@@ -24,7 +27,10 @@ The web app uses an industrial command-center palette designed for dispatchers, 
 | `infamous-warning` | `#e8a23b` | Warning semantic states |
 | `infamous-danger` | `#e05a47` | Error and destructive semantic states |
 
-Typography is locked to `Sora` for the app UI, `Archivo Black` for compact display/logo moments, and `IBM Plex Mono` for IDs, amounts, and operational metadata. Use the Tailwind families `font-sans`, `font-display`, and `font-mono` instead of adding one-off font stacks.
+Typography is locked to `Sora` for the app UI, `Archivo Black` for compact
+display/logo moments, and `IBM Plex Mono` for IDs, amounts, and operational
+metadata. Use the Tailwind families `font-sans`, `font-display`, and
+`font-mono` instead of adding one-off font stacks.
 
 | File | Purpose | Spec |
 |------|---------|------|
@@ -41,7 +47,9 @@ Typography is locked to `Sora` for the app UI, `Archivo Black` for compact displ
 4. Upload via **Repo Settings → General → Social preview** (committing alone is insufficient).
 5. Commit the optimized PNG to `.github/social-preview.png` as the source of truth.
 
-> **Note:** Committing the file to `.github/social-preview.png` does **not** automatically make GitHub use it as the Open Graph image. You must also upload it via **Repo Settings → General → Social preview**.
+> **Note:** Committing the file to `.github/social-preview.png` does **not**
+> automatically make GitHub use it as the Open Graph image. You must also
+> upload it via **Repo Settings → General → Social preview**.
 
 ## Generating the PNG from the SVG source
 
@@ -58,7 +66,8 @@ After generating, optimize and re-upload as described above.
 - **Dimensions:** 1280×640 px (1.91:1 ratio)
 - **Max file size:** < 1 MB (target < 300 KB after lossless compression)
 - **Format:** PNG, JPG, or GIF
-- **Color profile:** sRGB (avoid Display P3 — some scrapers mis-render wide gamut)
+- **Color profile:** sRGB (avoid Display P3 — some scrapers mis-render wide
+  gamut)
 
 ## Design guidelines
 

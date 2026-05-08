@@ -3,9 +3,9 @@
 @config "../tailwind.config.js";
 
 @theme {
-  --font-sans: 'Sora', system-ui, -apple-system, sans-serif;
+  --font-sans: Sora, system-ui, -apple-system, sans-serif;
   --font-display: 'Archivo Black', 'Sora', system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
   --color-infamous-orange: #f05a24;
   --color-infamous-orange-light: #ff8a3d;
   --color-infamous-orange-dark: #b83a14;
@@ -27,7 +27,6 @@
 @layer base {
   body {
     @apply bg-infamous-dark text-infamous-cream antialiased;
-    font-family: 'Sora', system-ui, -apple-system, sans-serif;
   }
 
   ::-webkit-scrollbar {
@@ -68,7 +67,11 @@
   }
 
   .input-field {
-    @apply w-full bg-infamous-panel border border-infamous-border rounded-lg px-4 py-3 text-infamous-cream text-sm placeholder-infamous-steel/60 focus:border-infamous-orange focus:outline-none transition-colors;
+    @apply w-full bg-infamous-panel border border-infamous-border rounded-lg px-4 py-3 text-infamous-cream text-sm placeholder-infamous-steel focus:border-infamous-orange focus:outline-none transition-colors;
+  }
+
+  .input-field::placeholder {
+    opacity: 0.6;
   }
 
   .table-header {
