@@ -304,6 +304,59 @@ function buildJsonLd(pathname: string): string {
     });
   }
 
+  if (pathname === '/drive') {
+    graph.push({
+      '@type': 'JobPosting',
+      title: 'Freight Driver — Owner Operator / Carrier',
+      description:
+        'Join the Infamous Freight driver network. Verified local and regional freight opportunities for cargo van, sprinter van, box truck, and power-only operators. Free to start with transparent dispatch support.',
+      datePosted: '2026-05-08',
+      validThrough: '2027-05-08',
+      employmentType: 'CONTRACTOR',
+      hiringOrganization: { '@id': SITE_URL + '/#organization' },
+      jobLocation: {
+        '@type': 'Place',
+        address: { '@type': 'PostalAddress', addressCountry: 'US' },
+      },
+      applicantLocationRequirements: { '@type': 'Country', name: 'United States' },
+      jobLocationType: 'TELECOMMUTE',
+      url: SITE_URL + '/drive',
+    });
+  }
+
+  if (pathname === '/pricing') {
+    graph.push(
+      {
+        '@type': 'Service',
+        name: 'Infamous Freight Platform — Starter',
+        description: 'Starter plan for shippers needing quote intake, tracking, and basic freight tools.',
+        provider: { '@id': SITE_URL + '/#organization' },
+        url: SITE_URL + '/pricing',
+        areaServed: { '@type': 'Country', name: 'United States' },
+        offers: {
+          '@type': 'Offer',
+          priceCurrency: 'USD',
+          url: SITE_URL + '/pricing',
+          availability: 'https://schema.org/InStock',
+        },
+      },
+      {
+        '@type': 'Service',
+        name: 'Infamous Freight Platform — Professional',
+        description: 'Professional plan with dispatch automation, carrier management, and AI freight tools.',
+        provider: { '@id': SITE_URL + '/#organization' },
+        url: SITE_URL + '/pricing',
+        areaServed: { '@type': 'Country', name: 'United States' },
+        offers: {
+          '@type': 'Offer',
+          priceCurrency: 'USD',
+          url: SITE_URL + '/pricing',
+          availability: 'https://schema.org/InStock',
+        },
+      },
+    );
+  }
+
   if (pathname.startsWith('/resources/') && pathname !== '/resources') {
     const seoEntry = SEO[pathname];
     if (seoEntry) {

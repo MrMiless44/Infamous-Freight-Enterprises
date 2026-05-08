@@ -174,6 +174,7 @@ const SeoManager = () => {
   const canonicalPath = pathname === '/home' ? '/' : pathname;
   const canonicalUrl = `${SITE_URL}${canonicalPath}`;
   const isIndexable = INDEXABLE_ROUTES.has(pathname) || pathname.startsWith('/services/') || pathname.startsWith('/resources/');
+  const isArticle = pathname.startsWith('/resources/') && pathname !== '/resources';
 
   return (
     <Helmet>
@@ -181,7 +182,7 @@ const SeoManager = () => {
       <meta name="description" content={seo.description} />
       <meta name="robots" content={isIndexable ? 'index,follow' : 'noindex,nofollow'} />
       <link rel="canonical" href={canonicalUrl} />
-      <meta property="og:type" content="website" />
+      <meta property="og:type" content={isArticle ? 'article' : 'website'} />
       <meta property="og:site_name" content={BRAND.displayName} />
       <meta property="og:locale" content="en_US" />
       <meta property="og:title" content={seo.title} />
@@ -192,6 +193,8 @@ const SeoManager = () => {
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:image:alt" content={BRAND.ogImageAlt} />
+      {isArticle && <meta property="article:published_time" content="2026-05-08T00:00:00Z" />}
+      {isArticle && <meta property="article:author" content={BRAND.displayName} />}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={seo.title} />
       <meta name="twitter:description" content={seo.description} />

@@ -1,6 +1,7 @@
 import { Link, Navigate, useParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, BookOpen, Clock } from 'lucide-react';
+import { ArrowRight, BookOpen, Calendar, Clock } from 'lucide-react';
 import { findArticle, resourceArticles } from '@/data/resourceArticles';
+import Breadcrumb from '@/components/Breadcrumb';
 
 const ResourceArticlePage: React.FC = () => {
   const { articleSlug } = useParams();
@@ -13,21 +14,17 @@ const ResourceArticlePage: React.FC = () => {
   return (
     <main className="min-h-screen bg-[#090909] px-6 py-10 text-white">
       <div className="mx-auto max-w-3xl">
-        <Link
-          to="/resources"
-          className="mb-8 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white"
-        >
-          <ArrowLeft size={14} /> Resources
-        </Link>
+        <Breadcrumb items={[{ label: 'Resources', href: '/resources' }, { label: article.title }]} />
 
         <div className="mb-5 inline-flex rounded-xl bg-infamous-orange/10 p-3 text-infamous-orange">
           <BookOpen size={24} />
         </div>
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">{article.category}</p>
         <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">{article.title}</h1>
-        <p className="mt-4 flex items-center gap-2 text-sm text-gray-400">
-          <Clock size={14} /> {article.readTime}
-        </p>
+        <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-400">
+          <span className="flex items-center gap-2"><Clock size={14} /> {article.readTime}</span>
+          <span className="flex items-center gap-2"><Calendar size={14} /> Published May 8, 2026</span>
+        </div>
         <p className="mt-4 text-lg leading-8 text-gray-300">{article.description}</p>
 
         <div className="mt-10 space-y-10">
