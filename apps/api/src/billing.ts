@@ -332,6 +332,20 @@ export function getBillingSyncFromStripeEvent(event: StripeEvent): BillingSyncPa
         status: 'canceled',
       };
     }
+    case 'customer.subscription.paused': {
+      return {
+        carrierId,
+        stripeCustomerId,
+        status: 'inactive',
+      };
+    }
+    case 'customer.subscription.resumed': {
+      return {
+        carrierId,
+        stripeCustomerId,
+        status: 'active',
+      };
+    }
     case 'invoice.payment_succeeded': {
       return {
         stripeCustomerId,
@@ -341,6 +355,20 @@ export function getBillingSyncFromStripeEvent(event: StripeEvent): BillingSyncPa
     case 'invoice.payment_failed': {
       return {
         stripeCustomerId,
+        status: 'past_due',
+      };
+    }
+    case 'charge.refunded': {
+      return {
+        stripeCustomerId,
+        carrierId,
+        status: 'past_due',
+      };
+    }
+    case 'charge.dispute.created': {
+      return {
+        stripeCustomerId,
+        carrierId,
         status: 'past_due',
       };
     }

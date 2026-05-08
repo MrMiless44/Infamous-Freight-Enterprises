@@ -16,6 +16,7 @@ import {
   ArrowDownRight,
   Minus
 } from 'lucide-react';
+import WidgetErrorBoundary from '@/components/ui/WidgetErrorBoundary';
 
 interface WeeklyMetric {
   label: string;
@@ -159,9 +160,14 @@ const MetricsDashboard: React.FC = () => {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white mb-1">Weekly Metrics</h1>
-            <p className="text-gray-400 text-sm">Track your fleet performance at a glance</p>
+            <p className="text-gray-400 text-sm">Track your fleet performance at a glance · sample data</p>
           </div>
-          <div className="flex gap-2 bg-[#1a1a1a] rounded-lg p-1">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-[#1a1a1a] border border-[#222] rounded-lg px-3 py-2">
+              <Activity size={14} className="text-gray-500" />
+              <span className="text-xs text-gray-500">Demo data</span>
+            </div>
+            <div className="flex gap-2 bg-[#1a1a1a] rounded-lg p-1">
             {(['7d', '30d', '90d'] as const).map((range) => (
               <button
                 key={range}
@@ -176,9 +182,11 @@ const MetricsDashboard: React.FC = () => {
               </button>
             ))}
           </div>
+          </div>
         </div>
 
         {/* KPI Cards */}
+        <WidgetErrorBoundary label="KPI metrics">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           {metrics.map((metric, i) => (
             <div
@@ -225,9 +233,11 @@ const MetricsDashboard: React.FC = () => {
             </div>
           ))}
         </div>
+        </WidgetErrorBoundary>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Top Lanes */}
+          <WidgetErrorBoundary label="Top lanes">
           <div className="bg-[#141414] border border-[#222] rounded-xl p-5">
             <div className="flex items-center gap-2 mb-4">
               <Map size={18} className="text-[#ff3d00]" />
@@ -253,8 +263,10 @@ const MetricsDashboard: React.FC = () => {
               ))}
             </div>
           </div>
+          </WidgetErrorBoundary>
 
           {/* Driver Leaderboard */}
+          <WidgetErrorBoundary label="Driver leaderboard">
           <div className="bg-[#141414] border border-[#222] rounded-xl p-5">
             <div className="flex items-center gap-2 mb-4">
               <Award size={18} className="text-[#ff3d00]" />
@@ -288,6 +300,7 @@ const MetricsDashboard: React.FC = () => {
               ))}
             </div>
           </div>
+          </WidgetErrorBoundary>
         </div>
 
         {/* Weekly Summary */}

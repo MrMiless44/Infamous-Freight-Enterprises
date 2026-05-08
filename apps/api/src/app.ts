@@ -7,6 +7,7 @@ import {
   createDataStore,
   DataStore,
   FreightOperationResource,
+  getPrismaClient,
 } from './data-store';
 import {
   BillingInterval,
@@ -28,6 +29,7 @@ import { createRateLimitMiddleware } from './rate-limit';
 import { createStripeWebhookEventStore } from './stripe-webhook-events';
 import { createStripeOneTimePaymentStore } from './stripe-one-time-payments';
 import { createFreightWorkflowRouter } from './freight-workflow-routes';
+import { createAuditLogger, AuditLogger } from './audit-logger';
 
 type Role = 'owner' | 'admin' | 'dispatcher';
 type SubscriptionStatus = 'active' | 'trialing' | 'trial' | 'past_due' | 'unpaid' | 'canceled' | 'incomplete' | 'none';
@@ -374,6 +376,14 @@ function requireBillingRole(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
+function getAuditUser(req: Request): { userId: string; userName: string } {
+  const auth = getTrustedAuthContext(req);
+  if (auth) return { userId: auth.userId, userName: auth.role };
+  const headerRole = req.header('x-user-role') ?? 'unknown';
+  const headerTenant = req.header('x-tenant-id') ?? 'unknown';
+  return { userId: headerTenant, userName: headerRole };
+}
+
 function normalizeSubscriptionStatus(status: unknown): SubscriptionStatus {
   if (typeof status !== 'string') {
     return 'none';
@@ -620,6 +630,41 @@ function isValidDateString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0 && !Number.isNaN(Date.parse(value));
 }
 
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function isFiniteNumber(value: unknown): boolean {
+  if (typeof value === 'number') return Number.isFinite(value);
+  if (typeof value === 'string') return value.trim().length > 0 && Number.isFinite(Number(value));
+  return false;
+}
+
+const VALID_EQUIPMENT_TYPES = new Set([
+  'dry_van', 'reefer', 'flatbed', 'box_truck', 'cargo_van',
+  'sprinter_van', 'step_deck', 'lowboy', 'tanker', 'intermodal', 'other',
+]);
+
+function validateLoadPayload(body: Record<string, unknown>): string[] {
+  const missing: string[] = [];
+  if (!isNonEmptyString(body.brokerName)) missing.push('brokerName');
+  if (!isNonEmptyString(body.originCity)) missing.push('originCity');
+  if (!isNonEmptyString(body.originState)) missing.push('originState');
+  if (!isNonEmptyString(body.destCity)) missing.push('destCity');
+  if (!isNonEmptyString(body.destState)) missing.push('destState');
+  if (!isFiniteNumber(body.rate)) missing.push('rate');
+  if (!isFiniteNumber(body.weight)) missing.push('weight');
+  if (!isValidDateString(body.pickupDate)) missing.push('pickupDate');
+  if (!isNonEmptyString(body.equipmentType)) missing.push('equipmentType');
+  return missing;
+}
+
+function validateDriverPayload(body: Record<string, unknown>): string[] {
+  const missing: string[] = [];
+  if (!isNonEmptyString(body.name)) missing.push('name');
+  return missing;
+}
+
 function getCarrierIdFromBillingSync(billingSync: ReturnType<typeof getBillingSyncFromStripeEvent>): string | null {
   return billingSync?.carrierId ?? null;
 }
@@ -636,6 +681,7 @@ function assignRequestId(req: Request, res: Response, next: NextFunction) {
   const requestId = req.header('x-request-id')?.trim() || randomUUID();
 
   req.requestId = requestId;
+  req.startTime = Date.now();
   res.setHeader('x-request-id', requestId);
   next();
 }
@@ -737,7 +783,7 @@ function registerWebhookRoute(app: express.Express, dataStore: DataStore) {
   }));
 }
 
-function registerRoutes(app: express.Express, dataStore: DataStore) {
+function registerRoutes(app: express.Express, dataStore: DataStore, auditLogger: AuditLogger) {
   const aiUsageStore = createAiUsageStore();
 
   // Public lead intake endpoints — no authentication required
@@ -846,6 +892,8 @@ function registerRoutes(app: express.Express, dataStore: DataStore) {
       billingInterval: getCheckoutInterval(req),
     });
 
+    const user = getAuditUser(req);
+    void auditLogger.log({ entityType: 'billing', entityId: carrierId, action: 'checkout_session_created', ...user, details: `plan=${getCheckoutPlan(req)}` });
     res.status(200).json({ data: { url } });
   }));
 
@@ -912,7 +960,14 @@ function registerRoutes(app: express.Express, dataStore: DataStore) {
   }));
 
   app.post('/api/loads', ...protectedApi, wrapAsync(async (req, res) => {
-    const data = await dataStore.createLoad(getRequiredTenantId(req), req.body);
+    const tenantId = getRequiredTenantId(req);
+    const missing = validateLoadPayload(req.body ?? {});
+    if (missing.length > 0) {
+      throw new HttpError(400, 'load_missing_fields', `Missing required fields: ${missing.join(', ')}.`);
+    }
+    const data = await dataStore.createLoad(tenantId, req.body);
+    const user = getAuditUser(req);
+    void auditLogger.log({ entityType: 'load', entityId: String(data.id), action: 'create', ...user });
     res.status(201).json({ data });
   }));
 
@@ -922,7 +977,14 @@ function registerRoutes(app: express.Express, dataStore: DataStore) {
   }));
 
   app.post('/api/drivers', ...protectedApi, wrapAsync(async (req, res) => {
-    const data = await dataStore.createDriver(getRequiredTenantId(req), req.body);
+    const tenantId = getRequiredTenantId(req);
+    const missing = validateDriverPayload(req.body ?? {});
+    if (missing.length > 0) {
+      throw new HttpError(400, 'driver_missing_fields', `Missing required fields: ${missing.join(', ')}.`);
+    }
+    const data = await dataStore.createDriver(tenantId, req.body);
+    const user = getAuditUser(req);
+    void auditLogger.log({ entityType: 'driver', entityId: String(data.id), action: 'create', ...user });
     res.status(201).json({ data });
   }));
 
@@ -932,7 +994,14 @@ function registerRoutes(app: express.Express, dataStore: DataStore) {
   }));
 
   app.post('/api/shipments', ...protectedApi, wrapAsync(async (req, res) => {
-    const data = await dataStore.createShipment(getRequiredTenantId(req), req.body);
+    const tenantId = getRequiredTenantId(req);
+    const missing = validateLoadPayload(req.body ?? {});
+    if (missing.length > 0) {
+      throw new HttpError(400, 'shipment_missing_fields', `Missing required fields: ${missing.join(', ')}.`);
+    }
+    const data = await dataStore.createShipment(tenantId, req.body);
+    const user = getAuditUser(req);
+    void auditLogger.log({ entityType: 'shipment', entityId: String(data.id), action: 'create', ...user });
     res.status(201).json({ data });
   }));
 
@@ -944,18 +1013,24 @@ function registerRoutes(app: express.Express, dataStore: DataStore) {
 
   app.post('/api/freight-operations/:resource', ...protectedApi, wrapAsync(async (req, res) => {
     const resource = getFreightOperationResource(req);
-    const data = await dataStore.createFreightOperation(resource, getRequiredTenantId(req), req.body);
+    const tenantId = getRequiredTenantId(req);
+    const data = await dataStore.createFreightOperation(resource, tenantId, req.body);
+    const user = getAuditUser(req);
+    void auditLogger.log({ entityType: resource, entityId: String(data.id), action: 'create', ...user });
     res.status(201).json({ data });
   }));
 
   app.patch('/api/freight-operations/:resource/:id', ...protectedApi, wrapAsync(async (req, res) => {
     const resource = getFreightOperationResource(req);
+    const id = getRouteParam(req, 'id');
     const data = await dataStore.updateFreightOperation(
       resource,
       getRequiredTenantId(req),
-      getRouteParam(req, 'id'),
+      id,
       req.body,
     );
+    const user = getAuditUser(req);
+    void auditLogger.log({ entityType: resource, entityId: id, action: 'update', ...user });
     res.status(200).json({ data });
   }));
 
@@ -965,10 +1040,34 @@ function registerRoutes(app: express.Express, dataStore: DataStore) {
 export function createApp() {
   const app = express();
   const dataStore = createDataStore();
+  const auditLogger = createAuditLogger(getPrismaClient());
 
   assertSafeAuthConfiguration();
   initializeSentry();
   app.use(assignRequestId);
+
+  app.use((_req: Request, res: Response, next: NextFunction) => {
+    const onFinish = () => {
+      res.removeListener('finish', onFinish);
+      const duration = _req.startTime ? Date.now() - _req.startTime : -1;
+      res.setHeader('x-response-time', `${duration}ms`);
+      if (duration > 0 && _req.url?.startsWith('/api/')) {
+        console.log(
+          JSON.stringify({
+            level: 'info',
+            event: 'request_completed',
+            method: _req.method,
+            path: _req.url,
+            status: res.statusCode,
+            durationMs: duration,
+            requestId: _req.requestId,
+          }),
+        );
+      }
+    };
+    res.on('finish', onFinish);
+    next();
+  });
 
   app.use(
     helmet({
@@ -1048,7 +1147,7 @@ export function createApp() {
     });
   });
 
-  registerRoutes(app, dataStore);
+  registerRoutes(app, dataStore, auditLogger);
 
   app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     if (err instanceof HttpError) {
@@ -1125,6 +1224,7 @@ declare global {
       userRole?: Role;
       subscriptionStatus?: SubscriptionStatus;
       requestId?: string;
+      startTime?: number;
     }
   }
 }

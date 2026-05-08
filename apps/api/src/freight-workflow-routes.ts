@@ -6,6 +6,11 @@ import {
 import {
   FreightWorkflowRuleError,
   assertQuoteCanConvertToLoad,
+  assertAssignmentCanTransition,
+  assertDispatchCanConfirm,
+  assertLoadCanReceiveTracking,
+  assertPaymentCanTransition,
+  assertLoadBoardPostCanTransition,
 } from './freight-workflow-rules';
 
 class FreightWorkflowHttpError extends Error {
@@ -98,32 +103,59 @@ export function createFreightWorkflowRouter(dataStore: DataStore): Router {
   }));
 
   router.post('/load-assignments/:id/:decision', wrapAsync(async (req: TenantRequest, res) => {
-    const data = await dataStore.respondToLoadAssignment(
-      getRequiredTenantId(req),
-      getRouteParam(req, 'id'),
-      getLoadAssignmentDecision(req),
-      req.body,
-    );
+    const tenantId = getRequiredTenantId(req);
+    const assignmentId = getRouteParam(req, 'id');
+    const decision = getLoadAssignmentDecision(req);
+    const assignments = await dataStore.listFreightOperations('loadAssignments', tenantId);
+    const assignment = assignments.find((item) => item.id === assignmentId);
+    if (assignment) {
+      assertAssignmentCanTransition(assignment, decision);
+    }
+    const data = await dataStore.respondToLoadAssignment(tenantId, assignmentId, decision, req.body);
     res.status(200).json({ data });
   }));
 
   router.post('/dispatches/:id/confirm', wrapAsync(async (req: TenantRequest, res) => {
-    const data = await dataStore.confirmDispatch(getRequiredTenantId(req), getRouteParam(req, 'id'), req.body);
+    const tenantId = getRequiredTenantId(req);
+    const dispatchId = getRouteParam(req, 'id');
+    const dispatches = await dataStore.listFreightOperations('loadDispatches', tenantId);
+    const dispatch = dispatches.find((item) => item.id === dispatchId);
+    if (dispatch) {
+      assertDispatchCanConfirm(dispatch);
+    }
+    const data = await dataStore.confirmDispatch(tenantId, dispatchId, req.body);
     res.status(200).json({ data });
   }));
 
   router.post('/loads/:loadId/tracking-updates', wrapAsync(async (req: TenantRequest, res) => {
-    const data = await dataStore.recordTrackingUpdate(getRequiredTenantId(req), getRouteParam(req, 'loadId'), req.body);
+    const tenantId = getRequiredTenantId(req);
+    const loadId = getRouteParam(req, 'loadId');
+    const trackingRecords = await dataStore.listFreightOperations('shipmentTracking', tenantId);
+    const latest = trackingRecords.find((item) => item.loadId === loadId);
+    assertLoadCanReceiveTracking(latest ?? null);
+    const data = await dataStore.recordTrackingUpdate(tenantId, loadId, req.body);
     res.status(201).json({ data });
   }));
 
   router.post('/loads/:loadId/verify-delivery', wrapAsync(async (req: TenantRequest, res) => {
-    const data = await dataStore.verifyDelivery(getRequiredTenantId(req), getRouteParam(req, 'loadId'), req.body);
+    const tenantId = getRequiredTenantId(req);
+    const loadId = getRouteParam(req, 'loadId');
+    const trackingRecords = await dataStore.listFreightOperations('shipmentTracking', tenantId);
+    const latest = trackingRecords.find((item) => item.loadId === loadId);
+    assertLoadCanReceiveTracking(latest ?? null);
+    const data = await dataStore.verifyDelivery(tenantId, loadId, req.body);
     res.status(201).json({ data });
   }));
 
   router.post('/carrier-payments/:id/status', wrapAsync(async (req: TenantRequest, res) => {
-    const data = await dataStore.updateCarrierPaymentStatus(getRequiredTenantId(req), getRouteParam(req, 'id'), req.body);
+    const tenantId = getRequiredTenantId(req);
+    const paymentId = getRouteParam(req, 'id');
+    const payments = await dataStore.listFreightOperations('carrierPayments', tenantId);
+    const payment = payments.find((item) => item.id === paymentId);
+    if (payment) {
+      assertPaymentCanTransition(payment);
+    }
+    const data = await dataStore.updateCarrierPaymentStatus(tenantId, paymentId, req.body);
     res.status(200).json({ data });
   }));
 
@@ -133,7 +165,14 @@ export function createFreightWorkflowRouter(dataStore: DataStore): Router {
   }));
 
   router.post('/load-board-posts/:id/status', wrapAsync(async (req: TenantRequest, res) => {
-    const data = await dataStore.updateLoadBoardPostStatus(getRequiredTenantId(req), getRouteParam(req, 'id'), req.body);
+    const tenantId = getRequiredTenantId(req);
+    const postId = getRouteParam(req, 'id');
+    const posts = await dataStore.listFreightOperations('loadBoardPosts', tenantId);
+    const post = posts.find((item) => item.id === postId);
+    if (post) {
+      assertLoadBoardPostCanTransition(post);
+    }
+    const data = await dataStore.updateLoadBoardPostStatus(tenantId, postId, req.body);
     res.status(200).json({ data });
   }));
 

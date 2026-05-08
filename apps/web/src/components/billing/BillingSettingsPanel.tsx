@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { CreditCard, ExternalLink, Loader2, ShieldCheck, Sparkles, Zap } from 'lucide-react';
 import { useAppStore } from '@/store/app-store';
+import { trackFunnelEvent } from '@/lib/analytics';
 import {
   BillingInterval,
   BillingPlan,
@@ -102,6 +103,7 @@ const BillingSettingsPanel: React.FC = () => {
 
     try {
       const url = await createCheckoutSession(context, plan, billingInterval);
+      trackFunnelEvent('funnel_billing_start', { plan, billingInterval });
       window.location.assign(url);
     } catch (error) {
       toast.error(getBillingErrorMessage(error));

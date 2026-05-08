@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import {
   DollarSign, FileText, Send, CheckCircle, AlertTriangle,
-  Clock, TrendingUp, Download, ChevronRight, Truck
+  Clock, TrendingUp, Download, ChevronRight, Truck, Activity
 } from 'lucide-react';
+import WidgetErrorBoundary from '@/components/ui/WidgetErrorBoundary';
+import EmptyState from '@/components/ui/EmptyState';
 
 type InvoiceStatus = 'draft' | 'sent' | 'overdue' | 'paid';
 
@@ -98,14 +100,21 @@ const AccountingDashboardPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Accounting</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Invoices, payments, and margin tracking</p>
+          <p className="text-sm text-gray-500 mt-0.5">Invoices, payments, and margin tracking · sample data</p>
         </div>
-        <button className="btn-primary flex items-center gap-2">
-          <FileText size={16} /> Create Invoice
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 bg-infamous-card border border-infamous-border rounded-xl px-3 py-2">
+            <Activity size={14} className="text-gray-500" />
+            <span className="text-xs text-gray-500">Demo data</span>
+          </div>
+          <button className="btn-primary flex items-center gap-2">
+            <FileText size={16} /> Create Invoice
+          </button>
+        </div>
       </div>
 
       {/* Summary Cards */}
+      <WidgetErrorBoundary label="Accounting summary">
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {[
           { label: 'Draft Invoices',    value: invoiceCounts.draft,                             icon: <Clock size={18} />,       color: 'text-yellow-400' },
@@ -124,6 +133,7 @@ const AccountingDashboardPage: React.FC = () => {
           </div>
         ))}
       </div>
+      </WidgetErrorBoundary>
 
       {/* Margin Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -254,7 +264,9 @@ const AccountingDashboardPage: React.FC = () => {
                   ))}
                   {filteredInvoices.length === 0 && (
                     <tr>
-                      <td colSpan={11} className="py-10 text-center text-gray-500 text-sm">No invoices</td>
+                      <td colSpan={11}>
+                        <EmptyState title="No invoices" description="No invoices match the selected status filter" />
+                      </td>
                     </tr>
                   )}
                 </tbody>

@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { ShieldCheck, AlertTriangle, FileCheck, Clock, TrendingDown, Truck, Ban, ExternalLink } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, FileCheck, Clock, TrendingDown, Truck, Ban, ExternalLink, Activity } from 'lucide-react';
+import WidgetErrorBoundary from '@/components/ui/WidgetErrorBoundary';
+import EmptyState from '@/components/ui/EmptyState';
 
 interface DocExpiry {
   id: string;
@@ -52,9 +54,13 @@ const CompliancePage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Compliance</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Track document expiries, CSA scores, and renewal alerts.</p>
+          <p className="text-sm text-gray-500 mt-0.5">Track document expiries, CSA scores, and renewal alerts · sample data</p>
         </div>
         <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 bg-infamous-card border border-infamous-border rounded-xl px-3 py-2">
+            <Activity size={14} className="text-gray-500" />
+            <span className="text-xs text-gray-500">Demo data</span>
+          </div>
           {expiredCount > 0 && (
             <div className="badge-red flex items-center gap-1">
               <Ban size={12} /> {expiredCount} expired — renew before dispatching

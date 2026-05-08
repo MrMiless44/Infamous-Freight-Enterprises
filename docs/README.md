@@ -27,6 +27,7 @@ This directory contains operational, architectural, and launch-readiness documen
 
 ## 🚀 Launch & Readiness
 
+- [CAPABILITY_STATUS_MAP.md](./CAPABILITY_STATUS_MAP.md) — Live/beta/planned status for every platform capability.
 - [LAUNCH_READINESS_INDEX.md](./LAUNCH_READINESS_INDEX.md) — Index of launch-readiness artifacts.
 - [LAUNCH-READINESS-CHECKLIST.md](./LAUNCH-READINESS-CHECKLIST.md) — Pre-launch checklist.
 - [LAUNCH_EVIDENCE_LOG.md](./LAUNCH_EVIDENCE_LOG.md) — Evidence log for launch checks.
@@ -72,6 +73,7 @@ This directory contains operational, architectural, and launch-readiness documen
 
 ## ☁️ Infrastructure & Deployment
 
+- [ANALYTICS_DECISION.md](./ANALYTICS_DECISION.md) — Analytics provider decision (Netlify Analytics + custom events).
 - [CUSTOM-DOMAIN.md](./CUSTOM-DOMAIN.md) — Custom-domain setup.
 - [CURRENT_RECOMMENDATIONS_UPDATE.md](./CURRENT_RECOMMENDATIONS_UPDATE.md) — Current launch recommendations and documentation updates.
 - [NETLIFY-BUILDHOOKS.md](./NETLIFY-BUILDHOOKS.md) — Netlify build hooks.

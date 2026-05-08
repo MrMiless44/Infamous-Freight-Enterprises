@@ -8,26 +8,36 @@ import {
   LogOut, ClipboardCheck, ClipboardList, DollarSign, type LucideIcon
 } from 'lucide-react';
 
+type UserRole = 'owner' | 'admin' | 'dispatcher' | 'driver';
+
 type NavItem = {
   path: string;
   label: string;
   icon: LucideIcon;
   badge?: string;
   end?: boolean;
+  minRole?: UserRole;
 };
+
+const ROLE_RANK: Record<UserRole, number> = { owner: 4, admin: 3, dispatcher: 2, driver: 1 };
+
+function meetsMinRole(userRole: string | undefined, minRole?: UserRole): boolean {
+  if (!minRole) return true;
+  return (ROLE_RANK[(userRole ?? 'driver') as UserRole] ?? 0) >= ROLE_RANK[minRole];
+}
 
 const baseNavItems: NavItem[] = [
   { path: '/ops', label: 'Ops Dashboard', icon: LayoutDashboard, end: true },
-  { path: '/quotes', label: 'Quotes', icon: ClipboardList },
+  { path: '/quotes', label: 'Quotes', icon: ClipboardList, minRole: 'dispatcher' },
   { path: '/loads', label: 'Loads', icon: Truck },
-  { path: '/dispatch', label: 'Dispatch Board', icon: Radio },
-  { path: '/carriers', label: 'Carriers', icon: Users },
-  { path: '/drivers', label: 'Drivers', icon: Users },
-  { path: '/accounting', label: 'Accounting', icon: DollarSign },
-  { path: '/invoices', label: 'Invoices', icon: FileText },
+  { path: '/dispatch', label: 'Dispatch Board', icon: Radio, minRole: 'dispatcher' },
+  { path: '/carriers', label: 'Carriers', icon: Users, minRole: 'admin' },
+  { path: '/drivers', label: 'Drivers', icon: Users, minRole: 'dispatcher' },
+  { path: '/accounting', label: 'Accounting', icon: DollarSign, minRole: 'admin' },
+  { path: '/invoices', label: 'Invoices', icon: FileText, minRole: 'dispatcher' },
   { path: '/chat', label: 'Messages', icon: MessageSquare, badge: '3' },
-  { path: '/analytics', label: 'Analytics', icon: TrendingUp },
-  { path: '/compliance', label: 'Compliance', icon: ShieldCheck },
+  { path: '/analytics', label: 'Analytics', icon: TrendingUp, minRole: 'admin' },
+  { path: '/compliance', label: 'Compliance', icon: ShieldCheck, minRole: 'admin' },
 ];
 
 const launchValidationNavItem: NavItem = {
@@ -36,13 +46,14 @@ const launchValidationNavItem: NavItem = {
   icon: ClipboardCheck,
 };
 
-const settingsNavItem: NavItem = { path: '/settings', label: 'Settings', icon: Settings };
+const settingsNavItem: NavItem = { path: '/settings', label: 'Settings', icon: Settings, minRole: 'admin' };
 
 const Sidebar: React.FC = () => {
   const { sidebarOpen, toggleSidebar, logout, user } = useAppStore();
-  const navItems: NavItem[] = canAccessLaunchValidation(user?.role)
+  const allItems: NavItem[] = canAccessLaunchValidation(user?.role)
     ? [...baseNavItems, launchValidationNavItem, settingsNavItem]
     : [...baseNavItems, settingsNavItem];
+  const navItems = allItems.filter((item) => meetsMinRole(user?.role, item.minRole));
 
   return (
     <aside

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, ClipboardList, Gauge, Paperclip, Send } from 'lucide-react';
-import { trackPublicEvent } from '@/lib/analytics';
+import { trackPublicEvent, trackFunnelEvent } from '@/lib/analytics';
 import { submitNetlifyForm } from '@/lib/netlifyForms';
 import { createPublicQuoteRequest } from '@/lib/publicFreightApi';
 
@@ -156,6 +156,7 @@ const PublicQuoteRequestPage: React.FC = () => {
       });
 
       setTrackingNumber(quote.trackingNumber);
+      trackFunnelEvent('funnel_quote_request', { equipment: form.equipment });
       trackPublicEvent('form_submit_success', {
         form: 'quote-request',
         hasAttachment: Boolean(attachment),

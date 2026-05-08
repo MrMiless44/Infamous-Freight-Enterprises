@@ -4,6 +4,7 @@ import AppLayout from '@/layouts/AppLayout';
 import PublicLayout from '@/layouts/PublicLayout';
 import SeoManager from '@/components/SeoManager';
 import { AppErrorBoundary } from '@/components/SentryErrorBoundary';
+import RouteGuard from '@/components/RouteGuard';
 import { BRAND } from '@/lib/brand';
 
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
@@ -121,20 +122,20 @@ function App() {
           <Route element={<AppLayout />}>
             <Route path="/ops" element={<DashboardPage />} />
             <Route path="/loads" element={<LoadsPage />} />
-            <Route path="/dispatch" element={<DispatchBoardPage />} />
-            <Route path="/drivers" element={<DriversPage />} />
-            <Route path="/invoices" element={<InvoicesPage />} />
-            <Route path="/analytics" element={<MetricsDashboard />} />
-            <Route path="/compliance" element={<CompliancePage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/billing" element={<BillingRequiredPage />} />
+            <Route path="/dispatch" element={<RouteGuard minRole="dispatcher"><DispatchBoardPage /></RouteGuard>} />
+            <Route path="/drivers" element={<RouteGuard minRole="dispatcher"><DriversPage /></RouteGuard>} />
+            <Route path="/invoices" element={<RouteGuard minRole="dispatcher"><InvoicesPage /></RouteGuard>} />
+            <Route path="/analytics" element={<RouteGuard minRole="admin"><MetricsDashboard /></RouteGuard>} />
+            <Route path="/compliance" element={<RouteGuard minRole="admin"><CompliancePage /></RouteGuard>} />
+            <Route path="/settings" element={<RouteGuard minRole="admin"><SettingsPage /></RouteGuard>} />
+            <Route path="/billing" element={<RouteGuard minRole="owner"><BillingRequiredPage /></RouteGuard>} />
             <Route path="/rate-comparison" element={<RateComparisonTool />} />
-            <Route path="/pay-per-load" element={<PayPerLoadPricing />} />
+            <Route path="/pay-per-load" element={<RouteGuard minRole="owner"><PayPerLoadPricing /></RouteGuard>} />
             <Route path="/referrals" element={<ReferralProgram />} />
-            <Route path="/launch-validation" element={<LaunchValidationPage />} />
-            <Route path="/carriers" element={<CarriersPage />} />
-            <Route path="/accounting" element={<AccountingDashboardPage />} />
-            <Route path="/quotes" element={<QuoteRequestsPage />} />
+            <Route path="/launch-validation" element={<RouteGuard minRole="admin"><LaunchValidationPage /></RouteGuard>} />
+            <Route path="/carriers" element={<RouteGuard minRole="admin"><CarriersPage /></RouteGuard>} />
+            <Route path="/accounting" element={<RouteGuard minRole="admin"><AccountingDashboardPage /></RouteGuard>} />
+            <Route path="/quotes" element={<RouteGuard minRole="dispatcher"><QuoteRequestsPage /></RouteGuard>} />
           </Route>
 
           <Route path="*" element={<NotFoundPage />} />

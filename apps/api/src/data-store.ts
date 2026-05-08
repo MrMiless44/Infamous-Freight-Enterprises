@@ -1063,3 +1063,7 @@ export function createDataStore(): DataStore {
   prismaClient ??= createPrismaClient();
   return new PrismaDataStore(prismaClient);
 }
+
+export function getPrismaClient(): PrismaClient | null {
+  return prismaClient;
+}

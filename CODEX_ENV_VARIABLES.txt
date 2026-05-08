@@ -1,4 +1,6 @@
 # Codex quick-reference environment variables
+# Canonical reference: docs/environment/ENVIRONMENT_VARIABLES_COMPLETE.md
+# Dev template: .env.example | Production template: .env.production.example
 # Backend
 NODE_ENV=production
 PORT=3000

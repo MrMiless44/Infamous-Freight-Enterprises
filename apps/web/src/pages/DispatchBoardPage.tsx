@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
-import { Sparkles, Zap, Truck, Users, ArrowRight, Mic, Clock, AlertTriangle, CheckCircle, Package, FileCheck, MapPin, Shield, ShieldCheck, Star, X } from 'lucide-react';
+import { Sparkles, Zap, Truck, Users, ArrowRight, Mic, Clock, AlertTriangle, CheckCircle, Package, FileCheck, MapPin, Shield, ShieldCheck, Star, X, Activity } from 'lucide-react';
+import WidgetErrorBoundary from '@/components/ui/WidgetErrorBoundary';
+import EmptyState from '@/components/ui/EmptyState';
 
 type DispatchStatus =
   | 'pending'
@@ -278,9 +280,14 @@ const DispatchBoardPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Dispatch Board</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Full load lifecycle — from pending to POD received</p>
+          <p className="text-sm text-gray-500 mt-0.5">Full load lifecycle — from pending to POD received · sample data</p>
         </div>
-        <div role="tablist" aria-label="Dispatch view" className="flex gap-2">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 bg-infamous-card border border-infamous-border rounded-xl px-3 py-2">
+            <Activity size={14} className="text-gray-500" />
+            <span className="text-xs text-gray-500">Demo data</span>
+          </div>
+          <div role="tablist" aria-label="Dispatch view" className="flex gap-2">
           <button
             role="tab"
             aria-selected={activeTab === 'board'}
@@ -299,6 +306,7 @@ const DispatchBoardPage: React.FC = () => {
           >
             <Mic size={14} aria-hidden="true" /> Voice
           </button>
+        </div>
         </div>
       </div>
 
@@ -386,7 +394,7 @@ const DispatchBoardPage: React.FC = () => {
                       );
                     })}
                     {colLoads.length === 0 && (
-                      <div className="text-center py-8 text-gray-600 text-xs">No loads</div>
+                      <EmptyState title="No loads" description={`No loads in ${cfg.label} status`} />
                     )}
                   </div>
                 </div>

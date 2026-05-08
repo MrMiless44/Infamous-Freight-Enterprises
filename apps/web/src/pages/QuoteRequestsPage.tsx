@@ -2,9 +2,11 @@ import { useState } from 'react';
 import {
   ClipboardList, Plus, ChevronRight, ArrowRight,
   Truck, MapPin, Package, DollarSign, Calendar,
-  CheckCircle, XCircle, Clock, RefreshCw, Eye
+  CheckCircle, XCircle, Clock, RefreshCw, Eye, Activity
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import WidgetErrorBoundary from '@/components/ui/WidgetErrorBoundary';
+import EmptyState from '@/components/ui/EmptyState';
 
 type QuoteStatus = 'NEW' | 'REVIEWING' | 'QUOTED' | 'APPROVED' | 'REJECTED' | 'CONVERTED';
 
@@ -189,11 +191,17 @@ const QuoteRequestsPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Quote Requests</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Review, quote, and convert shipper requests to loads</p>
+          <p className="text-sm text-gray-500 mt-0.5">Review, quote, and convert shipper requests to loads · sample data</p>
         </div>
-        <button className="btn-primary flex items-center gap-2">
-          <Plus size={16} /> New Quote
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 bg-infamous-card border border-infamous-border rounded-xl px-3 py-2">
+            <Activity size={14} className="text-gray-500" />
+            <span className="text-xs text-gray-500">Demo data</span>
+          </div>
+          <button className="btn-primary flex items-center gap-2">
+            <Plus size={16} /> New Quote
+          </button>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -278,7 +286,9 @@ const QuoteRequestsPage: React.FC = () => {
               })}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="py-10 text-center text-gray-500 text-sm">No quotes found</td>
+                  <td colSpan={7}>
+                    <EmptyState title="No quotes found" description="Try adjusting your search or filter criteria" />
+                  </td>
                 </tr>
               )}
             </tbody>

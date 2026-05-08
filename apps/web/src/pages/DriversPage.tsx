@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Users, MapPin, Clock, Star, Phone, Truck, TrendingUp, Award } from 'lucide-react';
+import { Users, MapPin, Clock, Star, Phone, Truck, TrendingUp, Award, Activity } from 'lucide-react';
+import WidgetErrorBoundary from '@/components/ui/WidgetErrorBoundary';
+import EmptyState from '@/components/ui/EmptyState';
 
 interface Driver {
   id: string;
@@ -55,12 +57,19 @@ const DriversPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Drivers</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{mockDrivers.filter((d) => d.status === 'available').length} of {mockDrivers.length} drivers available</p>
+          <p className="text-sm text-gray-500 mt-0.5">{mockDrivers.filter((d) => d.status === 'available').length} of {mockDrivers.length} drivers available · sample data</p>
         </div>
-        <button className="btn-primary">+ Add Driver</button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 bg-infamous-card border border-infamous-border rounded-xl px-3 py-2">
+            <Activity size={14} className="text-gray-500" />
+            <span className="text-xs text-gray-500">Demo data</span>
+          </div>
+          <button className="btn-primary">+ Add Driver</button>
+        </div>
       </div>
 
       {/* Stats */}
+      <WidgetErrorBoundary label="Driver stats">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'Total Drivers', value: mockDrivers.length, icon: <Users size={18} />, color: 'text-blue-400' },
@@ -77,6 +86,7 @@ const DriversPage: React.FC = () => {
           </div>
         ))}
       </div>
+      </WidgetErrorBoundary>
 
       {/* Filters */}
       <div className="flex gap-3">
@@ -92,6 +102,11 @@ const DriversPage: React.FC = () => {
 
       {/* Driver Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {filtered.length === 0 && (
+          <div className="col-span-full">
+            <EmptyState title="No drivers found" description="Try adjusting your search or status filter" />
+          </div>
+        )}
         {filtered.map((driver) => {
           const status = statusConfig[driver.status];
           return (

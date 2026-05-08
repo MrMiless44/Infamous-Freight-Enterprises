@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
@@ -20,7 +20,7 @@ import {
   Users,
   Zap,
 } from 'lucide-react';
-import { trackPublicEvent } from '@/lib/analytics';
+import { trackPublicEvent, trackFunnelEvent } from '@/lib/analytics';
 import BrandMark from '@/components/ui/BrandMark';
 import { BRAND } from '@/lib/brand';
 
@@ -194,6 +194,10 @@ const FaqItem: React.FC<{ question: string; answer: string }> = ({ question, ans
 };
 
 const LandingPage: React.FC = () => {
+  useEffect(() => {
+    trackFunnelEvent('funnel_landing_visit', { referrer: document.referrer || 'direct' });
+  }, []);
+
   return (
     <main id="main-content" className="min-h-screen overflow-hidden bg-infamous-dark text-white">
       <header className="sticky top-0 z-40 border-b border-infamous-border bg-infamous-darker/[0.92] backdrop-blur">
