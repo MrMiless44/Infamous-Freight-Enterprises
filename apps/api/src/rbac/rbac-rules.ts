@@ -1,6 +1,6 @@
 /**
  * Pure RBAC business logic – no framework dependencies.
- * Import from this file in both the NestJS service and plain Jest tests.
+ * Import from this file in API route code and plain Jest tests.
  */
 
 export type UserRole =

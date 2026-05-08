@@ -18,7 +18,7 @@ Some project documentation and generated PDF material references backend archite
 
 Known drift areas:
 
-- README references NestJS in the tech stack.
+- Some older planning documents may reference inactive backend frameworks or routes.
 - The uploaded PDF describes an Express 5 + Prisma + tRPC-style backend.
 - The PDF route map references `/api/freight/...` endpoints.
 - The current implementation exposes routes such as `/api/loads`, `/api/shipments`, `/api/freight-operations/:resource`, `/api/workflows/...`, `/api/billing/...`, `/health`, and `/api/health`.

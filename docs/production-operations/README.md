@@ -37,7 +37,7 @@ Do not prioritize advanced automation until the core freight lifecycle works end
 
 ## Architecture Rule
 
-Extend the existing NestJS modules and Prisma models before creating new ones. Use the MVP architecture alignment document to avoid duplicate domain models and conflicting workflows.
+Extend the existing Express API and Prisma models before creating new backend patterns. Use the MVP architecture alignment document to avoid duplicate domain models and conflicting workflows.
 
 ## Launch Rule
 

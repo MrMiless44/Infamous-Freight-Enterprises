@@ -474,7 +474,7 @@ Common error codes:
 
 ## Planned / Not-Yet-Implemented Routes
 
-The following route patterns are described in planning documents but are **not currently implemented** in the Express layer. They will be added as feature modules are migrated from the NestJS planning files into the active Express server.
+The following route patterns are described in planning documents but are **not currently implemented** in the Express API. They should be added as Express route handlers or route modules when the features are built.
 
 | Route pattern | Planned feature |
 |---|---|

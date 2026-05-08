@@ -32,7 +32,7 @@ Prioritize these immediately after launch blockers:
 Ship these as focused API/UI slices:
 
 - Wire customer-facing quote, tracking, load, billing, and document flows only to implemented endpoints.
-- Keep inactive NestJS planning modules labeled as inactive until migrated into Express route modules.
+- Implement new backend capabilities in the active Express API instead of reintroducing inactive backend framework patterns.
 - Add stricter server-side validation for loads, drivers, shipments, and freight operation records.
 - Add workflow state-transition checks so rejected assignments, delivered loads, and verified PODs cannot move backward accidentally.
 - Decide and document document-storage ownership, security controls, retention, and expiring access URLs.

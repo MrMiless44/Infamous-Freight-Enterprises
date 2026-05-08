@@ -93,16 +93,9 @@ const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
 Update your API's CORS settings to accept requests from your custom domain:
 
-### `apps/api/src/main.ts`
-```typescript
-app.enableCors({
-  origin: [
-    'https://infamousfreight.com',
-    'https://www.infamousfreight.com',
-    'http://localhost:5173',
-  ],
-  credentials: true,
-});
+### `apps/api/src/app.ts`
+```bash
+CORS_ORIGINS=https://infamousfreight.com,https://www.infamousfreight.com,http://localhost:5173
 ```
 
 ---
