@@ -1,11 +1,14 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
   BarChart3,
   Bot,
   Camera,
+  ChevronDown,
   ClipboardCheck,
   FileText,
+  HelpCircle,
   LogIn,
   Map as MapIcon,
   Phone,
@@ -119,6 +122,74 @@ const portalLinks = [
   { label: 'Carrier Portal', href: '/carrier-portal', icon: <ShieldCheck size={20} /> },
   { label: 'Operations Dashboard', href: '/ops', icon: <BarChart3 size={20} /> },
 ];
+
+const faqItems = [
+  {
+    question: 'How do I get a freight quote from Infamous Freight?',
+    answer:
+      'Submit your shipment details including pickup location, destination, freight type, and timing on the Request a Quote page. Our dispatch team reviews your request and provides a rate with carrier and equipment confirmation, typically within hours.',
+  },
+  {
+    question: 'What types of freight services do you offer?',
+    answer:
+      'Infamous Freight handles box truck (16–26 ft), cargo van, sprinter van, local metro, and regional multi-city freight. We also provide full freight dispatch support for owner-operators, small fleets, and brokerage operations.',
+  },
+  {
+    question: 'How does real-time shipment tracking work?',
+    answer:
+      'Every load gets a live tracking timeline from pickup to delivery. You receive status updates, ETA changes, and proof-of-delivery events as they happen. Enter your reference number on the Track Shipment page for instant visibility.',
+  },
+  {
+    question: 'What is your carrier vetting process?',
+    answer:
+      'Every carrier is verified for FMCSA authority, active insurance, safety scores, and driver identity before touching a load. We re-check credentials on policy events and maintain documented records for every assignment.',
+  },
+  {
+    question: 'How do carriers and drivers get paid?',
+    answer:
+      'Standard carrier pay terms are included with every load. QuickPay options are available at 2.5% for 48-hour and 3.5% for same-day settlement. Instant payout is also available at 4% with transparent fee structure.',
+  },
+  {
+    question: 'What areas does Infamous Freight service?',
+    answer:
+      'We cover local and regional freight lanes across core U.S. markets with verified carrier capacity. Service areas include major metro regions and multi-city distribution corridors with coordinated pickup and delivery windows.',
+  },
+  {
+    question: 'Do you offer same-day or expedited freight?',
+    answer:
+      'Yes. Cargo van and sprinter van services support same-day pickup and delivery for time-sensitive freight. Expedited options are available for parts runs, medical supplies, trade show materials, and urgent commercial shipments.',
+  },
+  {
+    question: 'How do I apply to drive with Infamous Freight?',
+    answer:
+      'Visit the Apply to Drive page and submit your name, contact info, city, equipment type, and any notes. Our onboarding team reviews applications and connects verified drivers with freight opportunities on matching lanes.',
+  },
+];
+
+const FaqItem: React.FC<{ question: string; answer: string }> = ({ question, answer }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border-b border-white/10">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center justify-between gap-4 py-5 text-left"
+        aria-expanded={open}
+      >
+        <span className="text-base font-semibold text-white">{question}</span>
+        <ChevronDown
+          size={18}
+          className={`shrink-0 text-zinc-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+      <div
+        className={`overflow-hidden transition-all duration-200 ${open ? 'max-h-60 pb-5' : 'max-h-0'}`}
+      >
+        <p className="text-sm leading-7 text-zinc-400">{answer}</p>
+      </div>
+    </div>
+  );
+};
 
 const LandingPage: React.FC = () => {
   return (
@@ -476,6 +547,36 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      <section className="border-t border-white/10 bg-[#0a0a0a] px-5 py-14 lg:px-6">
+        <div className="mx-auto max-w-3xl">
+          <div className="mb-8 flex items-center gap-3">
+            <div className="rounded-lg bg-infamous-orange/10 p-2.5 text-infamous-orange">
+              <HelpCircle size={20} />
+            </div>
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">FAQ</p>
+              <h2 className="text-2xl font-black">Frequently asked questions</h2>
+            </div>
+          </div>
+          <div className="rounded-lg border border-white/10 bg-[#111] px-6">
+            {faqItems.map((faq) => (
+              <FaqItem key={faq.question} question={faq.question} answer={faq.answer} />
+            ))}
+          </div>
+          <p className="mt-5 text-sm text-zinc-500">
+            Have another question?{' '}
+            <Link to="/contact" className="font-semibold text-infamous-orange hover:underline">
+              Contact the dispatch team
+            </Link>{' '}
+            or try the{' '}
+            <Link to="/freight-assistant" className="font-semibold text-infamous-orange hover:underline">
+              AI freight assistant
+            </Link>
+            .
+          </p>
+        </div>
+      </section>
+
       <section className="border-t border-white/10 bg-[#0d0d0d] px-5 py-10 lg:px-6">
         <div className="mx-auto flex max-w-7xl flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -501,6 +602,69 @@ const LandingPage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      <footer className="border-t border-white/10 bg-[#090909] px-5 py-10 text-sm text-zinc-400 lg:px-6">
+        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1.2fr_2fr]">
+          <div>
+            <Link to="/" className="flex items-center gap-3 text-white" aria-label="Infamous Freight home">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-infamous-orange text-white">
+                <Truck size={20} />
+              </span>
+              <span className="text-lg font-black">Infamous Freight</span>
+            </Link>
+            <p className="mt-4 max-w-md leading-6">
+              AI-powered freight command center with auto-dispatch, rate negotiation, real-time tracking, and end-to-end shipment visibility.
+            </p>
+            <p className="mt-4">© {new Date().getFullYear()} Infamous Freight.</p>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-4">
+            <div>
+              <h2 className="mb-3 text-sm font-bold uppercase tracking-[0.18em] text-gray-200">Freight</h2>
+              <div className="space-y-2">
+                <Link to="/request-quote" className="block hover:text-infamous-orange">Request quote</Link>
+                <Link to="/track-shipment" className="block hover:text-infamous-orange">Track shipment</Link>
+                <Link to="/load-board" className="block hover:text-infamous-orange">Load board</Link>
+                <Link to="/freight-assistant" className="block hover:text-infamous-orange">Freight assistant</Link>
+                <Link to="/pricing" className="block hover:text-infamous-orange">Pricing</Link>
+              </div>
+            </div>
+            <div>
+              <h2 className="mb-3 text-sm font-bold uppercase tracking-[0.18em] text-gray-200">Services</h2>
+              <div className="space-y-2">
+                <Link to="/services" className="block hover:text-infamous-orange">All services</Link>
+                <Link to="/services/box-truck" className="block hover:text-infamous-orange">Box truck</Link>
+                <Link to="/services/cargo-van" className="block hover:text-infamous-orange">Cargo van</Link>
+                <Link to="/services/sprinter-van" className="block hover:text-infamous-orange">Sprinter van</Link>
+                <Link to="/services/local-freight" className="block hover:text-infamous-orange">Local freight</Link>
+                <Link to="/services/regional-freight" className="block hover:text-infamous-orange">Regional freight</Link>
+                <Link to="/services/freight-dispatch" className="block hover:text-infamous-orange">Freight dispatch</Link>
+              </div>
+            </div>
+            <div>
+              <h2 className="mb-3 text-sm font-bold uppercase tracking-[0.18em] text-gray-200">Network</h2>
+              <div className="space-y-2">
+                <Link to="/drive" className="block hover:text-infamous-orange">Apply to drive</Link>
+                <Link to="/partners" className="block hover:text-infamous-orange">Partners</Link>
+                <Link to="/carrier-portal" className="block hover:text-infamous-orange">Carrier portal</Link>
+                <Link to="/customer-portal" className="block hover:text-infamous-orange">Customer portal</Link>
+                <Link to="/resources" className="block hover:text-infamous-orange">Resources</Link>
+              </div>
+            </div>
+            <div>
+              <h2 className="mb-3 text-sm font-bold uppercase tracking-[0.18em] text-gray-200">Company</h2>
+              <div className="space-y-2">
+                <Link to="/about" className="block hover:text-infamous-orange">About</Link>
+                <Link to="/contact" className="block hover:text-infamous-orange">Contact</Link>
+                <Link to="/terms" className="block hover:text-infamous-orange">Terms</Link>
+                <Link to="/privacy" className="block hover:text-infamous-orange">Privacy</Link>
+                <Link to="/carrier-agreement" className="block hover:text-infamous-orange">Carrier agreement</Link>
+                <Link to="/shipper-agreement" className="block hover:text-infamous-orange">Shipper agreement</Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 };

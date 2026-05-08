@@ -19,18 +19,31 @@ const footerGroups = [
     links: [
       { label: 'Request quote', href: '/request-quote' },
       { label: 'Track shipment', href: '/track-shipment' },
-      { label: 'Services', href: '/services' },
+      { label: 'Load board', href: '/load-board' },
       { label: 'Freight assistant', href: '/freight-assistant' },
+      { label: 'Pricing', href: '/pricing' },
+    ],
+  },
+  {
+    title: 'Services',
+    links: [
+      { label: 'All services', href: '/services' },
+      { label: 'Box truck', href: '/services/box-truck' },
+      { label: 'Cargo van', href: '/services/cargo-van' },
+      { label: 'Sprinter van', href: '/services/sprinter-van' },
+      { label: 'Local freight', href: '/services/local-freight' },
+      { label: 'Regional freight', href: '/services/regional-freight' },
+      { label: 'Freight dispatch', href: '/services/freight-dispatch' },
     ],
   },
   {
     title: 'Network',
     links: [
       { label: 'Apply to drive', href: '/drive' },
-      { label: 'Load board', href: '/load-board' },
+      { label: 'Partners', href: '/partners' },
       { label: 'Carrier portal', href: '/carrier-portal' },
       { label: 'Customer portal', href: '/customer-portal' },
-      { label: 'Partners', href: '/partners' },
+      { label: 'Resources', href: '/resources' },
     ],
   },
   {
@@ -40,6 +53,8 @@ const footerGroups = [
       { label: 'Contact', href: '/contact' },
       { label: 'Terms', href: '/terms' },
       { label: 'Privacy', href: '/privacy' },
+      { label: 'Carrier agreement', href: '/carrier-agreement' },
+      { label: 'Shipper agreement', href: '/shipper-agreement' },
     ],
   },
 ];
@@ -114,7 +129,7 @@ const PublicLayout: React.FC = () => {
             <p className="mt-4">© {new Date().getFullYear()} Infamous Freight.</p>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {footerGroups.map((group) => (
               <div key={group.title}>
                 <h2 className="mb-3 text-sm font-bold uppercase tracking-[0.18em] text-gray-200">{group.title}</h2>

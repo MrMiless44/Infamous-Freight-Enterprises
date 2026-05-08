@@ -47,6 +47,8 @@ const AboutPage = lazy(() => import('@/pages/AboutPage'));
 const ServicesPage = lazy(() => import('@/pages/ServicesPage'));
 const ServiceDetailPage = lazy(() => import('@/pages/ServiceDetailPage'));
 const LegalPage = lazy(() => import('@/pages/LegalPage'));
+const ResourcesPage = lazy(() => import('@/pages/ResourcesPage'));
+const ResourceArticlePage = lazy(() => import('@/pages/ResourceArticlePage'));
 
 const RouteFallback = () => (
   <main
@@ -105,6 +107,8 @@ function App() {
             <Route path="/privacy" element={<LegalPage />} />
             <Route path="/carrier-agreement" element={<LegalPage />} />
             <Route path="/shipper-agreement" element={<LegalPage />} />
+            <Route path="/resources" element={<ResourcesPage />} />
+            <Route path="/resources/:articleSlug" element={<ResourceArticlePage />} />
           </Route>
 
           <Route path="/login" element={<LoginPage />} />
