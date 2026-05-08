@@ -5,7 +5,7 @@
 @theme {
   --font-sans: Sora, system-ui, -apple-system, sans-serif;
   --font-display: 'Archivo Black', 'Sora', system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, sfmono-regular, monospace;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
   --color-infamous-orange: #f05a24;
   --color-infamous-orange-light: #ff8a3d;
   --color-infamous-orange-dark: #b83a14;
@@ -27,8 +27,6 @@
 @layer base {
   body {
     @apply bg-infamous-dark text-infamous-cream antialiased;
-
-    font-family: Sora, system-ui, -apple-system, sans-serif;
   }
 
   ::-webkit-scrollbar {
