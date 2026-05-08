@@ -75,6 +75,26 @@ const SEO_BY_PATH: Record<string, SeoConfig> = {
     title: `Carrier Portal | ${BRAND.displayName}`,
     description: 'Open carrier freight tools for onboarding, assigned loads, proof workflows, and dispatch updates.'
   },
+  '/load-board': {
+    title: `Freight Load Board | ${BRAND.displayName}`,
+    description: 'Browse available freight loads with verified lanes, equipment requirements, and real-time status from Infamous Freight dispatch.'
+  },
+  '/terms': {
+    title: `Terms of Service | ${BRAND.displayName}`,
+    description: 'Review the terms of service for using the Infamous Freight platform, services, and tools.'
+  },
+  '/privacy': {
+    title: `Privacy Policy | ${BRAND.displayName}`,
+    description: 'Read the Infamous Freight privacy policy covering data collection, usage, and protection practices.'
+  },
+  '/carrier-agreement': {
+    title: `Carrier Agreement | ${BRAND.displayName}`,
+    description: 'Review the carrier agreement for operating under Infamous Freight dispatch and brokerage services.'
+  },
+  '/shipper-agreement': {
+    title: `Shipper Agreement | ${BRAND.displayName}`,
+    description: 'Review the shipper agreement for freight services, liability, and terms with Infamous Freight.'
+  },
 };
 
 const INDEXABLE_ROUTES = new Set([
@@ -91,6 +111,11 @@ const INDEXABLE_ROUTES = new Set([
   '/drive',
   '/customer-portal',
   '/carrier-portal',
+  '/load-board',
+  '/terms',
+  '/privacy',
+  '/carrier-agreement',
+  '/shipper-agreement',
 ]);
 
 const SeoManager = () => {
@@ -99,7 +124,7 @@ const SeoManager = () => {
   const seo = SEO_BY_PATH[pathname] ?? DEFAULT_SEO;
   const canonicalPath = pathname === '/home' ? '/' : pathname;
   const canonicalUrl = `${SITE_URL}${canonicalPath}`;
-  const isIndexable = INDEXABLE_ROUTES.has(pathname);
+  const isIndexable = INDEXABLE_ROUTES.has(pathname) || pathname.startsWith('/services/');
 
   return (
     <Helmet>
