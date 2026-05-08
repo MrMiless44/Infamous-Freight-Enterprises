@@ -8,6 +8,8 @@ afterEach(() => {
   delete process.env.RATE_LIMIT_ENABLED;
   delete process.env.RATE_LIMIT_WINDOW_MS;
   delete process.env.RATE_LIMIT_MAX_REQUESTS;
+  delete process.env.AUTH_MODE;
+  delete process.env.ALLOW_UNSAFE_HEADER_AUTH;
 });
 
 describe('health endpoint', () => {
@@ -204,6 +206,76 @@ describe('configuration safety', () => {
         process.env.DATABASE_URL = previousDatabaseUrl;
       } else {
         delete process.env.DATABASE_URL;
+      }
+    }
+  });
+
+  it('rejects unsafe header auth mode in production unless explicitly acknowledged', () => {
+    const previousNodeEnv = process.env.NODE_ENV;
+    const previousDatabaseUrl = process.env.DATABASE_URL;
+    const previousAuthMode = process.env.AUTH_MODE;
+    const previousUnsafeHeaderAuth = process.env.ALLOW_UNSAFE_HEADER_AUTH;
+
+    try {
+      process.env.NODE_ENV = 'production';
+      process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/infamous_test';
+      process.env.AUTH_MODE = 'header';
+      delete process.env.ALLOW_UNSAFE_HEADER_AUTH;
+
+      expect(() => createApp()).toThrow('AUTH_MODE=header is not allowed in production');
+    } finally {
+      process.env.NODE_ENV = previousNodeEnv;
+
+      if (previousDatabaseUrl !== undefined) {
+        process.env.DATABASE_URL = previousDatabaseUrl;
+      } else {
+        delete process.env.DATABASE_URL;
+      }
+
+      if (previousAuthMode !== undefined) {
+        process.env.AUTH_MODE = previousAuthMode;
+      } else {
+        delete process.env.AUTH_MODE;
+      }
+
+      if (previousUnsafeHeaderAuth !== undefined) {
+        process.env.ALLOW_UNSAFE_HEADER_AUTH = previousUnsafeHeaderAuth;
+      } else {
+        delete process.env.ALLOW_UNSAFE_HEADER_AUTH;
+      }
+    }
+  });
+
+  it('does not accept tenant and role spoofing headers in default production auth mode', async () => {
+    const previousNodeEnv = process.env.NODE_ENV;
+    const previousDatabaseUrl = process.env.DATABASE_URL;
+    const previousAuthMode = process.env.AUTH_MODE;
+
+    try {
+      process.env.NODE_ENV = 'production';
+      process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/infamous_test';
+      delete process.env.AUTH_MODE;
+
+      const response = await request(createApp())
+        .get('/api/loads')
+        .set('x-tenant-id', 'tenant-1')
+        .set('x-user-role', 'dispatcher');
+
+      expect(response.status).toBe(401);
+      expect(response.body.error).toBe('authentication_required');
+    } finally {
+      process.env.NODE_ENV = previousNodeEnv;
+
+      if (previousDatabaseUrl !== undefined) {
+        process.env.DATABASE_URL = previousDatabaseUrl;
+      } else {
+        delete process.env.DATABASE_URL;
+      }
+
+      if (previousAuthMode !== undefined) {
+        process.env.AUTH_MODE = previousAuthMode;
+      } else {
+        delete process.env.AUTH_MODE;
       }
     }
   });

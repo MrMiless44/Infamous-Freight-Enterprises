@@ -44,11 +44,11 @@ npm run start            # runs node dist/src/server.js
 |---|---|---|
 | Local development | `3000` | `apps/api/src/server.ts` default (`PORT ?? 3000`) |
 | Docker Compose API | `3001` | `docker-compose.yml` → `PORT: 3001` |
-| Dockerfile.api default | `3000` | `ENV PORT=3000` (overridden by Docker Compose) |
+| Dockerfile.api default | `3001` | `ENV PORT=3001` |
 | Nginx proxy target | `3001` | `nginx.conf` → `proxy_pass http://api:3001` |
 | `.env.example` default | `3001` | `PORT=3001` |
 
-> **Recommendation:** Use `PORT=3001` in all environments to match Docker Compose and nginx. Set this in your local `.env` file.
+> **Recommendation:** Use `PORT=3001` for Docker-based API runtime paths to match Docker Compose, Caddy, and nginx. Local non-Docker development can continue using the server default unless `PORT` is set.
 
 ---
 

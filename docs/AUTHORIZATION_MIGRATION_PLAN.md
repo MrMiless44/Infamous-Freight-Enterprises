@@ -48,10 +48,12 @@ function requireAuthenticatedUser(req, res, next) {
 
 ### Phase 1 — Add middleware behind feature flag
 
-- Add `AUTH_MODE=header|bearer`.
-- Default non-test production to `bearer`.
+- Add `AUTH_MODE=header|trusted`.
+- Default production to `trusted`.
 - Keep header mode only for tests/local controlled environments.
 - Add clear startup failure if production is configured with unsafe header mode.
+
+Current status: production now defaults to `AUTH_MODE=trusted`, and protected Express routes no longer silently accept caller-controlled `x-tenant-id` and `x-user-role` headers in that mode. Header mode remains available for local/test compatibility and is blocked at production startup unless `ALLOW_UNSAFE_HEADER_AUTH=true` is deliberately set.
 
 ### Phase 2 — Add tests
 
@@ -73,6 +75,8 @@ Replace:
 - `requireBillingRole`
 
 with guards that use trusted authenticated user context.
+
+Current status: the Express route guards first use a trusted authenticated request context when present and only fall back to header-derived tenant/role values in `AUTH_MODE=header`.
 
 ### Phase 4 — Remove unsafe production path
 

@@ -31,6 +31,13 @@ import { createFreightWorkflowRouter } from './freight-workflow-routes';
 
 type Role = 'owner' | 'admin' | 'dispatcher';
 type SubscriptionStatus = 'active' | 'trialing' | 'trial' | 'past_due' | 'unpaid' | 'canceled' | 'incomplete' | 'none';
+type AuthMode = 'header' | 'trusted';
+
+type TrustedAuthContext = {
+  userId: string;
+  tenantId: string;
+  role: Role;
+};
 
 type HealthResponse = {
   status: 'ok' | 'degraded';
@@ -69,7 +76,65 @@ class HttpError extends Error {
   }
 }
 
+function isProductionRuntime(): boolean {
+  return process.env.NODE_ENV === 'production';
+}
+
+function getAuthMode(): AuthMode {
+  const configured = process.env.AUTH_MODE?.trim().toLowerCase();
+
+  if (configured === 'header' || configured === 'trusted') {
+    return configured;
+  }
+
+  return isProductionRuntime() ? 'trusted' : 'header';
+}
+
+function assertSafeAuthConfiguration() {
+  if (
+    isProductionRuntime() &&
+    getAuthMode() === 'header' &&
+    process.env.ALLOW_UNSAFE_HEADER_AUTH !== 'true'
+  ) {
+    throw new Error('AUTH_MODE=header is not allowed in production without ALLOW_UNSAFE_HEADER_AUTH=true.');
+  }
+}
+
+function getTrustedAuthContext(req: Request): TrustedAuthContext | null {
+  if (!req.authenticatedUser) {
+    return null;
+  }
+
+  const { userId, tenantId, role } = req.authenticatedUser;
+
+  if (
+    typeof userId !== 'string' ||
+    userId.trim().length === 0 ||
+    typeof tenantId !== 'string' ||
+    tenantId.trim().length === 0 ||
+    !ALLOWED_ROLES.includes(role)
+  ) {
+    return null;
+  }
+
+  return {
+    userId: userId.trim(),
+    tenantId: tenantId.trim(),
+    role,
+  };
+}
+
 function getTenantId(req: Request): string | null {
+  const trustedAuth = getTrustedAuthContext(req);
+
+  if (trustedAuth) {
+    return trustedAuth.tenantId;
+  }
+
+  if (getAuthMode() !== 'header') {
+    return null;
+  }
+
   const tenantHeader = req.header('x-tenant-id')?.trim();
 
   return tenantHeader || null;
@@ -79,9 +144,13 @@ function requireTenant(req: Request, res: Response, next: NextFunction) {
   const tenantId = getTenantId(req);
 
   if (!tenantId) {
-    return res.status(400).json({
-      error: 'tenant_id_required',
-      message: 'Provide tenantId via the x-tenant-id header.',
+    const trustedMode = getAuthMode() === 'trusted';
+
+    return res.status(trustedMode ? 401 : 400).json({
+      error: trustedMode ? 'authentication_required' : 'tenant_id_required',
+      message: trustedMode
+        ? 'A verified authenticated user is required for this endpoint.'
+        : 'Provide tenantId via the x-tenant-id header.',
       requestId: req.requestId,
     });
   }
@@ -91,6 +160,21 @@ function requireTenant(req: Request, res: Response, next: NextFunction) {
 }
 
 function requireRole(req: Request, res: Response, next: NextFunction) {
+  const trustedAuth = getTrustedAuthContext(req);
+
+  if (trustedAuth) {
+    req.userRole = trustedAuth.role;
+    return next();
+  }
+
+  if (getAuthMode() !== 'header') {
+    return res.status(401).json({
+      error: 'authentication_required',
+      message: 'A verified authenticated user is required for this endpoint.',
+      requestId: req.requestId,
+    });
+  }
+
   const role = req.header('x-user-role');
 
   if (!role || !ALLOWED_ROLES.includes(role as Role)) {
@@ -709,6 +793,7 @@ export function createApp() {
   const app = express();
   const dataStore = createDataStore();
 
+  assertSafeAuthConfiguration();
   initializeSentry();
   app.use(assignRequestId);
 
@@ -854,7 +939,14 @@ export function createApp() {
 
 declare global {
   namespace Express {
+    interface AuthenticatedUser {
+      userId: string;
+      tenantId: string;
+      role: Role;
+    }
+
     interface Request {
+      authenticatedUser?: AuthenticatedUser;
       tenantId?: string;
       userRole?: Role;
       subscriptionStatus?: SubscriptionStatus;
