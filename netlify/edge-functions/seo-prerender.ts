@@ -432,6 +432,19 @@ export default async (req: Request, context: Context) => {
   const headers = new Headers(response.headers);
   headers.set('cache-control', 'public, max-age=0, must-revalidate');
   headers.set('x-seo-prerender', 'true');
+  headers.set('x-content-type-options', 'nosniff');
+  headers.set('x-frame-options', 'SAMEORIGIN');
+  headers.set('referrer-policy', 'strict-origin-when-cross-origin');
+  headers.set('strict-transport-security', 'max-age=63072000; includeSubDomains; preload');
+  headers.set('cross-origin-embedder-policy', 'credentialless');
+  headers.set('cross-origin-opener-policy', 'same-origin-allow-popups');
+  headers.set('cross-origin-resource-policy', 'same-origin');
+  headers.set(
+    'permissions-policy',
+    'camera=(), microphone=(), geolocation=(), payment=(self https://js.stripe.com), usb=(), bluetooth=(), serial=(), hid=(), accelerometer=(), gyroscope=(), magnetometer=(), ambient-light-sensor=(), autoplay=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(self), idle-detection=(), interest-cohort=(), picture-in-picture=(self), screen-wake-lock=(), xr-spatial-tracking=()',
+  );
+  headers.set('x-dns-prefetch-control', 'off');
+  headers.set('x-permitted-cross-domain-policies', 'none');
 
   return new Response(html, { status: response.status, headers });
 };

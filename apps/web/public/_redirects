@@ -1,7 +1,6 @@
 # Netlify Redirect Rules for Infamous Freight
 
 # Redirect platform subdomains
-https://api.infamousfreight.com/* https://www.infamousfreight.com/ 301!
 https://app.infamousfreight.com/* https://www.infamousfreight.com/ 301!
 https://admin.infamousfreight.com/* https://www.infamousfreight.com/ 301!
 https://dispatch.infamousfreight.com/* https://www.infamousfreight.com/ 301!

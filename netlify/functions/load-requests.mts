@@ -46,15 +46,34 @@ const toFiniteNumber = (v: unknown): number | null => {
   return null;
 };
 
+const SECURITY_HEADERS: Record<string, string> = {
+  'content-type': 'application/json; charset=utf-8',
+  'x-content-type-options': 'nosniff',
+  'x-frame-options': 'DENY',
+  'cache-control': 'no-store',
+  'referrer-policy': 'strict-origin-when-cross-origin',
+  'strict-transport-security': 'max-age=63072000; includeSubDomains; preload',
+  'x-permitted-cross-domain-policies': 'none',
+  'x-dns-prefetch-control': 'off',
+  'cross-origin-embedder-policy': 'credentialless',
+  'cross-origin-opener-policy': 'same-origin',
+  'cross-origin-resource-policy': 'same-origin',
+  'permissions-policy':
+    'camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), serial=(), hid=(), accelerometer=(), gyroscope=(), magnetometer=(), ambient-light-sensor=(), autoplay=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), idle-detection=(), interest-cohort=(), picture-in-picture=(), screen-wake-lock=(), xr-spatial-tracking=()',
+};
+
 const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { 'content-type': 'application/json; charset=utf-8' },
+    headers: SECURITY_HEADERS,
   });
 
 export default async (req: Request) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204 });
+    return new Response(null, {
+      status: 204,
+      headers: SECURITY_HEADERS,
+    });
   }
 
   const store = getStore(STORE_NAME);

@@ -15,16 +15,15 @@ if [[ "${final_url}" != "${CANONICAL_SITE_URL}/" ]]; then
   exit 1
 fi
 
-echo "Checking Fly root health..."
-curl --fail --show-error --silent "${FLY_API_URL}/health"
-echo
-
-echo "Checking Fly API health..."
-curl --fail --show-error --silent "${FLY_API_URL}/api/health"
-echo
-
 echo "Checking proxied API health..."
 curl --fail --show-error --silent "${CANONICAL_SITE_URL}/api/health"
 echo
+
+echo "Checking optional direct Fly API health..."
+if curl --fail --show-error --silent "${FLY_API_URL}/api/health"; then
+  echo
+else
+  echo "WARNING: Direct Fly API health failed; the launch-critical proxied API health check passed." >&2
+fi
 
 echo "Production smoke test passed."

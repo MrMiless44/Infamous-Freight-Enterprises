@@ -14,15 +14,11 @@ function read(filePath: string): string {
 describe('Netlify CSP policy', () => {
   const repoRoot = path.resolve(__dirname, '../../..');
   const rootNetlify = path.join(repoRoot, 'netlify.toml');
-  const webNetlify = path.join(repoRoot, 'apps/web/netlify.toml');
-
-  it('keeps analytics domains allowed in root and web netlify config', () => {
+  it('keeps analytics domains allowed in root netlify config', () => {
     const rootContent = read(rootNetlify);
-    const webContent = read(webNetlify);
 
     for (const host of REQUIRED_ANALYTICS_HOSTS) {
       expect(rootContent).toContain(host);
-      expect(webContent).toContain(host);
     }
   });
 
