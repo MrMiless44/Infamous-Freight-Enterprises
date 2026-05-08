@@ -5,7 +5,7 @@
 @theme {
   --font-sans: Sora, system-ui, -apple-system, sans-serif;
   --font-display: 'Archivo Black', 'Sora', system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
   --color-infamous-orange: #f05a24;
   --color-infamous-orange-light: #ff8a3d;
   --color-infamous-orange-dark: #b83a14;
