@@ -75,6 +75,18 @@ const SEO_BY_PATH: Record<string, SeoConfig> = {
     title: `Carrier Portal | ${BRAND.displayName}`,
     description: 'Open carrier freight tools for onboarding, assigned loads, proof workflows, and dispatch updates.'
   },
+  '/load-board': {
+    title: `Public Load Board | ${BRAND.displayName}`,
+    description: 'Browse and book available freight loads with real-time rates, lane details, and one-click carrier booking.'
+  },
+  '/terms': {
+    title: `Terms of Service | ${BRAND.displayName}`,
+    description: `Review the terms of service governing use of the ${BRAND.displayName} platform and freight services.`
+  },
+  '/privacy': {
+    title: `Privacy Policy | ${BRAND.displayName}`,
+    description: `Read how ${BRAND.displayName} collects, uses, and protects your personal and shipment data.`
+  },
 };
 
 const INDEXABLE_ROUTES = new Set([
@@ -91,6 +103,9 @@ const INDEXABLE_ROUTES = new Set([
   '/drive',
   '/customer-portal',
   '/carrier-portal',
+  '/load-board',
+  '/terms',
+  '/privacy',
 ]);
 
 const SeoManager = () => {
