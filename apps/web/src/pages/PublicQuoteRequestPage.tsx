@@ -225,11 +225,13 @@ const PublicQuoteRequestPage: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <form name="quote-request" method="POST" data-netlify="true" netlify-honeypot="bot-field" encType="multipart/form-data" onSubmit={handleSubmit} className="space-y-6">
+              <form name="quote-request" method="POST" action="/thank-you/" data-netlify="true" data-netlify-form="quote-request" data-success-url="/thank-you/" netlify-honeypot="bot-field" encType="multipart/form-data" onSubmit={handleSubmit} className="space-y-6">
                 <input type="hidden" name="form-name" value="quote-request" />
                 <input type="hidden" name="csrf-token" value="netlify-form-quote-request-v1" />
+                <input type="hidden" name="clientSubmittedAt" />
+                <input type="hidden" name="pageUrl" />
                 <p className="hidden">
-                  <label>Do not fill this out: <input name="bot-field" /></label>
+                  <label>Do not fill this out: <input name="bot-field" tabIndex={-1} autoComplete="off" /></label>
                 </p>
                 <div className="grid gap-4 md:grid-cols-2">
                   {[
@@ -250,9 +252,12 @@ const PublicQuoteRequestPage: React.FC = () => {
                       <span className="mb-2 block text-sm font-medium text-gray-300">{label}</span>
                       <input
                         name={key}
-                        type={key === 'email' ? 'email' : key.toLowerCase().includes('date') ? 'date' : 'text'}
+                        type={key === 'email' ? 'email' : key.toLowerCase().includes('date') ? 'date' : key === 'weight' || key === 'miles' ? 'number' : 'text'}
                         autoComplete={key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'off'}
                         inputMode={key === 'phone' ? 'tel' : key === 'weight' || key === 'miles' ? 'numeric' : key === 'email' ? 'email' : 'text'}
+                        min={key === 'weight' || key === 'miles' ? 0 : undefined}
+                        step={key === 'weight' ? 1 : key === 'miles' ? 0.1 : undefined}
+                        maxLength={key === 'email' ? 160 : key === 'phone' ? 40 : key === 'origin' || key === 'destination' ? 180 : 120}
                         value={form[key as keyof typeof form]}
                         onChange={(event) => updateField(key as keyof typeof initialForm, event.target.value)}
                         className="w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"
@@ -290,7 +295,7 @@ const PublicQuoteRequestPage: React.FC = () => {
                   <input
                     name="attachment"
                     type="file"
-                    accept=".pdf,.png,.jpg,.jpeg,.webp,.heic"
+                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv,.txt"
                     onChange={(event) => setAttachment(event.target.files?.[0] ?? null)}
                     className="mt-3 block w-full text-sm text-gray-300 file:mr-4 file:rounded-lg file:border-0 file:bg-infamous-orange file:px-4 file:py-2 file:font-semibold file:text-white"
                   />
@@ -301,6 +306,7 @@ const PublicQuoteRequestPage: React.FC = () => {
                   <span className="mb-2 block text-sm font-medium text-gray-300">Special instructions</span>
                   <textarea
                     name="instructions"
+                    maxLength={2000}
                     value={form.instructions}
                     onChange={(event) => updateField('instructions', event.target.value)}
                     className="min-h-32 w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"

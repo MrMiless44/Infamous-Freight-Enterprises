@@ -1,13 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Infamous Freight preview">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#0a0a0a"/>
-      <stop offset="100%" stop-color="#171717"/>
+      <stop offset="0%" stop-color="#06080c"/>
+      <stop offset="56%" stop-color="#0b0f14"/>
+      <stop offset="100%" stop-color="#18212d"/>
     </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
-  <rect x="80" y="80" width="1040" height="470" rx="24" fill="#111827" stroke="#27272a"/>
-  <text x="140" y="250" fill="#f97316" font-size="56" font-family="Inter, Arial, sans-serif" font-weight="700">Infamous Freight</text>
-  <text x="140" y="320" fill="#ffffff" font-size="44" font-family="Inter, Arial, sans-serif" font-weight="600">AI Freight Command Center</text>
-  <text x="140" y="390" fill="#a1a1aa" font-size="30" font-family="Inter, Arial, sans-serif">Dispatch • Rate Negotiation • ELD Sync • Visibility</text>
+  <rect x="80" y="80" width="1040" height="470" rx="18" fill="#121821" stroke="#263241"/>
+  <path d="M145 170h170v38H145zm0 58h112v38H145zm0 58h145v38H145z" fill="#f97316"/>
+  <path d="M278 228h45v38h-45zm-90 112h135v14H188z" fill="#38bdf8"/>
+  <circle cx="170" cy="354" r="13" fill="#facc15"/>
+  <circle cx="308" cy="354" r="13" fill="#facc15"/>
+  <text x="385" y="238" fill="#f97316" font-size="56" font-family="Sora, IBM Plex Sans, sans-serif" font-weight="800">Infamous Freight</text>
+  <text x="385" y="310" fill="#ffffff" font-size="44" font-family="Sora, IBM Plex Sans, sans-serif" font-weight="700">Verified Freight Command</text>
+  <text x="385" y="380" fill="#94a3b8" font-size="30" font-family="IBM Plex Sans, sans-serif">Quote intake | Dispatch | Tracking | POD workflows</text>
 </svg>

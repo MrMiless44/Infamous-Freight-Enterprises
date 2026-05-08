@@ -8,18 +8,23 @@ export default {
     extend: {
       colors: {
         infamous: {
-          orange: '#ff3d00',
-          'orange-light': '#ff6d00',
-          'orange-dark': '#e63600',
-          dark: '#0a0a0a',
-          darker: '#050505',
-          card: '#141414',
-          border: '#222',
-          'border-light': '#333',
+          orange: '#f97316',
+          'orange-light': '#fb923c',
+          'orange-dark': '#c2410c',
+          amber: '#facc15',
+          steel: '#38bdf8',
+          dark: '#0b0f14',
+          darker: '#06080c',
+          card: '#121821',
+          panel: '#18212d',
+          border: '#263241',
+          'border-light': '#3a4a5f',
+          muted: '#94a3b8',
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['IBM Plex Sans', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['Sora', 'IBM Plex Sans', 'system-ui', 'sans-serif'],
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',

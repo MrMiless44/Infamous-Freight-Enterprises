@@ -1,12 +1,12 @@
 {
   "name": "Infamous Freight",
   "short_name": "Infamous",
-  "description": "AI-powered freight command center with auto-dispatch, rate negotiation, voice booking, ELD sync, and end-to-end shipment visibility.",
+  "description": "Verified freight command center for quote intake, dispatch coordination, carrier execution, shipment visibility, and proof workflows.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#0a0a0a",
-  "theme_color": "#0a0a0a",
+  "background_color": "#0b0f14",
+  "theme_color": "#0b0f14",
   "orientation": "portrait-primary",
   "icons": [
     {

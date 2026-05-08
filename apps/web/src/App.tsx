@@ -48,14 +48,15 @@ const ServiceDetailPage = lazy(() => import('@/pages/ServiceDetailPage'));
 const LegalPage = lazy(() => import('@/pages/LegalPage'));
 const ResourcesPage = lazy(() => import('@/pages/ResourcesPage'));
 const ResourceArticlePage = lazy(() => import('@/pages/ResourceArticlePage'));
+const ThankYouPage = lazy(() => import('@/pages/ThankYouPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
 const RouteFallback = () => (
   <main
-    className="min-h-screen w-full flex items-center justify-center p-6 bg-[#0a0a0a] text-slate-100"
+    className="min-h-screen w-full flex items-center justify-center p-6 bg-infamous-dark text-slate-100"
     style={{
       background:
-        'radial-gradient(circle at top left, rgba(255, 106, 0, 0.2), transparent 32rem), #0a0a0a',
+        'radial-gradient(circle at top left, rgba(249, 115, 22, 0.22), transparent 32rem), radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.12), transparent 28rem), #0b0f14',
     }}
     aria-live="polite"
     aria-busy="true"
@@ -64,7 +65,7 @@ const RouteFallback = () => (
       <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-infamous-orange">
         {BRAND.displayName}
       </p>
-      <h1 className="mt-3 mb-4 text-4xl sm:text-5xl font-bold leading-tight">
+      <h1 className="font-display mt-3 mb-4 text-4xl sm:text-5xl font-bold leading-tight">
         Loading freight command center...
       </h1>
       <p className="text-base leading-relaxed text-slate-300">
@@ -111,6 +112,7 @@ function App() {
             <Route path="/case-studies" element={<CaseStudies />} />
             <Route path="/product-hunt" element={<ProductHunt />} />
             <Route path="/gdpr" element={<GDPR />} />
+            <Route path="/thank-you" element={<ThankYouPage />} />
           </Route>
 
           <Route path="/login" element={<LoginPage />} />

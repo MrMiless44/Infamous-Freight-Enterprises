@@ -2,9 +2,30 @@
 
 Canonical brand and social preview assets for Infamous Freight Enterprise.
 
+## Locked Brand Tokens
+
+The Phase 1 web brand uses a field-operations palette: near-black command surfaces, slate panels, signal orange for primary actions, amber for priority highlights, and steel blue for live/status accents.
+
+| Token | Value | Usage |
+|------|-------|-------|
+| `infamous.darker` | `#06080c` | Deep app shell background |
+| `infamous.dark` | `#0b0f14` | Page background |
+| `infamous.card` | `#121821` | Cards, sidebars, headers |
+| `infamous.panel` | `#18212d` | Inputs and inset controls |
+| `infamous.border` | `#263241` | Default borders |
+| `infamous.border-light` | `#3a4a5f` | Hover and active borders |
+| `infamous.orange` | `#f97316` | Primary actions and brand mark |
+| `infamous.amber` | `#facc15` | Priority highlights |
+| `infamous.steel` | `#38bdf8` | Live and operational status accents |
+| `infamous.muted` | `#94a3b8` | Secondary text |
+
+Typography is locked to `Sora` for display marks and high-emphasis headings, with `IBM Plex Sans` for body copy and operational UI.
+
 | File | Purpose | Spec |
 |------|---------|------|
 | `.github/social-preview.png` | GitHub repo social / Open Graph preview | 1280×640 PNG, < 1 MB, sRGB |
+| `apps/web/public/og-image.svg` | Runtime Open Graph source rendered through Netlify Image CDN | 1200×630 SVG |
+| `apps/web/public/favicon.svg` | Browser and app icon source | SVG |
 
 ## Updating the social preview
 

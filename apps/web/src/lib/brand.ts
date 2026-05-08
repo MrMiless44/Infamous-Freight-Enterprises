@@ -3,11 +3,11 @@ export const BRAND = {
   displayName: 'Infamous Freight',
   shortName: 'INFAMOUS',
   secondaryName: 'FREIGHT',
-  tagline: 'Freight Command Center',
+  tagline: 'Verified Freight Command',
   siteUrl: 'https://www.infamousfreight.com',
   supportEmail: 'support@infamousfreight.com',
   notificationIcon: '/favicon.svg',
-  ogImageAlt: 'Infamous Freight AI Freight Command Center',
+  ogImageAlt: 'Infamous Freight verified freight command center',
   description:
-    'Infamous Freight is an AI-powered freight command center with auto-dispatch, rate negotiation, voice booking, ELD sync, and end-to-end shipment visibility.',
+    'Infamous Freight is a verified freight command center for quote intake, dispatch coordination, carrier execution, shipment visibility, and proof workflows.',
 };

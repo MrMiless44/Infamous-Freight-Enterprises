@@ -96,11 +96,13 @@ const ContactPage: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" onSubmit={handleSubmit} className="mt-6 space-y-5">
+              <form name="contact" method="POST" action="/thank-you/" data-netlify="true" data-netlify-form="contact" data-success-url="/thank-you/" netlify-honeypot="bot-field" onSubmit={handleSubmit} className="mt-6 space-y-5">
                 <input type="hidden" name="form-name" value="contact" />
                 <input type="hidden" name="csrf-token" value="netlify-form-contact-v1" />
+                <input type="hidden" name="clientSubmittedAt" />
+                <input type="hidden" name="pageUrl" />
                 <p className="hidden">
-                  <label>Do not fill this out: <input name="bot-field" /></label>
+                  <label>Do not fill this out: <input name="bot-field" tabIndex={-1} autoComplete="off" /></label>
                 </p>
                 <div className="grid gap-4 md:grid-cols-2">
                   {[
@@ -115,6 +117,7 @@ const ContactPage: React.FC = () => {
                         name={key}
                         type={key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'text'}
                         autoComplete={key === 'name' ? 'name' : key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'organization'}
+                        maxLength={key === 'email' ? 160 : key === 'phone' ? 40 : 120}
                         value={form[key as keyof typeof initialForm]}
                         onChange={(event) => update(key as keyof typeof initialForm, event.target.value)}
                         className="w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"
@@ -144,6 +147,7 @@ const ContactPage: React.FC = () => {
                   <span className="mb-2 block text-sm font-medium text-gray-300">Message</span>
                   <textarea
                     name="message"
+                    maxLength={2000}
                     value={form.message}
                     onChange={(event) => update('message', event.target.value)}
                     className="min-h-36 w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"

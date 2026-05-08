@@ -3,20 +3,24 @@
 @config "../tailwind.config.js";
 
 @theme {
-  --color-infamous-orange: #ff3d00;
-  --color-infamous-orange-light: #ff6d00;
-  --color-infamous-orange-dark: #e63600;
-  --color-infamous-dark: #0a0a0a;
-  --color-infamous-darker: #050505;
-  --color-infamous-card: #141414;
-  --color-infamous-border: #222;
-  --color-infamous-border-light: #333;
+  --color-infamous-orange: #f97316;
+  --color-infamous-orange-light: #fb923c;
+  --color-infamous-orange-dark: #c2410c;
+  --color-infamous-amber: #facc15;
+  --color-infamous-steel: #38bdf8;
+  --color-infamous-dark: #0b0f14;
+  --color-infamous-darker: #06080c;
+  --color-infamous-card: #121821;
+  --color-infamous-panel: #18212d;
+  --color-infamous-border: #263241;
+  --color-infamous-border-light: #3a4a5f;
+  --color-infamous-muted: #94a3b8;
 }
 
 @layer base {
   body {
     @apply bg-infamous-dark text-white antialiased;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
   }
 
   ::-webkit-scrollbar {
@@ -25,39 +29,39 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: #0a0a0a;
+    background: #0b0f14;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #333;
+    background: #3a4a5f;
     border-radius: 3px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #555;
+    background: #52657c;
   }
 
   ::selection {
-    background: #ff3d00;
-    color: white;
+    background: #f97316;
+    color: #06080c;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-gradient-to-r from-infamous-orange to-infamous-orange-light hover:from-infamous-orange-light hover:to-[#ff8d00] text-white font-semibold py-2.5 px-5 rounded-xl transition-all shadow-lg shadow-infamous-orange/20 disabled:opacity-40 disabled:cursor-not-allowed;
+    @apply bg-gradient-to-r from-infamous-orange to-infamous-amber hover:from-infamous-orange-light hover:to-infamous-amber text-infamous-darker font-semibold py-2.5 px-5 rounded-lg transition-all shadow-lg shadow-infamous-orange/20 disabled:opacity-40 disabled:cursor-not-allowed;
   }
 
   .btn-secondary {
-    @apply bg-infamous-card border border-infamous-border hover:border-infamous-border-light text-gray-300 hover:text-white font-medium py-2.5 px-5 rounded-xl transition-all;
+    @apply bg-infamous-card border border-infamous-border hover:border-infamous-border-light text-slate-300 hover:text-white font-medium py-2.5 px-5 rounded-lg transition-all;
   }
 
   .card {
-    @apply bg-infamous-card border border-infamous-border rounded-xl p-5 hover:border-infamous-border-light transition-all;
+    @apply bg-infamous-card border border-infamous-border rounded-lg p-5 hover:border-infamous-border-light transition-all;
   }
 
   .input-field {
-    @apply w-full bg-[#1a1a1a] border border-infamous-border rounded-lg px-4 py-3 text-white text-sm placeholder-gray-600 focus:border-infamous-orange focus:outline-none transition-colors;
+    @apply w-full bg-infamous-panel border border-infamous-border rounded-lg px-4 py-3 text-white text-sm placeholder-slate-500 focus:border-infamous-orange focus:outline-none transition-colors;
   }
 
   .table-header {

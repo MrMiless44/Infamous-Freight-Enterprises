@@ -1,5 +1,7 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { ArrowRight, Truck } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+import BrandMark from '@/components/ui/BrandMark';
+import { BRAND } from '@/lib/brand';
 
 const navLinks = [
   { label: 'Services', href: '/services' },
@@ -63,16 +65,14 @@ const PublicLayout: React.FC = () => {
   const { pathname } = useLocation();
 
   return (
-    <div className="min-h-screen bg-[#090909] text-white">
-      <header className="sticky top-0 z-50 border-b border-infamous-border bg-[#090909]/95 backdrop-blur">
+    <div className="min-h-screen bg-infamous-dark text-white">
+      <header className="sticky top-0 z-50 border-b border-infamous-border bg-infamous-darker/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
           <Link to="/" className="flex items-center gap-3" aria-label="Infamous Freight home">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-infamous-orange text-white">
-              <Truck size={20} />
-            </span>
+            <BrandMark compact />
             <span>
-              <span className="block text-lg font-black leading-none">Infamous Freight</span>
-              <span className="text-xs uppercase tracking-[0.18em] text-gray-500">AI Freight Command Center</span>
+              <span className="block font-display text-lg font-black leading-none">{BRAND.displayName}</span>
+              <span className="text-xs uppercase tracking-[0.18em] text-infamous-muted">{BRAND.tagline}</span>
             </span>
           </Link>
 
@@ -98,13 +98,13 @@ const PublicLayout: React.FC = () => {
           <div className="flex flex-wrap items-center gap-3">
             <Link
               to="/customer-portal"
-              className="rounded-xl border border-infamous-border bg-infamous-card px-4 py-2 text-sm font-semibold text-white transition hover:border-infamous-orange/50"
+            className="rounded-lg border border-infamous-border bg-infamous-card px-4 py-2 text-sm font-semibold text-white transition hover:border-infamous-orange/50"
             >
               Portal
             </Link>
             <Link
               to="/login"
-              className="inline-flex items-center gap-2 rounded-xl bg-infamous-orange px-4 py-2 text-sm font-bold text-white transition hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-lg bg-infamous-orange px-4 py-2 text-sm font-bold text-infamous-darker transition hover:bg-infamous-orange-light"
             >
               Login <ArrowRight size={15} />
             </Link>
@@ -116,14 +116,12 @@ const PublicLayout: React.FC = () => {
         <Outlet />
       </main>
 
-      <footer className="border-t border-infamous-border bg-[#090909] px-6 py-10 text-sm text-gray-400">
+      <footer className="border-t border-infamous-border bg-infamous-darker px-6 py-10 text-sm text-slate-400">
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1.2fr_2fr]">
           <div>
             <Link to="/" className="flex items-center gap-3 text-white" aria-label="Infamous Freight home">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-infamous-orange text-white">
-                <Truck size={20} />
-              </span>
-              <span className="text-lg font-black">Infamous Freight</span>
+              <BrandMark compact />
+              <span className="font-display text-lg font-black">{BRAND.displayName}</span>
             </Link>
             <p className="mt-4 max-w-md leading-6">
               Built for verified freight operations: quote intake, dispatch, tracking, proof of delivery, driver onboarding, and partner workflows.

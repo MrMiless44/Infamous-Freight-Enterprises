@@ -21,6 +21,8 @@ import {
   Zap,
 } from 'lucide-react';
 import { trackPublicEvent } from '@/lib/analytics';
+import BrandMark from '@/components/ui/BrandMark';
+import { BRAND } from '@/lib/brand';
 
 const navLinks = [
   { label: 'Quote', href: '/request-quote', event: 'quote_cta_click' },
@@ -193,16 +195,14 @@ const FaqItem: React.FC<{ question: string; answer: string }> = ({ question, ans
 
 const LandingPage: React.FC = () => {
   return (
-    <main id="main-content" className="min-h-screen overflow-hidden bg-[#090909] text-white">
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-[#090909]/[0.92] backdrop-blur">
+    <main id="main-content" className="min-h-screen overflow-hidden bg-infamous-dark text-white">
+      <header className="sticky top-0 z-40 border-b border-infamous-border bg-infamous-darker/[0.92] backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between lg:px-6">
           <Link to="/" className="flex items-center gap-3" aria-label="Infamous Freight home">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-infamous-orange font-black text-white shadow-[0_0_0_1px_rgba(255,255,255,0.14)_inset]">
-              IF
-            </span>
+            <BrandMark compact />
             <span>
-              <span className="block text-lg font-black leading-none">Infamous Freight</span>
-              <span className="text-xs uppercase tracking-[0.18em] text-zinc-500">Freight Command Center</span>
+              <span className="block font-display text-lg font-black leading-none">{BRAND.displayName}</span>
+              <span className="text-xs uppercase tracking-[0.18em] text-infamous-muted">{BRAND.tagline}</span>
             </span>
           </Link>
 

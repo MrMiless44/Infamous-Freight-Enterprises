@@ -96,10 +96,12 @@ const DriversApplyPage: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <form name="driver-application" method="POST" data-netlify="true" netlify-honeypot="bot-field" onSubmit={handleSubmit} className="mt-6 space-y-5">
+              <form name="driver-application" method="POST" action="/thank-you/" data-netlify="true" data-netlify-form="driver-application" data-success-url="/thank-you/" netlify-honeypot="bot-field" onSubmit={handleSubmit} className="mt-6 space-y-5">
                 <input type="hidden" name="form-name" value="driver-application" />
                 <input type="hidden" name="csrf-token" value="netlify-form-driver-application-v1" />
-                <p className="hidden"><label>Do not fill this out: <input name="bot-field" /></label></p>
+                <input type="hidden" name="clientSubmittedAt" />
+                <input type="hidden" name="pageUrl" />
+                <p className="hidden"><label>Do not fill this out: <input name="bot-field" tabIndex={-1} autoComplete="off" /></label></p>
                 {(['fullName', 'email', 'phone', 'city', 'state'] as const).map((key) => (
                   <label key={key} className="block">
                     <span className="mb-2 block text-sm font-medium text-gray-300">{fieldLabels[key]}</span>
@@ -107,6 +109,7 @@ const DriversApplyPage: React.FC = () => {
                       name={key}
                       type={key === 'email' ? 'email' : 'text'}
                       autoComplete={autoCompleteByField[key]}
+                      maxLength={key === 'email' ? 160 : key === 'phone' || key === 'state' ? 40 : key === 'city' ? 100 : 120}
                       value={form[key]}
                       onChange={(event) => update(key, event.target.value)}
                       className="w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"
@@ -122,7 +125,7 @@ const DriversApplyPage: React.FC = () => {
                 </label>
                 <label className="block">
                   <span className="mb-2 block text-sm font-medium text-gray-300">Notes</span>
-                  <textarea name="notes" value={form.notes} onChange={(event) => update('notes', event.target.value)} className="min-h-28 w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange" />
+                  <textarea name="notes" maxLength={2000} value={form.notes} onChange={(event) => update('notes', event.target.value)} className="min-h-28 w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange" />
                 </label>
                 {error ? <p className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">{error}</p> : null}
                 <button type="submit" disabled={loading} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 font-semibold text-white transition hover:opacity-90 disabled:opacity-60">

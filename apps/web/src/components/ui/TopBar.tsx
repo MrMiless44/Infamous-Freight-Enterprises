@@ -15,7 +15,7 @@ const TopBar: React.FC = () => {
             id="global-search"
             type="text"
             placeholder="Search loads, drivers, brokers..."
-            className="w-full bg-[#1a1a1a] border border-infamous-border rounded-xl pl-10 pr-4 py-2 text-sm text-white placeholder-gray-600 focus:border-infamous-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-orange transition-colors"
+            className="w-full bg-infamous-panel border border-infamous-border rounded-lg pl-10 pr-4 py-2 text-sm text-white placeholder-slate-500 focus:border-infamous-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-orange transition-colors"
           />
           <div aria-hidden="true" className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-gray-600">
             <Command size={12} />
@@ -37,9 +37,9 @@ const TopBar: React.FC = () => {
         </button>
 
         {/* Live indicator */}
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
-          <CircleDot size={10} className="text-green-400 animate-pulse" />
-          <span className="text-xs text-green-400 font-medium">Live</span>
+        <div className="flex items-center gap-1.5 rounded-full border border-infamous-steel/20 bg-infamous-steel/10 px-3 py-1.5">
+          <CircleDot size={10} className="text-infamous-steel animate-pulse" />
+          <span className="text-xs text-infamous-steel font-medium">Live</span>
         </div>
 
         {/* User */}
@@ -48,7 +48,7 @@ const TopBar: React.FC = () => {
             <p className="text-sm font-medium text-white">{user?.name || 'User'}</p>
             <p className="text-xs text-gray-500">{user?.role || 'Owner'}</p>
           </div>
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-infamous-orange to-infamous-orange-light flex items-center justify-center text-white font-bold text-sm">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-infamous-orange via-infamous-amber to-infamous-steel flex items-center justify-center text-infamous-darker font-bold text-sm">
             {user?.name?.[0] || 'U'}
           </div>
         </div>

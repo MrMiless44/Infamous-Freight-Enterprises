@@ -2,57 +2,88 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Infamous Freight forms</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Infamous Freight Netlify Forms</title>
   </head>
   <body>
-    <form name="quote-request" method="POST" data-netlify="true" netlify-honeypot="bot-field" enctype="multipart/form-data" hidden>
+    <!-- Hidden Netlify form registry. Visible forms must keep matching names and field names. -->
+
+    <form
+      name="quote-request"
+      action="/thank-you/"
+      method="POST"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+      enctype="multipart/form-data"
+      hidden
+    >
       <input type="hidden" name="form-name" value="quote-request" />
-      <input name="bot-field" />
-      <input name="csrf-token" />
-      <input name="company" />
-      <input name="contact" />
-      <input name="email" />
-      <input name="phone" />
-      <input name="origin" />
-      <input name="destination" />
-      <input name="freightType" />
-      <input name="equipment" />
-      <input name="weight" />
-      <input name="dimensions" />
-      <input name="miles" />
-      <input name="pickupDate" />
-      <input name="deliveryDate" />
-      <input name="trackingNumber" />
-      <input name="estimateLow" />
-      <input name="estimateMid" />
-      <input name="estimateHigh" />
-      <input name="attachment" type="file" />
-      <textarea name="instructions"></textarea>
+      <input type="text" name="bot-field" autocomplete="off" tabindex="-1" />
+      <input type="hidden" name="csrf-token" />
+      <input type="hidden" name="clientSubmittedAt" />
+      <input type="hidden" name="pageUrl" />
+      <input type="text" name="company" autocomplete="organization" maxlength="120" />
+      <input type="text" name="contact" autocomplete="name" maxlength="120" />
+      <input type="email" name="email" autocomplete="email" maxlength="160" />
+      <input type="tel" name="phone" autocomplete="tel" maxlength="40" />
+      <input type="text" name="origin" maxlength="180" />
+      <input type="text" name="destination" maxlength="180" />
+      <input type="text" name="freightType" maxlength="120" />
+      <input type="text" name="equipment" maxlength="120" />
+      <input type="number" name="weight" min="0" step="1" />
+      <input type="text" name="dimensions" maxlength="120" />
+      <input type="number" name="miles" min="0" step="0.1" />
+      <input type="date" name="pickupDate" />
+      <input type="date" name="deliveryDate" />
+      <input type="text" name="trackingNumber" maxlength="80" />
+      <input type="number" name="estimateLow" min="0" step="0.01" />
+      <input type="number" name="estimateMid" min="0" step="0.01" />
+      <input type="number" name="estimateHigh" min="0" step="0.01" />
+      <input type="file" name="attachment" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv,.txt" />
+      <textarea name="instructions" maxlength="2000"></textarea>
     </form>
 
-    <form name="driver-application" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
+    <form
+      name="driver-application"
+      action="/thank-you/"
+      method="POST"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+      hidden
+    >
       <input type="hidden" name="form-name" value="driver-application" />
-      <input name="bot-field" />
-      <input name="csrf-token" />
-      <input name="fullName" />
-      <input name="email" />
-      <input name="phone" />
-      <input name="city" />
-      <input name="state" />
-      <input name="equipment" />
-      <textarea name="notes"></textarea>
+      <input type="text" name="bot-field" autocomplete="off" tabindex="-1" />
+      <input type="hidden" name="csrf-token" />
+      <input type="hidden" name="clientSubmittedAt" />
+      <input type="hidden" name="pageUrl" />
+      <input type="text" name="fullName" autocomplete="name" maxlength="120" />
+      <input type="email" name="email" autocomplete="email" maxlength="160" />
+      <input type="tel" name="phone" autocomplete="tel" maxlength="40" />
+      <input type="text" name="city" autocomplete="address-level2" maxlength="100" />
+      <input type="text" name="state" autocomplete="address-level1" maxlength="40" />
+      <input type="text" name="equipment" maxlength="120" />
+      <textarea name="notes" maxlength="2000"></textarea>
     </form>
 
-    <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
+    <form
+      name="contact"
+      action="/thank-you/"
+      method="POST"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+      hidden
+    >
       <input type="hidden" name="form-name" value="contact" />
-      <input name="bot-field" />
-      <input name="csrf-token" />
-      <input name="name" />
-      <input name="company" />
-      <input name="email" />
-      <input name="phone" />
-      <input name="topic" />
-      <textarea name="message"></textarea>
+      <input type="text" name="bot-field" autocomplete="off" tabindex="-1" />
+      <input type="hidden" name="csrf-token" />
+      <input type="hidden" name="clientSubmittedAt" />
+      <input type="hidden" name="pageUrl" />
+      <input type="text" name="name" autocomplete="name" maxlength="120" />
+      <input type="text" name="company" autocomplete="organization" maxlength="120" />
+      <input type="email" name="email" autocomplete="email" maxlength="160" />
+      <input type="tel" name="phone" autocomplete="tel" maxlength="40" />
+      <input type="text" name="topic" maxlength="120" />
+      <textarea name="message" maxlength="2000"></textarea>
     </form>
   </body>
 </html>
