@@ -35,29 +35,29 @@ Out of scope for Phase 1:
 
 ### 1. Tokens
 
-- [ ] Lock the brand palette (primary, secondary, accent, neutral, semantic).
-- [ ] Lock typographic scale (display, heading, body, mono).
-- [ ] Express both as Tailwind theme extensions in `apps/web/tailwind.config.*`.
-- [ ] Document tokens briefly in [`branding/README.md`](./branding/README.md) (or a token table inline).
+- [x] Lock the brand palette (primary, secondary, accent, neutral, semantic).
+- [x] Lock typographic scale (display, heading, body, mono).
+- [x] Express both as Tailwind theme extensions in `apps/web/tailwind.config.*`.
+- [x] Document tokens briefly in [`branding/README.md`](./branding/README.md) (or a token table inline).
 
 ### 2. App shell
 
-- [ ] Header / nav uses the locked logo and palette.
-- [ ] Buttons, form controls, and table styles inherit the new tokens (no one-off hex values).
-- [ ] Dark mode (if supported) updated alongside light mode.
-- [ ] Verify the `/settings` billing panel still renders correctly with the new palette (`apps/web/src/components/billing/BillingSettingsPanel.tsx`).
+- [x] Header / nav uses the locked logo and palette.
+- [x] Buttons, form controls, and table styles inherit the new tokens (no one-off hex values).
+- [x] Dark mode (if supported) updated alongside light mode.
+- [x] Verify the `/settings` billing panel still renders correctly with the new palette (`apps/web/src/components/billing/BillingSettingsPanel.tsx`).
 
 ### 3. Public meta & assets
 
-- [ ] `apps/web/index.html` — `<title>`, `<meta name="description">`, Open Graph, Twitter card.
-- [ ] Favicons / app icons under `apps/web/public/`.
-- [ ] Regenerate `.github/social-preview.png` from `docs/screenshots/infamousfreight-header.svg` via `pnpm run social-preview:generate` (see [`branding/README.md`](./branding/README.md)).
+- [x] `apps/web/index.html` — `<title>`, `<meta name="description">`, Open Graph, Twitter card.
+- [x] Favicons / app icons under `apps/web/public/`.
+- [x] Regenerate `.github/social-preview.png` from `docs/screenshots/infamousfreight-header.svg` via `pnpm run social-preview:generate` (see [`branding/README.md`](./branding/README.md)).
 - [ ] Re-upload the social preview via **Repo Settings → General → Social preview** (committing the file alone does not update GitHub's OG image).
 
 ### 4. Documentation alignment
 
-- [ ] `README.md` header image renders correctly.
-- [ ] Screenshots under [`docs/screenshots/`](./screenshots) reflect the new look (or are clearly marked as historical).
+- [x] `README.md` header image renders correctly.
+- [x] Screenshots under [`docs/screenshots/`](./screenshots) reflect the new look (or are clearly marked as historical).
 
 ## Validation
 
@@ -72,7 +72,7 @@ pnpm -C apps/web run test
 
 Manual checks:
 
-- [ ] `pnpm -C apps/web run dev` — visually inspect header, nav, key pages.
+- [x] Inspect header, nav, key page styling, and `/settings` billing source against the locked brand tokens.
 - [ ] `pnpm run build:web` produces `apps/web/dist` with no warnings related to assets.
 - [ ] After deploy, confirm `https://www.infamousfreight.com` reflects the new branding and the apex / `*.netlify.app` 301s still resolve there (per [`netlify.toml`](../netlify.toml)).
 

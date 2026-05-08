@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Infamous Freight">
-  <rect width="64" height="64" rx="12" fill="#0a0a0a"/>
-  <path d="M14 20h36v8H14zm0 12h24v8H14zm0 12h30v8H14z" fill="#f97316"/>
+  <rect width="64" height="64" rx="12" fill="#11100f"/>
+  <path d="M12 18h38l4 8H12zm0 13h28l4 8H12zm0 13h34l4 8H12z" fill="#f05a24"/>
+  <path d="M44 18h6l4 8h-6zm-4 13h4l4 8h-4zm6 13h4l4 8h-4z" fill="#ffb45f"/>
 </svg>

@@ -3,20 +3,31 @@
 @config "../tailwind.config.js";
 
 @theme {
-  --color-infamous-orange: #ff3d00;
-  --color-infamous-orange-light: #ff6d00;
-  --color-infamous-orange-dark: #e63600;
-  --color-infamous-dark: #0a0a0a;
-  --color-infamous-darker: #050505;
-  --color-infamous-card: #141414;
-  --color-infamous-border: #222;
-  --color-infamous-border-light: #333;
+  --font-sans: 'Sora', system-ui, -apple-system, sans-serif;
+  --font-display: 'Archivo Black', 'Sora', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+  --color-infamous-orange: #f05a24;
+  --color-infamous-orange-light: #ff8a3d;
+  --color-infamous-orange-dark: #b83a14;
+  --color-infamous-ember: #ffb45f;
+  --color-infamous-ink: #11100f;
+  --color-infamous-dark: #11100f;
+  --color-infamous-darker: #070706;
+  --color-infamous-card: #191714;
+  --color-infamous-panel: #23201b;
+  --color-infamous-border: #342f28;
+  --color-infamous-border-light: #4a4237;
+  --color-infamous-steel: #8fa3ad;
+  --color-infamous-cream: #f6efe4;
+  --color-infamous-success: #3fbf7f;
+  --color-infamous-warning: #e8a23b;
+  --color-infamous-danger: #e05a47;
 }
 
 @layer base {
   body {
-    @apply bg-infamous-dark text-white antialiased;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    @apply bg-infamous-dark text-infamous-cream antialiased;
+    font-family: 'Sora', system-ui, -apple-system, sans-serif;
   }
 
   ::-webkit-scrollbar {
@@ -25,11 +36,11 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: #0a0a0a;
+    background: #11100f;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #333;
+    background: #4a4237;
     border-radius: 3px;
   }
 
@@ -38,26 +49,26 @@
   }
 
   ::selection {
-    background: #ff3d00;
-    color: white;
+    background: #f05a24;
+    color: #fff8ee;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-gradient-to-r from-infamous-orange to-infamous-orange-light hover:from-infamous-orange-light hover:to-[#ff8d00] text-white font-semibold py-2.5 px-5 rounded-xl transition-all shadow-lg shadow-infamous-orange/20 disabled:opacity-40 disabled:cursor-not-allowed;
+    @apply bg-gradient-to-r from-infamous-orange to-infamous-ember hover:from-infamous-orange-light hover:to-infamous-ember text-white font-semibold py-2.5 px-5 rounded-lg transition-all shadow-lg shadow-infamous-orange/20 disabled:opacity-40 disabled:cursor-not-allowed;
   }
 
   .btn-secondary {
-    @apply bg-infamous-card border border-infamous-border hover:border-infamous-border-light text-gray-300 hover:text-white font-medium py-2.5 px-5 rounded-xl transition-all;
+    @apply bg-infamous-card border border-infamous-border hover:border-infamous-border-light text-infamous-cream/80 hover:text-infamous-cream font-medium py-2.5 px-5 rounded-lg transition-all;
   }
 
   .card {
-    @apply bg-infamous-card border border-infamous-border rounded-xl p-5 hover:border-infamous-border-light transition-all;
+    @apply bg-infamous-card border border-infamous-border rounded-lg p-5 hover:border-infamous-border-light transition-all;
   }
 
   .input-field {
-    @apply w-full bg-[#1a1a1a] border border-infamous-border rounded-lg px-4 py-3 text-white text-sm placeholder-gray-600 focus:border-infamous-orange focus:outline-none transition-colors;
+    @apply w-full bg-infamous-panel border border-infamous-border rounded-lg px-4 py-3 text-infamous-cream text-sm placeholder-infamous-steel/60 focus:border-infamous-orange focus:outline-none transition-colors;
   }
 
   .table-header {
@@ -65,7 +76,7 @@
   }
 
   .table-cell {
-    @apply py-3 px-4 text-sm text-gray-300 border-b border-infamous-border;
+    @apply py-3 px-4 text-sm text-infamous-cream/80 border-b border-infamous-border;
   }
 
   .badge {

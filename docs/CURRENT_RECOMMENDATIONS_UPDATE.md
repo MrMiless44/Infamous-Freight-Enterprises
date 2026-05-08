@@ -22,3 +22,9 @@ The custom-domain guide was updated to match the committed Netlify routing behav
 The May 8, 2026 16:04 UTC retest confirmed that the canonical web host and apex-to-www redirect are working, and that the direct Fly API health endpoint returns healthy JSON. The browser-critical `https://www.infamousfreight.com/api/health` path still returned the Vite HTML shell, so the launch blocker remains open until Netlify deploys the hardened redirect rules.
 
 The repository now includes an exact forced `/api/health` proxy and forced `/api/*` and `/socket.io/*` proxy rules ahead of the SPA fallback. After the next production deploy, run the checks from [`netlify-deploy-checklist.md`](./netlify-deploy-checklist.md) and append the results to the launch evidence log. Do not record secrets or environment variable values in the evidence.
+
+## May 8, 2026 Retest
+
+The May 8, 2026 18:46 UTC retest confirmed that `https://www.infamousfreight.com/` serves the branded web app with the expected Netlify security headers, `https://infamousfreight.com/` returns a 301 redirect to `https://www.infamousfreight.com/`, and `https://www.infamousfreight.com/api/health` now returns healthy JSON through the Netlify proxy. This closes the previously observed browser-critical `/api/health` routing blocker for the deployed site.
+
+The recommended local validation gate was also rerun. Dependency installation, lint, API typecheck, web typecheck, API coverage, and the web Vitest suite passed. Build commands were not run because Netlify validation owns build execution for this workflow.

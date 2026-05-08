@@ -1,13 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Infamous Freight preview">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#0a0a0a"/>
-      <stop offset="100%" stop-color="#171717"/>
+      <stop offset="0%" stop-color="#11100f"/>
+      <stop offset="100%" stop-color="#23201b"/>
     </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
-  <rect x="80" y="80" width="1040" height="470" rx="24" fill="#111827" stroke="#27272a"/>
-  <text x="140" y="250" fill="#f97316" font-size="56" font-family="Inter, Arial, sans-serif" font-weight="700">Infamous Freight</text>
-  <text x="140" y="320" fill="#ffffff" font-size="44" font-family="Inter, Arial, sans-serif" font-weight="600">AI Freight Command Center</text>
-  <text x="140" y="390" fill="#a1a1aa" font-size="30" font-family="Inter, Arial, sans-serif">Dispatch • Rate Negotiation • ELD Sync • Visibility</text>
+  <rect x="80" y="80" width="1040" height="470" rx="18" fill="#191714" stroke="#4a4237"/>
+  <path d="M140 148h112l16 32H140zm0 48h84l16 32H140zm0 48h102l16 32H140z" fill="#f05a24"/>
+  <text x="140" y="350" fill="#ffb45f" font-size="58" font-family="Archivo Black, Sora, Arial, sans-serif">Infamous Freight</text>
+  <text x="140" y="420" fill="#f6efe4" font-size="42" font-family="Sora, Arial, sans-serif" font-weight="700">Freight Command Center</text>
+  <text x="140" y="488" fill="#d9cdbc" font-size="29" font-family="Sora, Arial, sans-serif">Dispatch | Rate tools | ELD sync | Visibility</text>
 </svg>

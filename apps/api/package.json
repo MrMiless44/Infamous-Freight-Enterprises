@@ -35,6 +35,7 @@
     "@types/node": "^25.6.2",
     "@types/supertest": "^7.2.0",
     "jest": "^30.4.0",
+    "jest-mock": "30.4.1",
     "prisma": "7.8.0",
     "supertest": "^7.1.1",
     "ts-jest": "^29.2.5",
