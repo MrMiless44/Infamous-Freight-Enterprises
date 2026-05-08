@@ -1,5 +1,7 @@
 # Netlify Production Deploy Checklist
 
+> **Primary checklist:** [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md) — this guide covers Netlify-specific environment variables and build settings.
+
 Use this checklist for every production deploy of `infamousfreight`.
 
 ## 1) Confirm web environment variables in Netlify

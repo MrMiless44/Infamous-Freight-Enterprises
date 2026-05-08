@@ -1,5 +1,7 @@
 # Fly.io Deployment Runbook
 
+> **Primary checklist:** [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md) — this guide covers Fly-specific commands and procedures.
+
 Run from repo root:
 
 ```bash

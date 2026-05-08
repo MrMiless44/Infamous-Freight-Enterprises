@@ -46,7 +46,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile.api
+      dockerfile: Dockerfile
     container_name: infamous-api
     restart: unless-stopped
     environment:

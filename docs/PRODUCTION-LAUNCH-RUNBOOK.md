@@ -1,5 +1,7 @@
 # Production Launch Runbook
 
+> **Primary checklist:** [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md) — this guide covers first-time production launch steps.
+
 This runbook covers the final production steps for Infamous Freight after the frontend is live and the API deployment is still blocked.
 
 ## Clone the repository

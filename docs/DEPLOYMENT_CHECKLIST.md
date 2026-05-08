@@ -1,5 +1,10 @@
 # Infamous Freight Deployment Checklist
 
+> **This is the single source of truth for production deployments.** For platform-specific details, see the companion guides:
+> - [Fly.io Deployment Runbook](./fly-deployment-runbook.md) — Fly CLI commands, CI token setup, and scaling
+> - [Netlify Deploy Checklist](./netlify-deploy-checklist.md) — Netlify environment variables and build settings
+> - [Production Launch Runbook](./PRODUCTION-LAUNCH-RUNBOOK.md) — First-time production launch steps
+
 ## Status
 
 Production code is buildable. Production readiness still requires environment configuration, database migration, Stripe verification, deployment, and health-check confirmation.
@@ -172,7 +177,6 @@ npm run build --workspace apps/web
 ```
 
 Deploy `apps/web/dist/` to Netlify as the production frontend (`www.infamousfreight.com`).
-Use Vercel only for previews/experiments/legacy fallback if needed.
 
 ## Verification commands
 
