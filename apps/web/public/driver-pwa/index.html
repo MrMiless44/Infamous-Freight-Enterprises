@@ -148,46 +148,47 @@
   </div>
 
   <script>
-    // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').then(() => {
-        console.log('Service Worker registered');
-      });
+      navigator.serviceWorker.register('sw.js').catch(function () {});
     }
 
-    // Update load status
+    function showToast(message, success) {
+      var toast = document.createElement('div');
+      toast.className = 'fixed top-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-sm font-medium z-50 animate-bounce text-white ' +
+        (success ? 'bg-emerald-600' : 'bg-red-600');
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(function () { toast.remove(); }, 2500);
+    }
+
     function updateStatus(status) {
-      console.log('Status updated:', status);
-      // Send to API
       fetch('/api/driver/status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, timestamp: new Date().toISOString() }),
+        body: JSON.stringify({ status: status, timestamp: new Date().toISOString() }),
+      }).then(function (res) {
+        if (!res.ok) throw new Error('status ' + res.status);
+        showToast('Status updated!', true);
+      }).catch(function () {
+        showToast('Failed to update status', false);
       });
-      
-      // Show feedback
-      const toast = document.createElement('div');
-      toast.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-emerald-600 text-white px-4 py-2 rounded-full text-sm font-medium z-50 animate-bounce';
-      toast.textContent = 'Status updated!';
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 2000);
     }
 
-    // Handle photo upload
     function handlePhoto(input) {
-      const file = input.files[0];
-      if (file) {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('type', 'POD');
-        
-        fetch('/api/uploads/pod', {
-          method: 'POST',
-          body: formData,
-        }).then(() => {
-          alert('POD uploaded successfully!');
-        });
-      }
+      var file = input.files[0];
+      if (!file) return;
+      var formData = new FormData();
+      formData.append('file', file);
+      formData.append('type', 'POD');
+      fetch('/api/uploads/pod', {
+        method: 'POST',
+        body: formData,
+      }).then(function (res) {
+        if (!res.ok) throw new Error('status ' + res.status);
+        showToast('POD uploaded!', true);
+      }).catch(function () {
+        showToast('Upload failed — try again', false);
+      });
     }
   </script>
 </body>

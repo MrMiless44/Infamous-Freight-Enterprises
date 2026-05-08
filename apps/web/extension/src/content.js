@@ -7,8 +7,6 @@
   const PLATFORM = detectPlatform();
   if (!PLATFORM) return;
 
-  console.log('[Infamous] Book It extension active on', PLATFORM);
-
   // Inject buttons after page loads
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
@@ -284,7 +282,7 @@
     panel.querySelector('.infamous-panel-close').addEventListener('click', () => panel.remove());
     panel.querySelector('#infamous-dismiss').addEventListener('click', () => panel.remove());
     panel.querySelector('#infamous-view-load').addEventListener('click', () => {
-      window.open(`https://infamousfreight.com/dispatch/loads/${response.loadId}`, '_blank');
+      window.open(`https://www.infamousfreight.com/dispatch/loads/${response.loadId}`, '_blank');
     });
 
     // Auto-dismiss after 10 seconds

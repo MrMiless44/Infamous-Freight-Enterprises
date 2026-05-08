@@ -43,7 +43,6 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
     if (userId) {
       this.userSockets.set(userId, client.id);
       client.join(`user:${userId}`);
-      console.log(`User ${userId} connected`);
     }
   }
 
@@ -51,7 +50,6 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
     const userId = client.handshake.query.userId as string;
     if (userId) {
       this.userSockets.delete(userId);
-      console.log(`User ${userId} disconnected`);
     }
   }
 

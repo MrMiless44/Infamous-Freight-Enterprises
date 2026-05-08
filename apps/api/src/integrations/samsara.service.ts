@@ -129,31 +129,27 @@ export class SamsaraService {
         await this.handleFaultCode(event);
         break;
       default:
-        console.log('Unhandled Samsara event:', event.eventType);
+        break;
     }
   }
 
   private async handleLocationUpdate(event: any) {
-    console.log('Vehicle location update:', event.vehicle.id, event.latitude, event.longitude);
     // Update vehicle position in database
     // Trigger exception engine checks
   }
 
   private async handleHOSUpdate(event: any) {
-    console.log('HOS update:', event.driver.id, event.clockData);
     // Alert dispatch if driver approaching limit
     // Update driver status in dashboard
   }
 
   private async handleSafetyEvent(event: any) {
-    console.log('Safety event:', event.vehicle.id, event.safetyEventType);
     // Log safety incident
     // Update driver safety score
     // Alert fleet manager
   }
 
   private async handleFaultCode(event: any) {
-    console.log('Fault code:', event.vehicle.id, event.faultCode);
     // Create maintenance alert
     // Notify maintenance team
   }
