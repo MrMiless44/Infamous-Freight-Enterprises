@@ -1,6 +1,7 @@
-import { getStore } from '@netlify/blobs';
+import { db } from "../../db/index.js";
+import { loadRequests } from "../../db/schema.js";
+import { desc } from "drizzle-orm";
 
-const STORE_NAME = 'load-requests';
 const MAX_LIST = 50;
 
 type LoadRequestInput = {
@@ -15,23 +16,6 @@ type LoadRequestInput = {
   contactPhone?: unknown;
   askingRate?: unknown;
   notes?: unknown;
-};
-
-type SavedLoadRequest = {
-  id: string;
-  loadId: string;
-  lane: string;
-  equipment: string;
-  totalPay: number | null;
-  ratePerMile: number | null;
-  carrierName: string;
-  mcNumber: string;
-  contactEmail: string;
-  contactPhone: string;
-  askingRate: number | null;
-  notes: string;
-  status: 'pending';
-  createdAt: string;
 };
 
 const isString = (v: unknown): v is string => typeof v === 'string';
@@ -57,19 +41,31 @@ export default async (req: Request) => {
     return new Response(null, { status: 204 });
   }
 
-  const store = getStore(STORE_NAME);
-
   if (req.method === 'GET') {
-    const list = await store.list();
-    const blobs = list.blobs ?? [];
-    const items = await Promise.all(
-      blobs.map((b) => store.get(b.key, { type: 'json' }) as Promise<SavedLoadRequest | null>),
-    );
-    const records = items
-      .filter((x): x is SavedLoadRequest => !!x)
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-      .slice(0, MAX_LIST);
-    return json(200, { requests: records });
+    const records = await db
+      .select()
+      .from(loadRequests)
+      .orderBy(desc(loadRequests.createdAt))
+      .limit(MAX_LIST);
+
+    const mapped = records.map((r) => ({
+      id: r.externalId,
+      loadId: r.loadId,
+      lane: r.lane,
+      equipment: r.equipment,
+      totalPay: r.totalPay,
+      ratePerMile: r.ratePerMile,
+      carrierName: r.carrierName,
+      mcNumber: r.mcNumber,
+      contactEmail: r.contactEmail,
+      contactPhone: r.contactPhone,
+      askingRate: r.askingRate,
+      notes: r.notes,
+      status: r.status,
+      createdAt: r.createdAt.toISOString(),
+    }));
+
+    return json(200, { requests: mapped });
   }
 
   if (req.method !== 'POST') {
@@ -98,24 +94,42 @@ export default async (req: Request) => {
     return json(400, { error: 'missing_fields', fields: missing });
   }
 
-  const id = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-  const record: SavedLoadRequest = {
-    id,
-    loadId,
-    lane: trimOrEmpty(body.lane, 200),
-    equipment: trimOrEmpty(body.equipment, 64),
-    totalPay: toFiniteNumber(body.totalPay),
-    ratePerMile: toFiniteNumber(body.ratePerMile),
-    carrierName,
-    mcNumber,
-    contactEmail,
-    contactPhone,
-    askingRate: toFiniteNumber(body.askingRate),
-    notes: trimOrEmpty(body.notes, 1000),
-    status: 'pending',
-    createdAt: new Date().toISOString(),
-  };
+  const externalId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
-  await store.setJSON(id, record);
-  return json(201, { request: record });
+  const [record] = await db
+    .insert(loadRequests)
+    .values({
+      externalId,
+      loadId,
+      lane: trimOrEmpty(body.lane, 200),
+      equipment: trimOrEmpty(body.equipment, 64),
+      totalPay: toFiniteNumber(body.totalPay),
+      ratePerMile: toFiniteNumber(body.ratePerMile),
+      carrierName,
+      mcNumber,
+      contactEmail,
+      contactPhone,
+      askingRate: toFiniteNumber(body.askingRate),
+      notes: trimOrEmpty(body.notes, 1000),
+    })
+    .returning();
+
+  return json(201, {
+    request: {
+      id: record.externalId,
+      loadId: record.loadId,
+      lane: record.lane,
+      equipment: record.equipment,
+      totalPay: record.totalPay,
+      ratePerMile: record.ratePerMile,
+      carrierName: record.carrierName,
+      mcNumber: record.mcNumber,
+      contactEmail: record.contactEmail,
+      contactPhone: record.contactPhone,
+      askingRate: record.askingRate,
+      notes: record.notes,
+      status: record.status,
+      createdAt: record.createdAt.toISOString(),
+    },
+  });
 };

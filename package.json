@@ -2,7 +2,7 @@
   "name": "infamous-freight",
   "version": "1.0.0",
   "private": true,
-  "description": "Infamous Freight \u2014 The freight dispatch platform built by truckers, for truckers",
+  "description": "Infamous Freight — The freight dispatch platform built by truckers, for truckers",
   "packageManager": "pnpm@10.0.0",
   "repository": {
     "type": "git",
@@ -57,6 +57,7 @@
   "devDependencies": {
     "@resvg/resvg-js": "2.6.2",
     "concurrently": "^9.0.0",
+    "drizzle-kit": "1.0.0-beta.22",
     "prisma": "7.8.0"
   },
   "overrides": {
@@ -80,5 +81,9 @@
       "esbuild",
       "prisma"
     ]
+  },
+  "dependencies": {
+    "@netlify/database": "^1.0.0",
+    "drizzle-orm": "1.0.0-beta.22"
   }
 }
