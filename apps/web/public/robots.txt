@@ -14,7 +14,12 @@ Disallow: /accounting
 Disallow: /quotes
 Disallow: /onboarding
 Disallow: /login
-Disallow: /customer-portal
-Disallow: /carrier-portal
+Disallow: /rate-comparison
+Disallow: /pay-per-load
+Disallow: /referrals
+Disallow: /case-studies
+Disallow: /product-hunt
+Disallow: /gdpr
+Disallow: /launch-validation
 
-Sitemap: https://infamousfreight.com/sitemap.xml
+Sitemap: https://www.infamousfreight.com/sitemap.xml

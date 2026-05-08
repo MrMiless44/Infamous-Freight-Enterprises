@@ -1,6 +1,17 @@
 import { Link, Navigate, useParams } from 'react-router-dom';
-import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, BookOpen, CheckCircle2 } from 'lucide-react';
 import { findServicePage, servicePages } from '@/data/publicPages';
+import { resourceArticles } from '@/data/resourceArticles';
+import Breadcrumb from '@/components/Breadcrumb';
+
+const serviceResourceMap: Record<string, string[]> = {
+  'box-truck': ['box-truck-shipping-guide', 'ltl-vs-ftl-freight'],
+  'cargo-van': ['cargo-van-vs-sprinter-van', 'freight-tracking-explained'],
+  'sprinter-van': ['cargo-van-vs-sprinter-van', 'box-truck-shipping-guide'],
+  'local-freight': ['freight-tracking-explained', 'what-is-freight-dispatch'],
+  'regional-freight': ['ltl-vs-ftl-freight', 'freight-tracking-explained'],
+  'freight-dispatch': ['what-is-freight-dispatch', 'ltl-vs-ftl-freight'],
+};
 
 const ServiceDetailPage: React.FC = () => {
   const { serviceSlug } = useParams();
@@ -11,13 +22,17 @@ const ServiceDetailPage: React.FC = () => {
   }
 
   const ServiceIcon = service.Icon;
+  const relatedSlugs = serviceResourceMap[service.slug] ?? [];
+  const relatedGuides = relatedSlugs
+    .map((slug) => resourceArticles.find((a) => a.slug === slug))
+    .filter(Boolean);
 
   return (
     <main className="min-h-screen bg-[#090909] px-6 py-10 text-white">
       <div className="mx-auto max-w-7xl">
+        <Breadcrumb items={[{ label: 'Services', href: '/services' }, { label: service.title }]} />
         <section className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
           <div>
-            <Link to="/services" className="mb-8 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white">Services</Link>
             <div className="mb-5 inline-flex rounded-xl bg-infamous-orange/10 p-3 text-infamous-orange"><ServiceIcon size={24} /></div>
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">{service.eyebrow}</p>
             <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-6xl">{service.title}</h1>
@@ -44,6 +59,25 @@ const ServiceDetailPage: React.FC = () => {
             <div className="grid gap-3 md:grid-cols-2">{service.bestFor.map((item) => <div key={item} className="rounded-2xl border border-infamous-border bg-infamous-card p-4 text-sm font-semibold text-gray-200">{item}</div>)}</div>
           </div>
         </section>
+
+        {relatedGuides.length > 0 && (
+          <section className="mt-14">
+            <div className="flex items-center gap-3 mb-5">
+              <BookOpen size={20} className="text-infamous-orange" />
+              <h2 className="text-2xl font-bold">Related guides</h2>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {relatedGuides.map((guide) => guide && (
+                <Link key={guide.slug} to={`/resources/${guide.slug}`} className="group rounded-2xl border border-infamous-border bg-infamous-card p-5 transition hover:border-infamous-orange/50">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-infamous-orange">{guide.category}</p>
+                  <h3 className="mt-2 font-bold text-white group-hover:text-infamous-orange transition">{guide.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-gray-400">{guide.description}</p>
+                  <p className="mt-3 flex items-center gap-2 text-sm font-semibold text-infamous-orange">Read guide <ArrowRight size={14} /></p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="mt-14">
           <h2 className="mb-5 text-2xl font-bold">Other services</h2>

@@ -13,6 +13,10 @@
       content="INFAMOUS FREIGHT is an AI-powered freight command center with auto-dispatch, rate negotiation, voice booking, ELD sync, and end-to-end shipment visibility."
     />
     <title>INFAMOUS FREIGHT — AI Freight Command Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://infamous-freight.fly.dev" />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
     <style>
       html,
       body,
@@ -72,6 +76,8 @@
         line-height: 1.65;
         margin: 0;
       }
+      .noscript-nav { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; }
+      .noscript-nav a { color: #ff8a33; text-decoration: underline; font-size: 0.95rem; }
     </style>
   </head>
   <body>
@@ -84,6 +90,19 @@
           <p class="app-shell-fallback__copy">
             Dispatch, visibility, rate tools, and carrier operations are loading.
           </p>
+          <noscript>
+            <nav class="noscript-nav" aria-label="Site navigation">
+              <a href="/request-quote">Request a Quote</a>
+              <a href="/track-shipment">Track Shipment</a>
+              <a href="/services">Services</a>
+              <a href="/pricing">Pricing</a>
+              <a href="/drive">Apply to Drive</a>
+              <a href="/load-board">Load Board</a>
+              <a href="/resources">Resources</a>
+              <a href="/contact">Contact</a>
+              <a href="/about">About</a>
+            </nav>
+          </noscript>
         </section>
       </main>
     </div>
