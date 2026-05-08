@@ -8,7 +8,7 @@ Short brief for the GitHub Copilot coding agent (or any contributor) when pickin
 
 Build Infamous Freight forward — a freight dispatch platform — by iterating on the existing pnpm monorepo:
 
-- `apps/api` — Express 4 + Prisma + PostgreSQL + Socket.IO + Stripe.
+- `apps/api` — Express 5 + Prisma + PostgreSQL + Socket.IO + Stripe.
 - `apps/web` — React + Vite + TypeScript + Tailwind.
 
 Current direction (see [`platform-roadmap.md`](./platform-roadmap.md)):

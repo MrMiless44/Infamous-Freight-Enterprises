@@ -1,15 +1,53 @@
-import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, AlertTriangle, MapPin, PackageCheck, Search, Truck } from 'lucide-react';
 import { demoShipments } from '@/data/mvpFreightData';
 import { trackPublicEvent } from '@/lib/analytics';
+import { getPublicShipment, PublicShipment } from '@/lib/publicFreightApi';
 
 const ShipmentTrackingPage: React.FC = () => {
-  const [trackingNumber, setTrackingNumber] = useState('IF-20491');
+  const [searchParams] = useSearchParams();
+  const [trackingNumber, setTrackingNumber] = useState(searchParams.get('tracking') || 'IF-20491');
+  const [liveShipment, setLiveShipment] = useState<PublicShipment | null>(null);
+  const [searched, setSearched] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [lookupError, setLookupError] = useState('');
 
-  const shipment = useMemo(() => {
+  const demoShipment = useMemo(() => {
     return demoShipments.find((item) => item.trackingNumber.toLowerCase() === trackingNumber.trim().toLowerCase());
   }, [trackingNumber]);
+
+  const shipment = liveShipment ?? demoShipment;
+  const isDemo = !liveShipment && Boolean(demoShipment);
+
+  const lookupShipment = async () => {
+    const value = trackingNumber.trim();
+    if (!value) return;
+
+    setLoading(true);
+    setLookupError('');
+
+    try {
+      const result = await getPublicShipment(value);
+      setLiveShipment(result);
+      setSearched(true);
+      trackPublicEvent('tracking_search', { found: Boolean(result || demoShipment), demo: !result && Boolean(demoShipment) });
+    } catch (error) {
+      setLiveShipment(null);
+      setLookupError(error instanceof Error ? error.message : 'Tracking lookup is temporarily unavailable.');
+      trackPublicEvent('tracking_search', { found: Boolean(demoShipment), demo: Boolean(demoShipment), error: true });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (searchParams.get('tracking')) {
+      void lookupShipment();
+    }
+    // Search parameters should trigger only the initial deep-link lookup.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <main className="min-h-screen bg-[#090909] px-6 py-8 text-white">
@@ -30,14 +68,15 @@ const ShipmentTrackingPage: React.FC = () => {
                   Enter a tracking number to view status, ETA, and dispatch notes.
                 </p>
               </div>
-              <span className="inline-flex w-fit items-center gap-2 rounded-full border border-amber-400/25 bg-amber-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-200">
-                <AlertTriangle size={14} /> Demo data
+              <span className={`inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide ${
+                isDemo
+                  ? 'border-amber-400/25 bg-amber-300/10 text-amber-200'
+                  : 'border-green-400/25 bg-green-300/10 text-green-200'
+              }`}>
+                {isDemo ? <AlertTriangle size={14} /> : <PackageCheck size={14} />}
+                {isDemo ? 'Demo fallback' : 'Live tracking'}
               </span>
             </div>
-            <p className="mt-4 rounded-2xl border border-white/10 bg-[#111] p-4 text-sm leading-6 text-gray-300">
-              Public lookup is currently a demo preview. Real customer tracking should use an assigned secure link or
-              portal access before live shipment, carrier, customer, or rate details are exposed.
-            </p>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -49,12 +88,17 @@ const ShipmentTrackingPage: React.FC = () => {
             />
             <button
               type="button"
-              onClick={() => trackPublicEvent('tracking_search', { found: Boolean(shipment), demo: true })}
+              onClick={() => void lookupShipment()}
+              disabled={loading}
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 font-semibold text-white"
             >
-              <Search size={17} /> Search
+              <Search size={17} /> {loading ? 'Searching...' : 'Search'}
             </button>
           </div>
+
+          {lookupError ? (
+            <p className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-100">{lookupError}</p>
+          ) : null}
 
           {shipment ? (
             <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_320px]">
@@ -63,17 +107,17 @@ const ShipmentTrackingPage: React.FC = () => {
                   <div>
                     <p className="font-mono text-sm text-gray-500">{shipment.trackingNumber}</p>
                     <h2 className="mt-1 text-2xl font-bold">{shipment.route}</h2>
-                    <p className="mt-2 text-gray-400">Demo customer details hidden from public preview</p>
+                    <p className="mt-2 text-gray-400">Customer, carrier, and rate details are hidden from public tracking.</p>
                   </div>
                   <span className="rounded-full bg-infamous-orange/10 px-4 py-2 text-sm font-semibold text-infamous-orange">{shipment.status}</span>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
                   {[
-                    ['Pickup', shipment.pickupDate],
-                    ['Delivery', shipment.deliveryDate],
-                    ['ETA', shipment.eta],
-                    ['Equipment', shipment.equipment],
+                    ['Pickup', shipment.pickupDate || 'Pending'],
+                    ['Delivery', shipment.deliveryDate || 'Pending'],
+                    ['ETA', shipment.eta || 'Pending'],
+                    ['Equipment', shipment.equipment || 'Pending'],
                     ['Carrier', 'Hidden in public demo'],
                     ['Rate', 'Hidden in public demo'],
                   ].map(([label, value]) => (
@@ -86,7 +130,7 @@ const ShipmentTrackingPage: React.FC = () => {
 
                 <div className="mt-6 rounded-xl border border-infamous-border bg-infamous-card p-4">
                   <p className="text-xs uppercase tracking-wider text-gray-500">Dispatch notes</p>
-                  <p className="mt-2 text-sm leading-6 text-gray-300">{shipment.notes}</p>
+                  <p className="mt-2 text-sm leading-6 text-gray-300">{shipment.notes || 'Dispatch has not added public notes yet.'}</p>
                 </div>
               </div>
 
@@ -150,12 +194,12 @@ const ShipmentTrackingPage: React.FC = () => {
                 </div>
               </aside>
             </div>
-          ) : (
+          ) : searched ? (
             <div className="mt-8 rounded-2xl border border-red-500/30 bg-red-500/10 p-6">
               <h2 className="text-xl font-bold">Tracking number not found</h2>
               <p className="mt-2 text-gray-300">We couldn't find that tracking number. Double-check the format (IF-##### with five digits) or contact dispatch if it should be active.</p>
             </div>
-          )}
+          ) : null}
         </section>
       </div>
     </main>

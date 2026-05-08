@@ -8,7 +8,7 @@ This document turns the 50 repository recommendations into production work track
 
 Resolve these before paid beta or public launch:
 
-- Keep `README.md`, `docs/ARCHITECTURE.md`, and public launch docs aligned to the active stack: React/Vite on Netlify and Express 4 on Fly.io.
+- Keep `README.md`, `docs/ARCHITECTURE.md`, and public launch docs aligned to the active stack: React/Vite on Netlify and Express 5 on Fly.io.
 - Keep Netlify build scope documented as web-only, with `/api/*` proxying to the Fly.io API.
 - Record Netlify deploy evidence for publish directory, redirects, headers, and plugin behavior.
 - Confirm production DNS and redirect behavior for apex, www, and proxied `/api/*`.

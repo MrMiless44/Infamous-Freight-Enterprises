@@ -20,6 +20,12 @@
   force = true
 
 [[redirects]]
+  from = "/api/health"
+  to = "https://infamous-freight.fly.dev/api/health"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/api/load-requests"
   to = "/.netlify/functions/load-requests"
   status = 200

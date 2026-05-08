@@ -1,16 +1,16 @@
           🚛 Infamous Freight 🚚
 
-> **AI-driven freight operations platform: dispatch, fleet intelligence, driver coordination, and enterprise-ready logistics execution.**
+> **Freight operations platform: dispatch workflows, shipment visibility, driver coordination, billing, and logistics execution.**
 
 [![CI](https://img.shields.io/github/actions/workflow/status/Infaemous-Freight/Infamous-freight/main.yml?branch=main&label=CI)](https://github.com/Infaemous-Freight/Infamous-freight/actions)
 [![License](https://img.shields.io/github/license/Infaemous-Freight/Infamous-freight)](LICENSE)
 [![Code Style: TypeScript](https://img.shields.io/badge/code%20style-TypeScript-3178C6.svg)](https://www.typescriptlang.org/)
 
-Infamous Freight is an AI-powered freight operations platform for dispatch execution, shipment visibility, driver coordination, compliance workflows, billing, and logistics automation.
+Infamous Freight is a freight operations platform for dispatch execution, shipment visibility, driver coordination, compliance workflows, billing, and logistics automation.
 
-Built as a **pnpm monorepo**, the platform combines an **Express 5 backend**, **React + Vite web application**, **Prisma/PostgreSQL data workflows**, **real-time messaging**, and **Stripe-powered billing flows** for modern freight teams and enterprise-ready operations.
+Built as a **pnpm monorepo**, the platform combines an **Express 5 backend**, **React + Vite web application**, **Prisma/PostgreSQL data workflows**, **Socket.io messaging**, and **Stripe-powered billing flows** for modern freight teams.
 
-If you want one system for dispatch, tracking, paperwork, analytics, compliance, and operational control, this is the platform.
+The repository is the active implementation source for dispatch, tracking, paperwork, analytics, compliance, and operational control workflows.
 
 ---
 
@@ -28,15 +28,15 @@ If you want one system for dispatch, tracking, paperwork, analytics, compliance,
 
 ## 🔥 Platform Highlights
 
-- 🚚 AI-assisted dispatch workflows
+- 🚚 Dispatch workflow surfaces
 - 📍 Real-time shipment location, ETA, and status visibility
 - 💬 Driver-dispatch chat with voice-note support
-- 🤖 Load matching and negotiation workflows
+- 🤖 Planned load matching and negotiation workflows
 - 📄 Digital paperwork, BOL/POD, and invoicing flows
-- 🛡️ Role-based, tenant-aware compliance controls
+- 🛡️ Tenant-aware API behavior with role controls under active hardening
 - 💳 Stripe billing, payroll, and factoring support
 - 📊 Broker, rate, and operational analytics
-- 🔎 Multi-board, ELD, IFTA, geofencing, CSA, and related freight workflow support
+- 🔎 Multi-board, ELD, IFTA, geofencing, CSA, and related freight workflow modules under active development
 
 ---
 
@@ -47,7 +47,7 @@ If you want one system for dispatch, tracking, paperwork, analytics, compliance,
 - ✅ **Structured validation and error handling** across the stack
 - ✅ **Nothing ships without CI**: lint, typecheck, build, and test must pass before merge
 - ✅ **No secrets in code**: use `.env` files and managed secret stores only
-- ✅ **Principle of least privilege** across services, workflows, and runtime configuration
+- ✅ **Least-privilege guidance** across services, workflows, and runtime configuration
 - ✅ **Security contact**: see [`SECURITY.md`](SECURITY.md) for responsible disclosure
 
 ---

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, ClipboardList, Gauge, Paperclip, Send } from 'lucide-react';
 import { trackPublicEvent } from '@/lib/analytics';
 import { submitNetlifyForm } from '@/lib/netlifyForms';
+import { createPublicQuoteRequest } from '@/lib/publicFreightApi';
 
 const initialForm = {
   company: '',
@@ -107,6 +108,7 @@ const computeEstimate = (form: typeof initialForm): Estimate | null => {
 const PublicQuoteRequestPage: React.FC = () => {
   const [form, setForm] = useState(initialForm);
   const [submitted, setSubmitted] = useState(false);
+  const [trackingNumber, setTrackingNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [attachment, setAttachment] = useState<File | null>(null);
@@ -129,16 +131,38 @@ const PublicQuoteRequestPage: React.FC = () => {
     setError('');
 
     try {
+      const quotePayload = {
+        ...form,
+        estimate: estimate
+          ? {
+              low: estimate.low,
+              mid: estimate.mid,
+              high: estimate.high,
+              rpm: estimate.rpm,
+              confidence: estimate.confidence,
+            }
+          : undefined,
+      };
+
+      const { quote } = await createPublicQuoteRequest(quotePayload);
+
       await submitNetlifyForm('quote-request', {
         ...form,
+        trackingNumber: quote.trackingNumber,
+        estimateLow: estimate?.low,
+        estimateMid: estimate?.mid,
+        estimateHigh: estimate?.high,
         ...(attachment ? { attachment } : {}),
       });
+
+      setTrackingNumber(quote.trackingNumber);
       trackPublicEvent('form_submit_success', {
         form: 'quote-request',
         hasAttachment: Boolean(attachment),
         equipment: form.equipment,
         estimateMid: estimate?.mid,
         estimateConfidence: estimate?.confidence,
+        trackingNumber: quote.trackingNumber,
       });
       setSubmitted(true);
     } catch (err) {
@@ -178,11 +202,21 @@ const PublicQuoteRequestPage: React.FC = () => {
                 <p className="mt-2 text-gray-300">
                   Dispatch will review your lane, confirm equipment, check carrier capacity, and reply with pricing.
                 </p>
+                {trackingNumber ? (
+                  <div className="mt-4 rounded-xl border border-green-400/20 bg-[#111] p-4">
+                    <p className="text-xs uppercase tracking-wider text-gray-500">Tracking reference</p>
+                    <p className="mt-1 font-mono text-lg font-semibold text-white">{trackingNumber}</p>
+                    <Link to={`/track-shipment?tracking=${encodeURIComponent(trackingNumber)}`} className="mt-3 inline-flex text-sm font-semibold text-green-300 hover:text-green-200">
+                      View tracking status
+                    </Link>
+                  </div>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => {
                     setSubmitted(false);
                     setForm(initialForm);
+                    setTrackingNumber('');
                     setAttachment(null);
                   }}
                   className="mt-5 rounded-xl bg-infamous-orange px-4 py-2 font-semibold text-white"

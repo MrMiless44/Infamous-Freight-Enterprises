@@ -6,9 +6,9 @@
 
 # Infamous Freight — API Reference
 
-_Last updated: April 2026_
+_Last updated: May 2026_
 
-This document lists all **implemented** API endpoints in the active Express 4 backend (`apps/api/src/app.ts`).
+This document lists all **implemented** API endpoints in the active Express 5 backend (`apps/api/src/app.ts`).
 
 > For the canonical architecture overview, see [`docs/ARCHITECTURE.md`](ARCHITECTURE.md).
 
@@ -20,7 +20,8 @@ This document lists all **implemented** API endpoints in the active Express 4 ba
 |---|---|
 | Local development | `http://localhost:3000` |
 | Docker Compose | `http://localhost:3001` |
-| Production | `https://api.infamousfreight.com` |
+| Production browser path | `https://www.infamousfreight.com/api` |
+| Production direct API diagnostics | `https://api.infamousfreight.com` |
 
 ---
 
