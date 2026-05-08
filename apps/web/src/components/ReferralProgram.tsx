@@ -6,10 +6,12 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Gift, Copy, Check, Users, DollarSign, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { BRAND } from '@/lib/brand';
 
 export function ReferralProgram() {
   const [copied, setCopied] = useState(false);
-  const referralLink = 'https://infamousfreight.netlify.app/?ref=MILES50';
+  const referralLink = `${BRAND.siteUrl}/?ref=MILES50`;
+  const twitterReferralText = 'Just started using @InfamousFreight - best TMS for trucking!';
   
   const stats = {
     referralsMade: 3,
@@ -54,7 +56,13 @@ export function ReferralProgram() {
           <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
         </svg>
       ),
-      action: () => window.open(`https://twitter.com/intent/tweet?text=Just started using @InfamousFreight - best TMS for trucking!&url=${encodeURIComponent(referralLink)}`),
+      action: () => {
+        const params = new URLSearchParams({
+          text: twitterReferralText,
+          url: referralLink,
+        });
+        window.open(`https://twitter.com/intent/tweet?${params.toString()}`);
+      },
     },
   ];
 

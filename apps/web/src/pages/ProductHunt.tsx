@@ -6,11 +6,23 @@ import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUpRight, MessageSquare, Globe, Share2, Users, TrendingUp, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { BRAND } from '@/lib/brand';
 
 export default function ProductHunt() {
   useEffect(() => {
     document.title = 'Infamous Freight on Product Hunt - TMS for Modern Fleets';
   }, []);
+
+
+  const productHuntShareText =
+    'Just discovered @InfamousFreight - the TMS that actually understands trucking! #ProductHunt';
+  const tweetShareUrl = `https://twitter.com/intent/tweet?${new URLSearchParams({
+    text: productHuntShareText,
+    url: BRAND.siteUrl,
+  }).toString()}`;
+  const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?${new URLSearchParams({
+    url: BRAND.siteUrl,
+  }).toString()}`;
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -156,7 +168,7 @@ export default function ProductHunt() {
           <p className="text-zinc-400 mb-6">Share Infamous Freight with your network</p>
           <div className="flex justify-center gap-4">
             <a 
-              href="https://twitter.com/intent/tweet?text=Just%20discovered%20@InfamousFreight%20-%20the%20TMS%20that%20actually%20understands%20trucking!%20%23ProductHunt"
+              href={tweetShareUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 hover:bg-zinc-800 transition-colors"
@@ -165,7 +177,7 @@ export default function ProductHunt() {
               <span className="text-sm">Tweet</span>
             </a>
             <a 
-              href="https://www.linkedin.com/sharing/share-offsite/?url=https://infamousfreight.netlify.app"
+              href={linkedInShareUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 hover:bg-zinc-800 transition-colors"
