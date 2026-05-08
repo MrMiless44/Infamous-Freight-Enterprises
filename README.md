@@ -8,7 +8,7 @@
 
 Infamous Freight is an AI-powered freight operations platform for dispatch execution, shipment visibility, driver coordination, compliance workflows, billing, and logistics automation.
 
-Built as a **pnpm monorepo**, the platform combines an **Express 4 backend**, **React + Vite web application**, **Prisma/PostgreSQL data workflows**, **real-time messaging**, and **Stripe-powered billing flows** for modern freight teams and enterprise-ready operations.
+Built as a **pnpm monorepo**, the platform combines an **Express 5 backend**, **React + Vite web application**, **Prisma/PostgreSQL data workflows**, **real-time messaging**, and **Stripe-powered billing flows** for modern freight teams and enterprise-ready operations.
 
 If you want one system for dispatch, tracking, paperwork, analytics, compliance, and operational control, this is the platform.
 
@@ -16,15 +16,13 @@ If you want one system for dispatch, tracking, paperwork, analytics, compliance,
 
 ## 📦 Monorepo Overview
 
-- `apps/api` — 🛠️ Node.js + Express backend, TypeScript, ESM-first
+- `apps/api` — 🛠️ Node.js + Express backend, TypeScript
 - `apps/web` — 🌐 React + Vite frontend, strict TypeScript
 - `apps/mobile` — 📱 React Native / Expo surface *(planned)*
-- `shared/` — 🧩 shared TypeScript modules and reusable platform utilities
-- `configs/` — ⚙️ lint, TypeScript, and workspace config
 - `docs/` — 📚 architecture, launch, operations, security, and readiness docs
 - `.github/` — 🔁 CI workflows, badges, automation, and social preview assets
 
-> **Workspace managed with pnpm. ESM enforced. CommonJS is avoided except where unavoidable for vendor compatibility.**
+> **Workspace managed with pnpm.**
 
 ---
 
@@ -59,7 +57,7 @@ If you want one system for dispatch, tracking, paperwork, analytics, compliance,
 | Layer | Tech |
 |---|---|
 | Frontend | React, Vite, TypeScript, Tailwind, Zustand, Socket.io |
-| Backend | Express 4, TypeScript, Prisma ORM |
+| Backend | Express 5, TypeScript, Prisma ORM |
 | Database | PostgreSQL |
 | Cache | Redis |
 | Auth | Supabase Auth + JWT |
@@ -126,12 +124,10 @@ Further setup references:
 
 ```text
 apps/
-  api/      # Express backend, TypeScript, ESM-first
+  api/      # Express backend, TypeScript
   web/      # React + Vite frontend
   mobile/   # React Native / Expo (planned)
 
-shared/     # Shared TypeScript utilities and modules
-configs/    # Lint, tsconfig, and related config
 docs/       # Architecture, operations, launch, and compliance docs
 .github/    # CI workflows, badges, and social preview
 Dockerfile*, docker-compose.yml, etc.
@@ -142,7 +138,6 @@ Dockerfile*, docker-compose.yml, etc.
 ## 📝 Coding Standards
 
 - TypeScript-first
-- ESM enforced
 - explicit exports
 - small composable functions
 - predictable file layouts

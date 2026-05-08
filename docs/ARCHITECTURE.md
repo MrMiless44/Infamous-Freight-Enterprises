@@ -13,9 +13,9 @@ Update this file whenever the framework, entry point, ports, or route structure 
 
 ---
 
-## Canonical Backend: Express 4
+## Canonical Backend: Express 5
 
-The active backend is an **Express 4** application written in TypeScript.
+The active backend is an **Express 5** application written in TypeScript.
 
 | File | Purpose |
 |---|---|
@@ -54,7 +54,7 @@ npm run start            # runs node dist/src/server.js
 
 ## Framework Decision
 
-**Canonical backend framework: Express 4**
+**Canonical backend framework: Express 5**
 
 The codebase also contains NestJS module files (`apps/api/src/main.ts`, `apps/api/src/app.module.ts`, and per-feature controllers) that were written during an earlier planning phase. These files are **not wired to the active server entry point** (`server.ts`) and are not executed in production.
 
@@ -66,8 +66,8 @@ The NestJS files represent planned feature modules that have not yet been migrat
 
 | Layer | Technology | Notes |
 |---|---|---|
-| Frontend | React 18, TypeScript, Vite, Tailwind CSS, Zustand, Socket.io | `apps/web` |
-| Backend | **Express 4**, TypeScript | `apps/api` |
+| Frontend | React 19, TypeScript, Vite, Tailwind CSS, Zustand, Socket.io | `apps/web` |
+| Backend | **Express 5**, TypeScript | `apps/api` |
 | ORM | Prisma | PostgreSQL schema in `apps/api/prisma/` |
 | Database | PostgreSQL 16 | |
 | Cache | Redis 7 | |
@@ -93,7 +93,7 @@ docker-compose up -d
 Services started:
 - `postgres` — PostgreSQL 16 on port `5432`
 - `redis` — Redis 7 on port `6379`
-- `api` — Express 4 API on port `3001`
+- `api` — Express 5 API on port `3001`
 - `web` — nginx serving the React SPA on port `80`
 
 The API container runs `node dist/src/server.js` with `PORT=3001`.
@@ -150,7 +150,6 @@ The following route patterns appear in older planning documents (PDF build packa
 |---|---|---|
 | `GET /api/freight/:resource` | Not implemented | Superseded by `/api/freight-operations/:resource` |
 | `POST /api/freight/:resource` | Not implemented | Superseded by `/api/freight-operations/:resource` |
-| Express 5 features | Not used | API uses Express 4 |
 | tRPC-style type-safe RPC | Not used | API uses REST over HTTP |
 
 ---

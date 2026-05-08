@@ -1,6 +1,5 @@
 import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { Analytics } from '@vercel/analytics/react';
 import AppLayout from '@/layouts/AppLayout';
 import PublicLayout from '@/layouts/PublicLayout';
 import SeoManager from '@/components/SeoManager';
@@ -84,7 +83,6 @@ function App() {
     <AppErrorBoundary>
       <Suspense fallback={<RouteFallback />}>
         <SeoManager />
-        <Analytics />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/home" element={<LandingPage />} />
