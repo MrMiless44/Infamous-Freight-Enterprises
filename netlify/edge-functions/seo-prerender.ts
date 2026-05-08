@@ -123,6 +123,36 @@ const SEO: Record<string, SeoEntry> = {
     description:
       'Review the shipper agreement for freight services, liability, and terms with Infamous Freight.',
   },
+  '/resources': {
+    title: 'Freight Guides and Resources | Infamous Freight',
+    description:
+      'Practical freight knowledge: equipment guides, industry explanations, and decision frameworks for shippers, carriers, and logistics teams.',
+  },
+  '/resources/ltl-vs-ftl-freight': {
+    title: 'LTL vs FTL Freight: How to Choose | Infamous Freight',
+    description:
+      'Understand the differences between less-than-truckload and full truckload freight, when each makes sense, and how to decide based on shipment size, budget, and timeline.',
+  },
+  '/resources/box-truck-shipping-guide': {
+    title: 'Complete Guide to Box Truck Freight Shipping | Infamous Freight',
+    description:
+      'Everything shippers need to know about box truck freight: capacity, pricing, best use cases, and how to book reliable box truck delivery.',
+  },
+  '/resources/what-is-freight-dispatch': {
+    title: 'What Is Freight Dispatch? A Complete Guide | Infamous Freight',
+    description:
+      'Learn what freight dispatchers do, how dispatch operations work, and how dispatch support helps fleets and owner-operators move freight efficiently.',
+  },
+  '/resources/freight-tracking-explained': {
+    title: 'How Real-Time Freight Tracking Works | Infamous Freight',
+    description:
+      'Learn how freight tracking technology provides real-time visibility into shipment status, ETAs, proof of delivery, and exception alerts.',
+  },
+  '/resources/cargo-van-vs-sprinter-van': {
+    title: 'Cargo Van vs Sprinter Van: Which Is Right? | Infamous Freight',
+    description:
+      'Compare cargo van and sprinter van freight options side by side — capacity, cost, speed, and best use cases — to decide which vehicle fits your shipment.',
+  },
 };
 
 const FAQ_DATA = [
@@ -274,6 +304,22 @@ function buildJsonLd(pathname: string): string {
     });
   }
 
+  if (pathname.startsWith('/resources/') && pathname !== '/resources') {
+    const seoEntry = SEO[pathname];
+    if (seoEntry) {
+      graph.push({
+        '@type': 'Article',
+        headline: seoEntry.title.replace(/ \| Infamous Freight$/, ''),
+        description: seoEntry.description,
+        url: SITE_URL + pathname,
+        publisher: { '@id': SITE_URL + '/#organization' },
+        author: { '@id': SITE_URL + '/#organization' },
+        datePublished: '2026-05-08',
+        dateModified: '2026-05-08',
+      });
+    }
+  }
+
   return JSON.stringify({ '@context': 'https://schema.org', '@graph': graph });
 }
 
@@ -307,8 +353,10 @@ export default async (req: Request, context: Context) => {
     `<link rel="canonical" href="${canonicalUrl}" />`,
   );
 
+  const ogType = pathname.startsWith('/resources/') && pathname !== '/resources' ? 'article' : 'website';
+
   const injected = `
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content="${ogType}" />
     <meta property="og:site_name" content="${BRAND_NAME}" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:title" content="${safeTitle}" />
@@ -356,6 +404,8 @@ export const config: Config = {
     '/privacy',
     '/carrier-agreement',
     '/shipper-agreement',
+    '/resources',
+    '/resources/*',
   ],
   onError: 'bypass',
 };

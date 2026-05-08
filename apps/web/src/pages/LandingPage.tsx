@@ -602,6 +602,69 @@ const LandingPage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      <footer className="border-t border-white/10 bg-[#090909] px-5 py-10 text-sm text-zinc-400 lg:px-6">
+        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1.2fr_2fr]">
+          <div>
+            <Link to="/" className="flex items-center gap-3 text-white" aria-label="Infamous Freight home">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-infamous-orange text-white">
+                <Truck size={20} />
+              </span>
+              <span className="text-lg font-black">Infamous Freight</span>
+            </Link>
+            <p className="mt-4 max-w-md leading-6">
+              AI-powered freight command center with auto-dispatch, rate negotiation, real-time tracking, and end-to-end shipment visibility.
+            </p>
+            <p className="mt-4">© {new Date().getFullYear()} Infamous Freight.</p>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-4">
+            <div>
+              <h2 className="mb-3 text-sm font-bold uppercase tracking-[0.18em] text-gray-200">Freight</h2>
+              <div className="space-y-2">
+                <Link to="/request-quote" className="block hover:text-infamous-orange">Request quote</Link>
+                <Link to="/track-shipment" className="block hover:text-infamous-orange">Track shipment</Link>
+                <Link to="/load-board" className="block hover:text-infamous-orange">Load board</Link>
+                <Link to="/freight-assistant" className="block hover:text-infamous-orange">Freight assistant</Link>
+                <Link to="/pricing" className="block hover:text-infamous-orange">Pricing</Link>
+              </div>
+            </div>
+            <div>
+              <h2 className="mb-3 text-sm font-bold uppercase tracking-[0.18em] text-gray-200">Services</h2>
+              <div className="space-y-2">
+                <Link to="/services" className="block hover:text-infamous-orange">All services</Link>
+                <Link to="/services/box-truck" className="block hover:text-infamous-orange">Box truck</Link>
+                <Link to="/services/cargo-van" className="block hover:text-infamous-orange">Cargo van</Link>
+                <Link to="/services/sprinter-van" className="block hover:text-infamous-orange">Sprinter van</Link>
+                <Link to="/services/local-freight" className="block hover:text-infamous-orange">Local freight</Link>
+                <Link to="/services/regional-freight" className="block hover:text-infamous-orange">Regional freight</Link>
+                <Link to="/services/freight-dispatch" className="block hover:text-infamous-orange">Freight dispatch</Link>
+              </div>
+            </div>
+            <div>
+              <h2 className="mb-3 text-sm font-bold uppercase tracking-[0.18em] text-gray-200">Network</h2>
+              <div className="space-y-2">
+                <Link to="/drive" className="block hover:text-infamous-orange">Apply to drive</Link>
+                <Link to="/partners" className="block hover:text-infamous-orange">Partners</Link>
+                <Link to="/carrier-portal" className="block hover:text-infamous-orange">Carrier portal</Link>
+                <Link to="/customer-portal" className="block hover:text-infamous-orange">Customer portal</Link>
+                <Link to="/resources" className="block hover:text-infamous-orange">Resources</Link>
+              </div>
+            </div>
+            <div>
+              <h2 className="mb-3 text-sm font-bold uppercase tracking-[0.18em] text-gray-200">Company</h2>
+              <div className="space-y-2">
+                <Link to="/about" className="block hover:text-infamous-orange">About</Link>
+                <Link to="/contact" className="block hover:text-infamous-orange">Contact</Link>
+                <Link to="/terms" className="block hover:text-infamous-orange">Terms</Link>
+                <Link to="/privacy" className="block hover:text-infamous-orange">Privacy</Link>
+                <Link to="/carrier-agreement" className="block hover:text-infamous-orange">Carrier agreement</Link>
+                <Link to="/shipper-agreement" className="block hover:text-infamous-orange">Shipper agreement</Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 };
