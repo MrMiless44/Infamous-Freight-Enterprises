@@ -99,6 +99,15 @@ curl --fail --show-error --location --head --retry 5 --retry-delay 10 --retry-co
 curl --fail --show-error --silent --location --retry 5 --retry-delay 10 --retry-connrefused https://www.infamousfreight.com/api/health
 ```
 
+Confirm Netlify-hosted public API routes are not swallowed by the broader Fly API proxy:
+
+```bash
+curl --fail --show-error --silent --location --retry 5 --retry-delay 10 --retry-connrefused --request OPTIONS https://www.infamousfreight.com/api/public/quote-requests
+curl --show-error --silent --location --retry 5 --retry-delay 10 --retry-connrefused --write-out '\n%{http_code}\n' https://www.infamousfreight.com/api/public/shipments/invalid-tracking
+```
+
+Expected result: the quote intake preflight returns an empty 204 response, and the invalid tracking lookup returns HTTP 400 JSON with `invalid_tracking_number`. Do not submit a production quote request during smoke testing unless the test record is intentionally tracked and cleaned up.
+
 Then confirm the bare domain redirects to the canonical www host:
 
 ```bash

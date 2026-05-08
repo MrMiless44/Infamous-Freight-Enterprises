@@ -31,6 +31,14 @@ const SECURITY_HEADERS: Record<string, string> = {
   'x-frame-options': 'DENY',
   'cache-control': 'no-store',
   'referrer-policy': 'strict-origin-when-cross-origin',
+  'strict-transport-security': 'max-age=63072000; includeSubDomains; preload',
+  'x-permitted-cross-domain-policies': 'none',
+  'x-dns-prefetch-control': 'off',
+  'cross-origin-embedder-policy': 'credentialless',
+  'cross-origin-opener-policy': 'same-origin',
+  'cross-origin-resource-policy': 'same-origin',
+  'permissions-policy':
+    'camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), serial=(), hid=(), accelerometer=(), gyroscope=(), magnetometer=(), ambient-light-sensor=(), autoplay=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), idle-detection=(), interest-cohort=(), picture-in-picture=(), screen-wake-lock=(), xr-spatial-tracking=()',
 };
 
 const json = (status: number, body: unknown) =>
@@ -61,11 +69,16 @@ const decimalOrNull = (value: unknown): number | null => {
 const dateOrNull = (value: unknown): string | null => {
   const raw = text(value, 32);
   if (!raw) return null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return null;
   const timestamp = Date.parse(`${raw}T00:00:00Z`);
   return Number.isNaN(timestamp) ? null : raw;
 };
 
 const trackingNumber = () => `IF-${Math.floor(10000 + Math.random() * 90000)}`;
+
+const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+const isTrackingNumber = (value: string) => /^IF-\d{5}$/i.test(value);
 
 async function createQuote(req: Request) {
   let body: QuoteInput;
@@ -95,12 +108,23 @@ async function createQuote(req: Request) {
     return json(400, { error: 'missing_fields', fields: missing });
   }
 
+  if (!isEmail(email)) {
+    return json(400, { error: 'invalid_email', message: 'A valid email address is required.' });
+  }
+
+  const pickupDate = dateOrNull(body.pickupDate);
+  const deliveryDate = dateOrNull(body.deliveryDate);
+  if (body.pickupDate && !pickupDate) {
+    return json(400, { error: 'invalid_date', field: 'pickupDate' });
+  }
+  if (body.deliveryDate && !deliveryDate) {
+    return json(400, { error: 'invalid_date', field: 'deliveryDate' });
+  }
+
   const db = getDatabase();
   const id = crypto.randomUUID();
   const tracking = trackingNumber();
   const route = `${origin} to ${destination}`;
-  const pickupDate = dateOrNull(body.pickupDate);
-  const deliveryDate = dateOrNull(body.deliveryDate);
   const publicNotes = 'Quote request received. Dispatch is reviewing lane details, equipment fit, and carrier capacity.';
   const timeline = JSON.stringify([
     {
@@ -206,6 +230,11 @@ async function createQuote(req: Request) {
 }
 
 async function getShipment(tracking: string) {
+  const normalizedTracking = tracking.trim().toUpperCase();
+  if (!isTrackingNumber(normalizedTracking)) {
+    return json(400, { error: 'invalid_tracking_number', message: 'Tracking number must use the IF-##### format.' });
+  }
+
   const db = getDatabase();
   const rows = await db.sql`
     SELECT
@@ -222,7 +251,7 @@ async function getShipment(tracking: string) {
       timeline,
       updated_at
     FROM public_shipments
-    WHERE tracking_number = ${tracking.toUpperCase()}
+    WHERE tracking_number = ${normalizedTracking}
     LIMIT 1
   `;
 
@@ -256,12 +285,20 @@ export default async (req: Request) => {
 
   const url = new URL(req.url);
   const trackingMatch = url.pathname.match(/^\/api\/public\/shipments\/([^/]+)$/);
+  const rewrittenTracking = url.searchParams.get('trackingNumber');
 
   if (req.method === 'GET' && trackingMatch?.[1]) {
     return getShipment(decodeURIComponent(trackingMatch[1]));
   }
 
-  if (req.method === 'POST' && url.pathname === '/api/public/quote-requests') {
+  if (req.method === 'GET' && rewrittenTracking) {
+    return getShipment(rewrittenTracking);
+  }
+
+  if (
+    req.method === 'POST' &&
+    (url.pathname === '/api/public/quote-requests' || url.pathname === '/.netlify/functions/public-freight')
+  ) {
     return createQuote(req);
   }
 

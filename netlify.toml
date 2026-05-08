@@ -38,6 +38,18 @@
   force = true
 
 [[redirects]]
+  from = "/api/public/quote-requests"
+  to = "/.netlify/functions/public-freight"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/public/shipments/:trackingNumber"
+  to = "/.netlify/functions/public-freight?trackingNumber=:trackingNumber"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/api/*"
   to = "https://infamous-freight.fly.dev/api/:splat"
   status = 200
