@@ -19,7 +19,7 @@ FROM node:22-slim
 
 WORKDIR /usr/src/app
 
-RUN apt-get update -y && apt-get install -y openssl
+RUN apt-get update -y && apt-get install -y openssl && apt-get clean
 
 ENV NODE_ENV=production
 ENV PORT=4000
