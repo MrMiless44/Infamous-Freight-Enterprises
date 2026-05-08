@@ -8,7 +8,7 @@ describe('ZAP baseline rules', () => {
   it('marks modern web application detection as ignored informational finding', () => {
     const content = fs.readFileSync(zapRules, 'utf8');
     expect(content).toContain(
-      '10109\tIGNORE\tModern Web Application identifies client-side routing behavior on the React SPA and is informational rather than a vulnerability.',
+      '10109\tIGNORE\tModern Web Application identifies client-side routing behavior on the React SPA and is informational rather than a vulnerability. Owner: Security. Expiry: 2026-08-31. Ref: https://github.com/Infaemous-Freight/Infamous-freight/actions/runs/25553724629',
     );
   });
 });
