@@ -2,18 +2,12 @@
  * RECOMMENDATION: Product Hunt Launch Page
  * Optimized landing page for Product Hunt launch
  */
-import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUpRight, MessageSquare, Globe, Share2, Users, TrendingUp, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BRAND } from '@/lib/brand';
 
 export default function ProductHunt() {
-  useEffect(() => {
-    document.title = 'Infamous Freight on Product Hunt - TMS for Modern Fleets';
-  }, []);
-
-
   const productHuntShareText =
     'Just discovered @InfamousFreight - the TMS that actually understands trucking! #ProductHunt';
   const tweetShareUrl = `https://twitter.com/intent/tweet?${new URLSearchParams({

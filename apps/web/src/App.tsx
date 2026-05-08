@@ -48,6 +48,7 @@ const ServiceDetailPage = lazy(() => import('@/pages/ServiceDetailPage'));
 const LegalPage = lazy(() => import('@/pages/LegalPage'));
 const ResourcesPage = lazy(() => import('@/pages/ResourcesPage'));
 const ResourceArticlePage = lazy(() => import('@/pages/ResourceArticlePage'));
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
 const RouteFallback = () => (
   <main
@@ -107,6 +108,9 @@ function App() {
             <Route path="/shipper-agreement" element={<LegalPage />} />
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/resources/:articleSlug" element={<ResourceArticlePage />} />
+            <Route path="/case-studies" element={<CaseStudies />} />
+            <Route path="/product-hunt" element={<ProductHunt />} />
+            <Route path="/gdpr" element={<GDPR />} />
           </Route>
 
           <Route path="/login" element={<LoginPage />} />
@@ -125,14 +129,13 @@ function App() {
             <Route path="/rate-comparison" element={<RateComparisonTool />} />
             <Route path="/pay-per-load" element={<PayPerLoadPricing />} />
             <Route path="/referrals" element={<ReferralProgram />} />
-            <Route path="/case-studies" element={<CaseStudies />} />
-            <Route path="/product-hunt" element={<ProductHunt />} />
-            <Route path="/gdpr" element={<GDPR />} />
             <Route path="/launch-validation" element={<LaunchValidationPage />} />
             <Route path="/carriers" element={<CarriersPage />} />
             <Route path="/accounting" element={<AccountingDashboardPage />} />
             <Route path="/quotes" element={<QuoteRequestsPage />} />
           </Route>
+
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
     </AppErrorBoundary>

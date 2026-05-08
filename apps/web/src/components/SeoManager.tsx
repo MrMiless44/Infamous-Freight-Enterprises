@@ -123,6 +123,18 @@ const SEO_BY_PATH: Record<string, SeoConfig> = {
     title: `Freight Guides and Resources | ${BRAND.displayName}`,
     description: 'Practical freight knowledge: equipment guides, industry explanations, and decision frameworks for shippers, carriers, and logistics teams.'
   },
+  '/case-studies': {
+    title: `Customer Success Stories | ${BRAND.displayName}`,
+    description: 'See how fleets of all sizes use Infamous Freight to grow revenue, reduce costs, and keep drivers happy.'
+  },
+  '/product-hunt': {
+    title: `Infamous Freight on Product Hunt | ${BRAND.displayName}`,
+    description: 'The TMS that actually understands trucking. AI-powered load management, real-time tracking, and automated exception handling.'
+  },
+  '/gdpr': {
+    title: `Privacy & Data Protection (GDPR) | ${BRAND.displayName}`,
+    description: 'Learn about your GDPR data rights, how Infamous Freight collects and uses data, and how to exercise your privacy rights.'
+  },
   '/resources/ltl-vs-ftl-freight': {
     title: `LTL vs FTL Freight: How to Choose | ${BRAND.displayName}`,
     description: 'Understand the differences between less-than-truckload and full truckload freight, when each makes sense, and how to decide based on shipment size, budget, and timeline.'
@@ -165,7 +177,83 @@ const INDEXABLE_ROUTES = new Set([
   '/carrier-agreement',
   '/shipper-agreement',
   '/resources',
+  '/case-studies',
+  '/product-hunt',
+  '/gdpr',
 ]);
+
+const ORGANIZATION_JSONLD = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: BRAND.displayName,
+  url: SITE_URL,
+  logo: `${SITE_URL}/favicon.svg`,
+  description: BRAND.description,
+  contactPoint: {
+    '@type': 'ContactPoint',
+    email: BRAND.supportEmail,
+    contactType: 'customer service',
+  },
+  sameAs: [
+    'https://www.producthunt.com/posts/infamous-freight',
+  ],
+});
+
+const FAQ_ITEMS = [
+  {
+    question: 'How do I get a freight quote from Infamous Freight?',
+    answer:
+      'Submit your shipment details including pickup location, destination, freight type, and timing on the Request a Quote page. Our dispatch team reviews your request and provides a rate with carrier and equipment confirmation, typically within hours.',
+  },
+  {
+    question: 'What types of freight services do you offer?',
+    answer:
+      'Infamous Freight handles box truck (16–26 ft), cargo van, sprinter van, local metro, and regional multi-city freight. We also provide full freight dispatch support for owner-operators, small fleets, and brokerage operations.',
+  },
+  {
+    question: 'How does real-time shipment tracking work?',
+    answer:
+      'Every load gets a live tracking timeline from pickup to delivery. You receive status updates, ETA changes, and proof-of-delivery events as they happen. Enter your reference number on the Track Shipment page for instant visibility.',
+  },
+  {
+    question: 'What is your carrier vetting process?',
+    answer:
+      'Every carrier is verified for FMCSA authority, active insurance, safety scores, and driver identity before touching a load. We re-check credentials on policy events and maintain documented records for every assignment.',
+  },
+  {
+    question: 'How do carriers and drivers get paid?',
+    answer:
+      'Standard carrier pay terms are included with every load. QuickPay options are available at 2.5% for 48-hour and 3.5% for same-day settlement. Instant payout is also available at 4% with transparent fee structure.',
+  },
+  {
+    question: 'What areas does Infamous Freight service?',
+    answer:
+      'We cover local and regional freight lanes across core U.S. markets with verified carrier capacity. Service areas include major metro regions and multi-city distribution corridors with coordinated pickup and delivery windows.',
+  },
+  {
+    question: 'Do you offer same-day or expedited freight?',
+    answer:
+      'Yes. Cargo van and sprinter van services support same-day pickup and delivery for time-sensitive freight. Expedited options are available for parts runs, medical supplies, trade show materials, and urgent commercial shipments.',
+  },
+  {
+    question: 'How do I apply to drive with Infamous Freight?',
+    answer:
+      'Visit the Apply to Drive page and submit your name, contact info, city, equipment type, and any notes. Our onboarding team reviews applications and connects verified drivers with freight opportunities on matching lanes.',
+  },
+];
+
+const FAQ_JSONLD = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQ_ITEMS.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.answer,
+    },
+  })),
+});
 
 const SeoManager = () => {
   const location = useLocation();
@@ -175,6 +263,34 @@ const SeoManager = () => {
   const canonicalUrl = `${SITE_URL}${canonicalPath}`;
   const isIndexable = INDEXABLE_ROUTES.has(pathname) || pathname.startsWith('/services/') || pathname.startsWith('/resources/');
   const isArticle = pathname.startsWith('/resources/') && pathname !== '/resources';
+  const isHome = pathname === '/' || pathname === '/home';
+  const isServiceDetail = pathname.startsWith('/services/') && pathname !== '/services';
+  const isResourceArticle = pathname.startsWith('/resources/') && pathname !== '/resources';
+
+  const breadcrumbJsonLd = (isServiceDetail || isResourceArticle) ? JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: SITE_URL,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: isServiceDetail ? 'Services' : 'Resources',
+        item: `${SITE_URL}${isServiceDetail ? '/services' : '/resources'}`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: seo.title.split(' | ')[0],
+        item: canonicalUrl,
+      },
+    ],
+  }) : null;
 
   return (
     <Helmet>
@@ -200,6 +316,9 @@ const SeoManager = () => {
       <meta name="twitter:description" content={seo.description} />
       <meta name="twitter:image" content={OG_IMAGE} />
       <meta name="twitter:image:alt" content={BRAND.ogImageAlt} />
+      <script type="application/ld+json">{ORGANIZATION_JSONLD}</script>
+      {isHome && <script type="application/ld+json">{FAQ_JSONLD}</script>}
+      {breadcrumbJsonLd && <script type="application/ld+json">{breadcrumbJsonLd}</script>}
     </Helmet>
   );
 };

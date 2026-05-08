@@ -112,7 +112,9 @@ const PublicLayout: React.FC = () => {
         </div>
       </header>
 
-      <Outlet />
+      <main id="main-content">
+        <Outlet />
+      </main>
 
       <footer className="border-t border-infamous-border bg-[#090909] px-6 py-10 text-sm text-gray-400">
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1.2fr_2fr]">

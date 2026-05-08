@@ -1,19 +1,25 @@
 {
-  "name": "Infamous Freight Public Preview",
+  "name": "Infamous Freight",
   "short_name": "Infamous",
-  "description": "Request freight quotes, start carrier onboarding, contact support, and open shipment portal entry points.",
+  "description": "AI-powered freight command center with auto-dispatch, rate negotiation, voice booking, ELD sync, and end-to-end shipment visibility.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#090909",
-  "theme_color": "#ff3d00",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
   "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/favicon.svg",
-      "sizes": "64x64",
+      "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ],
   "categories": ["business", "productivity"],

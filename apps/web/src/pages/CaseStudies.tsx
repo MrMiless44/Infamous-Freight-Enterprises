@@ -67,7 +67,7 @@ export default function CaseStudies() {
     <div className="min-h-screen bg-black py-16 px-4">
       <div className="mx-auto max-w-6xl">
         {/* Header */}
-        <Link to="/">
+        <Link to="/" aria-label="Back to homepage">
           <Button variant="ghost" className="mb-6 text-zinc-400 hover:text-white">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
