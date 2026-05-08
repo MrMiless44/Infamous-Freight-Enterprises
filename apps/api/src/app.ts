@@ -1,6 +1,6 @@
 import cors from 'cors';
 import helmet from 'helmet';
-import { randomUUID } from 'crypto';
+import { createHmac, timingSafeEqual, randomUUID } from 'crypto';
 import express, { NextFunction, Request, Response } from 'express';
 import * as Sentry from '@sentry/node';
 import {
@@ -37,6 +37,35 @@ type TrustedAuthContext = {
   userId: string;
   tenantId: string;
   role: Role;
+};
+
+type JwtClaims = {
+  sub?: unknown;
+  exp?: unknown;
+  nbf?: unknown;
+  aud?: unknown;
+  tenant_id?: unknown;
+  tenantId?: unknown;
+  carrier_id?: unknown;
+  carrierId?: unknown;
+  role?: unknown;
+  user_role?: unknown;
+  app_metadata?: {
+    tenant_id?: unknown;
+    tenantId?: unknown;
+    carrier_id?: unknown;
+    carrierId?: unknown;
+    role?: unknown;
+    user_role?: unknown;
+  };
+  user_metadata?: {
+    tenant_id?: unknown;
+    tenantId?: unknown;
+    carrier_id?: unknown;
+    carrierId?: unknown;
+    role?: unknown;
+    user_role?: unknown;
+  };
 };
 
 type HealthResponse = {
@@ -98,6 +127,150 @@ function assertSafeAuthConfiguration() {
   ) {
     throw new Error('AUTH_MODE=header is not allowed in production without ALLOW_UNSAFE_HEADER_AUTH=true.');
   }
+
+  if (isProductionRuntime() && getAuthMode() === 'trusted' && !getJwtVerificationSecret()) {
+    throw new Error('SUPABASE_JWT_SECRET or JWT_SECRET is required when production AUTH_MODE=trusted.');
+  }
+}
+
+function getJwtVerificationSecret(): string | null {
+  const secret = process.env.SUPABASE_JWT_SECRET ?? process.env.JWT_SECRET;
+  const trimmed = secret?.trim();
+
+  return trimmed && !trimmed.startsWith('<') ? trimmed : null;
+}
+
+function decodeBase64UrlJson(value: string): Record<string, unknown> | null {
+  try {
+    return JSON.parse(Buffer.from(value, 'base64url').toString('utf8')) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+function verifyJwtSignature(token: string, secret: string, signature: string): boolean {
+  const expected = createHmac('sha256', secret)
+    .update(token)
+    .digest('base64url');
+  const expectedBuffer = Buffer.from(expected);
+  const actualBuffer = Buffer.from(signature);
+
+  return expectedBuffer.length === actualBuffer.length && timingSafeEqual(expectedBuffer, actualBuffer);
+}
+
+function getStringClaim(...values: unknown[]): string | null {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim().length > 0) {
+      return value.trim();
+    }
+  }
+
+  return null;
+}
+
+function getRoleClaim(...values: unknown[]): Role | null {
+  const role = getStringClaim(...values);
+
+  return role && ALLOWED_ROLES.includes(role as Role) ? (role as Role) : null;
+}
+
+function audienceMatches(claims: JwtClaims): boolean {
+  const expectedAudience = process.env.AUTH_JWT_AUDIENCE?.trim() || process.env.SUPABASE_JWT_AUDIENCE?.trim();
+
+  if (!expectedAudience) {
+    return true;
+  }
+
+  if (typeof claims.aud === 'string') {
+    return claims.aud === expectedAudience;
+  }
+
+  if (Array.isArray(claims.aud)) {
+    return claims.aud.includes(expectedAudience);
+  }
+
+  return false;
+}
+
+function getTrustedAuthContextFromJwt(token: string): TrustedAuthContext | null {
+  const secret = getJwtVerificationSecret();
+
+  if (!secret) {
+    return null;
+  }
+
+  const parts = token.split('.');
+  if (parts.length !== 3) {
+    return null;
+  }
+
+  const [encodedHeader, encodedClaims, signature] = parts;
+  const header = decodeBase64UrlJson(encodedHeader);
+  const claims = decodeBase64UrlJson(encodedClaims) as JwtClaims | null;
+
+  if (!header || !claims || header.alg !== 'HS256') {
+    return null;
+  }
+
+  if (!verifyJwtSignature(`${encodedHeader}.${encodedClaims}`, secret, signature)) {
+    return null;
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  if (typeof claims.exp === 'number' && claims.exp <= now) {
+    return null;
+  }
+
+  if (typeof claims.nbf === 'number' && claims.nbf > now) {
+    return null;
+  }
+
+  if (!audienceMatches(claims)) {
+    return null;
+  }
+
+  const userId = getStringClaim(claims.sub);
+  const tenantId = getStringClaim(
+    claims.app_metadata?.tenant_id,
+    claims.app_metadata?.tenantId,
+    claims.app_metadata?.carrier_id,
+    claims.app_metadata?.carrierId,
+    claims.user_metadata?.tenant_id,
+    claims.user_metadata?.tenantId,
+    claims.user_metadata?.carrier_id,
+    claims.user_metadata?.carrierId,
+    claims.tenant_id,
+    claims.tenantId,
+    claims.carrier_id,
+    claims.carrierId,
+  );
+  const role = getRoleClaim(
+    claims.app_metadata?.role,
+    claims.app_metadata?.user_role,
+    claims.user_metadata?.role,
+    claims.user_metadata?.user_role,
+    claims.user_role,
+    claims.role,
+  );
+
+  if (!userId || !tenantId || !role) {
+    return null;
+  }
+
+  return { userId, tenantId, role };
+}
+
+function authenticateBearerToken(req: Request, _res: Response, next: NextFunction) {
+  const [scheme, token] = (req.header('authorization') ?? '').split(/\s+/, 2);
+
+  if (scheme?.toLowerCase() === 'bearer' && token) {
+    const trustedAuth = getTrustedAuthContextFromJwt(token);
+    if (trustedAuth) {
+      req.authenticatedUser = trustedAuth;
+    }
+  }
+
+  next();
 }
 
 function getTrustedAuthContext(req: Request): TrustedAuthContext | null {
@@ -831,6 +1004,7 @@ export function createApp() {
   app.use('/api', createRateLimitMiddleware('api'));
   registerWebhookRoute(app, dataStore);
   app.use(express.json());
+  app.use(authenticateBearerToken);
 
   app.get('/health', wrapAsync(async (_req, res) => {
     const readiness = await createReadinessResponse(dataStore);

@@ -1,7 +1,22 @@
 import request from 'supertest';
+import { createHmac } from 'crypto';
 import { createApp } from '../src/app';
 import * as dataStoreModule from '../src/data-store';
 import { resetRateLimitBucketsForTests } from '../src/rate-limit';
+
+function signJwt(
+  claims: Record<string, unknown>,
+  secret = 'test-supabase-jwt-secret',
+  header: Record<string, unknown> = { alg: 'HS256', typ: 'JWT' },
+): string {
+  const encodedHeader = Buffer.from(JSON.stringify(header)).toString('base64url');
+  const encodedClaims = Buffer.from(JSON.stringify(claims)).toString('base64url');
+  const signature = createHmac('sha256', secret)
+    .update(`${encodedHeader}.${encodedClaims}`)
+    .digest('base64url');
+
+  return `${encodedHeader}.${encodedClaims}.${signature}`;
+}
 
 afterEach(() => {
   resetRateLimitBucketsForTests();
@@ -10,6 +25,10 @@ afterEach(() => {
   delete process.env.RATE_LIMIT_MAX_REQUESTS;
   delete process.env.AUTH_MODE;
   delete process.env.ALLOW_UNSAFE_HEADER_AUTH;
+  delete process.env.SUPABASE_JWT_SECRET;
+  delete process.env.JWT_SECRET;
+  delete process.env.AUTH_JWT_AUDIENCE;
+  delete process.env.SUPABASE_JWT_AUDIENCE;
 });
 
 describe('health endpoint', () => {
@@ -250,10 +269,12 @@ describe('configuration safety', () => {
     const previousNodeEnv = process.env.NODE_ENV;
     const previousDatabaseUrl = process.env.DATABASE_URL;
     const previousAuthMode = process.env.AUTH_MODE;
+    const previousJwtSecret = process.env.SUPABASE_JWT_SECRET;
 
     try {
       process.env.NODE_ENV = 'production';
       process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/infamous_test';
+      process.env.SUPABASE_JWT_SECRET = 'test-supabase-jwt-secret';
       delete process.env.AUTH_MODE;
 
       const response = await request(createApp())
@@ -277,6 +298,98 @@ describe('configuration safety', () => {
       } else {
         delete process.env.AUTH_MODE;
       }
+
+      if (previousJwtSecret !== undefined) {
+        process.env.SUPABASE_JWT_SECRET = previousJwtSecret;
+      } else {
+        delete process.env.SUPABASE_JWT_SECRET;
+      }
     }
+  });
+
+  it('accepts a verified bearer token in default production auth mode', async () => {
+    const previousNodeEnv = process.env.NODE_ENV;
+    const previousDatabaseUrl = process.env.DATABASE_URL;
+    const previousAuthMode = process.env.AUTH_MODE;
+    const previousJwtSecret = process.env.SUPABASE_JWT_SECRET;
+
+    try {
+      process.env.NODE_ENV = 'production';
+      process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/infamous_test';
+      process.env.SUPABASE_JWT_SECRET = 'test-supabase-jwt-secret';
+      delete process.env.AUTH_MODE;
+
+      const token = signJwt({
+        sub: 'user-1',
+        exp: Math.floor(Date.now() / 1000) + 60,
+        app_metadata: {
+          tenant_id: 'tenant-token',
+          role: 'dispatcher',
+        },
+      });
+
+      const response = await request(createApp())
+        .get('/api/loads')
+        .set('authorization', `Bearer ${token}`)
+        .set('x-tenant-id', 'tenant-spoof')
+        .set('x-user-role', 'owner');
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toEqual([]);
+    } finally {
+      process.env.NODE_ENV = previousNodeEnv;
+
+      if (previousDatabaseUrl !== undefined) {
+        process.env.DATABASE_URL = previousDatabaseUrl;
+      } else {
+        delete process.env.DATABASE_URL;
+      }
+
+      if (previousAuthMode !== undefined) {
+        process.env.AUTH_MODE = previousAuthMode;
+      } else {
+        delete process.env.AUTH_MODE;
+      }
+
+      if (previousJwtSecret !== undefined) {
+        process.env.SUPABASE_JWT_SECRET = previousJwtSecret;
+      } else {
+        delete process.env.SUPABASE_JWT_SECRET;
+      }
+    }
+  });
+
+  it('rejects expired or tampered bearer tokens in trusted auth mode', async () => {
+    process.env.AUTH_MODE = 'trusted';
+    process.env.SUPABASE_JWT_SECRET = 'test-supabase-jwt-secret';
+
+    const expiredToken = signJwt({
+      sub: 'user-1',
+      exp: Math.floor(Date.now() / 1000) - 60,
+      app_metadata: {
+        tenant_id: 'tenant-token',
+        role: 'dispatcher',
+      },
+    });
+    const tamperedToken = `${signJwt({
+      sub: 'user-1',
+      exp: Math.floor(Date.now() / 1000) + 60,
+      app_metadata: {
+        tenant_id: 'tenant-token',
+        role: 'dispatcher',
+      },
+    }).slice(0, -1)}x`;
+
+    const expiredResponse = await request(createApp())
+      .get('/api/loads')
+      .set('authorization', `Bearer ${expiredToken}`);
+    const tamperedResponse = await request(createApp())
+      .get('/api/loads')
+      .set('authorization', `Bearer ${tamperedToken}`);
+
+    expect(expiredResponse.status).toBe(401);
+    expect(expiredResponse.body.error).toBe('authentication_required');
+    expect(tamperedResponse.status).toBe(401);
+    expect(tamperedResponse.body.error).toBe('authentication_required');
   });
 });

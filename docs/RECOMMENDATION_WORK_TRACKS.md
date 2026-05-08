@@ -19,7 +19,7 @@ Resolve these before paid beta or public launch:
 
 Prioritize these immediately after launch blockers:
 
-- Replace production trust in `x-user-role` and `x-tenant-id` with verified JWT claims and membership lookup.
+- Production protected API routes now verify bearer JWTs and derive tenant and role from trusted claims instead of caller-controlled `x-user-role` and `x-tenant-id` headers. Continue toward a database-backed membership lookup if roles need to be revoked or changed immediately after token issuance.
 - Keep test-only header fallbacks explicitly gated.
 - Expand Stripe webhook coverage for duplicate events, subscription changes, failed payments, refunds, one-time purchases, and missing metadata.
 - Alert on failed Stripe webhook event records.
