@@ -3,6 +3,7 @@ import {
   Truck, ShieldCheck, Clock, AlertTriangle, XCircle, FileText,
   CheckCircle, ChevronRight, Plus, Search, Phone, Mail
 } from 'lucide-react';
+import EmptyState from '@/components/ui/EmptyState';
 
 type CarrierStatus = 'pending' | 'approved' | 'needs_documents' | 'expiring_insurance' | 'rejected';
 
@@ -267,7 +268,13 @@ const CarriersPage: React.FC = () => {
               })}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="py-10 text-center text-gray-500 text-sm">No carriers found</td>
+                  <td colSpan={6}>
+                    <EmptyState
+                      icon={<Truck size={40} />}
+                      title="No carriers found"
+                      description="Try adjusting your search or filter to find carriers."
+                    />
+                  </td>
                 </tr>
               )}
             </tbody>

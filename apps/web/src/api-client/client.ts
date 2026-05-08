@@ -7,6 +7,28 @@ import { useAppStore } from '@/store/app-store';
 // https://api.infamousfreight.com) only when bypassing the proxy.
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
+const MAX_RETRIES = 2;
+const RETRY_BASE_MS = 500;
+
+function isRetryable(error: AxiosError): boolean {
+  if (!error.response) return true;
+  const status = error.response.status;
+  return status === 502 || status === 503 || status === 504;
+}
+
+function retryDelay(attempt: number, error: AxiosError): number {
+  const retryAfter = error.response?.headers?.['retry-after'];
+  if (retryAfter) {
+    const seconds = Number(retryAfter);
+    if (!Number.isNaN(seconds) && seconds > 0 && seconds <= 60) return seconds * 1000;
+  }
+  return RETRY_BASE_MS * 2 ** attempt;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 class ApiClient {
   private client: AxiosInstance;
 
@@ -36,7 +58,16 @@ class ApiClient {
 
     this.client.interceptors.response.use(
       (response) => response,
-      (error: AxiosError<{ message?: string }>) => {
+      async (error: AxiosError<{ message?: string }>) => {
+        const config = error.config as AxiosRequestConfig & { _retryCount?: number };
+        const attempt = config?._retryCount ?? 0;
+
+        if (config && attempt < MAX_RETRIES && isRetryable(error)) {
+          config._retryCount = attempt + 1;
+          await sleep(retryDelay(attempt, error));
+          return this.client.request(config);
+        }
+
         const message = error.response?.data?.message || error.message || 'Something went wrong';
 
         if (error.response?.status === 401) {

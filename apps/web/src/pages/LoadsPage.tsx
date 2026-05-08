@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search, Filter, MapPin, DollarSign, Clock, Star, Truck, Bookmark, Phone, CreditCard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import EmptyState from '@/components/ui/EmptyState';
 
 interface Load {
   id: string;
@@ -94,6 +95,18 @@ const LoadsPage: React.FC = () => {
       </div>
 
       {/* Load Cards */}
+      {filtered.length === 0 ? (
+        <EmptyState
+          icon={<Truck size={40} />}
+          title="No loads match your filters"
+          description="Try adjusting your search, equipment type, or minimum rate to see available loads."
+          action={
+            <button onClick={() => { setSearch(''); setEquipment('All'); setMinRate(''); }} className="btn-secondary text-sm">
+              Reset filters
+            </button>
+          }
+        />
+      ) : (
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         {filtered.map((load) => (
           <div key={load.id} className="card hover:border-infamous-orange/30 transition-all group">
@@ -158,6 +171,7 @@ const LoadsPage: React.FC = () => {
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 };

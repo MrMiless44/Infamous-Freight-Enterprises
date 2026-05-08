@@ -7,6 +7,7 @@ import {
   TrendingUp, Receipt, Banknote
 } from 'lucide-react';
 import WidgetErrorBoundary from '@/components/ui/WidgetErrorBoundary';
+import EmptyState from '@/components/ui/EmptyState';
 
 interface OpsMetric {
   label: string;
@@ -91,11 +92,11 @@ const DashboardPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Operations Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Daily freight control overview</p>
+          <p className="text-sm text-gray-500 mt-0.5">Daily freight control overview · sample data</p>
         </div>
         <div className="flex items-center gap-2 bg-infamous-card border border-infamous-border rounded-xl px-3 py-2">
-          <Activity size={14} className="text-green-400 animate-pulse" />
-          <span className="text-xs text-gray-400">Live</span>
+          <Activity size={14} className="text-gray-500" />
+          <span className="text-xs text-gray-500">Demo data</span>
           {urgentCount > 0 && (
             <span className="ml-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{urgentCount} urgent</span>
           )}
@@ -242,7 +243,11 @@ const DashboardPage: React.FC = () => {
               </button>
             ))}
             {filteredLoads.length === 0 && (
-              <div className="text-center py-8 text-gray-600 text-sm">No loads matching filter</div>
+              <EmptyState
+                icon={<Truck size={36} />}
+                title="No loads matching filter"
+                description="Try selecting a different filter to see active loads."
+              />
             )}
           </div>
         </div>

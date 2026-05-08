@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { FileText, DollarSign, Clock, Send, CheckCircle, AlertTriangle, Download, TrendingUp, FileCheck2, Sparkles } from 'lucide-react';
+import EmptyState from '@/components/ui/EmptyState';
 
 interface Invoice {
   id: string;
@@ -231,6 +232,17 @@ const InvoicesPage: React.FC = () => {
                   </td>
                 </tr>
               ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={9}>
+                    <EmptyState
+                      icon={<FileText size={40} />}
+                      title="No invoices match this filter"
+                      description="Try selecting a different status or create a new invoice."
+                    />
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
