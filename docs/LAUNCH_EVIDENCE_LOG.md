@@ -36,12 +36,13 @@ Use this file during production readiness verification. Do not mark the launch r
 
 | ID | Severity | Area | Description | Owner | Workaround | Status |
 |---|---|---|---|---|---|---|
-| B-001 | High | Infrastructure | Fly.io API endpoint (infamous-freight.fly.dev) not responding — direct health checks time out | MrMiless44 | API accessible via Netlify proxy (/api/health returns `{"ok":true}`); verify Fly.io app is running with `flyctl status` | Open |
-| B-002 | Medium | Infrastructure | Bare domain infamousfreight.com not resolving — DNS connection refused | MrMiless44 | Users can access https://www.infamousfreight.com directly | Open |
+| B-001 | High | Infrastructure | Fly.io API endpoint (infamous-freight.fly.dev) not responding — direct health checks time out | MrMiless44 | Direct Fly API returned healthy JSON on 2026-05-08; rerun the full smoke test after Netlify redeploy and close if stable | Needs retest |
+| B-002 | Medium | Infrastructure | Bare domain infamousfreight.com not resolving — DNS connection refused | MrMiless44 | Apex redirected to https://www.infamousfreight.com/ on 2026-05-08; rerun the full smoke test after Netlify redeploy and close if stable | Needs retest |
 | B-003 | Medium | Tooling | `flyctl` CLI not installed in local dev environment; preflight check fails | MrMiless44 | CI/CD deploys via GitHub Actions which has flyctl configured | Open |
 | B-004 | Unknown | Billing | Stripe mode not confirmed as Live — must verify before accepting real payments | MrMiless44 | Do not accept payments until confirmed Live mode | Open |
 | B-005 | Unknown | Database | Database migration version not confirmed | MrMiless44 | Confirm with `prisma migrate status` before launch | Open |
-| B-006 | Critical | Infrastructure | Production redirect loop: `https://www.infamousfreight.com/` 301→`https://infamousfreight.com/` 301→`https://www.infamousfreight.com/` (observed 2026-05-03 09:00 UTC). `curl --max-redirs 10` exhausts without reaching HTML (final HTTP 301, body 43 bytes). Proxied `/api/health` also returns 301 because requests to `www` bounce before hitting the Netlify `/api/*` rule. `netlify.toml` only declares the apex→www direction, so the reverse www→apex 301 is being injected by an out-of-repo source (domain alias or registrar forwarding). | MrMiless44 | None — site is effectively unreachable through the canonical hostname. Until fixed, the API is reachable only via direct Fly URL (also currently timing out — see B-001). | Open |
+| B-006 | Critical | Infrastructure | Production redirect loop: `https://www.infamousfreight.com/` 301→`https://infamousfreight.com/` 301→`https://www.infamousfreight.com/` (observed 2026-05-03 09:00 UTC). `curl --max-redirs 10` exhausted without reaching HTML (final HTTP 301, body 43 bytes). | MrMiless44 | Canonical web and apex redirect checks passed on 2026-05-08; rerun the full smoke test after Netlify redeploy and close if stable | Needs retest |
+| B-007 | High | Infrastructure | Production `https://www.infamousfreight.com/api/health` returns the web app HTML shell instead of API health JSON. The browser-critical API path is not currently proving the Fly API proxy. | MrMiless44 | Direct Fly API `https://infamous-freight.fly.dev/api/health` returned healthy JSON on 2026-05-08. The repository now includes exact forced `/api/health` routing plus forced API proxy rules; deploy and rerun the proxied check. | Open |
 
 ## Evidence Entry Template
 
@@ -82,6 +83,107 @@ None / Low / Medium / High / Critical
 ---
 
 # Evidence Entries
+
+## Test
+Phase 1 - Production Routing Retest And Proxy Rule Hardening
+
+## Date/Time
+2026-05-08 16:04 UTC
+
+## Owner
+Automation
+
+## Command or Action
+Retested the canonical production web host, apex redirect, browser-critical proxied API health path, and direct Fly API health path with `curl`. Sensitive page script parameters were not recorded.
+
+## Expected Result
+`https://www.infamousfreight.com/` returns HTTP 200 with security headers, `https://infamousfreight.com/` redirects to `https://www.infamousfreight.com/`, `https://www.infamousfreight.com/api/health` returns API health JSON, and `https://infamous-freight.fly.dev/api/health` returns API health JSON as an optional origin diagnostic.
+
+## Actual Result
+- Canonical web host returned HTTP 200 from Netlify with expected security headers.
+- Apex domain returned HTTP 301 to `https://www.infamousfreight.com/`, then HTTP 200.
+- Proxied `/api/health` returned HTTP 200 with `content-type: text/html; charset=UTF-8` and served the Vite web app shell instead of API health JSON.
+- Direct Fly API `/api/health` returned HTTP 200 JSON with `status: ok` and `services.database: connected`.
+- Repository routing was hardened after the retest by adding an exact forced `/api/health` proxy in `netlify.toml` and `apps/web/public/_redirects`, and by forcing the broader `/api/*` and `/socket.io/*` proxy rules in `_redirects`.
+
+## Status
+FAIL
+
+## Severity
+High
+
+## Follow-Up
+B-007 remains open. Trigger a Netlify production deploy containing the hardened redirect rules, then rerun `https://www.infamousfreight.com/api/health` and verify JSON before launch.
+
+## Notes
+No build command was run. The direct API origin is healthy; the remaining issue is the deployed Netlify browser path serving the SPA shell for `/api/health`.
+
+## Test
+Phase 1 - Production Canonical Web And API Routing Refresh
+
+## Date/Time
+2026-05-08 15:46 UTC
+
+## Owner
+Automation
+
+## Command or Action
+Checked the canonical production host, apex redirect, proxied API health route, and direct Fly API health route with `curl`. Sensitive page script parameters were not recorded.
+
+## Expected Result
+`https://www.infamousfreight.com/` returns HTTP 200, `https://infamousfreight.com/` redirects to `https://www.infamousfreight.com/`, `https://www.infamousfreight.com/api/health` returns API health JSON, and direct Fly API checks are treated as optional diagnostics.
+
+## Actual Result
+- Canonical web host returned HTTP 200 at `https://www.infamousfreight.com/`.
+- Apex domain redirected to `https://www.infamousfreight.com/` and returned HTTP 200.
+- Security headers were present on the canonical web response, including `content-security-policy`, `strict-transport-security`, `x-frame-options`, `x-content-type-options`, `referrer-policy`, and `permissions-policy`.
+- Netlify response metadata included request IDs and an HTML asset etag `W/"710b6d2d02664c0388a82228317db761-ssl-df"`.
+- `https://www.infamousfreight.com/api/health` returned HTTP 200 with `content-type: text/html; charset=UTF-8`, which indicates the SPA shell was served instead of API health JSON.
+- `https://infamous-freight.fly.dev/api/health` returned HTTP 200 JSON with `status: ok` and `services.database: connected`.
+
+## Status
+FAIL
+
+## Severity
+High
+
+## Follow-Up
+B-006 can be retested because the canonical redirect loop was not reproduced. B-007 was opened because the proxied API path is still not returning API JSON. Deploy the `_redirects` update that adds `/api/*` and `/socket.io/*` proxy rules before the SPA fallback, then rerun the production smoke checks.
+
+## Notes
+This refresh did not run a build command. It recorded launch evidence from production HTTP checks only.
+
+## Test
+Phase 1 - Production Routing Retest
+
+## Date/Time
+2026-05-08 15:56 UTC
+
+## Owner
+Automation
+
+## Command or Action
+Retested the canonical production web host, apex redirect, and browser-critical proxied API health path with `curl`.
+
+## Expected Result
+`https://www.infamousfreight.com/` returns HTTP 200 with security headers, `https://infamousfreight.com/` resolves to `https://www.infamousfreight.com/`, and `https://www.infamousfreight.com/api/health` returns API health JSON.
+
+## Actual Result
+- Canonical web host returned HTTP 200 with Netlify headers and the expected security headers.
+- Apex domain resolved to `https://www.infamousfreight.com/` with HTTP 200.
+- Proxied `/api/health` returned HTTP 200 but served `text/html` and the Vite web app shell instead of API health JSON.
+
+## Status
+FAIL
+
+## Severity
+High
+
+## Follow-Up
+B-007 remains open. Trigger a Netlify production deploy containing the committed `_redirects` API proxy rules, then rerun `https://www.infamousfreight.com/api/health` and verify JSON before launch.
+
+## Notes
+No build command was run. The retest confirms the source fix still needs production deployment or verification.
 
 ## Test
 Phase 1 - Netlify Repository Configuration Audit
@@ -237,7 +339,7 @@ date: Mon, 27 Apr 2026 09:15:59 GMT
 age: 1979276
 cache-control: public,max-age=0,must-revalidate
 ```
-Historical production response returned HTTP 200 from Netlify and included Next.js headers from an older deployed build. The repository source of truth is now React/Vite for the web app and Express 4 for the API. Security headers (HSTS, X-Frame-Options, X-Content-Type-Options, Permissions-Policy, Referrer-Policy) were present in that response. Full browser verification pending human review after the next Netlify deploy.
+Historical production response returned HTTP 200 from Netlify and included Next.js headers from an older deployed build. The repository source of truth is now React/Vite for the web app and Express 5 for the API. Security headers (HSTS, X-Frame-Options, X-Content-Type-Options, Permissions-Policy, Referrer-Policy) were present in that response. Full browser verification pending human review after the next Netlify deploy.
 
 ## Status
 PASS

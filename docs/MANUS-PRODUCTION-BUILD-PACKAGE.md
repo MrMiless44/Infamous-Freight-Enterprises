@@ -158,8 +158,8 @@ Build the MVP in the most practical production-ready order, not as a mockup.
 > | This document | Actual repo |
 > |---|---|
 > | Next.js frontend | React 18 + Vite SPA (not Next.js) |
-> | Next.js API routes or separate Node backend | Express 4 (`apps/api/src/server.ts`) |
-> | Express 5 assumed in some sections | Express 4 in use |
+> | Next.js API routes or separate Node backend | Express 5 (`apps/api/src/server.ts`) |
+> | Express version assumptions in older sections | Express 5 in use |
 > | tRPC-style type-safe RPC | Standard REST over HTTP |
 > | `/api/freight/...` route prefix | Routes use `/api/loads`, `/api/shipments`, `/api/freight-operations/:resource`, `/api/workflows/...` |
 > | Webhook endpoint `POST /api/webhooks/stripe` | Implemented as `POST /api/billing/webhook` |

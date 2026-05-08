@@ -38,12 +38,23 @@ Recommended execution order:
 Run these after deployment:
 
 ```bash
-curl -i https://infamous-freight.fly.dev/health
-curl -i https://infamous-freight.fly.dev/api/health
-curl -i https://www.infamousfreight.com/api/health
+curl --fail --show-error --location --head https://www.infamousfreight.com
+curl --fail --show-error --location --head https://infamousfreight.com
+curl --fail --show-error --silent --location https://www.infamousfreight.com/api/health
 ```
 
-Expected result: HTTP 200 from all three endpoints.
+Expected result: the canonical `www` site returns HTTP 200, the apex domain redirects to `https://www.infamousfreight.com/`, and the proxied `/api/health` endpoint returns API health JSON rather than the web app HTML.
+
+Optional direct API origin checks:
+
+```bash
+curl -i https://infamous-freight.fly.dev/health
+curl -i https://infamous-freight.fly.dev/api/health
+curl -i https://api.infamousfreight.com/health
+curl -i https://api.infamousfreight.com/api/health
+```
+
+Direct API checks are operational diagnostics. Do not block the Netlify web launch on `api.infamousfreight.com` until that route is confirmed; the launch-critical browser path is `https://www.infamousfreight.com/api/health`.
 
 ## Production environment expectations
 
@@ -71,7 +82,6 @@ VITE_API_URL=/api
 ## Not production ready if
 
 - `FLY_API_TOKEN` is missing or stale.
-- Fly `/health` fails.
-- Fly `/api/health` fails.
 - Public proxied `/api/health` fails.
+- Public proxied `/api/health` returns web app HTML instead of API health JSON.
 - Netlify has not been redeployed after env changes.

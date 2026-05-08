@@ -2,7 +2,7 @@
 
 A phased plan for building Infamous Freight forward from the current monorepo. This roadmap is intentionally short and outcome-oriented; each phase points at concrete code areas already present in the repo.
 
-> Stack reminder: pnpm monorepo with `apps/api` (Express 4 + Prisma + PostgreSQL + Socket.IO + Stripe) and `apps/web` (React + Vite + TypeScript + Tailwind). See [`README.md`](../README.md) and [`ARCHITECTURE.md`](./ARCHITECTURE.md).
+> Stack reminder: pnpm monorepo with `apps/api` (Express 5 + Prisma + PostgreSQL + Socket.IO + Stripe) and `apps/web` (React + Vite + TypeScript + Tailwind). See [`README.md`](../README.md) and [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 
 ---
 

@@ -1,6 +1,5 @@
-import { getStore } from '@netlify/blobs';
+import { getDatabase } from '@netlify/database';
 
-const STORE_NAME = 'load-requests';
 const MAX_LIST = 50;
 
 type LoadRequestInput = {
@@ -31,7 +30,7 @@ type SavedLoadRequest = {
   askingRate: number | null;
   notes: string;
   status: 'pending';
-  createdAt: string;
+  createdAt?: string;
 };
 
 const isString = (v: unknown): v is string => typeof v === 'string';
@@ -76,18 +75,45 @@ export default async (req: Request) => {
     });
   }
 
-  const store = getStore(STORE_NAME);
+  const db = getDatabase();
 
   if (req.method === 'GET') {
-    const list = await store.list();
-    const blobs = list.blobs ?? [];
-    const items = await Promise.all(
-      blobs.map((b) => store.get(b.key, { type: 'json' }) as Promise<SavedLoadRequest | null>),
-    );
-    const records = items
-      .filter((x): x is SavedLoadRequest => !!x)
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-      .slice(0, MAX_LIST);
+    const rows = await db.sql`
+      SELECT
+        id,
+        load_id,
+        lane,
+        equipment,
+        total_pay,
+        rate_per_mile,
+        carrier_name,
+        mc_number,
+        contact_email,
+        contact_phone,
+        asking_rate,
+        notes,
+        status,
+        created_at
+      FROM carrier_load_requests
+      ORDER BY created_at DESC
+      LIMIT ${MAX_LIST}
+    `;
+    const records = rows.map((row: Record<string, unknown>) => ({
+      id: row.id,
+      loadId: row.load_id,
+      lane: row.lane,
+      equipment: row.equipment,
+      totalPay: row.total_pay,
+      ratePerMile: row.rate_per_mile,
+      carrierName: row.carrier_name,
+      mcNumber: row.mc_number,
+      contactEmail: row.contact_email,
+      contactPhone: row.contact_phone,
+      askingRate: row.asking_rate,
+      notes: row.notes,
+      status: row.status,
+      createdAt: row.created_at,
+    }));
     return json(200, { requests: records });
   }
 
@@ -135,6 +161,39 @@ export default async (req: Request) => {
     createdAt: new Date().toISOString(),
   };
 
-  await store.setJSON(id, record);
-  return json(201, { request: record });
+  const [saved] = await db.sql`
+    INSERT INTO carrier_load_requests (
+      id,
+      load_id,
+      lane,
+      equipment,
+      total_pay,
+      rate_per_mile,
+      carrier_name,
+      mc_number,
+      contact_email,
+      contact_phone,
+      asking_rate,
+      notes,
+      status
+    )
+    VALUES (
+      ${record.id},
+      ${record.loadId},
+      ${record.lane || null},
+      ${record.equipment || null},
+      ${record.totalPay},
+      ${record.ratePerMile},
+      ${record.carrierName},
+      ${record.mcNumber},
+      ${record.contactEmail || null},
+      ${record.contactPhone || null},
+      ${record.askingRate},
+      ${record.notes || null},
+      ${record.status}
+    )
+    RETURNING created_at
+  `;
+
+  return json(201, { request: { ...record, createdAt: saved.created_at } });
 };
