@@ -1,20 +1,13 @@
-# Netlify Redirect Rules for Infamous Freight
+# Subdomain consolidation — redirect platform subdomains to the canonical www host.
+# These only fire if the subdomain's DNS points to Netlify.
+https://api.infamousfreight.com/*      https://www.infamousfreight.com/:splat  301!
+https://app.infamousfreight.com/*      https://www.infamousfreight.com/:splat  301!
+https://admin.infamousfreight.com/*    https://www.infamousfreight.com/:splat  301!
+https://dispatch.infamousfreight.com/* https://www.infamousfreight.com/:splat  301!
+https://driver.infamousfreight.com/*   https://www.infamousfreight.com/:splat  301!
+https://broker.infamousfreight.com/*   https://www.infamousfreight.com/:splat  301!
+https://carrier.infamousfreight.com/*  https://www.infamousfreight.com/:splat  301!
 
-# Redirect platform subdomains
-https://api.infamousfreight.com/* https://www.infamousfreight.com/ 301!
-https://app.infamousfreight.com/* https://www.infamousfreight.com/ 301!
-https://admin.infamousfreight.com/* https://www.infamousfreight.com/ 301!
-https://dispatch.infamousfreight.com/* https://www.infamousfreight.com/ 301!
-https://driver.infamousfreight.com/* https://www.infamousfreight.com/ 301!
-https://broker.infamousfreight.com/* https://www.infamousfreight.com/ 301!
-https://carrier.infamousfreight.com/* https://www.infamousfreight.com/ 301!
-
-# Redirect apex to canonical www
-https://infamousfreight.com/* https://www.infamousfreight.com/:splat 301!
-
-# Redirect old domain paths
-/old-page /new-page 301!
-/legacy/* /new-path/:splat 301!
-
-# SPA fallback - serve index.html for all routes
-/*    /index.html   200
+# All other redirects (API proxy, SPA fallback, etc.) are defined in netlify.toml.
+# Do NOT add a catch-all SPA fallback here — it would shadow the API proxy rules
+# in netlify.toml because _redirects rules are evaluated first.

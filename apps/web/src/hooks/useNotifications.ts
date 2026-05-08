@@ -23,9 +23,7 @@ export function useNotifications(userId: string, companyId: string) {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    // Prefer an explicit socket origin so production does not fall back to the
-    // web origin, which can be blocked by CSP during the WebSocket upgrade.
-    const socketBase = (import.meta.env.VITE_API_URL ?? 'wss://api.infamousfreight.com').replace(/\/$/, '');
+    const socketBase = (import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
     const newSocket = io(`${socketBase}/notifications`, {
       query: { userId },
     });
@@ -54,12 +52,12 @@ export function useNotifications(userId: string, companyId: string) {
       }
     });
 
-    newSocket.on('load:update', (update) => {
-      console.log('Load update:', update);
+    newSocket.on('load:update', (_update) => {
+      // handled via the generic 'notification' event
     });
 
-    newSocket.on('exception:alert', (alert) => {
-      console.log('Exception alert:', alert);
+    newSocket.on('exception:alert', (_alert) => {
+      // handled via the generic 'notification' event
     });
 
     setSocket(newSocket);
