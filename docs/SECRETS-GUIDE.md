@@ -163,7 +163,7 @@ fly deploy --app infamous-freight
 
 # Web (Netlify)
 npm run build:web
-netlify deploy --prod --dir=apps/web/dist
+netlify deploy --prod --dir=apps/web/dist --functions netlify/functions
 ```
 
 ---

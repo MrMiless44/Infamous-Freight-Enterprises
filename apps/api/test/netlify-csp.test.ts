@@ -65,6 +65,8 @@ describe('Netlify production routing', () => {
     expect(rootContent).toContain('to = "/.netlify/functions/public-freight?trackingNumber=:trackingNumber"');
     expect(rootContent).toContain('to = "https://infamous-freight.fly.dev/api/:splat"');
     expect(rootContent).toContain('to = "https://infamous-freight.fly.dev/socket.io/:splat"');
+    expect(rootContent).toContain('from = "/api/*"\n  to = "https://infamous-freight.fly.dev/api/:splat"\n  status = 200\n  force = true');
+    expect(rootContent).toContain('from = "/socket.io/*"\n  to = "https://infamous-freight.fly.dev/socket.io/:splat"\n  status = 200\n  force = true');
   });
 
   it('keeps generated public redirect rules aligned with the Netlify API proxies', () => {

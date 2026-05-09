@@ -717,3 +717,44 @@ PARTIAL PASS
 
 ## Follow-Up
 The previous launch blocker for `https://www.infamousfreight.com/api/health` returning the Vite HTML shell was resolved in production. The public Netlify function routes still failed because the production deploy did not expose the expected functions. The CLI readiness deploy command was updated to include `--functions netlify/functions`, and regression coverage was added so future CLI production deploys keep the static web directory and Netlify functions together. Re-run the public API route smoke checks after the next production deploy.
+
+---
+
+## Test
+Netlify Production Recommendation Re-check
+
+## Date/Time
+2026-05-09 04:21 UTC
+
+## Owner
+Netlify agent
+
+## Command or Action
+Re-ran the recommended checks for the canonical web host, apex redirect, proxied API health, security headers, and Netlify-hosted public API routes.
+
+```bash
+curl --fail --show-error --location --head --retry 3 --retry-delay 5 --retry-connrefused --max-time 30 https://www.infamousfreight.com
+curl --show-error --silent --location --retry 3 --retry-delay 5 --retry-connrefused --max-time 30 https://www.infamousfreight.com/api/health
+curl --silent --location --head --retry 3 --retry-delay 5 --retry-connrefused --max-time 30 --output /dev/null --write-out 'FINAL_URL=%{url_effective}\nHTTP_STATUS=%{http_code}\n' https://infamousfreight.com
+curl --show-error --silent --location --retry 3 --retry-delay 5 --retry-connrefused --max-time 30 --request OPTIONS --output /dev/null --write-out 'HTTP_STATUS=%{http_code}\nCONTENT_TYPE=%{content_type}\n' https://www.infamousfreight.com/api/public/quote-requests
+curl --show-error --silent --location --retry 3 --retry-delay 5 --retry-connrefused --max-time 30 --output /dev/null --write-out 'HTTP_STATUS=%{http_code}\nCONTENT_TYPE=%{content_type}\n' https://www.infamousfreight.com/api/public/shipments/invalid-tracking
+```
+
+## Expected Result
+- `https://www.infamousfreight.com/` returns HTTP 200 with configured security headers.
+- `https://infamousfreight.com/` redirects to `https://www.infamousfreight.com/`.
+- `https://www.infamousfreight.com/api/health` returns HTTP 200 JSON.
+- Public Netlify API route smoke checks return JSON or the expected empty 204 preflight response instead of Netlify HTML.
+
+## Actual Result
+- **Canonical frontend (`https://www.infamousfreight.com/`)**: HTTP/2 200 from Netlify. Security headers were present, including `content-security-policy`, `strict-transport-security`, `x-frame-options`, `x-content-type-options`, `permissions-policy`, and `referrer-policy`. Netlify request ID observed: `01KR5FFEYS4N4YYJ4PN0YC5G2Y`.
+- **Apex redirect (`https://infamousfreight.com/`)**: followed to `https://www.infamousfreight.com/` with final HTTP 200.
+- **Proxied API health (`https://www.infamousfreight.com/api/health`)**: HTTP 200 JSON, with status `ok` and database service `connected`.
+- **Public quote preflight (`OPTIONS /api/public/quote-requests`)**: HTTP 404 with `text/html; charset=utf-8`.
+- **Invalid public shipment lookup (`GET /api/public/shipments/invalid-tracking`)**: HTTP 404 with `text/html; charset=utf-8`.
+
+## Status
+PARTIAL PASS
+
+## Follow-Up
+The canonical frontend, apex redirect, and browser-critical `/api/health` path are passing in production. Public Netlify function routes still require a fresh production deploy that includes `netlify/functions`. The repository now forces the broad `/api/*` and `/socket.io/*` proxy rules in `netlify.toml`, keeps the exact public function routes ahead of the Fly.io API proxy, and documents manual Netlify deploys with `--functions netlify/functions`.

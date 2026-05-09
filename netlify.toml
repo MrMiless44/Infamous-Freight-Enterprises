@@ -53,11 +53,13 @@
   from = "/api/*"
   to = "https://infamous-freight.fly.dev/api/:splat"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/socket.io/*"
   to = "https://infamous-freight.fly.dev/socket.io/:splat"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/*.map"
