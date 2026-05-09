@@ -126,7 +126,7 @@ const PublicLayout: React.FC = () => {
             <p className="mt-4 max-w-md leading-6">
               Built for verified freight operations: quote intake, dispatch, tracking, proof of delivery, driver onboarding, and partner workflows.
             </p>
-            <p className="mt-4">© {new Date().getFullYear()} Infamous Freight.</p>
+            <p className="mt-4">© {new Date().getFullYear()} {BRAND.legalName}. All rights reserved.</p>
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

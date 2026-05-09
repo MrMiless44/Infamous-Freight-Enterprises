@@ -9,6 +9,8 @@
 
 const Stripe = require('stripe');
 
+const LEGAL_BUSINESS_NAME = 'INFAMOUS FREIGHT';
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-04-10',
 });
@@ -73,7 +75,7 @@ async function createProducts() {
       name: product.name,
       description: product.description,
       features: product.features.map(f => ({ name: f })),
-      metadata: { plan_key: key },
+      metadata: { plan_key: key, legal_business_name: LEGAL_BUSINESS_NAME },
     });
 
     console.log(`  ✅ Product: ${stripeProduct.id}`);
