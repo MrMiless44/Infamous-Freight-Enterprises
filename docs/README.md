@@ -76,6 +76,7 @@ This directory contains operational, architectural, and launch-readiness documen
 - [ANALYTICS_DECISION.md](./ANALYTICS_DECISION.md) — Analytics provider decision (Netlify Analytics + custom events).
 - [CUSTOM-DOMAIN.md](./CUSTOM-DOMAIN.md) — Custom-domain setup.
 - [CURRENT_RECOMMENDATIONS_UPDATE.md](./CURRENT_RECOMMENDATIONS_UPDATE.md) — Current launch recommendations and documentation updates.
+- [digitalocean-lptms-deployment.md](./digitalocean-lptms-deployment.md) — DigitalOcean App Platform guidance for LPTMS demo and production deployments.
 - [NETLIFY-BUILDHOOKS.md](./NETLIFY-BUILDHOOKS.md) — Netlify build hooks.
 - [netlify-deploy-checklist.md](./netlify-deploy-checklist.md) — Netlify deploy checklist.
 - [MANUS-PRODUCTION-BUILD-PACKAGE.md](./MANUS-PRODUCTION-BUILD-PACKAGE.md) — Production build package notes.
