@@ -17,6 +17,10 @@ This update summarizes the next practical recommendations for the Netlify-hosted
 
 The custom-domain guide was updated to match the committed Netlify routing behavior. It now identifies `https://www.infamousfreight.com` as the canonical web URL, recommends `VITE_API_URL=/api` for production, and calls out the redirect-loop risk created by conflicting domain settings.
 
+The root README was corrected to match the active Infamous Freight repository instead of an unrelated LogisticsX/.NET/Angular project description. It now documents the React/Vite web app, Express API, Netlify/Fly.io split, `/api` proxy expectation, public and protected route surfaces, and the launch-readiness documents that should guide production work.
+
+The architecture source-of-truth documents were updated to include the Netlify web runtime, canonical `www` host, production `/api` proxy path, and production trusted-claims authentication model.
+
 ## Follow-Up Validation
 
 The May 9, 2026 04:21 UTC retest confirmed that the canonical web host and apex-to-www redirect are working, and that the browser-critical `https://www.infamousfreight.com/api/health` path now returns API health JSON with the database service connected. The remaining production gap is that public Netlify function routes such as `OPTIONS /api/public/quote-requests` and `GET /api/public/shipments/invalid-tracking` still return Netlify HTML 404 responses, which indicates the current production deploy has not exposed the expected functions.
