@@ -1052,7 +1052,7 @@ class PrismaDataStore implements DataStore {
 let prismaClient: PrismaClient | null = null;
 
 export function createDataStore(): DataStore {
-  if (process.env.NODE_ENV === 'test') {
+  if (process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID) {
     return new MemoryDataStore();
   }
 

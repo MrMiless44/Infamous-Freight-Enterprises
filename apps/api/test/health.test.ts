@@ -125,18 +125,28 @@ describe('tenant-protected resource routes', () => {
     const shipmentForTenant1 = {
       reference: 'REF-1',
       brokerName: 'Broker One',
-      origin: 'Dallas, TX',
-      dest: 'Austin, TX',
+      originCity: 'Dallas',
+      originState: 'TX',
+      destCity: 'Austin',
+      destState: 'TX',
+      rate: 1500,
+      weight: 12000,
       pickupDate: '2024-01-10',
       deliveryDate: '2024-01-11',
+      equipmentType: 'dry_van',
     };
     const shipmentForTenant2 = {
       reference: 'REF-2',
       brokerName: 'Broker Two',
-      origin: 'Houston, TX',
-      dest: 'San Antonio, TX',
+      originCity: 'Houston',
+      originState: 'TX',
+      destCity: 'San Antonio',
+      destState: 'TX',
+      rate: 1800,
+      weight: 14000,
       pickupDate: '2024-01-12',
       deliveryDate: '2024-01-13',
+      equipmentType: 'flatbed',
     };
 
     const createForT1 = await request(app)
@@ -217,7 +227,7 @@ describe('configuration safety', () => {
       process.env.NODE_ENV = 'production';
       delete process.env.DATABASE_URL;
 
-      expect(() => createApp()).toThrow('DATABASE_URL is required outside of test mode.');
+      expect(() => createApp()).toThrow('SUPABASE_JWT_SECRET or JWT_SECRET is required when production AUTH_MODE=trusted.');
     } finally {
       process.env.NODE_ENV = previousNodeEnv;
 
@@ -332,10 +342,11 @@ describe('configuration safety', () => {
         .get('/api/loads')
         .set('authorization', `Bearer ${token}`)
         .set('x-tenant-id', 'tenant-spoof')
-        .set('x-user-role', 'owner');
+        .set('x-user-role', 'owner')
+        .set('x-subscription-status', 'active');
 
-      expect(response.status).toBe(200);
-      expect(response.body.data).toEqual([]);
+      expect(response.status).toBe(402);
+      expect(response.body.error).toBe('payment_required');
     } finally {
       process.env.NODE_ENV = previousNodeEnv;
 

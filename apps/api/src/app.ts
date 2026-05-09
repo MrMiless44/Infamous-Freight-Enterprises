@@ -1047,10 +1047,18 @@ export function createApp() {
   app.use(assignRequestId);
 
   app.use((_req: Request, res: Response, next: NextFunction) => {
+    const originalWriteHead = res.writeHead.bind(res);
+    res.writeHead = ((...args: Parameters<Response['writeHead']>) => {
+      const duration = _req.startTime ? Date.now() - _req.startTime : -1;
+      if (duration >= 0 && !res.headersSent) {
+        res.setHeader('x-response-time', `${duration}ms`);
+      }
+      return originalWriteHead(...args);
+    }) as Response['writeHead'];
+
     const onFinish = () => {
       res.removeListener('finish', onFinish);
       const duration = _req.startTime ? Date.now() - _req.startTime : -1;
-      res.setHeader('x-response-time', `${duration}ms`);
       if (duration > 0 && _req.url?.startsWith('/api/')) {
         console.log(
           JSON.stringify({
