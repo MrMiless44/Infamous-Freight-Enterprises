@@ -4,6 +4,7 @@ import { ArrowLeft, AlertTriangle, MapPin, PackageCheck, Search, Truck } from 'l
 import { demoShipments } from '@/data/mvpFreightData';
 import { trackPublicEvent } from '@/lib/analytics';
 import { getPublicShipment, PublicShipment } from '@/lib/publicFreightApi';
+import { ShipmentRouteMap } from '@/components/ShipmentRouteMap';
 
 const ShipmentTrackingPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -131,6 +132,14 @@ const ShipmentTrackingPage: React.FC = () => {
                 <div className="mt-6 rounded-xl border border-infamous-border bg-infamous-card p-4">
                   <p className="text-xs uppercase tracking-wider text-gray-500">Dispatch notes</p>
                   <p className="mt-2 text-sm leading-6 text-gray-300">{shipment.notes || 'Dispatch has not added public notes yet.'}</p>
+                </div>
+
+                <div className="mt-6">
+                  <ShipmentRouteMap
+                    origin={shipment.origin}
+                    destination={shipment.destination}
+                    status={shipment.status}
+                  />
                 </div>
               </div>
 
