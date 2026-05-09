@@ -11,6 +11,7 @@ This directory contains operational, architectural, and launch-readiness documen
 
 - [platform-roadmap.md](./platform-roadmap.md) — Phased build direction for Infamous Freight.
 - [phase-1-branding-plan.md](./phase-1-branding-plan.md) — Phase 1 branding plan.
+- [INFAMOUS_FREIGHT_REQUIRED_SETUP.md](./INFAMOUS_FREIGHT_REQUIRED_SETUP.md) — Required GitHub, local, and deployment setup guardrails, including the Laravel TMS branch path and current Netlify monorepo distinction.
 - [local-setup.md](./local-setup.md) — Local development setup for the pnpm monorepo.
 - [customization-checklist.md](./customization-checklist.md) — Branding, env, and integration checklist.
 - [github-agent-build-brief.md](./github-agent-build-brief.md) — Build brief for the GitHub coding agent.
