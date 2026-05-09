@@ -8,6 +8,8 @@ This guide configures your Stripe products and prices for the Infamous Freight p
 
 Store Stripe credentials only in the appropriate deployment environment. Do not paste live keys into documentation, source files, issue comments, screenshots, or local command output.
 
+Set `STRIPE_ACCOUNT_ID` to the Stripe account identifier for the account that owns these products and prices. This value is not a secret, but it should still be treated as deployment configuration rather than hardcoded application logic. Configure it anywhere Stripe provisioning or billing deployment secrets are managed, including production environment variables and GitHub Actions secrets. The product setup script checks it against the account returned by `STRIPE_SECRET_KEY` before creating Stripe objects.
+
 ---
 
 ## Step 1: Create Products
@@ -209,5 +211,6 @@ VITE_API_URL=/api
 - [ ] Webhook endpoint configured (`/api/billing/webhook`)
 - [ ] Customer portal enabled
 - [ ] Subscription Price IDs verified server-side and one-time add-on overrides configured if needed
+- [ ] `STRIPE_ACCOUNT_ID` matches the Stripe account used by `STRIPE_SECRET_KEY`
 - [ ] Test checkout flow works
 - [ ] Production environment variables set

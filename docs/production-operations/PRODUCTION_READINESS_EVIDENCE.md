@@ -120,7 +120,7 @@ Related issue: #1644
 ### Stripe Account
 
 - Active Stripe account confirmed as correct Infamous Freight production account:
-- Account ID:
+- Account ID recorded in deployment configuration as `STRIPE_ACCOUNT_ID`: (yes / no)
 - Dashboard URL: https://dashboard.stripe.com
 - Confirmed by:
 - Confirmed date:

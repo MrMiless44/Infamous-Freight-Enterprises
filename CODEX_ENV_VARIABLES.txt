@@ -7,6 +7,7 @@ PORT=3000
 DATABASE_URL=postgresql://user:password@host:5432/infamous_freight
 CORS_ORIGINS=https://www.infamousfreight.com,https://app.infamousfreight.com
 WEB_APP_URL=https://www.infamousfreight.com
+STRIPE_ACCOUNT_ID=acct_YOUR_ACCOUNT_ID
 STRIPE_SECRET_KEY=sk_live_YOUR_KEY
 STRIPE_WEBHOOK_SECRET=whsec_YOUR_SECRET
 STRIPE_CHECKOUT_SUCCESS_URL=https://www.infamousfreight.com/billing/success

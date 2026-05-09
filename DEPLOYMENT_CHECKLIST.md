@@ -23,6 +23,7 @@ Production code is buildable. Production readiness still requires environment co
 | `PORT` | Yes | Server port. Fly should route to `3000`. |
 | `NODE_ENV` | Yes | Set to `production`. |
 | `DATABASE_URL` | Yes | PostgreSQL connection string. |
+| `STRIPE_ACCOUNT_ID` | Recommended | Stripe account identifier used to guard billing provisioning against the wrong account. |
 | `STRIPE_SECRET_KEY` | Yes | Stripe API key. |
 | `STRIPE_WEBHOOK_SECRET` | Yes | Stripe webhook verification secret. |
 | `STRIPE_CHECKOUT_SUCCESS_URL` | Yes | Redirect after checkout success. |
@@ -95,6 +96,7 @@ Run migrations using the repository's actual migration command once confirmed. D
 ### 2. Stripe integration
 
 - [ ] Stripe account configured for intended mode: test or live
+- [ ] `STRIPE_ACCOUNT_ID` configured and confirmed against the intended Stripe account
 - [ ] `STRIPE_SECRET_KEY` configured
 - [ ] Webhook endpoint registered in Stripe dashboard
 - [ ] `STRIPE_WEBHOOK_SECRET` configured
@@ -136,6 +138,7 @@ fly secrets set \
   DATABASE_URL="postgresql://..." \
   CORS_ORIGINS="https://www.infamousfreight.com,https://infamousfreight.com" \
   CORS_ORIGIN="https://www.infamousfreight.com" \
+  STRIPE_ACCOUNT_ID="acct_..." \
   STRIPE_SECRET_KEY="sk_live_..." \
   STRIPE_WEBHOOK_SECRET="whsec_..." \
   OPENAI_API_KEY="sk-..." \
