@@ -12,6 +12,27 @@ The compliance owner is responsible for confirming, maintaining, and updating al
 
 ---
 
+## Official Legal Business Record
+
+**Source record:** IRS CP575G notice dated March 21, 2026.
+
+**Legal business name:** INFAMOUS FREIGHT
+
+**IRS name control:** INFA
+
+Use [`LEGAL_BUSINESS_RECORD_UPDATE.md`](./LEGAL_BUSINESS_RECORD_UPDATE.md) to align Stripe, banking, DOT/FMCSA, insurance, accounting, and tax records. Do not commit the full EIN, bank details, tax documents, or processor credentials to this repository.
+
+**Validation checklist:**
+- [ ] Stripe legal/tax business profile updated to INFAMOUS FREIGHT
+- [ ] Business bank account opened or updated under INFAMOUS FREIGHT
+- [ ] DOT/FMCSA filings use INFAMOUS FREIGHT
+- [ ] Insurance policy documents and certificates use INFAMOUS FREIGHT
+- [ ] Accounting software company profile uses INFAMOUS FREIGHT
+- [ ] Federal, state, and local tax filings use INFAMOUS FREIGHT and IRS name control INFA where required
+- [ ] Non-sensitive completion evidence recorded in `PRODUCTION_READINESS_EVIDENCE.md`
+
+---
+
 ## FMCSA Broker Authority
 
 **Requirement:** A freight broker must hold active FMCSA Property Broker Authority (Form OP-1) before arranging the transportation of freight for compensation.
@@ -83,6 +104,7 @@ The compliance owner is responsible for confirming, maintaining, and updating al
 
 - [ ] Business entity formed (LLC or corporation)
 - [ ] EIN received from IRS
+- [ ] External accounts aligned to official legal business name
 - [ ] FMCSA broker authority — Active (see above)
 - [ ] BOC-3 filed and confirmed (see above)
 - [ ] BMC-84 surety bond or BMC-85 trust — Active (see above)

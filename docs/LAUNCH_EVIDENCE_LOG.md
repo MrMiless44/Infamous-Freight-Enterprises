@@ -758,3 +758,40 @@ PARTIAL PASS
 
 ## Follow-Up
 The canonical frontend, apex redirect, and browser-critical `/api/health` path are passing in production. Public Netlify function routes still require a fresh production deploy that includes `netlify/functions`. The repository now forces the broad `/api/*` and `/socket.io/*` proxy rules in `netlify.toml`, keeps the exact public function routes ahead of the Fly.io API proxy, and documents manual Netlify deploys with `--functions netlify/functions`.
+
+---
+
+## Test
+Public Netlify Function Route Packaging Mitigation
+
+## Date/Time
+2026-05-09 10:05 UTC
+
+## Owner
+Netlify agent
+
+## Command or Action
+Re-checked the two public Netlify function smoke routes and then adjusted repository packaging by moving the public functions from `.mts` files to standard `.ts` function files.
+
+```bash
+curl --show-error --silent --location --retry 2 --retry-delay 2 --retry-connrefused --max-time 20 --request OPTIONS https://www.infamousfreight.com/api/public/quote-requests
+curl --show-error --silent --location --retry 2 --retry-delay 2 --retry-connrefused --max-time 20 --output /tmp/tracking_body.txt --write-out 'HTTP_STATUS=%{http_code}\nCONTENT_TYPE=%{content_type}\n' https://www.infamousfreight.com/api/public/shipments/invalid-tracking
+pnpm -C apps/api exec jest test/netlify-csp.test.ts --runInBand
+```
+
+## Expected Result
+- `OPTIONS /api/public/quote-requests` returns HTTP 204.
+- `GET /api/public/shipments/invalid-tracking` returns HTTP 400 JSON with `invalid_tracking_number`.
+- Netlify routing regression tests pass.
+
+## Actual Result
+- **Public quote preflight (`OPTIONS /api/public/quote-requests`)**: HTTP 404 with `text/html; charset=utf-8` before the packaging mitigation was applied.
+- **Invalid public shipment lookup (`GET /api/public/shipments/invalid-tracking`)**: HTTP 404 with `text/html; charset=utf-8` before the packaging mitigation was applied.
+- **Repository mitigation**: `netlify/functions/load-requests.mts` and `netlify/functions/public-freight.mts` were renamed to `netlify/functions/load-requests.ts` and `netlify/functions/public-freight.ts` without changing their route names or runtime behavior.
+- **Regression test**: `test/netlify-csp.test.ts` passed with 6 tests.
+
+## Status
+REPOSITORY MITIGATION COMPLETE; PRODUCTION REDEPLOY STILL REQUIRED
+
+## Follow-Up
+Trigger a fresh production deploy that includes `netlify/functions`, then re-run the public function route checks from `docs/netlify-deploy-checklist.md`. If either route still returns Netlify HTML after that deploy, inspect the Netlify deploy summary to confirm both `load-requests` and `public-freight` were detected and uploaded as functions.

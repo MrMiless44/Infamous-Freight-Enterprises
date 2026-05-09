@@ -46,6 +46,7 @@ This directory contains operational, architectural, and launch-readiness documen
 - [PRODUCTION_DASHBOARD_REMAINING_WORK.md](./PRODUCTION_DASHBOARD_REMAINING_WORK.md) — Remaining production dashboard, secret-management, and Stripe billing verification work.
 - [PRODUCTION_READINESS_VERIFICATION.md](./PRODUCTION_READINESS_VERIFICATION.md) — Readiness verification.
 - [PRODUCTION_TEST_DATA_PLAN.md](./PRODUCTION_TEST_DATA_PLAN.md) — Production test-data plan.
+- [production-operations/LEGAL_BUSINESS_RECORD_UPDATE.md](./production-operations/LEGAL_BUSINESS_RECORD_UPDATE.md) — Official legal-name update checklist for Stripe, banking, DOT/FMCSA, insurance, accounting, and tax records.
 - [ROLLBACK_PLAN.md](./ROLLBACK_PLAN.md) — Rollback procedures.
 - [BACKUP_RESTORE_VERIFICATION.md](./BACKUP_RESTORE_VERIFICATION.md) — Backup/restore verification.
 - [ADMIN_RECOVERY_RUNBOOK.md](./ADMIN_RECOVERY_RUNBOOK.md) — Admin recovery runbook.

@@ -4,6 +4,14 @@ This guide configures your Stripe products and prices for the Infamous Freight p
 
 ---
 
+## Legal Business Profile
+
+Before accepting production payments, confirm the Stripe account legal and tax profile uses the official legal business name `INFAMOUS FREIGHT`. Enter the full EIN only in Stripe Dashboard and deployment systems that require it; do not add it to source code, documentation, logs, screenshots, or issue comments.
+
+Use [`production-operations/LEGAL_BUSINESS_RECORD_UPDATE.md`](./production-operations/LEGAL_BUSINESS_RECORD_UPDATE.md) for the full external-account update checklist.
+
+---
+
 ## Credential Policy
 
 Store Stripe credentials only in the appropriate deployment environment. Do not paste live keys into documentation, source files, issue comments, screenshots, or local command output.

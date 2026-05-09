@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight, FileText, ShieldCheck } from 'lucide-react';
+import { BRAND } from '@/lib/brand';
 
 const legalContent = {
   '/terms': {
@@ -68,6 +69,9 @@ const LegalPage: React.FC = () => {
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">{page.eyebrow}</p>
           <h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">{page.title}</h1>
           <p className="mt-4 max-w-3xl text-lg leading-8 text-gray-300">{page.intro}</p>
+          <p className="mt-3 text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">
+            Legal business name: {BRAND.legalName}
+          </p>
         </header>
 
         <section className="space-y-4">

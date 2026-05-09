@@ -1,5 +1,6 @@
 export const BRAND = {
   name: 'INFAMOUS FREIGHT',
+  legalName: 'INFAMOUS FREIGHT',
   displayName: 'Infamous Freight',
   shortName: 'INFAMOUS',
   secondaryName: 'FREIGHT',
