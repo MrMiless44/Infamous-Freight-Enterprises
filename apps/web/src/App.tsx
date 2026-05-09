@@ -49,6 +49,7 @@ const ServiceDetailPage = lazy(() => import('@/pages/ServiceDetailPage'));
 const LegalPage = lazy(() => import('@/pages/LegalPage'));
 const ResourcesPage = lazy(() => import('@/pages/ResourcesPage'));
 const ResourceArticlePage = lazy(() => import('@/pages/ResourceArticlePage'));
+const GraphHopperPage = lazy(() => import('@/pages/GraphHopperPage'));
 const ThankYouPage = lazy(() => import('@/pages/ThankYouPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
@@ -110,6 +111,7 @@ function App() {
             <Route path="/shipper-agreement" element={<LegalPage />} />
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/resources/:articleSlug" element={<ResourceArticlePage />} />
+            <Route path="/graphhopper" element={<GraphHopperPage />} />
             <Route path="/case-studies" element={<CaseStudies />} />
             <Route path="/product-hunt" element={<ProductHunt />} />
             <Route path="/gdpr" element={<GDPR />} />

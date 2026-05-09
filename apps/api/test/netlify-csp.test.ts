@@ -69,6 +69,13 @@ describe('Netlify production routing', () => {
     expect(rootContent).toContain('from = "/socket.io/*"\n  to = "https://infamous-freight.fly.dev/socket.io/:splat"\n  status = 200\n  force = true');
   });
 
+  it('publishes the Netlify functions directory on normal Git deploys', () => {
+    const rootContent = read(rootNetlify);
+
+    expect(rootContent).toContain('[build]');
+    expect(rootContent).toContain('functions = "netlify/functions"');
+  });
+
   it('keeps generated public redirect rules aligned with the Netlify API proxies', () => {
     const redirectContent = read(publicRedirects);
 
