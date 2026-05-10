@@ -51,7 +51,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      PORT: 3001
+      PORT: 3000
       DATABASE_URL: postgresql://${DB_USER:-infamous}:${DB_PASSWORD:?DB_PASSWORD is required}@postgres:5432/${DB_NAME:-infamous_freight}?schema=public
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -71,7 +71,7 @@ services:
       XERO_CLIENT_SECRET: ${XERO_CLIENT_SECRET}
       SENDGRID_API_KEY: ${SENDGRID_API_KEY}
     ports:
-      - "3001:3001"
+      - "3001:3000"
     depends_on:
       postgres:
         condition: service_healthy
