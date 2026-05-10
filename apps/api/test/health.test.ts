@@ -68,6 +68,24 @@ describe('health endpoint', () => {
     expect(response.body.status).toBe('ok');
     expect(typeof response.body.timestamp).toBe('string');
   });
+
+  it('returns 200 liveness response on /api/health/live', async () => {
+    const response = await request(createApp()).get('/api/health/live');
+
+    expect(response.status).toBe(200);
+    expect(response.body.status).toBe('ok');
+    expect(typeof response.body.timestamp).toBe('string');
+    expect(response.body.services.api).toBe('running');
+    expect(response.body.services.database).toBeUndefined();
+  });
+
+  it('returns 200 liveness response on /health/live', async () => {
+    const response = await request(createApp()).get('/health/live');
+
+    expect(response.status).toBe(200);
+    expect(response.body.status).toBe('ok');
+    expect(response.body.services.api).toBe('running');
+  });
 });
 
 describe('rate limiting', () => {
