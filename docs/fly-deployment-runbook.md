@@ -121,3 +121,42 @@ fly secrets set DATABASE_URL='<new_database_url>' --app infamous-freight
 # 5) verify release health
 scripts/fly-post-deploy-check.sh infamous-freight https://infamous-freight.fly.dev https://api.infamousfreight.com
 ```
+
+
+## If deploy times out waiting for health checks
+
+A timeout such as `timeout reached waiting for health checks to pass` means Fly started the Machine, but it never became healthy before deploy timeout.
+
+Run these commands from repo root and keep the app explicit:
+
+```bash
+fly status -a infamous-freight --all
+fly checks list -a infamous-freight
+fly machine status <machine-id> -a infamous-freight
+fly logs -a infamous-freight --machine <machine-id> --no-tail
+
+# one-shot helper:
+scripts/fly-diagnose-health-timeout.sh infamous-freight <machine-id>
+```
+
+Common root causes:
+
+- API process crashed after startup due to bad/missing secrets.
+- Port/host mismatch (must bind `0.0.0.0:3000` in this repo).
+- Health route mismatch or non-200 responses from `/api/health/live`.
+
+Secrets rollout (deterministic sequence):
+
+```bash
+scripts/fly-secrets-rollout.sh infamous-freight
+
+# Equivalent manual steps:
+# fly config save -a infamous-freight --yes
+# fly secrets sync -a infamous-freight --stage
+# fly secrets deploy -a infamous-freight
+```
+
+Notes:
+
+- `--detach` only skips waiting; it does not fix health failures.
+- Use `--stage` + `deploy` when you want one controlled restart window.
