@@ -231,13 +231,16 @@ const LandingPage: React.FC = () => {
           </div>
 
           {/* Metrics bar */}
-          <div className="mt-16 grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <div className="mt-16">
+            <p className="text-[10px] text-infamous-muted uppercase tracking-wider mb-3 text-center lg:text-left">Sample workflow data</p>
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             {liveMetrics.map((metric) => (
               <div key={metric.label} className="glass-card rounded-[18px] p-5">
                 <p className="text-xs font-medium uppercase tracking-wider text-infamous-muted">{metric.label}</p>
                 <p className={`mt-2 text-3xl font-black ${metric.color}`}>{metric.value}</p>
               </div>
             ))}
+            </div>
           </div>
         </div>
       </section>
@@ -370,8 +373,8 @@ const LandingPage: React.FC = () => {
                 <div className="w-3 h-3 rounded-full bg-[#36D399]/60" />
                 <span className="ml-4 text-xs text-infamous-muted">Operations Dashboard</span>
               </div>
-              <span className="inline-flex items-center gap-1.5 text-xs text-infamous-red-light">
-                <span className="w-1.5 h-1.5 rounded-full bg-infamous-red-light animate-pulse" /> Live
+              <span className="inline-flex items-center gap-1.5 text-xs text-infamous-muted">
+                Sample Preview
               </span>
             </div>
 

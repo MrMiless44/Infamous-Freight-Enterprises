@@ -9,6 +9,7 @@ import {
   Send,
   Truck,
 } from 'lucide-react';
+import EmptyState from '@/components/ui/EmptyState';
 
 interface Message {
   id: string;
@@ -210,7 +211,13 @@ const MessagesPage: React.FC = () => {
 
       {/* Thread List */}
       <div className="flex-1 overflow-y-auto divide-y divide-infamous-border">
-        {filteredThreads.map((thread) => (
+        {filteredThreads.length === 0 ? (
+          <EmptyState
+            icon={<MessageSquare size={40} />}
+            title="No conversations found"
+            description={searchQuery ? 'Try a different search term.' : 'Messages with dispatchers, drivers, and shippers will appear here.'}
+          />
+        ) : filteredThreads.map((thread) => (
           <button
             key={thread.id}
             onClick={() => setActiveThread(thread)}
