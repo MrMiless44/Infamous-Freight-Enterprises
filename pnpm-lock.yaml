@@ -11,6 +11,9 @@ importers:
       '@netlify/database':
         specifier: ^1.0.0
         version: 1.0.0(@electric-sql/pglite@0.4.1)(mysql2@3.15.3)(postgres@3.4.7)
+      netlify-build-plugin-pagewatch:
+        specifier: ^1.0.2
+        version: 1.0.2
     devDependencies:
       '@netlify/edge-functions':
         specifier: ^3.0.6
@@ -3392,6 +3395,9 @@ packages:
 
   neo-async@2.6.2:
     resolution: {integrity: sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==}
+
+  netlify-build-plugin-pagewatch@1.0.2:
+    resolution: {integrity: sha512-Ljb6rR7FfBY+M2zAIrXAnrFLLTaNZErx3N3ZO+anRDRD69cYqNznU+PtKeJCRuPFYal8XRyWTgXCdHjO5+Bk6g==}
 
   node-fetch@2.7.0:
     resolution: {integrity: sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==}
@@ -7951,6 +7957,12 @@ snapshots:
   negotiator@1.0.0: {}
 
   neo-async@2.6.2: {}
+
+  netlify-build-plugin-pagewatch@1.0.2:
+    dependencies:
+      node-fetch: 2.7.0
+    transitivePeerDependencies:
+      - encoding
 
   node-fetch@2.7.0:
     dependencies:

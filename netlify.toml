@@ -8,6 +8,9 @@
   NETLIFY_NEXT_PLUGIN_SKIP = "true"
   SENTRY_DISABLE_UPLOAD = "true"
 
+[[plugins]]
+  package = "netlify-build-plugin-pagewatch"
+
 [[redirects]]
   from = "https://infamousfreight.com/*"
   to = "https://www.infamousfreight.com/:splat"
