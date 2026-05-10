@@ -17,6 +17,11 @@ describe('fly post deploy check script', () => {
     expect(content).toContain('flyctl auth whoami');
     expect(content).toContain('flyctl status --app "${APP_NAME}"');
     expect(content).toContain('flyctl checks list --app "${APP_NAME}"');
+    expect(content).toContain('ALLOW_MULTI_IMAGE_DEPLOY="${ALLOW_MULTI_IMAGE_DEPLOY:-false}"');
+    expect(content).toContain('flyctl machine list --app "${APP_NAME}" --json');
+    expect(content).toContain('ERROR: ${APP_NAME} has ${unique_image_count} deployed images across machines.');
+    expect(content).toContain('machine(s) with ${image}: ${ids}');
+    expect(content).toContain('WARN: Continuing because ALLOW_MULTI_IMAGE_DEPLOY=true');
     expect(content).toContain('curl -fsS "${APP_URL}/api/health" >/dev/null');
     expect(content).toContain('curl -fsS "${API_URL}/api/health" >/dev/null');
   });
