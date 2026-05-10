@@ -2,7 +2,7 @@ import { getDatabase } from '@netlify/database';
 import type { Config } from '@netlify/functions';
 import { requireAuth, type TokenPayload } from './lib/auth.ts';
 import { json, options } from './lib/http.ts';
-import { text, toNumber, parseBody, parseUrl } from './lib/validate.ts';
+import { text, toNumber, parseBody, parseUrl, extractParam } from './lib/validate.ts';
 
 async function getRateTrend(req: Request) {
   const url = parseUrl(req);

@@ -36,10 +36,18 @@ type AppErrorBoundaryProps = {
   fallback?: ReactElement;
 };
 
+// Re-type ErrorBoundary to accept React 19's ReactNode (which adds bigint).
+// Sentry 10 was built against an older React where ReactPortal had required children,
+// causing a structural mismatch that doesn't affect runtime behaviour.
+const ErrorBoundaryCompat = Sentry.ErrorBoundary as React.ComponentType<{
+  fallback: ReactElement;
+  children?: ReactNode;
+}>;
+
 export const AppErrorBoundary = ({ children, fallback }: AppErrorBoundaryProps) => (
-  <Sentry.ErrorBoundary fallback={fallback ?? <DefaultFallback />}>
+  <ErrorBoundaryCompat fallback={fallback ?? <DefaultFallback />}>
     {children}
-  </Sentry.ErrorBoundary>
+  </ErrorBoundaryCompat>
 );
 
 export const SentryErrorBoundary = Sentry.ErrorBoundary;
