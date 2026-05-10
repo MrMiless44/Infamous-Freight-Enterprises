@@ -37,6 +37,7 @@ This directory contains operational, architectural, and launch-readiness documen
 - [INFAMOUS_FREIGHT_MVP_BUILD_PLAN.md](./INFAMOUS_FREIGHT_MVP_BUILD_PLAN.md) — MVP build plan.
 - [MVP_LAUNCH_DEMO_DATA_SET.md](./MVP_LAUNCH_DEMO_DATA_SET.md) — Demo data set for MVP launch.
 - [REPO-ACCURATE-STATUS.md](./REPO-ACCURATE-STATUS.md) — Current repo status.
+- [RELEASE.md](./RELEASE.md) — Pre-merge release checklist and deployment safety gates.
 - [launch/](./launch) — Additional launch artifacts.
 
 ## 🛠️ Production Operations
