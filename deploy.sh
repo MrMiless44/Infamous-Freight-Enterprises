@@ -176,6 +176,7 @@ run_tests() {
 
 validate_container_image_ref() {
   local image_ref="$1"
+  local expected_app="${2:-}"
 
   # Conservative validation for container image references used in deployment.
   if [[ "$image_ref" =~ [[:space:]] ]]; then
@@ -191,6 +192,17 @@ validate_container_image_ref() {
   if [[ "$image_ref" != *":"* && "$image_ref" != *@sha256:* ]]; then
     error "Invalid FLY_DEPLOY_IMAGE: expected a tagged image or digest (example: registry.fly.io/app:tag)"
     exit 1
+  fi
+
+  if [[ -n "$expected_app" ]]; then
+    local image_app="${image_ref#registry.fly.io/}"
+    image_app="${image_app%%:*}"
+    image_app="${image_app%%@sha256:*}"
+
+    if [[ "$image_app" != "$expected_app" ]]; then
+      error "Invalid FLY_DEPLOY_IMAGE: app mismatch (expected ${expected_app}, got ${image_app})"
+      exit 1
+    fi
   fi
 }
 
@@ -216,7 +228,7 @@ deploy_fly() {
   local deploy_image="${FLY_DEPLOY_IMAGE:-}"
   local -a fly_args=(deploy --app "$app_name" --remote-only)
   if [[ -n "$deploy_image" ]]; then
-    validate_container_image_ref "$deploy_image"
+    validate_container_image_ref "$deploy_image" "$app_name"
     log "Deploying prebuilt Fly image: $deploy_image"
     fly_args+=(--image "$deploy_image")
   fi
