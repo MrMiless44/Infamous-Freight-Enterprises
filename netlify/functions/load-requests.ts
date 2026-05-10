@@ -1,4 +1,5 @@
 import { getDatabase } from '@netlify/database';
+import { requireAuth } from './lib/auth.ts';
 
 const MAX_LIST = 50;
 
@@ -78,6 +79,9 @@ export default async (req: Request) => {
   const db = getDatabase();
 
   if (req.method === 'GET') {
+    const auth = await requireAuth(req);
+    if (auth instanceof Response) return auth;
+
     const rows = await db.sql`
       SELECT
         id,
@@ -143,7 +147,7 @@ export default async (req: Request) => {
     return json(400, { error: 'missing_fields', fields: missing });
   }
 
-  const id = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  const id = crypto.randomUUID();
   const record: SavedLoadRequest = {
     id,
     loadId,

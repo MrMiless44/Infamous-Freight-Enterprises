@@ -5,7 +5,7 @@ import { requireAuth, type TokenPayload } from './lib/auth.ts';
 import { json, options, genId } from './lib/http.ts';
 import { text, parseUrl, extractParam } from './lib/validate.ts';
 
-const ALLOWED_TYPES = ['BOL', 'POD', 'RATE_CONFIRMATION', 'INSURANCE', 'LICENSE', 'OTHER'];
+const ALLOWED_TYPES = ['BOL', 'POD', 'RATE_CONFIRMATION', 'INSURANCE', 'LICENSE', 'INVOICE', 'OTHER'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
 function rowToDocument(row: Record<string, unknown>) {
@@ -37,8 +37,9 @@ async function uploadDocument(req: Request, user: TokenPayload) {
   if (file.size > MAX_FILE_SIZE) return json(400, { error: 'file_too_large', message: 'Maximum file size is 10 MB.' });
   if (!ALLOWED_TYPES.includes(docType)) return json(400, { error: 'invalid_type', message: `Type must be one of: ${ALLOWED_TYPES.join(', ')}` });
 
+  const db = getDatabase();
+
   if (loadId) {
-    const db = getDatabase();
     const loadCheck = await db.sql`SELECT id FROM loads WHERE id = ${loadId} LIMIT 1`;
     if (loadCheck.length === 0) return json(400, { error: 'invalid_load', message: 'Load not found.' });
   }
@@ -58,12 +59,21 @@ async function uploadDocument(req: Request, user: TokenPayload) {
     },
   });
 
-  const db = getDatabase();
   const [row] = await db.sql`
     INSERT INTO documents (id, load_id, type, file_name, blob_key, file_size, mime_type, uploaded_by)
     VALUES (${id}, ${loadId}, ${docType}, ${file.name}, ${blobKey}, ${file.size}, ${file.type || 'application/octet-stream'}, ${user.sub})
     RETURNING *
   `;
+
+  if (docType === 'POD' && loadId) {
+    await db.sql`UPDATE loads SET status = 'pod_uploaded' WHERE id = ${loadId} AND status = 'delivered'`;
+
+    const eventId = genId();
+    await db.sql`
+      INSERT INTO status_events (id, load_id, status, changed_by, notes)
+      VALUES (${eventId}, ${loadId}, 'pod_uploaded', ${user.sub}, 'POD document uploaded')
+    `;
+  }
 
   return json(201, { document: rowToDocument(row as Record<string, unknown>) });
 }

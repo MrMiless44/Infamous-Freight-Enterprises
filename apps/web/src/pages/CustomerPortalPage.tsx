@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   AlertTriangle,
@@ -16,7 +16,7 @@ import {
   Search,
   Truck,
 } from 'lucide-react';
-import { demoQuotes, demoShipments } from '@/data/mvpFreightData';
+import api from '@/api-client/client';
 
 const statusColorMap: Record<string, string> = {
   'In Transit': 'badge-blue',
@@ -36,26 +36,85 @@ function getStatusBadge(status: string) {
   return <span className={`${cls}`}>{status}</span>;
 }
 
-const recentAlerts = [
-  { id: 1, type: 'warning', message: 'ETA updated for IF-20491 — delayed 2 hours', time: '35 min ago' },
-  { id: 2, type: 'success', message: 'Shipment IF-20490 delivered successfully', time: '2 hours ago' },
-  { id: 3, type: 'info', message: 'Invoice #INV-1042 ready for download', time: '4 hours ago' },
-];
-
-const recentInvoices = [
-  { id: 'INV-1042', load: 'IF-20490', amount: '$2,450.00', status: 'Ready', date: 'May 8, 2026' },
-  { id: 'INV-1038', load: 'IF-20487', amount: '$1,875.00', status: 'Paid', date: 'May 5, 2026' },
-  { id: 'INV-1035', load: 'IF-20482', amount: '$3,200.00', status: 'Paid', date: 'May 1, 2026' },
-];
-
-const recentDocuments = [
-  { name: 'POD — IF-20490', type: 'Proof of Delivery', date: 'May 8, 2026' },
-  { name: 'BOL — IF-20491', type: 'Bill of Lading', date: 'May 7, 2026' },
-  { name: 'Rate Confirmation — IF-20491', type: 'Rate Con', date: 'May 6, 2026' },
-];
-
 const CustomerPortalPage: React.FC = () => {
   const [trackingInput, setTrackingInput] = useState('');
+  const [shipments, setShipments] = useState<Array<{ trackingNumber: string; status: string; route: string; carrier: string; eta: string; origin: string; destination: string; equipment: string }>>([]);
+  const [quotes, setQuotes] = useState<Array<{ id: string; lane: string; status: string; equipment: string; weight: string }>>([]);
+  const [invoices, setInvoices] = useState<Array<{ id: string; load: string; amount: string; status: string; date: string }>>([]);
+  const [alerts, setAlerts] = useState<Array<{ id: string | number; type: string; message: string; time: string }>>([]);
+  const [documents, setDocuments] = useState<Array<{ name: string; type: string; date: string }>>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [loadsRes, quotesRes, invoicesRes, notificationsRes] = await Promise.all([
+          api.getLoads(),
+          api.getQuotes(),
+          api.getInvoices(),
+          api.getNotifications({ limit: 5 }),
+        ]);
+
+        const formatStatus = (s: string) =>
+          s.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
+
+        setShipments(
+          (loadsRes.loads || []).map((l: Record<string, unknown>) => ({
+            trackingNumber: l.trackingNumber as string,
+            status: formatStatus(l.status as string),
+            route: `${l.origin} → ${l.destination}`,
+            carrier: l.shipperName as string,
+            eta: l.deliveryAt
+              ? new Date(l.deliveryAt as string).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+              : '',
+            origin: l.origin as string,
+            destination: l.destination as string,
+            equipment: l.equipment as string,
+          }))
+        );
+
+        setQuotes(
+          (quotesRes.quotes || []).map((q: Record<string, unknown>) => ({
+            id: q.quoteNumber as string,
+            lane: `${q.origin} → ${q.destination}`,
+            status: q.status as string,
+            equipment: q.equipment as string,
+            weight: q.weight as string,
+          }))
+        );
+
+        setInvoices(
+          (invoicesRes.invoices || []).map((inv: Record<string, unknown>) => ({
+            id: inv.invoiceNumber as string,
+            load: inv.loadId as string,
+            amount: `$${Number(inv.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+            status: inv.status as string,
+            date: inv.issuedAt
+              ? new Date(inv.issuedAt as string).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+              : '',
+          }))
+        );
+
+        setAlerts(
+          (notificationsRes.notifications || []).map((n: Record<string, unknown>) => ({
+            id: n.id as string,
+            type: n.type as string,
+            message: n.message as string || n.title as string,
+            time: n.createdAt
+              ? new Date(n.createdAt as string).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+              : '',
+          }))
+        );
+
+        setDocuments([]);
+      } catch {
+        // errors handled by api interceptor
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
 
   return (
     <div className="min-h-screen bg-infamous-dark px-5 py-8 text-[#F5E8E8] lg:px-6">
@@ -99,7 +158,7 @@ const CustomerPortalPage: React.FC = () => {
               <Truck size={20} className="text-infamous-red-light" />
               <span className="badge-blue">Active</span>
             </div>
-            <p className="mt-4 text-3xl font-black">{demoShipments.length}</p>
+            <p className="mt-4 text-3xl font-black">{shipments.filter((s) => s.status !== 'Delivered').length}</p>
             <p className="mt-1 text-sm text-infamous-muted">Active Loads</p>
           </div>
           <div className="metric-card">
@@ -107,7 +166,7 @@ const CustomerPortalPage: React.FC = () => {
               <AlertTriangle size={20} className="text-infamous-orange" />
               <span className="badge-orange">Action</span>
             </div>
-            <p className="mt-4 text-3xl font-black">1</p>
+            <p className="mt-4 text-3xl font-black">{shipments.filter((s) => s.status === 'Delayed' || s.status === 'Exception').length}</p>
             <p className="mt-1 text-sm text-infamous-muted">Loads Needing Action</p>
           </div>
           <div className="metric-card">
@@ -115,7 +174,7 @@ const CustomerPortalPage: React.FC = () => {
               <DollarSign size={20} className="text-[#36D399]" />
               <span className="badge-green">Ready</span>
             </div>
-            <p className="mt-4 text-3xl font-black">$2,450</p>
+            <p className="mt-4 text-3xl font-black">{invoices.length}</p>
             <p className="mt-1 text-sm text-infamous-muted">Recent Invoices</p>
           </div>
           <div className="metric-card">
@@ -123,7 +182,7 @@ const CustomerPortalPage: React.FC = () => {
               <Package size={20} className="text-infamous-ember" />
               <span className="badge-gray">Month</span>
             </div>
-            <p className="mt-4 text-3xl font-black">12</p>
+            <p className="mt-4 text-3xl font-black">{shipments.filter((s) => s.status === 'Delivered').length}</p>
             <p className="mt-1 text-sm text-infamous-muted">Delivered This Month</p>
           </div>
         </div>
@@ -138,7 +197,7 @@ const CustomerPortalPage: React.FC = () => {
                 <Link to="/track-shipment" className="text-sm font-medium text-infamous-red-light hover:underline">View All</Link>
               </div>
               <div className="divide-y divide-infamous-border">
-                {demoShipments.map((shipment) => (
+                {shipments.map((shipment) => (
                   <div
                     key={shipment.trackingNumber}
                     className="flex items-center justify-between gap-4 p-5 transition hover:bg-infamous-panel/50"
@@ -199,7 +258,7 @@ const CustomerPortalPage: React.FC = () => {
                 <Link to="/request-quote" className="text-sm font-medium text-infamous-red-light hover:underline">New Quote</Link>
               </div>
               <div className="divide-y divide-infamous-border">
-                {demoQuotes.map((quote) => (
+                {quotes.map((quote) => (
                   <div key={quote.id} className="p-5">
                     <div className="flex items-center justify-between gap-3">
                       <span className="font-mono text-xs text-infamous-muted">{quote.id}</span>
@@ -223,7 +282,7 @@ const CustomerPortalPage: React.FC = () => {
                 </h2>
               </div>
               <div className="divide-y divide-infamous-border">
-                {recentAlerts.map((alert) => (
+                {alerts.map((alert) => (
                   <div key={alert.id} className="p-4">
                     <div className="flex items-start gap-3">
                       <div className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${
@@ -248,7 +307,7 @@ const CustomerPortalPage: React.FC = () => {
                 </h2>
               </div>
               <div className="divide-y divide-infamous-border">
-                {recentInvoices.map((inv) => (
+                {invoices.map((inv) => (
                   <div key={inv.id} className="flex items-center justify-between p-4">
                     <div>
                       <p className="text-sm font-semibold text-[#F5E8E8]">{inv.id}</p>
@@ -271,7 +330,7 @@ const CustomerPortalPage: React.FC = () => {
                 </h2>
               </div>
               <div className="divide-y divide-infamous-border">
-                {recentDocuments.map((doc) => (
+                {documents.map((doc) => (
                   <div key={doc.name} className="flex items-center justify-between p-4">
                     <div>
                       <p className="text-sm font-medium text-[#F5E8E8]">{doc.name}</p>

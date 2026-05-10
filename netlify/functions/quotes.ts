@@ -25,34 +25,56 @@ type QuoteInput = {
   status?: unknown;
 };
 
-const RATE_TABLE: Record<string, { basePerMile: number; fuelSurcharge: number; minCharge: number }> = {
-  'Dry van': { basePerMile: 2.45, fuelSurcharge: 0.35, minCharge: 750 },
-  'Reefer': { basePerMile: 3.10, fuelSurcharge: 0.42, minCharge: 1200 },
-  'Flatbed': { basePerMile: 2.85, fuelSurcharge: 0.38, minCharge: 950 },
-  'Step deck': { basePerMile: 3.25, fuelSurcharge: 0.40, minCharge: 1100 },
-  'Power only': { basePerMile: 1.95, fuelSurcharge: 0.30, minCharge: 500 },
-  'Hotshot': { basePerMile: 2.15, fuelSurcharge: 0.32, minCharge: 600 },
-  'LTL': { basePerMile: 1.75, fuelSurcharge: 0.28, minCharge: 350 },
-  'Partial': { basePerMile: 2.10, fuelSurcharge: 0.33, minCharge: 550 },
+const RATE_TABLE: Record<string, { basePerMile: number; fuelSurchargePercent: number; minCharge: number }> = {
+  'Dry van': { basePerMile: 2.45, fuelSurchargePercent: 15, minCharge: 750 },
+  'Reefer': { basePerMile: 3.10, fuelSurchargePercent: 18, minCharge: 1200 },
+  'Flatbed': { basePerMile: 2.85, fuelSurchargePercent: 16, minCharge: 950 },
+  'Step deck': { basePerMile: 3.25, fuelSurchargePercent: 17, minCharge: 1100 },
+  'Power only': { basePerMile: 1.95, fuelSurchargePercent: 12, minCharge: 500 },
+  'Hotshot': { basePerMile: 2.15, fuelSurchargePercent: 14, minCharge: 600 },
+  'LTL': { basePerMile: 1.75, fuelSurchargePercent: 10, minCharge: 350 },
+  'Partial': { basePerMile: 2.10, fuelSurchargePercent: 13, minCharge: 550 },
 };
 
-function calculateRate(equipment: string, miles: number, weight: number | null) {
+const WEIGHT_SURCHARGE_THRESHOLD = 42000;
+const WEIGHT_SURCHARGE_PERCENT = 8;
+const DEFAULT_MARGIN_PERCENT = 18;
+
+function calculateRate(equipment: string, miles: number, weight: number | null, marginOverride?: number | null) {
   const rates = RATE_TABLE[equipment] || RATE_TABLE['Dry van'];
-  const ratePerMile = rates.basePerMile + rates.fuelSurcharge;
-  let total = Math.max(miles * ratePerMile, rates.minCharge);
+  const marginPercent = marginOverride ?? DEFAULT_MARGIN_PERCENT;
 
-  if (weight && weight > 40000) total *= 1.08;
-  if (miles > 1500) total *= 0.95;
-  if (miles < 200) total *= 1.15;
+  const baseCost = miles * rates.basePerMile;
+  const fuelSurcharge = baseCost * (rates.fuelSurchargePercent / 100);
+  let subtotal = baseCost + fuelSurcharge;
 
-  const carrierCost = total * 0.82;
-  const margin = ((total - carrierCost) / total) * 100;
+  let weightSurcharge = 0;
+  if (weight && weight > WEIGHT_SURCHARGE_THRESHOLD) {
+    weightSurcharge = subtotal * (WEIGHT_SURCHARGE_PERCENT / 100);
+    subtotal += weightSurcharge;
+  }
+
+  if (miles > 1500) subtotal *= 0.95;
+  if (miles < 200) subtotal *= 1.15;
+
+  const carrierCost = Math.max(subtotal, rates.minCharge);
+  const margin = carrierCost * (marginPercent / 100);
+  const total = carrierCost + margin;
+  const ratePerMile = miles > 0 ? total / miles : 0;
 
   return {
     quotedAmount: Math.round(total * 100) / 100,
     estimatedCarrierCost: Math.round(carrierCost * 100) / 100,
     ratePerMile: Math.round(ratePerMile * 100) / 100,
-    targetMargin: Math.round(margin * 100) / 100,
+    targetMargin: Math.round(marginPercent * 100) / 100,
+    breakdown: {
+      baseCost: Math.round(baseCost * 100) / 100,
+      fuelSurcharge: Math.round(fuelSurcharge * 100) / 100,
+      fuelSurchargePercent: rates.fuelSurchargePercent,
+      weightSurcharge: Math.round(weightSurcharge * 100) / 100,
+      marginAmount: Math.round(margin * 100) / 100,
+      marginPercent,
+    },
   };
 }
 
@@ -131,7 +153,7 @@ async function createQuote(req: Request) {
   let ratePerMile: number | null = null;
 
   if (laneMiles && laneMiles > 0 && quotedAmount === null) {
-    const pricing = calculateRate(equipment, laneMiles, weightLbs);
+    const pricing = calculateRate(equipment, laneMiles, weightLbs, targetMargin);
     quotedAmount = pricing.quotedAmount;
     estimatedCarrierCost = pricing.estimatedCarrierCost;
     targetMargin = pricing.targetMargin;
@@ -220,10 +242,11 @@ async function getEstimate(req: Request) {
   const equipment = url.searchParams.get('equipment') || 'Dry van';
   const miles = toInt(url.searchParams.get('miles'));
   const weight = toInt(url.searchParams.get('weight'));
+  const margin = toNumber(url.searchParams.get('margin'));
 
   if (!miles || miles <= 0) return json(400, { error: 'missing_fields', fields: ['miles'] });
 
-  const pricing = calculateRate(equipment, miles, weight);
+  const pricing = calculateRate(equipment, miles, weight, margin);
   const lowEstimate = Math.round(pricing.quotedAmount * 0.88);
   const highEstimate = Math.round(pricing.quotedAmount * 1.12);
 
@@ -237,6 +260,8 @@ async function getEstimate(req: Request) {
       margin: pricing.targetMargin,
       equipment,
       miles,
+      weight: weight || null,
+      breakdown: pricing.breakdown,
       confidence: miles > 100 && miles < 3000 ? 85 : 65,
     },
   });

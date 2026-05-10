@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ShieldCheck, AlertTriangle, FileCheck, Clock, TrendingDown, Truck, Ban, ExternalLink, Activity } from 'lucide-react';
 import WidgetErrorBoundary from '@/components/ui/WidgetErrorBoundary';
 import EmptyState from '@/components/ui/EmptyState';
+import api from '@/api-client/client';
 
 interface DocExpiry {
   id: string;
@@ -20,24 +21,6 @@ interface BASICScore {
   alertStatus: 'no_alert' | 'alert' | 'intervention';
 }
 
-const mockDocs: DocExpiry[] = [
-  { id: '1', name: 'Auto Liability', type: 'insurance', number: 'POL-2024-001', issuedBy: 'Progressive', expiryDate: '2025-05-15', daysLeft: 25, status: 'expiring_soon' },
-  { id: '2', name: 'Cargo Insurance', type: 'insurance', number: 'POL-2024-002', issuedBy: 'Northland', expiryDate: '2025-08-22', daysLeft: 124, status: 'active' },
-  { id: '3', name: 'MC Authority', type: 'authority', number: 'MC-123456', issuedBy: 'FMCSA', expiryDate: '2025-12-31', daysLeft: 255, status: 'active' },
-  { id: '4', name: 'DOT Physical — Marcus T.', type: 'medical', number: 'MED-2024-001', issuedBy: 'Concentra', expiryDate: '2025-04-25', daysLeft: 5, status: 'expiring_soon' },
-  { id: '5', name: 'CDL License — James R.', type: 'license', number: 'TX12345678', issuedBy: 'TX DMV', expiryDate: '2026-01-15', daysLeft: 270, status: 'active' },
-  { id: '6', name: 'IFTA License', type: 'permit', number: 'IFTA-TX-2024', issuedBy: 'TX DOT', expiryDate: '2024-12-31', daysLeft: -100, status: 'expired' },
-];
-
-const mockBASICs: BASICScore[] = [
-  { category: 'Unsafe Driving', percentile: 35, alertStatus: 'no_alert' },
-  { category: 'HOS Compliance', percentile: 72, alertStatus: 'alert' },
-  { category: 'Driver Fitness', percentile: 15, alertStatus: 'no_alert' },
-  { category: 'Substances/Alcohol', percentile: 0, alertStatus: 'no_alert' },
-  { category: 'Vehicle Maintenance', percentile: 58, alertStatus: 'alert' },
-  { category: 'Crash Indicator', percentile: 45, alertStatus: 'no_alert' },
-];
-
 const docStatusBadge = {
   active: 'badge-green',
   expiring_soon: 'badge-yellow',
@@ -46,21 +29,103 @@ const docStatusBadge = {
 
 const CompliancePage: React.FC = () => {
   const [tab, setTab] = useState<'documents' | 'csa' | 'alerts'>('documents');
-  const criticalAlerts = mockDocs.filter((d) => d.daysLeft <= 7);
-  const expiredCount = mockDocs.filter((d) => d.status === 'expired').length;
+  const [docs, setDocs] = useState<DocExpiry[]>([]);
+  const [basics, setBasics] = useState<BASICScore[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const carriersRes = await api.request<{ carriers: Array<{ name?: string; insuranceExpiry?: string; authorityStatus?: string; mcNumber?: string; dotNumber?: string }> }>('GET', '/carriers');
+        const driversRes = await api.getDrivers() as { drivers: Array<{ name?: string; licenseNumber?: string; licenseState?: string }> };
+
+        const now = new Date();
+        const records: DocExpiry[] = [];
+        let idCounter = 1;
+
+        (carriersRes.carriers || []).forEach((carrier) => {
+          if (carrier.insuranceExpiry) {
+            const expiry = new Date(carrier.insuranceExpiry);
+            const daysLeft = Math.round((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+            let status: DocExpiry['status'] = 'active';
+            if (daysLeft < 0) status = 'expired';
+            else if (daysLeft <= 30) status = 'expiring_soon';
+            records.push({
+              id: String(idCounter++),
+              name: `Insurance — ${carrier.name || 'Unknown'}`,
+              type: 'insurance',
+              number: carrier.mcNumber || '—',
+              issuedBy: '—',
+              expiryDate: carrier.insuranceExpiry,
+              daysLeft,
+              status,
+            });
+          }
+        });
+
+        (driversRes.drivers || []).forEach((driver) => {
+          if (driver.licenseNumber) {
+            records.push({
+              id: String(idCounter++),
+              name: `CDL — ${driver.name || 'Unknown'}`,
+              type: 'license',
+              number: driver.licenseNumber,
+              issuedBy: `${driver.licenseState || '—'} DMV`,
+              expiryDate: '—',
+              daysLeft: 0,
+              status: 'active',
+            });
+          }
+        });
+
+        setDocs(records);
+        setBasics([
+          { category: 'Unsafe Driving', percentile: 0, alertStatus: 'no_alert' },
+          { category: 'HOS Compliance', percentile: 0, alertStatus: 'no_alert' },
+          { category: 'Driver Fitness', percentile: 0, alertStatus: 'no_alert' },
+          { category: 'Substances/Alcohol', percentile: 0, alertStatus: 'no_alert' },
+          { category: 'Vehicle Maintenance', percentile: 0, alertStatus: 'no_alert' },
+          { category: 'Crash Indicator', percentile: 0, alertStatus: 'no_alert' },
+        ]);
+      } catch {
+        setDocs([]);
+        setBasics([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  const criticalAlerts = docs.filter((d) => d.daysLeft <= 7);
+  const expiredCount = docs.filter((d) => d.status === 'expired').length;
+
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Compliance</h1>
+            <p className="text-sm text-[#B88989]/70 mt-0.5">Loading compliance data...</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="card h-20 animate-pulse bg-infamous-card" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Compliance</h1>
-          <p className="text-sm text-[#B88989]/70 mt-0.5">Track document expiries, CSA scores, and renewal alerts · sample data</p>
+          <p className="text-sm text-[#B88989]/70 mt-0.5">Track document expiries, CSA scores, and renewal alerts</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 bg-infamous-card border border-infamous-border rounded-xl px-3 py-2">
-            <Activity size={14} className="text-[#B88989]/70" />
-            <span className="text-xs text-[#B88989]/70">Demo data</span>
-          </div>
           {expiredCount > 0 && (
             <div className="badge-red flex items-center gap-1">
               <Ban size={12} /> {expiredCount} expired — renew before dispatching
@@ -72,10 +137,10 @@ const CompliancePage: React.FC = () => {
       {/* Summary */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Active Documents', value: mockDocs.filter((d) => d.status === 'active').length, icon: <FileCheck size={18} />, color: 'text-green-400' },
-          { label: 'Expiring Soon', value: mockDocs.filter((d) => d.status === 'expiring_soon').length, icon: <Clock size={18} />, color: 'text-yellow-400' },
+          { label: 'Active Documents', value: docs.filter((d) => d.status === 'active').length, icon: <FileCheck size={18} />, color: 'text-green-400' },
+          { label: 'Expiring Soon', value: docs.filter((d) => d.status === 'expiring_soon').length, icon: <Clock size={18} />, color: 'text-yellow-400' },
           { label: 'Expired', value: expiredCount, icon: <AlertTriangle size={18} />, color: 'text-red-400' },
-          { label: 'BASIC Alerts', value: mockBASICs.filter((b) => b.alertStatus === 'alert').length, icon: <TrendingDown size={18} />, color: 'text-infamous-orange' },
+          { label: 'BASIC Alerts', value: basics.filter((b) => b.alertStatus === 'alert').length, icon: <TrendingDown size={18} />, color: 'text-infamous-orange' },
         ].map((stat, i) => (
           <div key={i} className="card flex items-center gap-3">
             <span className={stat.color}>{stat.icon}</span>
@@ -120,7 +185,7 @@ const CompliancePage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {mockDocs.map((doc) => (
+              {docs.map((doc) => (
                 <tr key={doc.id} className="hover:bg-infamous-panel transition-colors">
                   <td className="table-cell font-medium">{doc.name}</td>
                   <td className="table-cell text-xs text-[#B88989]/70 capitalize">{doc.type}</td>
@@ -149,7 +214,7 @@ const CompliancePage: React.FC = () => {
               <ShieldCheck size={18} className="text-infamous-orange" /> BASIC Scores
             </h2>
             <div className="space-y-3">
-              {mockBASICs.map((basic) => (
+              {basics.map((basic) => (
                 <div key={basic.category}>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm">{basic.category}</span>

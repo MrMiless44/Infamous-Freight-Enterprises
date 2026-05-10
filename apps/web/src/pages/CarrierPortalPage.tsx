@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -13,7 +14,7 @@ import {
   Truck,
   UserCheck,
 } from 'lucide-react';
-import { demoCarrierLoads } from '@/data/mvpFreightData';
+import api from '@/api-client/client';
 
 type OnboardingStageId = 'application' | 'documents' | 'insurance' | 'compliance' | 'approved';
 
@@ -35,10 +36,37 @@ const onboardingStages: OnboardingStage[] = [
 const currentStageId = 'compliance' as OnboardingStageId;
 
 const CarrierPortalPage: React.FC = () => {
+  const [loads, setLoads] = useState<Array<{ id: string; lane: string; equipment: string; pickup: string; delivery: string; miles: string; pay: string }>>([]);
+  const [loading, setLoading] = useState(true);
   const currentIdx = onboardingStages.findIndex((s) => s.id === currentStageId);
   const completedCount = currentStageId === 'approved' ? onboardingStages.length : currentIdx;
   const progressPct = Math.round((completedCount / onboardingStages.length) * 100);
   const isApproved = currentStageId === 'approved';
+
+  useEffect(() => {
+    async function fetchLoads() {
+      try {
+        const res = await api.getLoads('available');
+        const formatDate = (d: string) =>
+          d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+        setLoads(
+          (res.loads || []).map((l: Record<string, unknown>) => ({
+            id: l.trackingNumber as string,
+            lane: `${l.origin} → ${l.destination}`,
+            equipment: l.equipment as string,
+            pickup: l.pickupAt ? formatDate(l.pickupAt as string) : '',
+            delivery: l.deliveryAt ? formatDate(l.deliveryAt as string) : '',
+            miles: l.miles ? `${l.miles} mi` : '',
+            pay: l.rate ? `$${Number(l.rate).toLocaleString('en-US', { minimumFractionDigits: 0 })}` : '',
+          }))
+        );
+      } catch {
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchLoads();
+  }, []);
 
   return (
     <div className="min-h-screen bg-infamous-dark px-5 py-8 text-[#F5E8E8] lg:px-6">
@@ -125,7 +153,7 @@ const CarrierPortalPage: React.FC = () => {
         {/* Metrics */}
         <section className="mb-6 grid gap-4 grid-cols-2 lg:grid-cols-4">
           {([
-            { label: 'Available Loads', value: demoCarrierLoads.length, icon: Truck, color: 'text-infamous-red-light' },
+            { label: 'Available Loads', value: loads.length, icon: Truck, color: 'text-infamous-red-light' },
             { label: 'Assigned Loads', value: 4, icon: ClipboardCheck, color: 'text-infamous-green-light' },
             { label: 'Documents Needed', value: 2, icon: FileCheck2, color: 'text-infamous-orange' },
             { label: 'Payments Pending', value: '$8,450', icon: DollarSign, color: 'text-[#36D399]' },
@@ -157,7 +185,7 @@ const CarrierPortalPage: React.FC = () => {
             </div>
           </div>
           <div className="grid gap-4 lg:grid-cols-3">
-            {demoCarrierLoads.map((load) => (
+            {loads.map((load) => (
               <article key={load.id} className="rounded-xl border border-infamous-border bg-infamous-panel p-5 transition hover:border-infamous-red/20">
                 <div className="mb-3 flex items-center justify-between">
                   <p className="font-mono text-xs text-infamous-muted">{load.id}</p>

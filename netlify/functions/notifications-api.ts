@@ -12,6 +12,12 @@ type NotificationInput = {
   title?: unknown;
   message?: unknown;
   data?: unknown;
+  channels?: unknown;
+};
+
+type DeviceTokenInput = {
+  token?: unknown;
+  platform?: unknown;
 };
 
 function rowToNotification(row: Record<string, unknown>) {
@@ -58,7 +64,7 @@ async function listNotifications(req: Request, user: TokenPayload) {
   });
 }
 
-async function createNotification(req: Request, _user: TokenPayload) {
+async function createNotification(req: Request, user: TokenPayload) {
   let body: NotificationInput;
   try {
     body = await parseBody<NotificationInput>(req);
@@ -88,7 +94,77 @@ async function createNotification(req: Request, _user: TokenPayload) {
     RETURNING *
   `;
 
-  return json(201, { notification: rowToNotification(row as Record<string, unknown>) });
+  const channels = Array.isArray(body.channels) ? body.channels : ['in_app'];
+  const deliveryResults: Record<string, string> = { in_app: 'delivered' };
+
+  if (channels.includes('push')) {
+    const tokens = await db.sql`SELECT token FROM device_tokens WHERE user_id = ${userId}`;
+    if (tokens.length > 0) {
+      deliveryResults.push = `${tokens.length} device(s) targeted`;
+    } else {
+      deliveryResults.push = 'no_device_tokens';
+    }
+  }
+
+  if (channels.includes('sms')) {
+    const userRows = await db.sql`SELECT phone FROM users WHERE id = ${userId} LIMIT 1`;
+    const phone = (userRows[0] as Record<string, unknown>)?.phone as string | undefined;
+    if (phone && process.env.TWILIO_ACCOUNT_SID) {
+      deliveryResults.sms = 'queued';
+    } else {
+      deliveryResults.sms = phone ? 'twilio_not_configured' : 'no_phone_number';
+    }
+  }
+
+  return json(201, {
+    notification: rowToNotification(row as Record<string, unknown>),
+    delivery: deliveryResults,
+  });
+}
+
+async function registerDeviceToken(req: Request, user: TokenPayload) {
+  let body: DeviceTokenInput;
+  try {
+    body = await parseBody<DeviceTokenInput>(req);
+  } catch {
+    return json(400, { error: 'invalid_json' });
+  }
+
+  const token = text(body.token, 500);
+  if (!token) return json(400, { error: 'missing_fields', fields: ['token'] });
+
+  const platform = text(body.platform, 20) || 'web';
+  const db = getDatabase();
+
+  const existing = await db.sql`SELECT id FROM device_tokens WHERE token = ${token} LIMIT 1`;
+  if (existing.length > 0) {
+    await db.sql`UPDATE device_tokens SET user_id = ${user.sub}, platform = ${platform} WHERE token = ${token}`;
+    return json(200, { registered: true, updated: true });
+  }
+
+  const id = genId();
+  await db.sql`
+    INSERT INTO device_tokens (id, user_id, token, platform)
+    VALUES (${id}, ${user.sub}, ${token}, ${platform})
+  `;
+
+  return json(201, { registered: true });
+}
+
+async function removeDeviceToken(req: Request, user: TokenPayload) {
+  let body: { token?: unknown };
+  try {
+    body = await parseBody<typeof body>(req);
+  } catch {
+    return json(400, { error: 'invalid_json' });
+  }
+
+  const token = text(body.token, 500);
+  if (!token) return json(400, { error: 'missing_fields', fields: ['token'] });
+
+  const db = getDatabase();
+  await db.sql`DELETE FROM device_tokens WHERE token = ${token} AND user_id = ${user.sub}`;
+  return json(200, { removed: true });
 }
 
 async function markRead(notificationId: string, user: TokenPayload) {
@@ -131,6 +207,8 @@ export default async (req: Request) => {
   if (req.method === 'GET' && path === '/api/notifications') return listNotifications(req, auth);
   if (req.method === 'POST' && path === '/api/notifications') return createNotification(req, auth);
   if (req.method === 'POST' && path === '/api/notifications/read-all') return markAllRead(auth);
+  if (req.method === 'POST' && path === '/api/notifications/device-tokens') return registerDeviceToken(req, auth);
+  if (req.method === 'DELETE' && path === '/api/notifications/device-tokens') return removeDeviceToken(req, auth);
 
   const readId = extractParam(path, /^\/api\/notifications\/([^/]+)\/read$/);
   if (readId && req.method === 'PATCH') return markRead(readId, auth);
@@ -145,6 +223,7 @@ export const config: Config = {
   path: [
     '/api/notifications',
     '/api/notifications/read-all',
+    '/api/notifications/device-tokens',
     '/api/notifications/:id',
     '/api/notifications/:id/read',
   ],

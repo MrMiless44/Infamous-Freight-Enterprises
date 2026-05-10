@@ -91,11 +91,11 @@ async function updateStatus(req: Request, user: TokenPayload) {
   const loadId = text(body.loadId, 64);
   if (loadId) {
     const loadStatusMap: Record<string, string> = {
-      arrived_pickup: 'at_pickup',
-      loading: 'at_pickup',
+      arrived_pickup: 'picked_up',
+      loading: 'picked_up',
       departed_pickup: 'in_transit',
-      arrived_delivery: 'at_delivery',
-      unloading: 'at_delivery',
+      arrived_delivery: 'out_for_delivery',
+      unloading: 'out_for_delivery',
       delivered: 'delivered',
     };
     const loadStatus = loadStatusMap[status];

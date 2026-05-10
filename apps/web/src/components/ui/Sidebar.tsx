@@ -4,7 +4,8 @@ import { canAccessLaunchValidation } from '@/lib/launchValidationAccess';
 import {
   LayoutDashboard, Truck, Radio, Users, FileText, MessageSquare,
   TrendingUp, ShieldCheck, Settings, ChevronLeft, ChevronRight,
-  LogOut, ClipboardCheck, ClipboardList, DollarSign, Infinity, type LucideIcon
+  LogOut, ClipboardCheck, ClipboardList, DollarSign, Infinity, Building2, Activity,
+  type LucideIcon
 } from 'lucide-react';
 import { BRAND } from '@/lib/brand';
 
@@ -35,9 +36,11 @@ const baseNavItems: NavItem[] = [
   { path: '/accounting', label: 'Accounting', icon: DollarSign, minRole: 'admin' },
   { path: '/analytics', label: 'Analytics', icon: TrendingUp, minRole: 'admin' },
   { path: '/quotes', label: 'Quotes', icon: ClipboardList, minRole: 'dispatcher' },
+  { path: '/customers', label: 'Customers', icon: Building2, minRole: 'admin' },
   { path: '/invoices', label: 'Invoices', icon: FileText, minRole: 'dispatcher' },
-  { path: '/messages', label: 'Messages', icon: MessageSquare, badge: '3' },
+  { path: '/messages', label: 'Messages', icon: MessageSquare },
   { path: '/compliance', label: 'Compliance', icon: ShieldCheck, minRole: 'admin' },
+  { path: '/audit', label: 'Audit Log', icon: Activity, minRole: 'admin' },
 ];
 
 const launchValidationNavItem: NavItem = {

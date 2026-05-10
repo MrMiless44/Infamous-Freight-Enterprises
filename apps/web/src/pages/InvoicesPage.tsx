@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FileText, DollarSign, Clock, Send, CheckCircle, AlertTriangle, Download, TrendingUp, FileCheck2, Sparkles } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
+import api from '@/api-client/client';
 
 interface Invoice {
   id: string;
@@ -23,21 +24,6 @@ interface PodReadyLoad {
   ocrConfidence: number;
 }
 
-const initialPodReadyLoads: PodReadyLoad[] = [
-  { loadRef: 'LD-4815', broker: 'RXO',       lane: 'Dallas, TX → Houston, TX',     amount: 700,  podReceivedAt: 'Today · 10:42 AM', ocrConfidence: 96 },
-  { loadRef: 'LD-4828', broker: 'JB Hunt',   lane: 'Phoenix, AZ → Las Vegas, NV',  amount: 950,  podReceivedAt: 'Today · 9:18 AM',  ocrConfidence: 92 },
-  { loadRef: 'LD-4819', broker: 'Schneider', lane: 'Memphis, TN → Indianapolis, IN', amount: 2400, podReceivedAt: 'Yesterday · 6:05 PM', ocrConfidence: 88 },
-];
-
-const mockInvoices: Invoice[] = [
-  { id: '1', number: 'INV-240421-001', broker: 'RXO', loadRef: 'LD-4815', amount: 3200, status: 'paid', issueDate: 'Apr 15', dueDate: 'May 15', age: 0 },
-  { id: '2', number: 'INV-240421-002', broker: 'TQL', loadRef: 'LD-4816', amount: 1850, status: 'sent', issueDate: 'Apr 16', dueDate: 'May 16', age: 4 },
-  { id: '3', number: 'INV-240421-003', broker: 'Landstar', loadRef: 'LD-4817', amount: 4100, status: 'sent', issueDate: 'Apr 17', dueDate: 'May 17', age: 3 },
-  { id: '4', number: 'INV-240418-004', broker: 'Schneider', loadRef: 'LD-4809', amount: 1950, status: 'overdue', issueDate: 'Apr 10', dueDate: 'May 10', age: 10 },
-  { id: '5', number: 'INV-240421-005', broker: 'JB Hunt', loadRef: 'LD-4818', amount: 2400, status: 'draft', issueDate: '—', dueDate: '—', age: 0 },
-  { id: '6', number: 'INV-240415-006', broker: 'RXO', loadRef: 'LD-4802', amount: 2800, status: 'paid', issueDate: 'Apr 1', dueDate: 'May 1', age: 0 },
-];
-
 const statusBadge: Record<string, string> = {
   draft: 'badge-yellow',
   sent: 'badge-blue',
@@ -54,34 +40,66 @@ const statusIcon: Record<string, React.ReactNode> = {
 
 const InvoicesPage: React.FC = () => {
   const [filter, setFilter] = useState('all');
-  const [extraInvoices, setExtraInvoices] = useState<Invoice[]>([]);
-  const [podReadyLoads, setPodReadyLoads] = useState<PodReadyLoad[]>(initialPodReadyLoads);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [podReadyLoads, setPodReadyLoads] = useState<PodReadyLoad[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const allInvoices = useMemo(() => [...extraInvoices, ...mockInvoices], [extraInvoices]);
-  const filtered = filter === 'all' ? allInvoices : allInvoices.filter((i) => i.status === filter);
+  const fetchData = async () => {
+    try {
+      const [invRes, loadsRes] = await Promise.all([
+        api.getInvoices(),
+        api.getLoads('pod_uploaded'),
+      ]);
+      const now = new Date();
+      const fmt = (d: string) => {
+        const date = new Date(d);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      };
+      setInvoices(
+        invRes.invoices.map((inv: any) => ({
+          id: inv.id,
+          number: inv.invoiceNumber,
+          broker: inv.customerName,
+          loadRef: inv.loadId || '—',
+          amount: inv.amount,
+          status: inv.status as Invoice['status'],
+          issueDate: inv.issuedAt ? fmt(inv.issuedAt) : '—',
+          dueDate: inv.dueAt ? fmt(inv.dueAt) : '—',
+          age: inv.status !== 'paid' && inv.dueAt
+            ? Math.max(0, Math.floor((now.getTime() - new Date(inv.dueAt).getTime()) / 86400000))
+            : 0,
+        }))
+      );
+      setPodReadyLoads(
+        loadsRes.loads
+          .filter((l: any) => l.status === 'pod_uploaded')
+          .map((l: any) => ({
+            loadRef: l.id,
+            broker: l.broker,
+            lane: l.lane,
+            amount: l.amount,
+            podReceivedAt: l.podReceivedAt,
+            ocrConfidence: l.ocrConfidence,
+          }))
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const totalOutstanding = allInvoices.filter((i) => i.status === 'sent' || i.status === 'overdue').reduce((s, i) => s + i.amount, 0);
-  const totalOverdue = allInvoices.filter((i) => i.status === 'overdue').reduce((s, i) => s + i.amount, 0);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  const draftFromPod = (load: PodReadyLoad) => {
-    const today = new Date();
-    const due = new Date(today);
-    due.setDate(due.getDate() + 30);
-    const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    const newInvoice: Invoice = {
-      id: `pod-${load.loadRef}`,
-      number: `INV-${load.loadRef.replace('LD-', '')}`,
-      broker: load.broker,
-      loadRef: load.loadRef,
-      amount: load.amount,
-      status: 'draft',
-      issueDate: fmt(today),
-      dueDate: fmt(due),
-      age: 0,
-    };
-    setExtraInvoices((prev) => [newInvoice, ...prev]);
-    setPodReadyLoads((prev) => prev.filter((p) => p.loadRef !== load.loadRef));
+  const filtered = filter === 'all' ? invoices : invoices.filter((i) => i.status === filter);
+
+  const totalOutstanding = invoices.filter((i) => i.status === 'sent' || i.status === 'overdue').reduce((s, i) => s + i.amount, 0);
+  const totalOverdue = invoices.filter((i) => i.status === 'overdue').reduce((s, i) => s + i.amount, 0);
+
+  const draftFromPod = async (load: PodReadyLoad) => {
+    await api.createInvoice({ loadId: load.loadRef, customerName: load.broker, amount: load.amount, status: 'draft' });
     setFilter('draft');
+    await fetchData();
   };
 
   return (
@@ -91,7 +109,7 @@ const InvoicesPage: React.FC = () => {
           <h1 className="text-2xl font-bold">Invoices</h1>
           <p className="text-sm text-[#B88989]/70 mt-0.5">Manage billing and track payments</p>
         </div>
-        <button className="btn-primary flex items-center gap-2">
+        <button onClick={async () => { await api.createInvoice({}); await fetchData(); }} className="btn-primary flex items-center gap-2">
           <FileText size={16} /> Create Invoice
         </button>
       </div>
@@ -175,7 +193,7 @@ const InvoicesPage: React.FC = () => {
               filter === f ? 'bg-infamous-orange text-[#F5E8E8]' : 'bg-infamous-card text-[#B88989] hover:text-[#F5E8E8] border border-infamous-border'
             }`}
           >
-            {f} {f !== 'all' && <span className="text-xs opacity-70">({allInvoices.filter((i) => i.status === f).length})</span>}
+            {f} {f !== 'all' && <span className="text-xs opacity-70">({invoices.filter((i) => i.status === f).length})</span>}
           </button>
         ))}
       </div>

@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Filter, MapPin, DollarSign, Clock, Star, Truck, Bookmark, Phone, CreditCard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import api from '@/api-client/client';
 import EmptyState from '@/components/ui/EmptyState';
 
 interface Load {
@@ -19,15 +21,6 @@ interface Load {
   isHot: boolean;
 }
 
-const mockLoads: Load[] = [
-  { id: 'DAT-49201', broker: 'RXO', credit: 'A+', origin: 'Chicago, IL', dest: 'Dallas, TX', distance: 925, rate: 3200, ratePerMile: 3.46, equipment: 'Dry Van', weight: 32000, pickup: 'Today 2PM', age: '3m', isHot: true },
-  { id: 'TS-77342', broker: 'TQL', credit: 'A', origin: 'Atlanta, GA', dest: 'Charlotte, NC', distance: 245, rate: 1850, ratePerMile: 2.71, equipment: 'Dry Van', weight: 28000, pickup: 'Tomorrow 8AM', age: '12m', isHot: false },
-  { id: '123-11092', broker: 'Landstar', credit: 'A+', origin: 'Houston, TX', dest: 'Phoenix, AZ', distance: 1080, rate: 4100, ratePerMile: 3.80, equipment: 'Reefer', weight: 35000, pickup: 'Today 6PM', age: '8m', isHot: true },
-  { id: 'DAT-49205', broker: 'JB Hunt', credit: 'A', origin: 'Memphis, TN', dest: 'Indianapolis, IN', distance: 380, rate: 2400, ratePerMile: 2.53, equipment: 'Flatbed', weight: 42000, pickup: 'Tomorrow 10AM', age: '25m', isHot: false },
-  { id: 'TS-77348', broker: 'Schneider', credit: 'B', origin: 'Denver, CO', dest: 'Kansas City, MO', distance: 560, rate: 1950, ratePerMile: 2.19, equipment: 'Dry Van', weight: 25000, pickup: 'Today 4PM', age: '45m', isHot: false },
-  { id: 'DAT-49211', broker: 'RXO', credit: 'A+', origin: 'Seattle, WA', dest: 'Portland, OR', distance: 175, rate: 1200, ratePerMile: 2.74, equipment: 'Dry Van', weight: 18000, pickup: 'Today 3PM', age: '1m', isHot: true },
-];
-
 const creditColor: Record<string, string> = { 'A+': 'badge-green', A: 'badge-blue', B: 'badge-yellow', C: 'badge-red' };
 
 const LoadsPage: React.FC = () => {
@@ -36,8 +29,38 @@ const LoadsPage: React.FC = () => {
   const [equipment, setEquipment] = useState('All');
   const [minRate, setMinRate] = useState('');
   const [saved, setSaved] = useState<Set<string>>(new Set());
+  const [loads, setLoads] = useState<Load[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = mockLoads.filter((l) => {
+  useEffect(() => {
+    let cancelled = false;
+    api.getLoads().then((res) => {
+      if (cancelled) return;
+      const mapped: Load[] = (res.loads || []).map((l: Record<string, unknown>) => {
+        const miles = Number(l.miles) || 0;
+        const rate = Number(l.rate) || 0;
+        return {
+          id: (l.trackingNumber as string) || (l.id as string),
+          broker: (l.shipperName as string) || '—',
+          credit: 'A' as const,
+          origin: l.origin as string,
+          dest: l.destination as string,
+          distance: miles,
+          rate,
+          ratePerMile: miles > 0 ? Math.round((rate / miles) * 100) / 100 : 0,
+          equipment: l.equipment as string,
+          weight: Number(l.weightLbs) || 0,
+          pickup: l.pickupAt ? new Date(l.pickupAt as string).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—',
+          age: '—',
+          isHot: l.status === 'available',
+        };
+      });
+      setLoads(mapped);
+    }).catch(() => {}).finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const filtered = loads.filter((l) => {
     if (search && !(`${l.origin} ${l.dest} ${l.broker}`.toLowerCase().includes(search.toLowerCase()))) return false;
     if (equipment !== 'All' && l.equipment !== equipment) return false;
     if (minRate && l.ratePerMile < parseFloat(minRate)) return false;
@@ -49,7 +72,7 @@ const LoadsPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Load Board</h1>
-          <p className="text-sm text-[#B88989]/70 mt-0.5">Sample loads from DAT, Truckstop, and 123Loadboard — searchable in one place.</p>
+          <p className="text-sm text-[#B88989]/70 mt-0.5">Search and book available loads</p>
         </div>
         <button onClick={() => navigate('/rate-comparison')} className="btn-secondary flex items-center gap-2">
           <DollarSign size={16} /> Rate Tool
@@ -85,6 +108,12 @@ const LoadsPage: React.FC = () => {
         </button>
       </div>
 
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-infamous-orange border-t-transparent" />
+        </div>
+      ) : (
+      <>
       {/* Results count */}
       <div className="flex items-center gap-2 text-sm text-[#B88989]/70">
         <span className="text-[#F5E8E8] font-semibold">{filtered.length}</span> loads found
@@ -163,7 +192,17 @@ const LoadsPage: React.FC = () => {
                 >
                   <Phone size={14} aria-hidden="true" />
                 </button>
-                <button className="btn-primary flex items-center gap-2 text-sm">
+                <button
+                  onClick={async () => {
+                    try {
+                      await api.bookLoad(load.id);
+                      toast.success(`Load ${load.id} booked successfully`);
+                    } catch {
+                      toast.error(`Failed to book load ${load.id}`);
+                    }
+                  }}
+                  className="btn-primary flex items-center gap-2 text-sm"
+                >
                   <Truck size={14} aria-hidden="true" /> Book Load
                 </button>
               </div>
@@ -171,6 +210,8 @@ const LoadsPage: React.FC = () => {
           </div>
         ))}
       </div>
+      )}
+      </>
       )}
     </div>
   );

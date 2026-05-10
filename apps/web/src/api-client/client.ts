@@ -100,8 +100,8 @@ class ApiClient {
     return data;
   }
 
-  async register(email: string, password: string, companyName: string) {
-    const { data } = await this.client.post('/auth/register', { email, password, companyName });
+  async register(email: string, password: string, companyName: string, role?: string) {
+    const { data } = await this.client.post('/auth/register', { email, password, companyName, role });
     if (data.token) localStorage.setItem('infamous_token', data.token);
     return data;
   }
@@ -111,7 +111,17 @@ class ApiClient {
     return data;
   }
 
+  async updateProfile(updates: { name?: string; phone?: string; avatar_url?: string }) {
+    const { data } = await this.client.patch('/auth/me', updates);
+    return data;
+  }
+
   // Loads
+  async getLoads(status?: string) {
+    const { data } = await this.client.get('/loads', { params: status ? { status } : {} });
+    return data;
+  }
+
   async searchLoads(filters: Record<string, unknown>) {
     const { data } = await this.client.get('/loads/search', { params: filters });
     return data;
@@ -124,6 +134,47 @@ class ApiClient {
 
   async getLoad(loadId: string) {
     const { data } = await this.client.get(`/loads/${loadId}`);
+    return data;
+  }
+
+  async createLoad(loadData: Record<string, unknown>) {
+    const { data } = await this.client.post('/loads', loadData);
+    return data;
+  }
+
+  async updateLoad(loadId: string, updates: Record<string, unknown>) {
+    const { data } = await this.client.patch(`/loads/${loadId}`, updates);
+    return data;
+  }
+
+  async updateLoadStatus(loadId: string, status: string, notes?: string) {
+    const { data } = await this.client.post(`/loads/${loadId}/status`, { status, notes });
+    return data;
+  }
+
+  async getLoadTimeline(loadId: string) {
+    const { data } = await this.client.get(`/loads/${loadId}/timeline`);
+    return data;
+  }
+
+  // Companies
+  async getCompanies(type?: string) {
+    const { data } = await this.client.get('/companies', { params: type ? { type } : {} });
+    return data;
+  }
+
+  async getCompany(companyId: string) {
+    const { data } = await this.client.get(`/companies/${companyId}`);
+    return data;
+  }
+
+  async createCompany(companyData: Record<string, unknown>) {
+    const { data } = await this.client.post('/companies', companyData);
+    return data;
+  }
+
+  async updateCompany(companyId: string, updates: Record<string, unknown>) {
+    const { data } = await this.client.patch(`/companies/${companyId}`, updates);
     return data;
   }
 
@@ -165,8 +216,154 @@ class ApiClient {
     return data;
   }
 
+  async getInvoice(invoiceId: string) {
+    const { data } = await this.client.get(`/invoices/${invoiceId}`);
+    return data;
+  }
+
   async createInvoice(invoiceData: Record<string, unknown>) {
     const { data } = await this.client.post('/invoices', invoiceData);
+    return data;
+  }
+
+  async updateInvoice(invoiceId: string, updates: Record<string, unknown>) {
+    const { data } = await this.client.patch(`/invoices/${invoiceId}`, updates);
+    return data;
+  }
+
+  // Payments
+  async createCheckoutSession(invoiceId: string, successUrl?: string, cancelUrl?: string) {
+    const { data } = await this.client.post('/payments/checkout', { invoiceId, successUrl, cancelUrl });
+    return data;
+  }
+
+  async getInvoicePayments(invoiceId: string) {
+    const { data } = await this.client.get(`/payments/invoice/${invoiceId}`);
+    return data;
+  }
+
+  // Quotes / Pricing
+  async getQuotes(status?: string) {
+    const { data } = await this.client.get('/quotes', { params: status ? { status } : {} });
+    return data;
+  }
+
+  async getQuote(quoteId: string) {
+    const { data } = await this.client.get(`/quotes/${quoteId}`);
+    return data;
+  }
+
+  async createQuote(quoteData: Record<string, unknown>) {
+    const { data } = await this.client.post('/quotes', quoteData);
+    return data;
+  }
+
+  async updateQuote(quoteId: string, updates: Record<string, unknown>) {
+    const { data } = await this.client.patch(`/quotes/${quoteId}`, updates);
+    return data;
+  }
+
+  async convertQuoteToLoad(quoteId: string) {
+    const { data } = await this.client.post(`/quotes/${quoteId}/convert`);
+    return data;
+  }
+
+  async getFreightEstimate(params: { equipment?: string; miles: number; weight?: number; margin?: number }) {
+    const { data } = await this.client.get('/quotes/estimate', { params });
+    return data;
+  }
+
+  // Documents
+  async uploadDocument(file: File, loadId?: string, type?: string) {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (loadId) formData.append('loadId', loadId);
+    if (type) formData.append('type', type);
+    const { data } = await this.client.post('/documents/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data;
+  }
+
+  async getLoadDocuments(loadId: string) {
+    const { data } = await this.client.get(`/documents/load/${loadId}`);
+    return data;
+  }
+
+  async getDocumentMeta(docId: string) {
+    const { data } = await this.client.get(`/documents/${docId}`);
+    return data;
+  }
+
+  async downloadDocument(docId: string) {
+    const response = await this.client.get(`/documents/${docId}/download`, { responseType: 'blob' });
+    return response.data;
+  }
+
+  async deleteDocument(docId: string) {
+    const { data } = await this.client.delete(`/documents/${docId}`);
+    return data;
+  }
+
+  // GPS Tracking
+  async recordPosition(position: { loadId?: string; driverId?: string; lat: number; lng: number; speedMph?: number; heading?: number; address?: string }) {
+    const { data } = await this.client.post('/tracking/positions', position);
+    return data;
+  }
+
+  async recordPositionBatch(positions: Array<{ loadId?: string; driverId?: string; lat: number; lng: number }>) {
+    const { data } = await this.client.post('/tracking/positions/batch', { positions });
+    return data;
+  }
+
+  async getLoadPositions(loadId: string, limit?: number) {
+    const { data } = await this.client.get(`/tracking/load/${loadId}/positions`, { params: limit ? { limit } : {} });
+    return data;
+  }
+
+  async getLoadRoute(loadId: string) {
+    const { data } = await this.client.get(`/tracking/load/${loadId}/route`);
+    return data;
+  }
+
+  async getDriverLatestPosition(driverId: string) {
+    const { data } = await this.client.get(`/tracking/driver/${driverId}/latest`);
+    return data;
+  }
+
+  // Notifications
+  async getNotifications(params?: { unread?: boolean; limit?: number }) {
+    const { data } = await this.client.get('/notifications', { params });
+    return data;
+  }
+
+  async createNotification(notification: { userId: string; type: string; title: string; message: string; data?: Record<string, unknown>; channels?: string[] }) {
+    const { data } = await this.client.post('/notifications', notification);
+    return data;
+  }
+
+  async markNotificationRead(notificationId: string) {
+    const { data } = await this.client.patch(`/notifications/${notificationId}/read`);
+    return data;
+  }
+
+  async markAllNotificationsRead() {
+    const { data } = await this.client.post('/notifications/read-all');
+    return data;
+  }
+
+  async deleteNotification(notificationId: string) {
+    const { data } = await this.client.delete(`/notifications/${notificationId}`);
+    return data;
+  }
+
+  async registerDeviceToken(token: string, platform?: string) {
+    const { data } = await this.client.post('/notifications/device-tokens', { token, platform });
+    return data;
+  }
+
+  async removeDeviceToken(token: string) {
+    const { data } = await this.client.delete('/notifications/device-tokens', { data: { token } });
     return data;
   }
 
@@ -218,6 +415,16 @@ class ApiClient {
 
   async getMessages(threadId: string) {
     const { data } = await this.client.get(`/chat/threads/${threadId}/messages`);
+    return data;
+  }
+
+  async sendMessage(threadId: string, body: string) {
+    const { data } = await this.client.post(`/chat/threads/${threadId}/messages`, { body });
+    return data;
+  }
+
+  async createChatThread(threadData: { subject?: string; loadId?: string; memberIds?: string[] }) {
+    const { data } = await this.client.post('/chat/threads', threadData);
     return data;
   }
 

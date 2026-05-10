@@ -55,6 +55,8 @@ const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 const DriverAppPage = lazy(() => import('@/pages/DriverAppPage'));
 const MessagesPage = lazy(() => import('@/pages/MessagesPage'));
 const ShipmentDetailPage = lazy(() => import('@/pages/ShipmentDetailPage'));
+const CustomersPage = lazy(() => import('@/pages/CustomersPage'));
+const AuditLogPage = lazy(() => import('@/pages/AuditLogPage'));
 
 const RouteFallback = () => (
   <main
@@ -142,6 +144,8 @@ function App() {
             <Route path="/carriers" element={<RouteGuard minRole="admin"><CarriersPage /></RouteGuard>} />
             <Route path="/accounting" element={<RouteGuard minRole="admin"><AccountingDashboardPage /></RouteGuard>} />
             <Route path="/quotes" element={<RouteGuard minRole="dispatcher"><QuoteRequestsPage /></RouteGuard>} />
+            <Route path="/customers" element={<RouteGuard minRole="admin"><CustomersPage /></RouteGuard>} />
+            <Route path="/audit" element={<RouteGuard minRole="admin"><AuditLogPage /></RouteGuard>} />
             <Route path="/messages" element={<MessagesPage />} />
             <Route path="/driver-app" element={<DriverAppPage />} />
           </Route>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Truck, AlertTriangle, Activity, ChevronRight, Package,
@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import WidgetErrorBoundary from '@/components/ui/WidgetErrorBoundary';
 import { ShipmentRouteMap } from '@/components/ShipmentRouteMap';
+import api from '@/api-client/client';
 
 interface ActiveLoad {
   ref: string;
@@ -26,21 +27,48 @@ interface ActiveLoad {
   deliveryDate: string;
 }
 
-const mockActiveLoads: ActiveLoad[] = [
-  { ref: 'IF-77391', origin: 'Atlanta, GA', destination: 'Dallas, TX', carrier: 'Swift Logistics', status: 'in_transit', statusLabel: 'In Transit', eta: '6:30 PM', rate: '$3,200', equipment: 'Dry Van', weight: '38,000 lbs', miles: '781 mi', driver: 'Marcus Johnson', phone: '(404) 555-0192', pickupDate: 'May 9, 2026', deliveryDate: 'May 10, 2026' },
-  { ref: 'IF-77392', origin: 'Chicago, IL', destination: 'Memphis, TN', carrier: 'Road Runner Inc.', status: 'at_pickup', statusLabel: 'At Pickup', eta: '4:00 PM', rate: '$1,850', equipment: 'Reefer', weight: '22,000 lbs', miles: '530 mi', driver: 'James Wright', phone: '(312) 555-0234', pickupDate: 'May 10, 2026', deliveryDate: 'May 11, 2026' },
-  { ref: 'IF-77393', origin: 'Houston, TX', destination: 'Phoenix, AZ', carrier: 'Desert Haul Co.', status: 'exception', statusLabel: 'Delayed', eta: 'TBD', rate: '$4,100', equipment: 'Flatbed', weight: '44,000 lbs', miles: '1,178 mi', driver: 'Carlos Rivera', phone: '(713) 555-0187', pickupDate: 'May 8, 2026', deliveryDate: 'May 11, 2026' },
-  { ref: 'IF-77394', origin: 'Los Angeles, CA', destination: 'Seattle, WA', carrier: 'Pacific Freight', status: 'in_transit', statusLabel: 'In Transit', eta: '11:00 PM', rate: '$2,900', equipment: 'Dry Van', weight: '32,000 lbs', miles: '1,135 mi', driver: 'Sarah Chen', phone: '(213) 555-0145', pickupDate: 'May 9, 2026', deliveryDate: 'May 11, 2026' },
-  { ref: 'IF-77395', origin: 'Miami, FL', destination: 'Atlanta, GA', carrier: 'Southeast Express', status: 'delivered', statusLabel: 'Delivered', eta: 'Done', rate: '$1,450', equipment: 'Box Truck', weight: '12,000 lbs', miles: '662 mi', driver: 'David Moore', phone: '(305) 555-0198', pickupDate: 'May 8, 2026', deliveryDate: 'May 9, 2026' },
-];
+const statusLabelMap: Record<string, string> = {
+  in_transit: 'In Transit',
+  at_pickup: 'At Pickup',
+  dispatched: 'Dispatched',
+  delivered: 'Delivered',
+  exception: 'Delayed',
+  pending: 'Pending',
+};
 
-const deliveryStatuses = [
-  { label: 'In Transit', count: 87, color: 'bg-infamous-red-light', textColor: 'text-infamous-red-light' },
-  { label: 'At Pickup', count: 14, color: 'bg-infamous-ember', textColor: 'text-infamous-ember' },
-  { label: 'Delivered', count: 41, color: 'bg-infamous-green', textColor: 'text-infamous-green' },
-  { label: 'Delayed', count: 8, color: 'bg-infamous-orange', textColor: 'text-infamous-orange' },
-  { label: 'Pending', count: 12, color: 'bg-infamous-muted', textColor: 'text-infamous-muted' },
-];
+const statusColorMap: Record<string, { color: string; textColor: string }> = {
+  in_transit: { color: 'bg-infamous-red-light', textColor: 'text-infamous-red-light' },
+  at_pickup: { color: 'bg-infamous-ember', textColor: 'text-infamous-ember' },
+  delivered: { color: 'bg-infamous-green', textColor: 'text-infamous-green' },
+  exception: { color: 'bg-infamous-orange', textColor: 'text-infamous-orange' },
+  pending: { color: 'bg-infamous-muted', textColor: 'text-infamous-muted' },
+  dispatched: { color: 'bg-infamous-orange', textColor: 'text-infamous-orange' },
+};
+
+function formatRate(cents: number): string {
+  return '$' + cents.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function formatWeight(lbs: number): string {
+  return lbs.toLocaleString('en-US') + ' lbs';
+}
+
+function formatMiles(mi: number): string {
+  return mi.toLocaleString('en-US') + ' mi';
+}
+
+function formatDate(iso: string): string {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function formatEta(iso: string, status: string): string {
+  if (status === 'delivered') return 'Done';
+  if (!iso) return 'TBD';
+  const d = new Date(iso);
+  return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+}
 
 const statusBarColor: Record<string, string> = {
   in_transit: 'bg-infamous-red-light',
@@ -71,15 +99,96 @@ const driverAppStages = [
 
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedLoad, setSelectedLoad] = useState<ActiveLoad>(mockActiveLoads[0]);
+  const [loads, setLoads] = useState<ActiveLoad[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedLoad, setSelectedLoad] = useState<ActiveLoad | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    api.getLoads()
+      .then((res) => {
+        if (cancelled) return;
+        const mapped: ActiveLoad[] = (res.loads || []).map((l: Record<string, unknown>) => ({
+          ref: (l.trackingNumber as string) || '—',
+          origin: (l.origin as string) || '—',
+          destination: (l.destination as string) || '—',
+          carrier: (l.shipperName as string) || '—',
+          status: (l.status as string) || 'pending',
+          statusLabel: statusLabelMap[(l.status as string)] || (l.status as string) || 'Pending',
+          eta: formatEta((l.deliveryAt as string) || '', (l.status as string) || ''),
+          rate: formatRate((l.rate as number) || 0),
+          equipment: (l.equipment as string) || '—',
+          weight: formatWeight((l.weightLbs as number) || 0),
+          miles: formatMiles((l.miles as number) || 0),
+          driver: '—',
+          phone: '—',
+          pickupDate: formatDate((l.pickupAt as string) || ''),
+          deliveryDate: formatDate((l.deliveryAt as string) || ''),
+        }));
+        setLoads(mapped);
+        setSelectedLoad(mapped[0] || null);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setLoads([]);
+        setSelectedLoad(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  const inTransitCount = loads.filter((l) => l.status === 'in_transit').length;
+  const atPickupCount = loads.filter((l) => l.status === 'at_pickup').length;
+  const deliveredCount = loads.filter((l) => l.status === 'delivered').length;
+  const delayedCount = loads.filter((l) => l.status === 'exception').length;
+  const pendingCount = loads.filter((l) => l.status === 'pending' || l.status === 'dispatched').length;
+  const totalLoads = loads.length;
+  const totalRevenue = loads.reduce((sum, l) => sum + Number(l.rate.replace(/[^0-9.]/g, '')), 0);
+  const onTimeCount = loads.filter((l) => l.status !== 'exception').length;
+  const onTimeRate = totalLoads > 0 ? ((onTimeCount / totalLoads) * 100).toFixed(1) + '%' : '0%';
+
+  const deliveryStatuses = [
+    { label: 'In Transit', count: inTransitCount, color: 'bg-infamous-red-light', textColor: 'text-infamous-red-light' },
+    { label: 'At Pickup', count: atPickupCount, color: 'bg-infamous-ember', textColor: 'text-infamous-ember' },
+    { label: 'Delivered', count: deliveredCount, color: 'bg-infamous-green', textColor: 'text-infamous-green' },
+    { label: 'Delayed', count: delayedCount, color: 'bg-infamous-orange', textColor: 'text-infamous-orange' },
+    { label: 'Pending', count: pendingCount, color: 'bg-infamous-muted', textColor: 'text-infamous-muted' },
+  ];
 
   const metrics = [
-    { label: 'Active Loads', value: '128', icon: <Truck size={18} />, color: 'text-infamous-red-light' },
-    { label: 'In Transit', value: '87', icon: <Navigation size={18} />, color: 'text-infamous-red-light' },
-    { label: 'Available Drivers', value: '34', icon: <Package size={18} />, color: 'text-infamous-green' },
-    { label: 'On-Time Rate', value: '96.2%', icon: <TrendingUp size={18} />, color: 'text-infamous-green' },
-    { label: 'Revenue MTD', value: '$2.4M', icon: <Activity size={18} />, color: 'text-infamous-red-light' },
+    { label: 'Active Loads', value: String(totalLoads), icon: <Truck size={18} />, color: 'text-infamous-red-light' },
+    { label: 'In Transit', value: String(inTransitCount), icon: <Navigation size={18} />, color: 'text-infamous-red-light' },
+    { label: 'Available Drivers', value: '—', icon: <Package size={18} />, color: 'text-infamous-green' },
+    { label: 'On-Time Rate', value: onTimeRate, icon: <TrendingUp size={18} />, color: 'text-infamous-green' },
+    { label: 'Revenue MTD', value: totalRevenue >= 1_000_000 ? '$' + (totalRevenue / 1_000_000).toFixed(1) + 'M' : '$' + totalRevenue.toLocaleString('en-US'), icon: <Activity size={18} />, color: 'text-infamous-red-light' },
   ];
+
+  if (loading) {
+    return (
+      <div className="space-y-5 animate-fade-in">
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={i}
+              className="relative overflow-hidden rounded-[16px] p-4"
+              style={{
+                background: 'rgba(36, 16, 19, 0.85)',
+                border: '1px solid rgba(255, 59, 48, 0.2)',
+              }}
+            >
+              <div className="h-4 w-8 rounded bg-infamous-panel animate-pulse mb-2" />
+              <div className="h-8 w-16 rounded bg-infamous-panel animate-pulse" />
+              <div className="h-3 w-20 rounded bg-infamous-panel animate-pulse mt-2" />
+            </div>
+          ))}
+        </div>
+        <div className="text-center text-infamous-muted py-12">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5 animate-fade-in">
@@ -119,11 +228,11 @@ const DashboardPage: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-infamous-red-light animate-pulse" />
-                <span className="text-[10px] text-infamous-muted">128 active routes</span>
+                <span className="text-[10px] text-infamous-muted">{totalLoads} active routes</span>
               </div>
             </div>
             <div className="h-[320px]">
-              <ShipmentRouteMap origin="Atlanta, GA" destination="Dallas, TX" status="in_transit" />
+              <ShipmentRouteMap origin={selectedLoad?.origin || 'Atlanta, GA'} destination={selectedLoad?.destination || 'Dallas, TX'} status={selectedLoad?.status || 'in_transit'} />
             </div>
           </div>
         </WidgetErrorBoundary>
@@ -144,10 +253,10 @@ const DashboardPage: React.FC = () => {
             <div className="mt-6 pt-4 border-t border-infamous-border">
               <div className="flex items-center justify-between text-xs text-infamous-muted mb-2">
                 <span>Overall Progress</span>
-                <span className="text-infamous-red-light font-bold">162 / 128 target</span>
+                <span className="text-infamous-red-light font-bold">{deliveredCount + inTransitCount} / {totalLoads} target</span>
               </div>
               <div className="w-full h-2 rounded-full bg-infamous-panel overflow-hidden">
-                <div className="h-full rounded-full bg-gradient-to-r from-infamous-red to-infamous-red-light" style={{ width: '78%', boxShadow: '0 0 10px rgba(255, 26, 26, 0.5)' }} />
+                <div className="h-full rounded-full bg-gradient-to-r from-infamous-red to-infamous-red-light" style={{ width: totalLoads > 0 ? `${Math.min(100, Math.round(((deliveredCount + inTransitCount) / totalLoads) * 100))}%` : '0%', boxShadow: '0 0 10px rgba(255, 26, 26, 0.5)' }} />
               </div>
             </div>
             <button
@@ -183,13 +292,15 @@ const DashboardPage: React.FC = () => {
             </div>
 
             <div className="space-y-1.5">
-              {mockActiveLoads.map((load) => (
+              {loads.length === 0 ? (
+                <div className="text-center text-infamous-muted py-8">No loads</div>
+              ) : loads.map((load) => (
                 <button
                   key={load.ref}
                   type="button"
                   onClick={() => setSelectedLoad(load)}
                   className={`w-full text-left md:grid md:grid-cols-[auto_1fr_1fr_100px_80px_80px] flex flex-col gap-1 md:gap-3 items-start md:items-center p-3 rounded-xl transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-red ${
-                    selectedLoad.ref === load.ref
+                    selectedLoad?.ref === load.ref
                       ? 'bg-infamous-red/8 border border-infamous-red/25'
                       : 'border border-transparent hover:bg-infamous-panel hover:border-infamous-border'
                   }`}
@@ -216,44 +327,44 @@ const DashboardPage: React.FC = () => {
           <div className="rounded-[18px] p-5" style={{ background: 'rgba(36, 16, 19, 0.85)', border: '1px solid rgba(255, 59, 48, 0.2)', boxShadow: '0 0 25px rgba(255, 26, 26, 0.1)' }}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold uppercase tracking-wide font-display">Load Details</h2>
-              <span className="text-xs font-mono text-infamous-red-light">{selectedLoad.ref}</span>
+              <span className="text-xs font-mono text-infamous-red-light">{selectedLoad?.ref || '—'}</span>
             </div>
 
             <div className="space-y-3">
               <div className="rounded-xl bg-infamous-panel border border-infamous-border p-3">
                 <p className="text-[10px] text-infamous-muted uppercase tracking-wider mb-1">Route</p>
-                <p className="text-sm font-medium">{selectedLoad.origin}</p>
+                <p className="text-sm font-medium">{selectedLoad?.origin || '—'}</p>
                 <div className="flex items-center gap-2 my-1.5">
                   <div className="flex-1 h-px bg-infamous-border" />
                   <Truck size={12} className="text-infamous-red-light" />
                   <div className="flex-1 h-px bg-infamous-border" />
                 </div>
-                <p className="text-sm font-medium">{selectedLoad.destination}</p>
+                <p className="text-sm font-medium">{selectedLoad?.destination || '—'}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div className="rounded-xl bg-infamous-panel border border-infamous-border p-3">
                   <p className="text-[10px] text-infamous-muted uppercase tracking-wider">Equipment</p>
-                  <p className="text-sm font-medium mt-1">{selectedLoad.equipment}</p>
+                  <p className="text-sm font-medium mt-1">{selectedLoad?.equipment || '—'}</p>
                 </div>
                 <div className="rounded-xl bg-infamous-panel border border-infamous-border p-3">
                   <p className="text-[10px] text-infamous-muted uppercase tracking-wider">Weight</p>
-                  <p className="text-sm font-medium mt-1">{selectedLoad.weight}</p>
+                  <p className="text-sm font-medium mt-1">{selectedLoad?.weight || '—'}</p>
                 </div>
                 <div className="rounded-xl bg-infamous-panel border border-infamous-border p-3">
                   <p className="text-[10px] text-infamous-muted uppercase tracking-wider">Miles</p>
-                  <p className="text-sm font-medium mt-1">{selectedLoad.miles}</p>
+                  <p className="text-sm font-medium mt-1">{selectedLoad?.miles || '—'}</p>
                 </div>
                 <div className="rounded-xl bg-infamous-panel border border-infamous-border p-3">
                   <p className="text-[10px] text-infamous-muted uppercase tracking-wider">Rate</p>
-                  <p className="text-sm font-bold text-infamous-red-light mt-1">{selectedLoad.rate}</p>
+                  <p className="text-sm font-bold text-infamous-red-light mt-1">{selectedLoad?.rate || '—'}</p>
                 </div>
               </div>
 
               <div className="rounded-xl bg-infamous-panel border border-infamous-border p-3">
                 <p className="text-[10px] text-infamous-muted uppercase tracking-wider mb-1">Driver</p>
-                <p className="text-sm font-medium">{selectedLoad.driver}</p>
-                <p className="text-xs text-infamous-muted">{selectedLoad.carrier}</p>
+                <p className="text-sm font-medium">{selectedLoad?.driver || '—'}</p>
+                <p className="text-xs text-infamous-muted">{selectedLoad?.carrier || '—'}</p>
               </div>
 
               <div className="rounded-xl bg-infamous-panel border border-infamous-border p-3">
@@ -261,12 +372,12 @@ const DashboardPage: React.FC = () => {
                 <div className="flex items-center justify-between text-xs">
                   <div>
                     <p className="text-infamous-muted">Pickup</p>
-                    <p className="text-[#F5E8E8] font-medium">{selectedLoad.pickupDate}</p>
+                    <p className="text-[#F5E8E8] font-medium">{selectedLoad?.pickupDate || '—'}</p>
                   </div>
                   <ChevronRight size={12} className="text-infamous-muted" />
                   <div className="text-right">
                     <p className="text-infamous-muted">Delivery</p>
-                    <p className="text-[#F5E8E8] font-medium">{selectedLoad.deliveryDate}</p>
+                    <p className="text-[#F5E8E8] font-medium">{selectedLoad?.deliveryDate || '—'}</p>
                   </div>
                 </div>
               </div>

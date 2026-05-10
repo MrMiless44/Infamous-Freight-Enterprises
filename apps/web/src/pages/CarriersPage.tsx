@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Truck, ShieldCheck, Clock, AlertTriangle, XCircle, FileText,
   CheckCircle, ChevronRight, Plus, Search, Phone, Mail
 } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
+import api from '@/api-client/client';
 
 type CarrierStatus = 'pending' | 'approved' | 'needs_documents' | 'expiring_insurance' | 'rejected';
 
@@ -24,88 +25,23 @@ interface Carrier {
   activeLoads: number;
 }
 
-const mockCarriers: Carrier[] = [
-  {
-    id: '1',
-    companyName: 'Swift Logistics LLC',
-    mcNumber: 'MC-123456',
-    dotNumber: 'DOT-789012',
-    contactName: 'John Smith',
-    email: 'john@swiftlogistics.com',
-    phone: '(555) 101-2020',
-    equipmentType: 'Dry Van',
-    insuranceExpiry: '2025-12-15',
-    daysUntilExpiry: 232,
-    w9Status: 'verified',
-    agreementStatus: 'signed',
-    approvalStatus: 'approved',
-    activeLoads: 3,
-  },
-  {
-    id: '2',
-    companyName: 'Desert Haul Co.',
-    mcNumber: 'MC-234567',
-    dotNumber: 'DOT-890123',
-    contactName: 'Maria Garcia',
-    email: 'maria@deserthaul.com',
-    phone: '(555) 202-3030',
-    equipmentType: 'Reefer',
-    insuranceExpiry: '2025-05-20',
-    daysUntilExpiry: 23,
-    w9Status: 'verified',
-    agreementStatus: 'signed',
-    approvalStatus: 'expiring_insurance',
-    activeLoads: 1,
-  },
-  {
-    id: '3',
-    companyName: 'Midland Freight Inc.',
-    mcNumber: 'MC-345678',
-    dotNumber: 'DOT-901234',
-    contactName: 'Robert Lee',
-    email: 'robert@midlandfreight.com',
-    phone: '(555) 303-4040',
-    equipmentType: 'Flatbed',
-    insuranceExpiry: '2025-09-10',
-    daysUntilExpiry: 136,
-    w9Status: 'pending',
-    agreementStatus: 'missing',
-    approvalStatus: 'needs_documents',
-    activeLoads: 0,
-  },
-  {
-    id: '4',
-    companyName: 'Pacific Freight Co.',
-    mcNumber: 'MC-456789',
-    dotNumber: 'DOT-012345',
-    contactName: 'Susan Chen',
-    email: 'susan@pacificfreight.com',
-    phone: '(555) 404-5050',
-    equipmentType: 'Dry Van',
-    insuranceExpiry: '—',
-    daysUntilExpiry: 0,
-    w9Status: 'missing',
-    agreementStatus: 'missing',
-    approvalStatus: 'pending',
-    activeLoads: 0,
-  },
-  {
-    id: '5',
-    companyName: 'Northeast Express LLC',
-    mcNumber: 'MC-567890',
-    dotNumber: 'DOT-123456',
-    contactName: 'David Kim',
-    email: 'david@northeastexpress.com',
-    phone: '(555) 505-6060',
-    equipmentType: 'Reefer',
-    insuranceExpiry: '—',
-    daysUntilExpiry: 0,
-    w9Status: 'pending',
-    agreementStatus: 'pending',
-    approvalStatus: 'rejected',
-    activeLoads: 0,
-  },
-];
+function mapApprovalStatus(carrier: { status?: string; authorityStatus?: string }): CarrierStatus {
+  const s = (carrier.status || '').toLowerCase();
+  const a = (carrier.authorityStatus || '').toLowerCase();
+  if (s === 'rejected' || a === 'revoked') return 'rejected';
+  if (s === 'approved' && a === 'active') return 'approved';
+  if (s === 'needs_documents') return 'needs_documents';
+  if (s === 'expiring_insurance') return 'expiring_insurance';
+  return 'pending';
+}
+
+function computeDaysUntilExpiry(dateStr: string | undefined): number {
+  if (!dateStr) return 0;
+  const expiry = new Date(dateStr);
+  if (isNaN(expiry.getTime())) return 0;
+  const diff = Math.ceil((expiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  return diff > 0 ? diff : 0;
+}
 
 const statusConfig: Record<CarrierStatus, { label: string; badge: string; icon: React.ReactNode }> = {
   approved:           { label: 'Approved',           badge: 'badge-green',  icon: <CheckCircle size={12} /> },
@@ -135,8 +71,51 @@ const CarriersPage: React.FC = () => {
   const [filter, setFilter] = useState<'all' | CarrierStatus>('all');
   const [search, setSearch] = useState('');
   const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
+  const [carriers, setCarriers] = useState<Carrier[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = mockCarriers.filter((c) => {
+  useEffect(() => {
+    setLoading(true);
+    api.request<{ carriers: Array<{
+      id: string;
+      name: string;
+      mcNumber: string;
+      dotNumber: string;
+      contactName: string;
+      contactEmail: string;
+      insuranceExpiry: string;
+      authorityStatus: string;
+      totalLoads: number;
+      status: string;
+    }> }>('GET', '/carriers')
+      .then((res) => {
+        const mapped: Carrier[] = res.carriers.map((c) => ({
+          id: c.id,
+          companyName: c.name,
+          mcNumber: c.mcNumber,
+          dotNumber: c.dotNumber,
+          contactName: c.contactName,
+          email: c.contactEmail,
+          phone: '—',
+          equipmentType: '—',
+          insuranceExpiry: c.insuranceExpiry || '—',
+          daysUntilExpiry: computeDaysUntilExpiry(c.insuranceExpiry),
+          w9Status: 'pending',
+          agreementStatus: 'pending',
+          approvalStatus: mapApprovalStatus(c),
+          activeLoads: c.totalLoads || 0,
+        }));
+        setCarriers(mapped);
+      })
+      .catch(() => {
+        setCarriers([]);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  const filtered = carriers.filter((c) => {
     const matchFilter = filter === 'all' || c.approvalStatus === filter;
     const matchSearch = !search ||
       c.companyName.toLowerCase().includes(search.toLowerCase()) ||
@@ -147,10 +126,21 @@ const CarriersPage: React.FC = () => {
 
   const counts = filterTabs.reduce<Record<string, number>>((acc, tab) => {
     acc[tab.key] = tab.key === 'all'
-      ? mockCarriers.length
-      : mockCarriers.filter((c) => c.approvalStatus === tab.key).length;
+      ? carriers.length
+      : carriers.filter((c) => c.approvalStatus === tab.key).length;
     return acc;
   }, {});
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64 animate-fade-in">
+        <div className="text-center">
+          <Truck size={32} className="text-[#B88989]/60 mx-auto mb-3 animate-pulse" />
+          <p className="text-sm text-[#B88989]/70">Loading carriers...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">

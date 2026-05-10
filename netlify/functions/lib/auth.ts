@@ -56,8 +56,11 @@ export async function verifyPassword(password: string, stored: string): Promise<
 }
 
 async function getSigningKey(): Promise<CryptoKey> {
-  const secret = process.env.JWT_SECRET || 'dev-secret-change-in-production';
-  return crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, [
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    console.warn('[AUTH] JWT_SECRET is not set — using insecure dev fallback. Set JWT_SECRET in production.');
+  }
+  return crypto.subtle.importKey('raw', new TextEncoder().encode(secret || 'dev-secret-change-in-production'), { name: 'HMAC', hash: 'SHA-256' }, false, [
     'sign',
     'verify',
   ]);

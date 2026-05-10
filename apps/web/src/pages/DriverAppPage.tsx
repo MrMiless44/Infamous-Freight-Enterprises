@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import api from '@/api-client/client';
 import {
   Camera,
   CheckCircle,
@@ -58,52 +59,138 @@ const stageOrder: LoadStage[] = [
   'assigned', 'en_route_pickup', 'at_pickup', 'loaded', 'in_transit', 'at_delivery', 'delivered', 'complete',
 ];
 
-const demoLoad: DriverLoad = {
-  id: 'IF-20491',
-  stage: 'in_transit',
-  origin: 'Chicago, IL',
-  originAddress: '1200 S Ashland Ave, Chicago, IL 60608',
-  destination: 'Dallas, TX',
-  destinationAddress: '4500 S Lamar St, Dallas, TX 75215',
-  pickupTime: 'Apr 29, 2026 · 8:00 AM',
-  deliveryTime: 'Apr 30, 2026 · 6:30 PM',
-  equipment: '53 ft Dry Van',
-  commodity: 'Palletized retail goods',
-  weight: '24,000 lb',
-  dispatcher: 'Marcus T.',
-  dispatcherPhone: '+1 (312) 555-0194',
-  rate: '$3,200',
-  miles: '925 mi',
-  notes: 'Dock door #7 at delivery. Lumper fee pre-paid.',
+const mapApiStatusToStage = (status: string): LoadStage => {
+  switch (status) {
+    case 'available':
+    case 'booked':
+      return 'assigned';
+    case 'carrier_assigned':
+    case 'pickup_scheduled':
+      return 'en_route_pickup';
+    case 'picked_up':
+      return 'loaded';
+    case 'in_transit':
+      return 'in_transit';
+    case 'delivered':
+      return 'delivered';
+    case 'pod_uploaded':
+      return 'complete';
+    default:
+      return 'assigned';
+  }
+};
+
+const stageToApiStatus: Partial<Record<LoadStage, string>> = {
+  en_route_pickup: 'pickup_scheduled',
+  at_pickup: 'picked_up',
+  loaded: 'picked_up',
+  in_transit: 'in_transit',
+  at_delivery: 'delivered',
+  delivered: 'pod_uploaded',
 };
 
 const DriverAppPage: React.FC = () => {
-  const [load, setLoad] = useState<DriverLoad>(demoLoad);
+  const [load, setLoad] = useState<DriverLoad | null>(null);
+  const [loading, setLoading] = useState(true);
   const [showPodUpload, setShowPodUpload] = useState(false);
   const [podUploaded, setPodUploaded] = useState(false);
 
-  const config = stageConfig[load.stage];
-  const currentStageIndex = stageOrder.indexOf(load.stage);
+  useEffect(() => {
+    let cancelled = false;
+    const fetchLoad = async () => {
+      try {
+        const data = await api.request<Record<string, unknown>>('GET', '/mobile/current-load');
+        if (cancelled) return;
+        if (data && data.trackingNumber) {
+          const formatDate = (iso: unknown) => {
+            if (!iso || typeof iso !== 'string') return '';
+            const d = new Date(iso);
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
+              ' · ' +
+              d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+          };
+          const mapped: DriverLoad = {
+            id: data.trackingNumber as string,
+            stage: mapApiStatusToStage(data.status as string),
+            origin: (data.origin as string) || '',
+            originAddress: (data.origin as string) || '',
+            destination: (data.destination as string) || '',
+            destinationAddress: (data.destination as string) || '',
+            pickupTime: formatDate(data.pickupAt),
+            deliveryTime: formatDate(data.deliveryAt),
+            equipment: (data.equipment as string) || '',
+            commodity: (data.commodity as string) || '',
+            weight: data.weightLbs ? `${Number(data.weightLbs).toLocaleString()} lb` : '',
+            dispatcher: 'Dispatch',
+            dispatcherPhone: '—',
+            rate: data.rate ? `$${Number(data.rate).toLocaleString()}` : '',
+            miles: data.miles ? `${Number(data.miles).toLocaleString()} mi` : '',
+            notes: (data.specialInstructions as string) || '',
+          };
+          setLoad(mapped);
+        }
+      } catch {
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    fetchLoad();
+    return () => { cancelled = true; };
+  }, []);
 
-  const handleMainAction = () => {
+  const handleMainAction = async () => {
+    if (!load) return;
     if (load.stage === 'delivered') {
       setShowPodUpload(true);
       return;
     }
+    const config = stageConfig[load.stage];
     if (config.next) {
+      const nextApiStatus = stageToApiStatus[config.next];
+      if (nextApiStatus) {
+        try {
+          await api.updateLoadStatus(load.id, nextApiStatus);
+        } catch {
+        }
+      }
       setLoad({ ...load, stage: config.next });
     }
   };
 
-  const handlePodUpload = () => {
+  const handlePodUpload = async () => {
+    if (!load) return;
+    try {
+      await api.updateLoadStatus(load.id, 'pod_uploaded');
+    } catch {
+    }
     setPodUploaded(true);
     setShowPodUpload(false);
     setLoad({ ...load, stage: 'complete' });
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-infamous-dark text-[#F5E8E8] flex items-center justify-center">
+        <p className="text-infamous-muted">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!load) {
+    return (
+      <div className="min-h-screen bg-infamous-dark text-[#F5E8E8] flex flex-col items-center justify-center gap-4">
+        <Truck size={48} className="text-infamous-muted" />
+        <p className="text-lg font-bold text-infamous-muted">No active load</p>
+        <p className="text-sm text-infamous-muted">Check back when a load has been assigned.</p>
+      </div>
+    );
+  }
+
+  const config = stageConfig[load.stage];
+  const currentStageIndex = stageOrder.indexOf(load.stage);
+
   return (
     <div className="min-h-screen bg-infamous-dark text-[#F5E8E8] flex flex-col">
-      {/* Top Bar */}
       <header className="flex items-center justify-between px-4 py-3 border-b border-infamous-border bg-infamous-navy">
         <div className="flex items-center gap-2">
           <Truck size={20} className="text-infamous-red-light" />

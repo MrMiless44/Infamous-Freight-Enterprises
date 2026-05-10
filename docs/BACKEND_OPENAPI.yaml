@@ -1,0 +1,83 @@
+openapi: 3.0.3
+info:
+  title: Infamous Freight API
+  version: 1.0.0
+  description: Backend API for Infamous Freight command-center dashboard, customer portal, and driver app.
+servers:
+  - url: http://localhost:4000/api
+paths:
+  /auth/login:
+    post:
+      summary: Login and receive JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        '200': { description: Authenticated }
+  /shipments:
+    get:
+      summary: List shipments visible to current user
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Shipments }
+    post:
+      summary: Create shipment
+      security: [{ bearerAuth: [] }]
+      responses:
+        '201': { description: Created }
+  /shipments/{id}/status:
+    post:
+      summary: Update shipment status
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Status updated }
+  /tracking/{trackingToken}:
+    get:
+      summary: Public shipment tracking
+      parameters:
+        - name: trackingToken
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Public tracking data }
+  /pricing/quote:
+    post:
+      summary: Calculate freight quote
+      responses:
+        '200': { description: Quote }
+  /documents/upload-url:
+    post:
+      summary: Create temporary document upload URL
+      security: [{ bearerAuth: [] }]
+      responses:
+        '201': { description: Upload URL created }
+  /invoices/{id}/checkout-session:
+    post:
+      summary: Create payment checkout session
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Checkout session }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

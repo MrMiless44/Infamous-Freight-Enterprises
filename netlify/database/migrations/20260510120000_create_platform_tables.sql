@@ -1,5 +1,24 @@
 -- Platform tables for freight management backend
 
+CREATE TABLE IF NOT EXISTS companies (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL DEFAULT 'shipper',
+  contact_name TEXT,
+  contact_email TEXT,
+  contact_phone TEXT,
+  address TEXT,
+  city TEXT,
+  state TEXT,
+  zip TEXT,
+  status TEXT NOT NULL DEFAULT 'active',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS companies_type_idx ON companies (type);
+CREATE INDEX IF NOT EXISTS companies_status_idx ON companies (status);
+
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   email TEXT NOT NULL UNIQUE,
@@ -7,6 +26,7 @@ CREATE TABLE IF NOT EXISTS users (
   name TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'viewer',
   carrier_id TEXT,
+  company_id TEXT REFERENCES companies(id) ON DELETE SET NULL,
   avatar_url TEXT,
   phone TEXT,
   subscription_status TEXT NOT NULL DEFAULT 'none',
@@ -18,6 +38,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE INDEX IF NOT EXISTS users_email_idx ON users (email);
 CREATE INDEX IF NOT EXISTS users_carrier_id_idx ON users (carrier_id);
 CREATE INDEX IF NOT EXISTS users_role_idx ON users (role);
+CREATE INDEX IF NOT EXISTS users_company_id_idx ON users (company_id);
 
 CREATE TABLE IF NOT EXISTS carriers (
   id TEXT PRIMARY KEY,
@@ -84,6 +105,7 @@ CREATE TABLE IF NOT EXISTS loads (
   carrier_id TEXT REFERENCES carriers(id) ON DELETE SET NULL,
   shipper_name TEXT,
   shipper_email TEXT,
+  shipper_company_id TEXT REFERENCES companies(id) ON DELETE SET NULL,
   special_instructions TEXT,
   notes TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -211,9 +233,53 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE TABLE IF NOT EXISTS status_events (
+  id TEXT PRIMARY KEY,
+  load_id TEXT NOT NULL REFERENCES loads(id) ON DELETE CASCADE,
+  status TEXT NOT NULL,
+  changed_by TEXT REFERENCES users(id) ON DELETE SET NULL,
+  notes TEXT,
+  lat NUMERIC(10,7),
+  lng NUMERIC(10,7),
+  address TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS status_events_load_id_idx ON status_events (load_id, created_at ASC);
+
+CREATE TABLE IF NOT EXISTS payments (
+  id TEXT PRIMARY KEY,
+  invoice_id TEXT NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
+  stripe_session_id TEXT UNIQUE,
+  stripe_payment_intent TEXT,
+  amount NUMERIC(12,2) NOT NULL,
+  currency TEXT NOT NULL DEFAULT 'USD',
+  status TEXT NOT NULL DEFAULT 'pending',
+  metadata JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS payments_invoice_id_idx ON payments (invoice_id);
+CREATE INDEX IF NOT EXISTS payments_stripe_session_idx ON payments (stripe_session_id);
+CREATE INDEX IF NOT EXISTS payments_status_idx ON payments (status);
+
+CREATE TABLE IF NOT EXISTS device_tokens (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token TEXT NOT NULL,
+  platform TEXT NOT NULL DEFAULT 'web',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS device_tokens_user_id_idx ON device_tokens (user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS device_tokens_token_idx ON device_tokens (token);
+
+CREATE TRIGGER companies_updated_at BEFORE UPDATE ON companies FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER users_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER carriers_updated_at BEFORE UPDATE ON carriers FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER drivers_updated_at BEFORE UPDATE ON drivers FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER loads_updated_at BEFORE UPDATE ON loads FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER quotes_updated_at BEFORE UPDATE ON quotes FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER invoices_updated_at BEFORE UPDATE ON invoices FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+CREATE TRIGGER payments_updated_at BEFORE UPDATE ON payments FOR EACH ROW EXECUTE FUNCTION update_updated_at();

@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
-import { Sparkles, Zap, Truck, Users, ArrowRight, Mic, Clock, AlertTriangle, CheckCircle, Package, FileCheck, MapPin, Shield, ShieldCheck, Star, X, Activity } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Sparkles, Zap, Truck, Users, ArrowRight, Mic, Clock, AlertTriangle, CheckCircle, Package, FileCheck, MapPin, Shield, ShieldCheck, Star, X } from 'lucide-react';
+import api from '@/api-client/client';
 import WidgetErrorBoundary from '@/components/ui/WidgetErrorBoundary';
 import EmptyState from '@/components/ui/EmptyState';
 
@@ -27,19 +28,6 @@ interface DispatchLoad {
   eta?: string;
   equipment: string;
 }
-
-const mockLoads: DispatchLoad[] = [
-  { id: '1', ref: 'LD-4821', origin: 'Chicago, IL', dest: 'Dallas, TX', status: 'pending', rate: 3200, equipment: 'Dry Van' },
-  { id: '2', ref: 'LD-4822', origin: 'Atlanta, GA', dest: 'Charlotte, NC', status: 'assigned', carrier: 'Swift Logistics', driver: 'Marcus T.', rate: 1850, equipment: 'Dry Van' },
-  { id: '3', ref: 'LD-4823', origin: 'Houston, TX', dest: 'Phoenix, AZ', status: 'dispatched', carrier: 'Desert Haul Co.', driver: 'James R.', rate: 4100, eta: '11:30 PM', equipment: 'Reefer' },
-  { id: '4', ref: 'LD-4824', origin: 'Memphis, TN', dest: 'Indianapolis, IN', status: 'at_pickup', carrier: 'Midland Freight', driver: 'David K.', rate: 2400, eta: '4:00 PM', equipment: 'Flatbed' },
-  { id: '5', ref: 'LD-4825', origin: 'Denver, CO', dest: 'Kansas City, MO', status: 'loaded', carrier: 'Rocky Road Transport', driver: 'Mike S.', rate: 1950, eta: '8:00 PM', equipment: 'Dry Van' },
-  { id: '6', ref: 'LD-4826', origin: 'Seattle, WA', dest: 'Portland, OR', status: 'in_transit', carrier: 'Pacific Freight', driver: 'Tom L.', rate: 1200, eta: '2:00 PM', equipment: 'Dry Van' },
-  { id: '7', ref: 'LD-4827', origin: 'Miami, FL', dest: 'Tampa, FL', status: 'at_delivery', carrier: 'Sunshine Carriers', driver: 'Chris B.', rate: 800, eta: '3:30 PM', equipment: 'Dry Van' },
-  { id: '8', ref: 'LD-4828', origin: 'Phoenix, AZ', dest: 'Las Vegas, NV', status: 'delivered', carrier: 'Desert Haul Co.', driver: 'Sarah K.', rate: 950, equipment: 'Dry Van' },
-  { id: '9', ref: 'LD-4815', origin: 'Dallas, TX', dest: 'Houston, TX', status: 'pod_received', carrier: 'Lone Star Freight', driver: 'Rick J.', rate: 700, equipment: 'Dry Van' },
-  { id: '10', ref: 'LD-4816', origin: 'Boston, MA', dest: 'New York, NY', status: 'exception', carrier: 'Northeast Express', driver: 'Paul D.', rate: 1400, equipment: 'Reefer' },
-];
 
 const statusConfig: Record<DispatchStatus, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
   pending:     { label: 'Pending',     color: 'text-[#B88989]',            bg: 'bg-gray-500/10 border-gray-500/20',              icon: <Clock size={12} /> },
@@ -75,17 +63,6 @@ interface CarrierCandidate {
   appResponsiveMin: number; // median app response time, lower is better
   preferredRpm: number;
 }
-
-const mockCarriers: CarrierCandidate[] = [
-  { id: 'c1', name: 'Lone Star Freight',     mc: 'MC-812441', authority: 'active',  insuranceOnFile: true, insuranceExpiresInDays: 184, safetyScore: 96, equipmentTypes: ['Dry Van', 'Reefer'], homeBase: 'Dallas, TX',     laneHistoryHits: 14, onTimePct: 98, claimsLast12Mo: 0, acceptanceRate: 92, appResponsiveMin: 4,  preferredRpm: 2.40 },
-  { id: 'c2', name: 'Midland Freight',       mc: 'MC-660921', authority: 'active',  insuranceOnFile: true, insuranceExpiresInDays: 92,  safetyScore: 91, equipmentTypes: ['Dry Van', 'Flatbed'],  homeBase: 'Memphis, TN',    laneHistoryHits: 6,  onTimePct: 94, claimsLast12Mo: 1, acceptanceRate: 88, appResponsiveMin: 7,  preferredRpm: 2.32 },
-  { id: 'c3', name: 'Desert Haul Co.',       mc: 'MC-519883', authority: 'active',  insuranceOnFile: true, insuranceExpiresInDays: 41,  safetyScore: 88, equipmentTypes: ['Reefer', 'Dry Van'],   homeBase: 'Phoenix, AZ',    laneHistoryHits: 9,  onTimePct: 95, claimsLast12Mo: 0, acceptanceRate: 81, appResponsiveMin: 11, preferredRpm: 2.55 },
-  { id: 'c4', name: 'Rocky Road Transport',  mc: 'MC-440117', authority: 'active',  insuranceOnFile: true, insuranceExpiresInDays: 230, safetyScore: 84, equipmentTypes: ['Dry Van'],             homeBase: 'Denver, CO',     laneHistoryHits: 3,  onTimePct: 90, claimsLast12Mo: 1, acceptanceRate: 76, appResponsiveMin: 9,  preferredRpm: 2.28 },
-  { id: 'c5', name: 'Pacific Freight',       mc: 'MC-302188', authority: 'active',  insuranceOnFile: true, insuranceExpiresInDays: 121, safetyScore: 89, equipmentTypes: ['Dry Van', 'Reefer'],   homeBase: 'Seattle, WA',    laneHistoryHits: 5,  onTimePct: 93, claimsLast12Mo: 0, acceptanceRate: 84, appResponsiveMin: 6,  preferredRpm: 2.45 },
-  { id: 'c6', name: 'Northeast Express',     mc: 'MC-712009', authority: 'active',  insuranceOnFile: true, insuranceExpiresInDays: 18,  safetyScore: 72, equipmentTypes: ['Reefer'],              homeBase: 'Boston, MA',     laneHistoryHits: 2,  onTimePct: 81, claimsLast12Mo: 3, acceptanceRate: 68, appResponsiveMin: 22, preferredRpm: 2.75 },
-  { id: 'c7', name: 'Sunshine Carriers',     mc: 'MC-188640', authority: 'active',  insuranceOnFile: true, insuranceExpiresInDays: 167, safetyScore: 86, equipmentTypes: ['Dry Van'],             homeBase: 'Miami, FL',      laneHistoryHits: 4,  onTimePct: 92, claimsLast12Mo: 0, acceptanceRate: 79, appResponsiveMin: 8,  preferredRpm: 2.20 },
-  { id: 'c8', name: 'Heartland Hotshot',     mc: 'MC-957742', authority: 'pending', insuranceOnFile: false,insuranceExpiresInDays: 0,   safetyScore: 64, equipmentTypes: ['Power Only', 'Hotshot'],homeBase: 'Tulsa, OK',     laneHistoryHits: 1,  onTimePct: 88, claimsLast12Mo: 0, acceptanceRate: 95, appResponsiveMin: 5,  preferredRpm: 2.10 },
-];
 
 interface CarrierScore {
   carrier: CarrierCandidate;
@@ -147,11 +124,12 @@ function rankCarriers(load: DispatchLoad, carriers: CarrierCandidate[]): Carrier
 
 interface CarrierMatchModalProps {
   load: DispatchLoad;
+  carriers: CarrierCandidate[];
   onClose: () => void;
 }
 
-const CarrierMatchModal: React.FC<CarrierMatchModalProps> = ({ load, onClose }) => {
-  const ranked = useMemo(() => rankCarriers(load, mockCarriers).slice(0, 6), [load]);
+const CarrierMatchModal: React.FC<CarrierMatchModalProps> = ({ load, carriers, onClose }) => {
+  const ranked = useMemo(() => rankCarriers(load, carriers).slice(0, 6), [load, carriers]);
 
   return (
     <div
@@ -262,17 +240,89 @@ const CarrierMatchModal: React.FC<CarrierMatchModalProps> = ({ load, onClose }) 
   );
 };
 
+const statusMap: Record<string, DispatchStatus> = {
+  available: 'pending',
+  booked: 'assigned',
+  carrier_assigned: 'dispatched',
+  pickup_scheduled: 'at_pickup',
+  picked_up: 'loaded',
+  in_transit: 'in_transit',
+  delivered: 'delivered',
+  pod_uploaded: 'pod_received',
+  delayed: 'exception',
+  exception: 'exception',
+};
+
 const DispatchBoardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'board' | 'voice'>('board');
   const [isListening, setIsListening] = useState(false);
   const [matchLoad, setMatchLoad] = useState<DispatchLoad | null>(null);
+  const [dispatchLoads, setDispatchLoads] = useState<DispatchLoad[]>([]);
+  const [carrierCandidates, setCarrierCandidates] = useState<CarrierCandidate[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const pendingCount = mockLoads.filter((l) => l.status === 'pending').length;
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [loadsRes, carriersRes] = await Promise.all([
+          api.getLoads(),
+          api.request<{ carriers?: Record<string, unknown>[] }>('GET', '/carriers'),
+        ]);
+
+        const mappedLoads: DispatchLoad[] = (loadsRes.loads ?? []).map((l: Record<string, unknown>) => ({
+          id: String(l.id),
+          ref: String(l.trackingNumber ?? ''),
+          origin: String(l.origin ?? ''),
+          dest: String(l.destination ?? ''),
+          status: statusMap[String(l.status)] ?? 'pending',
+          carrier: l.shipperName ? String(l.shipperName) : undefined,
+          driver: '—',
+          rate: Number(l.rate) || 0,
+          eta: l.deliveryAt ? new Date(String(l.deliveryAt)).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : undefined,
+          equipment: String(l.equipment ?? 'Dry Van'),
+        }));
+
+        const mappedCarriers: CarrierCandidate[] = (carriersRes.carriers ?? []).map((c: Record<string, unknown>) => ({
+          id: String(c.id),
+          name: String(c.name ?? ''),
+          mc: String(c.mcNumber ?? c.mc ?? ''),
+          authority: (String(c.authorityStatus ?? 'active') === 'active' ? 'active' : String(c.authorityStatus ?? 'active') === 'revoked' ? 'revoked' : 'pending') as 'active' | 'pending' | 'revoked',
+          insuranceOnFile: c.insuranceExpiry ? new Date(String(c.insuranceExpiry)) > new Date() : false,
+          insuranceExpiresInDays: c.insuranceExpiry ? Math.max(0, Math.round((new Date(String(c.insuranceExpiry)).getTime() - Date.now()) / 86400000)) : 0,
+          safetyScore: Number(c.safetyScore) || 80,
+          equipmentTypes: Array.isArray(c.equipmentTypes) ? (c.equipmentTypes as string[]) : [String(c.equipmentTypes ?? 'Dry Van')],
+          homeBase: String(c.homeBase ?? c.city ?? ''),
+          laneHistoryHits: Math.round((Number(c.totalLoads) || 0) / 10),
+          onTimePct: Math.round((Number(c.onTimeRate) || 0.8) * 100),
+          claimsLast12Mo: Number(c.claimsLast12Mo) || 0,
+          acceptanceRate: Number(c.acceptanceRate) || 80,
+          appResponsiveMin: Number(c.appResponsiveMin) || 10,
+          preferredRpm: Number(c.preferredRpm) || 2.5,
+        }));
+
+        setDispatchLoads(mappedLoads);
+        setCarrierCandidates(mappedCarriers);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const pendingCount = dispatchLoads.filter((l) => l.status === 'pending').length;
 
   const runAutoDispatch = () => {
-    const firstPending = mockLoads.find((l) => l.status === 'pending');
+    const firstPending = dispatchLoads.find((l) => l.status === 'pending');
     if (firstPending) setMatchLoad(firstPending);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="w-8 h-8 border-2 border-infamous-orange border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -280,13 +330,9 @@ const DispatchBoardPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Dispatch Board</h1>
-          <p className="text-sm text-[#B88989]/70 mt-0.5">Full load lifecycle — from pending to POD received · sample data</p>
+          <p className="text-sm text-[#B88989]/70 mt-0.5">Full load lifecycle — from pending to POD received</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-infamous-card border border-infamous-border rounded-xl px-3 py-2">
-            <Activity size={14} className="text-[#B88989]/70" />
-            <span className="text-xs text-[#B88989]/70">Demo data</span>
-          </div>
           <div role="tablist" aria-label="Dispatch view" className="flex gap-2">
           <button
             role="tab"
@@ -329,7 +375,7 @@ const DispatchBoardPage: React.FC = () => {
         <div id="dispatch-panel" role="tabpanel" className="overflow-x-auto pb-4">
           <div className="flex gap-4" style={{ minWidth: `${statusColumns.length * 220}px` }}>
             {statusColumns.map((status) => {
-              const colLoads = mockLoads.filter((l) => l.status === status);
+              const colLoads = dispatchLoads.filter((l) => l.status === status);
               const cfg = statusConfig[status];
               return (
                 <div key={status} className="w-52 flex-shrink-0">
@@ -457,7 +503,7 @@ const DispatchBoardPage: React.FC = () => {
           </div>
         </div>
       )}
-      {matchLoad && <CarrierMatchModal load={matchLoad} onClose={() => setMatchLoad(null)} />}
+      {matchLoad && <CarrierMatchModal load={matchLoad} carriers={carrierCandidates} onClose={() => setMatchLoad(null)} />}
     </div>
   );
 };

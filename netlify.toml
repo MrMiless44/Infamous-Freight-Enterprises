@@ -133,6 +133,12 @@
   status = 200
   force = true
 
+[[redirects]]
+  from = "/api/documents"
+  to = "/.netlify/functions/documents"
+  status = 200
+  force = true
+
 # Invoices
 [[redirects]]
   from = "/api/invoices/*"
@@ -143,6 +149,26 @@
 [[redirects]]
   from = "/api/invoices"
   to = "/.netlify/functions/invoices"
+  status = 200
+  force = true
+
+# Payments (Stripe checkout + webhooks)
+[[redirects]]
+  from = "/api/payments/*"
+  to = "/.netlify/functions/payments"
+  status = 200
+  force = true
+
+# Companies
+[[redirects]]
+  from = "/api/companies/*"
+  to = "/.netlify/functions/companies"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/companies"
+  to = "/.netlify/functions/companies"
   status = 200
   force = true
 
@@ -163,6 +189,73 @@
 [[redirects]]
   from = "/api/mobile/*"
   to = "/.netlify/functions/mobile"
+  status = 200
+  force = true
+
+# Dispatch Board
+[[redirects]]
+  from = "/api/dispatch/*"
+  to = "/.netlify/functions/dispatch"
+  status = 200
+  force = true
+
+# Compliance & CSA
+[[redirects]]
+  from = "/api/compliance/*"
+  to = "/.netlify/functions/compliance"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/csa/*"
+  to = "/.netlify/functions/compliance"
+  status = 200
+  force = true
+
+# Rate Analytics & Broker Credit & Factoring
+[[redirects]]
+  from = "/api/rate-analytics/*"
+  to = "/.netlify/functions/rate-analytics"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/broker-credit/*"
+  to = "/.netlify/functions/rate-analytics"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/factoring/*"
+  to = "/.netlify/functions/rate-analytics"
+  status = 200
+  force = true
+
+# Payroll / Settlements
+[[redirects]]
+  from = "/api/payroll/*"
+  to = "/.netlify/functions/settlements"
+  status = 200
+  force = true
+
+# Chat / Messaging
+[[redirects]]
+  from = "/api/chat/*"
+  to = "/.netlify/functions/settlements"
+  status = 200
+  force = true
+
+# Rate Confirmations
+[[redirects]]
+  from = "/api/ratecons/*"
+  to = "/.netlify/functions/settlements"
+  status = 200
+  force = true
+
+# Admin: Activity Log & Notification Admin
+[[redirects]]
+  from = "/api/admin/*"
+  to = "/.netlify/functions/audit-log"
   status = 200
   force = true
 

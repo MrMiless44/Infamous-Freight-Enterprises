@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import maplibregl, { type GeoJSONSource, type LngLatBoundsLike, type Map } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import api from '@/api-client/client';
 
 type ShipmentRouteMapProps = {
   origin: string;
   destination: string;
   status: string;
+  loadId?: string;
 };
 
 type Coordinate = [number, number];
@@ -75,19 +77,45 @@ const progressForStatus = (status: string) => {
   }
 };
 
-export const ShipmentRouteMap: React.FC<ShipmentRouteMapProps> = ({ origin, destination, status }) => {
+export const ShipmentRouteMap: React.FC<ShipmentRouteMapProps> = ({ origin, destination, status, loadId }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
   const [mapError, setMapError] = useState('');
+  const [gpsPositions, setGpsPositions] = useState<Array<{ lat: number; lng: number }>>([]);
+
+  useEffect(() => {
+    if (!loadId) return;
+    let cancelled = false;
+    const fetchPositions = async () => {
+      try {
+        const data = await api.getLoadPositions(loadId);
+        if (cancelled) return;
+        if (data?.positions && Array.isArray(data.positions) && data.positions.length > 0) {
+          setGpsPositions(data.positions.map((p: { lat: number; lng: number }) => ({ lat: p.lat, lng: p.lng })));
+        }
+      } catch {
+      }
+    };
+    fetchPositions();
+    return () => { cancelled = true; };
+  }, [loadId]);
 
   const route = useMemo(() => {
     const start = cityCoordinates[normalizePlace(origin)];
     const end = cityCoordinates[normalizePlace(destination)];
     if (!start || !end) return null;
 
-    const truck = lerpCoordinate(start, end, progressForStatus(status));
-    return { start, end, truck };
-  }, [origin, destination, status]);
+    const latestGps = gpsPositions.length > 0 ? gpsPositions[gpsPositions.length - 1] : null;
+    const truck: Coordinate = latestGps
+      ? [latestGps.lng, latestGps.lat]
+      : lerpCoordinate(start, end, progressForStatus(status));
+
+    const routePoints: Coordinate[] = gpsPositions.length > 1
+      ? gpsPositions.map((p) => [p.lng, p.lat] as Coordinate)
+      : [start, end];
+
+    return { start, end, truck, routePoints };
+  }, [origin, destination, status, gpsPositions]);
 
   useEffect(() => {
     if (!containerRef.current || !route) return;
@@ -110,7 +138,7 @@ export const ShipmentRouteMap: React.FC<ShipmentRouteMapProps> = ({ origin, dest
         properties: {},
         geometry: {
           type: 'LineString',
-          coordinates: [route.start, route.end],
+          coordinates: route.routePoints,
         },
       };
 
@@ -172,7 +200,7 @@ export const ShipmentRouteMap: React.FC<ShipmentRouteMapProps> = ({ origin, dest
       properties: {},
       geometry: {
         type: 'LineString',
-        coordinates: [route.start, route.end],
+        coordinates: route.routePoints,
       },
     });
   }, [route]);

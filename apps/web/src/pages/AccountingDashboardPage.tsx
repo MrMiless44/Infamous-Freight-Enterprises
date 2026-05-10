@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
-  DollarSign, FileText, Send, CheckCircle, AlertTriangle,
-  Clock, TrendingUp, Download, ChevronRight, Truck, Activity
+  FileText, Send, CheckCircle, AlertTriangle,
+  Clock, TrendingUp, Download, ChevronRight, Truck
 } from 'lucide-react';
 import WidgetErrorBoundary from '@/components/ui/WidgetErrorBoundary';
 import EmptyState from '@/components/ui/EmptyState';
+import api from '@/api-client/client';
 
 type InvoiceStatus = 'draft' | 'sent' | 'overdue' | 'paid';
 
@@ -33,22 +34,6 @@ interface CarrierPayRecord {
   dueDate: string;
 }
 
-const mockInvoices: AccountingInvoice[] = [
-  { id: '1', number: 'INV-240427-001', shipper: 'Harborside Retail Group', loadRef: 'LD-4815', shipperAmount: 3500, carrierPay: 2800, grossMargin: 700, grossMarginPct: 20, status: 'paid', podAttached: true, issueDate: 'Apr 1', dueDate: 'May 1', daysAge: 0 },
-  { id: '2', number: 'INV-240427-002', shipper: 'Global Trade Inc.', loadRef: 'LD-4816', shipperAmount: 2200, carrierPay: 1750, grossMargin: 450, grossMarginPct: 20.5, status: 'sent', podAttached: true, issueDate: 'Apr 16', dueDate: 'May 16', daysAge: 11 },
-  { id: '3', number: 'INV-240427-003', shipper: 'Pacific Imports', loadRef: 'LD-4817', shipperAmount: 4800, carrierPay: 3700, grossMargin: 1100, grossMarginPct: 22.9, status: 'sent', podAttached: true, issueDate: 'Apr 17', dueDate: 'May 17', daysAge: 10 },
-  { id: '4', number: 'INV-240415-004', shipper: 'Midwest Supplies', loadRef: 'LD-4809', shipperAmount: 2100, carrierPay: 1680, grossMargin: 420, grossMarginPct: 20, status: 'overdue', podAttached: true, issueDate: 'Apr 10', dueDate: 'Apr 25', daysAge: 2 },
-  { id: '5', number: 'INV-240427-005', shipper: 'Eastern Distribution', loadRef: 'LD-4818', shipperAmount: 2700, carrierPay: 2100, grossMargin: 600, grossMarginPct: 22.2, status: 'draft', podAttached: false, issueDate: '—', dueDate: '—', daysAge: 0 },
-  { id: '6', number: 'INV-240415-006', shipper: 'National Retail', loadRef: 'LD-4802', shipperAmount: 3200, carrierPay: 2500, grossMargin: 700, grossMarginPct: 21.9, status: 'overdue', podAttached: true, issueDate: 'Apr 8', dueDate: 'Apr 23', daysAge: 4 },
-];
-
-const mockCarrierPay: CarrierPayRecord[] = [
-  { id: '1', carrier: 'Swift Logistics LLC', loadRef: 'LD-4821', amount: 2800, status: 'pending', dueDate: 'May 5' },
-  { id: '2', carrier: 'Desert Haul Co.', loadRef: 'LD-4823', amount: 3700, status: 'processing', dueDate: 'May 3' },
-  { id: '3', carrier: 'Midland Freight Inc.', loadRef: 'LD-4824', amount: 1900, status: 'pending', dueDate: 'May 6' },
-  { id: '4', carrier: 'Pacific Freight Co.', loadRef: 'LD-4826', amount: 950, status: 'paid', dueDate: 'Apr 28' },
-];
-
 const invoiceStatusBadge: Record<InvoiceStatus, string> = {
   draft: 'badge-yellow',
   sent: 'badge-blue',
@@ -72,26 +57,87 @@ const carrierPayBadge: Record<string, string> = {
 const AccountingDashboardPage: React.FC = () => {
   const [invoiceFilter, setInvoiceFilter] = useState<'all' | InvoiceStatus>('all');
   const [tab, setTab] = useState<'invoices' | 'carrier_pay'>('invoices');
+  const [invoices, setInvoices] = useState<AccountingInvoice[]>([]);
+  const [carrierPay, setCarrierPay] = useState<CarrierPayRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [invoiceRes, loadsRes] = await Promise.all([
+          api.getInvoices(),
+          api.getLoads(),
+        ]);
+
+        const now = new Date();
+        const mapped: AccountingInvoice[] = (invoiceRes.invoices || []).map((inv: any) => {
+          const amt = inv.amount || 0;
+          const cp = Math.round(amt * 0.78 * 100) / 100;
+          const gm = Math.round(amt * 0.22 * 100) / 100;
+          const issued = inv.issuedAt ? new Date(inv.issuedAt) : null;
+          const due = inv.dueAt ? new Date(inv.dueAt) : null;
+          const daysAge = due ? Math.max(0, Math.floor((now.getTime() - due.getTime()) / (1000 * 60 * 60 * 24))) : 0;
+          const statusMap: Record<string, InvoiceStatus> = { draft: 'draft', sent: 'sent', paid: 'paid', overdue: 'overdue', void: 'draft' };
+          return {
+            id: inv.id,
+            number: inv.invoiceNumber,
+            shipper: inv.customerName,
+            loadRef: inv.loadId || '—',
+            shipperAmount: amt,
+            carrierPay: cp,
+            grossMargin: gm,
+            grossMarginPct: 22,
+            status: statusMap[inv.status] || 'draft',
+            podAttached: inv.status !== 'draft',
+            issueDate: issued ? issued.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—',
+            dueDate: due ? due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—',
+            daysAge,
+          } as AccountingInvoice;
+        });
+
+        setInvoices(mapped);
+
+        const carrierRecords: CarrierPayRecord[] = (loadsRes.loads || [])
+          .filter((ld: any) => ['delivered', 'pod_uploaded', 'invoiced'].includes(ld.status))
+          .map((ld: any) => ({
+            id: ld.id,
+            carrier: ld.shipperName || ld.carrierId || 'Unknown',
+            loadRef: ld.trackingNumber || ld.id,
+            amount: ld.rate || 0,
+            status: ld.status === 'invoiced' ? 'paid' as const : 'pending' as const,
+            dueDate: '—',
+          }));
+
+        setCarrierPay(carrierRecords);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const filteredInvoices = invoiceFilter === 'all'
-    ? mockInvoices
-    : mockInvoices.filter((i) => i.status === invoiceFilter);
+    ? invoices
+    : invoices.filter((i) => i.status === invoiceFilter);
 
-  const totalShipperRevenue = mockInvoices.reduce((s, i) => s + i.shipperAmount, 0);
-  const totalCarrierPay = mockInvoices.reduce((s, i) => s + i.carrierPay, 0);
-  const totalGrossMargin = mockInvoices.reduce((s, i) => s + i.grossMargin, 0);
-  const avgMarginPct = mockInvoices.length > 0
-    ? Math.round(mockInvoices.reduce((s, i) => s + i.grossMarginPct, 0) / mockInvoices.length * 10) / 10
+  const totalShipperRevenue = invoices.reduce((s, i) => s + i.shipperAmount, 0);
+  const totalCarrierPay = invoices.reduce((s, i) => s + i.carrierPay, 0);
+  const totalGrossMargin = invoices.reduce((s, i) => s + i.grossMargin, 0);
+  const avgMarginPct = invoices.length > 0
+    ? Math.round(invoices.reduce((s, i) => s + i.grossMarginPct, 0) / invoices.length * 10) / 10
     : 0;
 
   const invoiceCounts = {
-    draft: mockInvoices.filter((i) => i.status === 'draft').length,
-    sent: mockInvoices.filter((i) => i.status === 'sent').length,
-    overdue: mockInvoices.filter((i) => i.status === 'overdue').length,
-    paid: mockInvoices.filter((i) => i.status === 'paid').length,
+    draft: invoices.filter((i) => i.status === 'draft').length,
+    sent: invoices.filter((i) => i.status === 'sent').length,
+    overdue: invoices.filter((i) => i.status === 'overdue').length,
+    paid: invoices.filter((i) => i.status === 'paid').length,
   };
 
-  const carrierPayPending = mockCarrierPay.filter((p) => p.status === 'pending' || p.status === 'processing')
+  const carrierPayPending = carrierPay.filter((p) => p.status === 'pending' || p.status === 'processing')
     .reduce((s, p) => s + p.amount, 0);
 
   return (
@@ -100,13 +146,9 @@ const AccountingDashboardPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Accounting</h1>
-          <p className="text-sm text-[#B88989]/70 mt-0.5">Invoices, payments, and margin tracking · sample data</p>
+          <p className="text-sm text-[#B88989]/70 mt-0.5">Invoices, payments, and margin tracking</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-infamous-card border border-infamous-border rounded-xl px-3 py-2">
-            <Activity size={14} className="text-[#B88989]/70" />
-            <span className="text-xs text-[#B88989]/70">Demo data</span>
-          </div>
           <button className="btn-primary flex items-center gap-2">
             <FileText size={16} /> Create Invoice
           </button>
@@ -291,7 +333,7 @@ const AccountingDashboardPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {mockCarrierPay.map((pay) => (
+                {carrierPay.map((pay) => (
                   <tr key={pay.id} className="hover:bg-infamous-panel transition-colors">
                     <td className="table-cell font-medium">{pay.carrier}</td>
                     <td className="table-cell text-xs text-[#B88989]/70">{pay.loadRef}</td>
@@ -302,7 +344,10 @@ const AccountingDashboardPage: React.FC = () => {
                     </td>
                     <td className="table-cell">
                       {pay.status === 'pending' && (
-                        <button className="px-3 py-1 rounded-lg bg-infamous-orange/10 text-infamous-orange text-xs font-medium hover:bg-infamous-orange hover:text-[#F5E8E8] transition-all">
+                        <button
+                          onClick={() => api.createCheckoutSession(pay.id)}
+                          className="px-3 py-1 rounded-lg bg-infamous-orange/10 text-infamous-orange text-xs font-medium hover:bg-infamous-orange hover:text-[#F5E8E8] transition-all"
+                        >
                           Pay Now
                         </button>
                       )}

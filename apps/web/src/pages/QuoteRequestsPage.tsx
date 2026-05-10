@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import api from '@/api-client/client';
 import {
   ClipboardList, Plus, ChevronRight, ArrowRight,
   Truck, MapPin, Package, DollarSign, Calendar,
-  CheckCircle, XCircle, Clock, RefreshCw, Eye, Activity
+  CheckCircle, XCircle, Clock, RefreshCw, Eye
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import WidgetErrorBoundary from '@/components/ui/WidgetErrorBoundary';
@@ -30,108 +31,21 @@ interface QuoteRequest {
   createdAt: string;
 }
 
-const mockQuotes: QuoteRequest[] = [
-  {
-    id: '1',
-    quoteNumber: 'QR-2024-001',
-    shipper: 'Harborside Retail Group',
-    pickupLocation: 'Chicago, IL',
-    deliveryLocation: 'Dallas, TX',
-    commodity: 'Electronics',
-    freightType: 'Full Truckload',
-    weight: '42,000 lbs',
-    equipmentNeeded: 'Dry Van 53\'',
-    pickupDate: 'Apr 29, 2025',
-    deliveryDeadline: 'May 1, 2025',
-    status: 'QUOTED',
-    quotedAmount: 3500,
-    estimatedCarrierCost: 2700,
-    targetMargin: 22.9,
-    createdAt: 'Apr 27, 2025',
-  },
-  {
-    id: '2',
-    quoteNumber: 'QR-2024-002',
-    shipper: 'Global Trade Inc.',
-    pickupLocation: 'Atlanta, GA',
-    deliveryLocation: 'Miami, FL',
-    commodity: 'Perishables',
-    freightType: 'Full Truckload',
-    weight: '38,000 lbs',
-    equipmentNeeded: 'Reefer 53\'',
-    pickupDate: 'Apr 30, 2025',
-    deliveryDeadline: 'May 2, 2025',
-    status: 'NEW',
-    createdAt: 'Apr 27, 2025',
-  },
-  {
-    id: '3',
-    quoteNumber: 'QR-2024-003',
-    shipper: 'Pacific Imports LLC',
-    pickupLocation: 'Los Angeles, CA',
-    deliveryLocation: 'Phoenix, AZ',
-    commodity: 'Steel Coils',
-    freightType: 'Full Truckload',
-    weight: '44,000 lbs',
-    equipmentNeeded: 'Flatbed 48\'',
-    pickupDate: 'May 2, 2025',
-    deliveryDeadline: 'May 4, 2025',
-    status: 'APPROVED',
-    quotedAmount: 2800,
-    estimatedCarrierCost: 2100,
-    targetMargin: 25,
-    createdAt: 'Apr 26, 2025',
-  },
-  {
-    id: '4',
-    quoteNumber: 'QR-2024-004',
-    shipper: 'Midwest Supplies Co.',
-    pickupLocation: 'Kansas City, MO',
-    deliveryLocation: 'Indianapolis, IN',
-    commodity: 'Auto Parts',
-    freightType: 'Full Truckload',
-    weight: '35,000 lbs',
-    equipmentNeeded: 'Dry Van 53\'',
-    pickupDate: 'May 3, 2025',
-    deliveryDeadline: 'May 5, 2025',
-    status: 'CONVERTED',
-    quotedAmount: 1900,
-    estimatedCarrierCost: 1500,
-    targetMargin: 21,
-    convertedLoadId: 'LD-4830',
-    createdAt: 'Apr 25, 2025',
-  },
-  {
-    id: '5',
-    quoteNumber: 'QR-2024-005',
-    shipper: 'Eastern Distribution',
-    pickupLocation: 'Boston, MA',
-    deliveryLocation: 'New York, NY',
-    commodity: 'Retail Goods',
-    freightType: 'Full Truckload',
-    weight: '28,000 lbs',
-    equipmentNeeded: 'Dry Van 48\'',
-    pickupDate: 'May 5, 2025',
-    deliveryDeadline: 'May 6, 2025',
-    status: 'REVIEWING',
-    createdAt: 'Apr 27, 2025',
-  },
-  {
-    id: '6',
-    quoteNumber: 'QR-2024-006',
-    shipper: 'National Retail Group',
-    pickupLocation: 'Seattle, WA',
-    deliveryLocation: 'Portland, OR',
-    commodity: 'Clothing',
-    freightType: 'LTL',
-    weight: '8,000 lbs',
-    equipmentNeeded: 'Dry Van 26\'',
-    pickupDate: 'May 6, 2025',
-    deliveryDeadline: 'May 7, 2025',
-    status: 'REJECTED',
-    createdAt: 'Apr 24, 2025',
-  },
-];
+const statusMap: Record<string, QuoteStatus> = {
+  pending: 'NEW',
+  reviewing: 'REVIEWING',
+  quoted: 'QUOTED',
+  approved: 'APPROVED',
+  rejected: 'REJECTED',
+  converted: 'CONVERTED',
+};
+
+const formatDate = (dateStr: string) => {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+};
+
+const formatWeight = (lbs: number) => lbs.toLocaleString() + ' lbs';
 
 const statusConfig: Record<QuoteStatus, { label: string; badge: string; icon: React.ReactNode }> = {
   NEW:       { label: 'New',       badge: 'badge-blue',   icon: <ClipboardList size={11} /> },
@@ -154,9 +68,45 @@ const filterTabs: { key: 'all' | QuoteStatus; label: string }[] = [
 
 const QuoteRequestsPage: React.FC = () => {
   const [filter, setFilter] = useState<'all' | QuoteStatus>('all');
-  const [quotes, setQuotes] = useState<QuoteRequest[]>(mockQuotes);
+  const [quotes, setQuotes] = useState<QuoteRequest[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedQuote, setSelectedQuote] = useState<QuoteRequest | null>(null);
   const [converting, setConverting] = useState(false);
+
+  const fetchQuotes = async () => {
+    try {
+      setLoading(true);
+      const { quotes: apiQuotes } = await api.getQuotes();
+      const mapped: QuoteRequest[] = apiQuotes.map((q: any) => ({
+        id: q.id,
+        quoteNumber: q.quoteNumber,
+        shipper: q.shipper,
+        pickupLocation: q.origin,
+        deliveryLocation: q.destination,
+        commodity: q.freightType,
+        freightType: q.freightType,
+        weight: formatWeight(q.weightLbs),
+        equipmentNeeded: q.equipment,
+        pickupDate: formatDate(q.pickupDate),
+        deliveryDeadline: formatDate(q.deliveryDeadline),
+        status: statusMap[q.status] || 'NEW',
+        quotedAmount: q.quotedAmount,
+        estimatedCarrierCost: q.estimatedCarrierCost,
+        targetMargin: q.targetMargin,
+        convertedLoadId: q.convertedLoadId,
+        createdAt: formatDate(q.createdAt),
+      }));
+      setQuotes(mapped);
+    } catch (err) {
+      toast.error('Failed to load quotes');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchQuotes();
+  }, []);
 
   const filtered = filter === 'all' ? quotes : quotes.filter((q) => q.status === filter);
 
@@ -167,18 +117,19 @@ const QuoteRequestsPage: React.FC = () => {
     return acc;
   }, {});
 
-  const handleConvert = () => {
+  const handleConvert = async () => {
     if (!selectedQuote || selectedQuote.status === 'CONVERTED') return;
     setConverting(true);
-    setTimeout(() => {
+    try {
+      await api.convertQuoteToLoad(selectedQuote.id);
+      toast.success(`Quote ${selectedQuote.quoteNumber} converted to load.`);
+      setSelectedQuote(null);
+      await fetchQuotes();
+    } catch (err) {
+      toast.error('Failed to convert quote to load');
+    } finally {
       setConverting(false);
-      // In production: POST /quote-requests/:id/convert-to-load
-      const loadId = selectedQuote.convertedLoadId ?? `LD-${Math.floor(1000 + Math.random() * 9000)}`;
-      const updated: QuoteRequest = { ...selectedQuote, status: 'CONVERTED', convertedLoadId: loadId };
-      setQuotes((prev) => prev.map((q) => (q.id === updated.id ? updated : q)));
-      setSelectedQuote(updated);
-      toast.success(`Quote ${updated.quoteNumber} converted. Load ${loadId} is now in dispatch.`);
-    }, 1500);
+    }
   };
 
   const grossMargin = selectedQuote?.quotedAmount && selectedQuote?.estimatedCarrierCost
@@ -191,13 +142,9 @@ const QuoteRequestsPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Quote Requests</h1>
-          <p className="text-sm text-[#B88989]/70 mt-0.5">Review, quote, and convert shipper requests to loads · sample data</p>
+          <p className="text-sm text-[#B88989]/70 mt-0.5">Review, quote, and convert shipper requests to loads</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-infamous-card border border-infamous-border rounded-xl px-3 py-2">
-            <Activity size={14} className="text-[#B88989]/70" />
-            <span className="text-xs text-[#B88989]/70">Demo data</span>
-          </div>
           <button className="btn-primary flex items-center gap-2">
             <Plus size={16} /> New Quote
           </button>
@@ -389,21 +336,57 @@ const QuoteRequestsPage: React.FC = () => {
               {/* Actions */}
               <div className="border-t border-infamous-border pt-4 space-y-2">
                 {selectedQuote.status === 'NEW' && (
-                  <button className="w-full btn-primary flex items-center justify-center gap-2">
+                  <button className="w-full btn-primary flex items-center justify-center gap-2" onClick={async () => {
+                    try {
+                      await api.updateQuote(selectedQuote.id, { status: 'reviewing' });
+                      toast.success('Quote review started');
+                      setSelectedQuote(null);
+                      await fetchQuotes();
+                    } catch (err) {
+                      toast.error('Failed to start review');
+                    }
+                  }}>
                     <Eye size={15} /> Start Review
                   </button>
                 )}
                 {selectedQuote.status === 'REVIEWING' && (
-                  <button className="w-full btn-primary flex items-center justify-center gap-2">
+                  <button className="w-full btn-primary flex items-center justify-center gap-2" onClick={async () => {
+                    try {
+                      await api.updateQuote(selectedQuote.id, { status: 'quoted' });
+                      toast.success('Quote submitted');
+                      setSelectedQuote(null);
+                      await fetchQuotes();
+                    } catch (err) {
+                      toast.error('Failed to submit quote');
+                    }
+                  }}>
                     <DollarSign size={15} /> Submit Quote
                   </button>
                 )}
                 {selectedQuote.status === 'QUOTED' && (
                   <>
-                    <button className="w-full btn-primary flex items-center justify-center gap-2">
+                    <button className="w-full btn-primary flex items-center justify-center gap-2" onClick={async () => {
+                      try {
+                        await api.updateQuote(selectedQuote.id, { status: 'approved' });
+                        toast.success('Quote approved');
+                        setSelectedQuote(null);
+                        await fetchQuotes();
+                      } catch (err) {
+                        toast.error('Failed to approve quote');
+                      }
+                    }}>
                       <CheckCircle size={15} /> Approve Quote
                     </button>
-                    <button className="w-full btn-secondary flex items-center justify-center gap-2 text-red-400">
+                    <button className="w-full btn-secondary flex items-center justify-center gap-2 text-red-400" onClick={async () => {
+                      try {
+                        await api.updateQuote(selectedQuote.id, { status: 'rejected' });
+                        toast.success('Quote rejected');
+                        setSelectedQuote(null);
+                        await fetchQuotes();
+                      } catch (err) {
+                        toast.error('Failed to reject quote');
+                      }
+                    }}>
                       <XCircle size={15} /> Reject
                     </button>
                   </>

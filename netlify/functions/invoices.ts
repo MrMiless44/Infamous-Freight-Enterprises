@@ -189,9 +189,17 @@ export default async (req: Request) => {
     if (req.method === 'PATCH') return updateInvoice(req, invoiceId);
   }
 
+  const checkoutId = extractParam(path, /^\/api\/invoices\/([^/]+)\/checkout-session$/);
+  if (checkoutId && req.method === 'POST') {
+    return json(301, {
+      redirect: '/api/payments/checkout',
+      message: 'Use POST /api/payments/checkout with { invoiceId } instead.',
+    });
+  }
+
   return json(405, { error: 'method_not_allowed' });
 };
 
 export const config: Config = {
-  path: ['/api/invoices', '/api/invoices/:id'],
+  path: ['/api/invoices', '/api/invoices/:id', '/api/invoices/:id/checkout-session'],
 };

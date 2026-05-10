@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -18,116 +19,137 @@ import {
   XCircle,
 } from 'lucide-react';
 import { ShipmentRouteMap } from '@/components/ShipmentRouteMap';
+import api from '@/api-client/client';
 
-const timelineSteps = [
-  { key: 'quote_created', label: 'Quote Created', date: 'Apr 25, 2026 · 9:15 AM' },
-  { key: 'shipment_booked', label: 'Shipment Booked', date: 'Apr 26, 2026 · 11:00 AM' },
-  { key: 'driver_assigned', label: 'Driver Assigned', date: 'Apr 27, 2026 · 3:30 PM' },
-  { key: 'pickup_completed', label: 'Pickup Completed', date: 'Apr 29, 2026 · 10:15 AM' },
-  { key: 'in_transit', label: 'In Transit', date: 'Apr 29, 2026 · 10:30 AM' },
-  { key: 'arrived_destination', label: 'Arrived at Destination', date: null },
-  { key: 'delivered', label: 'Delivered', date: null },
-  { key: 'pod_uploaded', label: 'Proof of Delivery Uploaded', date: null },
-  { key: 'invoice_ready', label: 'Invoice Ready', date: null },
-];
+interface TimelineStep {
+  key: string;
+  label: string;
+  date: string | null;
+}
 
-const shipmentData = {
-  'IF-20491': {
-    trackingNumber: 'IF-20491',
-    status: 'In Transit',
-    customer: 'Summit Retail Group',
-    origin: 'Chicago, IL',
-    originAddress: '1200 S Ashland Ave, Chicago, IL 60608',
-    destination: 'Dallas, TX',
-    destinationAddress: '4500 S Lamar St, Dallas, TX 75215',
-    pickupDate: 'Apr 29, 2026 · 8:00 AM',
-    deliveryDate: 'Apr 30, 2026 · 6:30 PM',
-    eta: 'Apr 30, 2026 · 6:30 PM',
-    equipment: '53 ft Dry Van',
-    weight: '24,000 lb',
-    commodity: 'Palletized retail goods',
-    rate: '$3,200',
-    miles: '925 mi',
-    carrier: 'Midwest Linehaul Co.',
-    carrierMc: 'MC-892104',
-    driver: 'James R.',
-    driverPhone: '+1 (312) 555-0187',
-    currentStep: 4,
-    invoiceId: null as string | null,
-    invoiceStatus: 'Pending delivery',
-    documents: [
-      { name: 'Bill of Lading', type: 'BOL', date: 'Apr 29, 2026' },
-      { name: 'Rate Confirmation', type: 'Rate Con', date: 'Apr 26, 2026' },
-    ],
-    messages: [
-      { from: 'Dispatch', text: 'Driver checked in. Running on schedule.', time: '2:15 PM' },
-      { from: 'Driver', text: 'Past Oklahoma City. Traffic clear ahead.', time: '1:42 PM' },
-    ],
-  },
-  'IF-20492': {
-    trackingNumber: 'IF-20492',
-    status: 'At Pickup',
-    customer: 'Blue Ridge Foods',
-    origin: 'Atlanta, GA',
-    originAddress: '600 Mitchell St SW, Atlanta, GA 30314',
-    destination: 'Charlotte, NC',
-    destinationAddress: '1000 W Trade St, Charlotte, NC 28202',
-    pickupDate: 'Apr 29, 2026 · 12:00 PM',
-    deliveryDate: 'Apr 29, 2026 · 4:00 PM',
-    eta: 'Apr 29, 2026 · 4:00 PM',
-    equipment: 'Reefer',
-    weight: '18,500 lb',
-    commodity: 'Refrigerated food product',
-    rate: '$1,850',
-    miles: '245 mi',
-    carrier: 'Road Runner Inc.',
-    carrierMc: 'MC-445210',
-    driver: 'David K.',
-    driverPhone: '+1 (404) 555-0239',
-    currentStep: 3,
-    invoiceId: null as string | null,
-    invoiceStatus: 'Pending delivery',
-    documents: [
-      { name: 'Bill of Lading', type: 'BOL', date: 'Apr 29, 2026' },
-      { name: 'Rate Confirmation', type: 'Rate Con', date: 'Apr 27, 2026' },
-    ],
-    messages: [
-      { from: 'Dispatch', text: 'Waiting on dock assignment. Temp confirmed at 34°F.', time: '11:45 AM' },
-    ],
-  },
-  'IF-20493': {
-    trackingNumber: 'IF-20493',
-    status: 'Exception',
-    customer: 'Desert Supply Co.',
-    origin: 'Houston, TX',
-    originAddress: '3100 Fannin St, Houston, TX 77004',
-    destination: 'Phoenix, AZ',
-    destinationAddress: '201 E Washington St, Phoenix, AZ 85004',
-    pickupDate: 'Apr 28, 2026 · 6:00 AM',
-    deliveryDate: 'Apr 30, 2026 · 2:00 PM',
-    eta: 'Delayed — recovery plan pending',
-    equipment: 'Flatbed',
-    weight: '42,000 lb',
-    commodity: 'Building materials',
-    rate: '$4,100',
-    miles: '1,180 mi',
-    carrier: 'Desert Haul Co.',
-    carrierMc: 'MC-671392',
-    driver: 'Carlos M.',
-    driverPhone: '+1 (713) 555-0441',
-    currentStep: 4,
-    invoiceId: null as string | null,
-    invoiceStatus: 'Pending delivery',
-    documents: [
-      { name: 'Bill of Lading', type: 'BOL', date: 'Apr 28, 2026' },
-      { name: 'Rate Confirmation', type: 'Rate Con', date: 'Apr 27, 2026' },
-    ],
-    messages: [
-      { from: 'Dispatch', text: 'Weather delay near El Paso. Confirming revised ETA.', time: '9:30 AM' },
-      { from: 'Driver', text: 'Pulled over at truck stop. Roads closed ahead.', time: '8:50 AM' },
-    ],
-  },
-};
+interface ShipmentDoc {
+  name: string;
+  type: string;
+  date: string;
+}
+
+interface ShipmentMessage {
+  from: string;
+  text: string;
+  time: string;
+}
+
+interface Shipment {
+  trackingNumber: string;
+  status: string;
+  customer: string;
+  origin: string;
+  originAddress: string;
+  destination: string;
+  destinationAddress: string;
+  pickupDate: string;
+  deliveryDate: string;
+  eta: string;
+  equipment: string;
+  weight: string;
+  commodity: string;
+  rate: string;
+  miles: string;
+  carrier: string;
+  carrierMc: string;
+  driver: string;
+  driverPhone: string;
+  currentStep: number;
+  invoiceId: string | null;
+  invoiceStatus: string;
+  documents: ShipmentDoc[];
+  messages: ShipmentMessage[];
+}
+
+function formatStatus(status: string): string {
+  return status
+    .split('_')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
+function formatDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }) + ' · ' + d.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+}
+
+function formatWeight(lbs: number | null | undefined): string {
+  if (!lbs) return '—';
+  return lbs.toLocaleString() + ' lb';
+}
+
+function formatRate(cents: number | null | undefined): string {
+  if (!cents && cents !== 0) return '—';
+  return '$' + cents.toLocaleString();
+}
+
+function buildTimelineSteps(events: Array<{ status: string; createdAt: string }>): { steps: TimelineStep[]; currentStep: number } {
+  const statusOrder = [
+    'quote_created',
+    'shipment_booked',
+    'driver_assigned',
+    'pickup_completed',
+    'in_transit',
+    'arrived_destination',
+    'delivered',
+    'pod_uploaded',
+    'invoice_ready',
+  ];
+
+  const labelMap: Record<string, string> = {
+    quote_created: 'Quote Created',
+    shipment_booked: 'Shipment Booked',
+    booked: 'Shipment Booked',
+    driver_assigned: 'Driver Assigned',
+    pickup_completed: 'Pickup Completed',
+    at_pickup: 'Pickup Completed',
+    in_transit: 'In Transit',
+    arrived_destination: 'Arrived at Destination',
+    delivered: 'Delivered',
+    pod_uploaded: 'Proof of Delivery Uploaded',
+    invoice_ready: 'Invoice Ready',
+  };
+
+  const eventMap = new Map<string, string>();
+  for (const ev of events) {
+    const key = ev.status.toLowerCase();
+    if (!eventMap.has(key)) {
+      eventMap.set(key, ev.createdAt);
+    }
+    const mapped = key === 'booked' ? 'shipment_booked' : key === 'at_pickup' ? 'pickup_completed' : null;
+    if (mapped && !eventMap.has(mapped)) {
+      eventMap.set(mapped, ev.createdAt);
+    }
+  }
+
+  let currentStep = -1;
+  const steps: TimelineStep[] = statusOrder.map((key, i) => {
+    const dateStr = eventMap.get(key) || null;
+    if (dateStr) currentStep = i;
+    return {
+      key,
+      label: labelMap[key] || formatStatus(key),
+      date: dateStr ? formatDate(dateStr) : null,
+    };
+  });
+
+  return { steps, currentStep };
+}
 
 const statusColorMap: Record<string, string> = {
   'In Transit': 'badge-blue',
@@ -141,7 +163,110 @@ const statusColorMap: Record<string, string> = {
 
 const ShipmentDetailPage: React.FC = () => {
   const { trackingId } = useParams<{ trackingId: string }>();
-  const shipment = shipmentData[trackingId as keyof typeof shipmentData];
+  const [shipment, setShipment] = useState<Shipment | null>(null);
+  const [timelineSteps, setTimelineSteps] = useState<TimelineStep[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!trackingId) {
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function fetchData() {
+      try {
+        const loadsRes = await api.getLoads();
+        const loads = loadsRes.loads || loadsRes || [];
+        const load = (Array.isArray(loads) ? loads : []).find(
+          (l: Record<string, unknown>) => l.trackingNumber === trackingId
+        );
+
+        if (!load) {
+          if (!cancelled) {
+            setShipment(null);
+            setLoading(false);
+          }
+          return;
+        }
+
+        const loadId = load.id;
+
+        const [timelineRes, docsRes] = await Promise.all([
+          api.getLoadTimeline(loadId).catch(() => ({ events: [] })),
+          api.getLoadDocuments(loadId).catch(() => ({ documents: [] })),
+        ]);
+
+        const events = timelineRes.events || [];
+        const documents = (docsRes.documents || []).map((doc: Record<string, unknown>) => ({
+          name: (doc.fileName as string) || (doc.type as string) || 'Document',
+          type: (doc.type as string) || '—',
+          date: formatDate(doc.createdAt as string),
+        }));
+
+        const { steps, currentStep } = buildTimelineSteps(events);
+
+        const displayStatus = formatStatus(load.status || '');
+
+        const mapped: Shipment = {
+          trackingNumber: load.trackingNumber || trackingId,
+          status: displayStatus,
+          customer: load.shipperName || '—',
+          origin: load.origin || '—',
+          originAddress: load.origin || '—',
+          destination: load.destination || '—',
+          destinationAddress: load.destination || '—',
+          pickupDate: formatDate(load.pickupAt),
+          deliveryDate: formatDate(load.deliveryAt),
+          eta: formatDate(load.deliveryAt) || '—',
+          equipment: load.equipment || '—',
+          weight: formatWeight(load.weightLbs),
+          commodity: load.commodity || '—',
+          rate: formatRate(load.rate),
+          miles: load.miles ? `${load.miles.toLocaleString()} mi` : '—',
+          carrier: '—',
+          carrierMc: '',
+          driver: '—',
+          driverPhone: '',
+          currentStep,
+          invoiceId: null,
+          invoiceStatus: 'Pending delivery',
+          documents,
+          messages: [],
+        };
+
+        if (!cancelled) {
+          setShipment(mapped);
+          setTimelineSteps(steps);
+          setLoading(false);
+        }
+      } catch {
+        if (!cancelled) {
+          setShipment(null);
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [trackingId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-infamous-dark text-[#F5E8E8] flex items-center justify-center p-6">
+        <div className="text-center">
+          <RefreshCw size={48} className="mx-auto text-infamous-muted mb-4 animate-spin" />
+          <h2 className="text-xl font-bold mb-2">Loading Shipment</h2>
+          <p className="text-infamous-muted">Fetching details for {trackingId}...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!shipment) {
     return (
