@@ -109,8 +109,9 @@ jobs:
           failed=0
           for check in "${checks[@]}"; do
             IFS='|' read -r name url expected <<< "$check"
+            body_file=$(mktemp)
             output=$(curl --silent --show-error --location --max-time 20 --max-redirs 5 \
-              --output /dev/null \
+              --output "$body_file" \
               --write-out '%{http_code}|%{url_effective}' \
               "$url" || true)
             actual="${output%%|*}"
@@ -119,7 +120,12 @@ jobs:
             if [[ "$actual" != "$expected" ]]; then
               result="FAIL"
               failed=1
+              echo "::error::SMOKE FAIL [${name}] expected=${expected} actual=${actual} final_url=${final_url}"
+              echo "--- response body snippet (first 20 lines) ---"
+              head -20 "$body_file" || true
+              echo "--- end snippet ---"
             fi
+            rm -f "$body_file"
             echo "| ${name} | ${expected} | ${actual} | \`${final_url}\` | ${result} |" >> "$GITHUB_STEP_SUMMARY"
           done
 
