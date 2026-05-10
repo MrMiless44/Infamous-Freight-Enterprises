@@ -80,13 +80,37 @@ install_netlify() {
     return
   fi
 
-  local netlify_prefix
+  local netlify_prefix install_cmd
   netlify_prefix="${REPO_ROOT}/.tools/netlify-cli"
-  npm --prefix "${netlify_prefix}" install --no-save netlify-cli@latest >/dev/null
-  if [[ -x "${netlify_prefix}/node_modules/.bin/netlify" ]]; then
-    cp "${netlify_prefix}/node_modules/.bin/netlify" "${TOOLS_DIR}/netlify"
-    chmod +x "${TOOLS_DIR}/netlify"
+
+  install_cmd=(npm --prefix "${netlify_prefix}" install --no-save netlify-cli@latest)
+  if command -v timeout >/dev/null 2>&1; then
+    if timeout 180 "${install_cmd[@]}" >/dev/null; then
+      if [[ -x "${netlify_prefix}/node_modules/.bin/netlify" ]]; then
+        cp "${netlify_prefix}/node_modules/.bin/netlify" "${TOOLS_DIR}/netlify"
+        chmod +x "${TOOLS_DIR}/netlify"
+        return
+      fi
+    fi
+  else
+    if "${install_cmd[@]}" >/dev/null; then
+      if [[ -x "${netlify_prefix}/node_modules/.bin/netlify" ]]; then
+        cp "${netlify_prefix}/node_modules/.bin/netlify" "${TOOLS_DIR}/netlify"
+        chmod +x "${TOOLS_DIR}/netlify"
+        return
+      fi
+    fi
   fi
+
+  cat > "${TOOLS_DIR}/netlify" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ -x "$(dirname "$0")/../netlify-cli/node_modules/.bin/netlify" ]]; then
+  exec "$(dirname "$0")/../netlify-cli/node_modules/.bin/netlify" "$@"
+fi
+exec npx --yes netlify-cli@latest "$@"
+EOF
+  chmod +x "${TOOLS_DIR}/netlify"
 }
 
 install_jq() {

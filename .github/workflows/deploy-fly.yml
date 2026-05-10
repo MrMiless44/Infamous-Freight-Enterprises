@@ -86,3 +86,9 @@ jobs:
 
       - name: Deploy API to Fly.io
         run: flyctl deploy --remote-only --config fly.toml
+
+      - name: Post-deploy health check
+        if: ${{ vars.FLY_HEALTHCHECK_URL != '' }}
+        run: |
+          echo "Checking ${{ vars.FLY_HEALTHCHECK_URL }}"
+          curl --fail --show-error --silent --max-time 20 --retry 5 --retry-delay 5 "${{ vars.FLY_HEALTHCHECK_URL }}"

@@ -328,6 +328,11 @@ describe('configuration safety', () => {
         },
       });
 
+      const dataStore = dataStoreModule.createDataStore();
+      const listLoadsSpy = jest.spyOn(dataStore, 'listLoads').mockResolvedValue([]);
+      const subscriptionSpy = jest.spyOn(dataStore, 'getCarrierSubscriptionStatus').mockResolvedValue('active');
+      const createDataStoreSpy = jest.spyOn(dataStoreModule, 'createDataStore').mockReturnValue(dataStore);
+
       const response = await request(createApp())
         .get('/api/loads')
         .set('authorization', `Bearer ${token}`)
@@ -336,6 +341,10 @@ describe('configuration safety', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.data).toEqual([]);
+
+      listLoadsSpy.mockRestore();
+      subscriptionSpy.mockRestore();
+      createDataStoreSpy.mockRestore();
     } finally {
       process.env.NODE_ENV = previousNodeEnv;
 
