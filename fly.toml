@@ -1,4 +1,4 @@
-app = "infamous-freight-api"
+app = "infamous-freight"
 primary_region = "dfw"
 
 [build]
