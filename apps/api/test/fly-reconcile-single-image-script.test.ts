@@ -15,6 +15,9 @@ describe('fly reconcile single image script', () => {
     const content = fs.readFileSync(scriptPath, 'utf8');
 
     expect(content).toContain('PRUNE_OLD_IMAGES="${PRUNE_OLD_IMAGES:-false}"');
+    expect(content).toContain('refusing to prune $prune_count machines');
+    expect(content).toContain('FORCE_PRUNE="${FORCE_PRUNE:-false}"');
+    expect(content).toContain('PRUNE_MAX_COUNT="${PRUNE_MAX_COUNT:-3}"');
     expect(content).toContain('flyctl machine list -a "$APP_NAME" --json');
     expect(content).toContain('uniqueImageCount');
     expect(content).toContain('WARN: $APP_NAME currently has $unique_image_count deployed images across machines.');

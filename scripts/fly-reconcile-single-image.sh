@@ -4,6 +4,8 @@ set -euo pipefail
 APP_NAME="${APP_NAME:-infamous-freight}"
 KEEP_IMAGE="${KEEP_IMAGE:-}"
 PRUNE_OLD_IMAGES="${PRUNE_OLD_IMAGES:-false}"
+PRUNE_MAX_COUNT="${PRUNE_MAX_COUNT:-3}"
+FORCE_PRUNE="${FORCE_PRUNE:-false}"
 
 require_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
@@ -92,6 +94,27 @@ fi
 if [[ "$PRUNE_OLD_IMAGES" != "true" ]]; then
   echo "No changes made. To prune old-image machines, rerun with:"
   echo "PRUNE_OLD_IMAGES=true APP_NAME=$APP_NAME KEEP_IMAGE=$target_image bash scripts/fly-reconcile-single-image.sh"
+  exit 1
+fi
+
+prune_count="$(printf '%s' "$summary" | KEEP_IMAGE="$target_image" node -e '
+let data="";
+process.stdin.on("data", c => (data += c));
+process.stdin.on("end", () => {
+  const parsed = JSON.parse(data);
+  const keep = process.env.KEEP_IMAGE;
+  let count = 0;
+  for (const group of parsed.groups) {
+    if (group.image === keep) continue;
+    count += group.ids.length;
+  }
+  console.log(count);
+});
+')"
+
+if [[ "$FORCE_PRUNE" != "true" && "$prune_count" -gt "$PRUNE_MAX_COUNT" ]]; then
+  echo "Error: refusing to prune $prune_count machines (PRUNE_MAX_COUNT=$PRUNE_MAX_COUNT)." >&2
+  echo "Set FORCE_PRUNE=true after verifying machine/image mapping to continue." >&2
   exit 1
 fi
 
