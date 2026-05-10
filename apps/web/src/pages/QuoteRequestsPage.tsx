@@ -134,22 +134,22 @@ const mockQuotes: QuoteRequest[] = [
 ];
 
 const statusConfig: Record<QuoteStatus, { label: string; badge: string; icon: React.ReactNode }> = {
-  NEW:       { label: 'New',       badge: 'badge-blue',   icon: <ClipboardList size={11} /> },
-  REVIEWING: { label: 'Reviewing', badge: 'badge-yellow', icon: <Eye size={11} /> },
-  QUOTED:    { label: 'Quoted',    badge: 'badge-orange', icon: <DollarSign size={11} /> },
-  APPROVED:  { label: 'Approved',  badge: 'badge-green',  icon: <CheckCircle size={11} /> },
-  REJECTED:  { label: 'Rejected',  badge: 'badge-red',    icon: <XCircle size={11} /> },
-  CONVERTED: { label: 'Converted', badge: 'badge-green',  icon: <RefreshCw size={11} /> },
+  NEW:       { label: 'Quote Pending',  badge: 'badge-blue',   icon: <ClipboardList size={11} /> },
+  REVIEWING: { label: 'Rate Pending',   badge: 'badge-yellow', icon: <Eye size={11} /> },
+  QUOTED:    { label: 'Rate Provided',  badge: 'badge-orange', icon: <DollarSign size={11} /> },
+  APPROVED:  { label: 'Booked',         badge: 'badge-green',  icon: <CheckCircle size={11} /> },
+  REJECTED:  { label: 'Declined',       badge: 'badge-red',    icon: <XCircle size={11} /> },
+  CONVERTED: { label: 'Shipment Created', badge: 'badge-green',  icon: <RefreshCw size={11} /> },
 };
 
 const filterTabs: { key: 'all' | QuoteStatus; label: string }[] = [
   { key: 'all', label: 'All' },
-  { key: 'NEW', label: 'New' },
-  { key: 'REVIEWING', label: 'Reviewing' },
-  { key: 'QUOTED', label: 'Quoted' },
-  { key: 'APPROVED', label: 'Approved' },
-  { key: 'REJECTED', label: 'Rejected' },
-  { key: 'CONVERTED', label: 'Converted' },
+  { key: 'NEW', label: 'Quote Pending' },
+  { key: 'REVIEWING', label: 'Rate Pending' },
+  { key: 'QUOTED', label: 'Rate Provided' },
+  { key: 'APPROVED', label: 'Booked' },
+  { key: 'REJECTED', label: 'Declined' },
+  { key: 'CONVERTED', label: 'Shipment Created' },
 ];
 
 const QuoteRequestsPage: React.FC = () => {

@@ -11,12 +11,14 @@ import {
   FileText,
   MapPin,
   MessageSquare,
+  Navigation,
   Package,
   RefreshCw,
   Search,
   Truck,
 } from 'lucide-react';
 import { demoQuotes, demoShipments } from '@/data/mvpFreightData';
+import { ShipmentRouteMap } from '@/components/ShipmentRouteMap';
 
 const statusColorMap: Record<string, string> = {
   'In Transit': 'badge-blue',
@@ -56,7 +58,7 @@ const recentDocuments = [
 
 const CustomerPortalPage: React.FC = () => {
   const [trackingInput, setTrackingInput] = useState('');
-
+  const [selectedShipment, setSelectedShipment] = useState(demoShipments[0]);
   return (
     <div className="min-h-screen bg-infamous-dark px-5 py-8 text-[#F5E8E8] lg:px-6">
       <div className="mx-auto max-w-7xl">
@@ -139,13 +141,20 @@ const CustomerPortalPage: React.FC = () => {
               </div>
               <div className="divide-y divide-infamous-border">
                 {demoShipments.map((shipment) => (
-                  <div
+                  <button
+                    type="button"
                     key={shipment.trackingNumber}
-                    className="flex items-center justify-between gap-4 p-5 transition hover:bg-infamous-panel/50"
+                    onClick={() => setSelectedShipment(shipment)}
+                    className={`w-full flex items-center justify-between gap-4 p-5 transition text-left ${
+                      selectedShipment?.trackingNumber === shipment.trackingNumber
+                        ? 'bg-infamous-red/5 border-l-2 border-infamous-red'
+                        : 'hover:bg-infamous-panel/50'
+                    }`}
                   >
                     <Link
                       to={`/shipment/${shipment.trackingNumber}`}
                       className="min-w-0 flex-1"
+                      onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex items-center gap-3">
                         <span className="font-mono text-xs text-infamous-muted">{shipment.trackingNumber}</span>
@@ -169,10 +178,32 @@ const CustomerPortalPage: React.FC = () => {
                       )}
                       <ChevronRight size={18} className="text-infamous-muted" />
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
+
+            {/* Route Map */}
+            {selectedShipment && (
+              <div className="rounded-xl border border-infamous-border bg-infamous-card overflow-hidden">
+                <div className="flex items-center justify-between border-b border-infamous-border px-5 py-3">
+                  <h2 className="text-sm font-bold flex items-center gap-2">
+                    <Navigation size={14} className="text-infamous-red-light" /> Live Route
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs text-infamous-muted">{selectedShipment.trackingNumber}</span>
+                    <span className="text-xs text-[#B88989]">{selectedShipment.route}</span>
+                  </div>
+                </div>
+                <div className="h-[280px]">
+                  <ShipmentRouteMap
+                    origin={selectedShipment.origin}
+                    destination={selectedShipment.destination}
+                    status={selectedShipment.status.toLowerCase().replace(/\s+/g, '_')}
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Shipment Timeline Preview */}
             <div className="rounded-xl border border-infamous-border bg-infamous-card p-5">

@@ -42,15 +42,15 @@ const mockLoads: DispatchLoad[] = [
 ];
 
 const statusConfig: Record<DispatchStatus, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
-  pending:     { label: 'Pending',     color: 'text-[#B88989]',            bg: 'bg-gray-500/10 border-gray-500/20',              icon: <Clock size={12} /> },
-  assigned:    { label: 'Assigned',    color: 'text-blue-400',            bg: 'bg-blue-500/10 border-blue-500/20',              icon: <Users size={12} /> },
-  dispatched:  { label: 'Dispatched',  color: 'text-infamous-orange',     bg: 'bg-infamous-orange/10 border-infamous-orange/20', icon: <Zap size={12} /> },
-  at_pickup:   { label: 'At Pickup',   color: 'text-yellow-400',          bg: 'bg-yellow-500/10 border-yellow-500/20',          icon: <Package size={12} /> },
-  loaded:      { label: 'Loaded',      color: 'text-cyan-400',            bg: 'bg-cyan-500/10 border-cyan-500/20',              icon: <Truck size={12} /> },
-  in_transit:  { label: 'In Transit',  color: 'text-purple-400',          bg: 'bg-purple-500/10 border-purple-500/20',          icon: <ArrowRight size={12} /> },
-  at_delivery: { label: 'At Delivery', color: 'text-indigo-400',          bg: 'bg-indigo-500/10 border-indigo-500/20',          icon: <MapPin size={12} /> },  delivered:   { label: 'Delivered',   color: 'text-green-400',           bg: 'bg-green-500/10 border-green-500/20',            icon: <CheckCircle size={12} /> },
-  pod_received:{ label: 'POD Received',color: 'text-[#36D399]',         bg: 'bg-[#36D399]/10 border-[#36D399]/20',        icon: <FileCheck size={12} /> },
-  exception:   { label: 'Exception',   color: 'text-red-400',             bg: 'bg-red-500/10 border-red-500/20',                icon: <AlertTriangle size={12} /> },
+  pending:     { label: 'Quote Pending',     color: 'text-[#B88989]',            bg: 'bg-gray-500/10 border-gray-500/20',              icon: <Clock size={12} /> },
+  assigned:    { label: 'Carrier Assigned',  color: 'text-blue-400',            bg: 'bg-blue-500/10 border-blue-500/20',              icon: <Users size={12} /> },
+  dispatched:  { label: 'Pickup Scheduled',  color: 'text-infamous-orange',     bg: 'bg-infamous-orange/10 border-infamous-orange/20', icon: <Zap size={12} /> },
+  at_pickup:   { label: 'At Pickup',         color: 'text-yellow-400',          bg: 'bg-yellow-500/10 border-yellow-500/20',          icon: <Package size={12} /> },
+  loaded:      { label: 'Picked Up',         color: 'text-cyan-400',            bg: 'bg-cyan-500/10 border-cyan-500/20',              icon: <Truck size={12} /> },
+  in_transit:  { label: 'In Transit',        color: 'text-purple-400',          bg: 'bg-purple-500/10 border-purple-500/20',          icon: <ArrowRight size={12} /> },
+  at_delivery: { label: 'Out for Delivery',  color: 'text-indigo-400',          bg: 'bg-indigo-500/10 border-indigo-500/20',          icon: <MapPin size={12} /> },  delivered:   { label: 'Delivered',         color: 'text-green-400',           bg: 'bg-green-500/10 border-green-500/20',            icon: <CheckCircle size={12} /> },
+  pod_received:{ label: 'POD Uploaded',      color: 'text-[#36D399]',         bg: 'bg-[#36D399]/10 border-[#36D399]/20',        icon: <FileCheck size={12} /> },
+  exception:   { label: 'Delayed',           color: 'text-red-400',             bg: 'bg-red-500/10 border-red-500/20',                icon: <AlertTriangle size={12} /> },
 };
 
 const statusColumns: DispatchStatus[] = [

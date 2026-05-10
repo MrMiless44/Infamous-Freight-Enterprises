@@ -1,13 +1,15 @@
+import { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { ArrowRight, Infinity } from 'lucide-react';
+import { ArrowRight, Infinity, Menu, X } from 'lucide-react';
 import { BRAND } from '@/lib/brand';
 
 const navLinks = [
   { label: 'Home', href: '/' },
+  { label: 'Services', href: '/services' },
   { label: 'Shippers', href: '/customer-portal' },
   { label: 'Carriers', href: '/carrier-portal' },
   { label: 'Tracking', href: '/track-shipment' },
-  { label: 'Pricing', href: '/pricing' },
+  { label: 'About', href: '/about' },
 ];
 
 const footerGroups = [
@@ -24,9 +26,9 @@ const footerGroups = [
     title: 'Services',
     links: [
       { label: 'All Services', href: '/services' },
-      { label: 'Box Truck', href: '/services/box-truck' },
-      { label: 'Cargo Van', href: '/services/cargo-van' },
-      { label: 'Sprinter Van', href: '/services/sprinter-van' },
+      { label: 'Full Truckload', href: '/services/full-truckload' },
+      { label: 'Flatbed', href: '/services/flatbed' },
+      { label: 'Expedited', href: '/services/expedited' },
     ],
   },
   {
@@ -51,6 +53,7 @@ const footerGroups = [
 
 const PublicLayout: React.FC = () => {
   const { pathname } = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-infamous-dark text-[#F5E8E8]">
@@ -67,6 +70,7 @@ const PublicLayout: React.FC = () => {
           <nav className="hidden items-center gap-1 lg:flex" aria-label="Public site navigation">
             {navLinks.map((item) => {
               const active = pathname === item.href
+                || (item.href === '/services' && pathname.startsWith('/services'))
                 || (item.href === '/customer-portal' && pathname.startsWith('/customer'))
                 || (item.href === '/carrier-portal' && pathname.startsWith('/carrier'));
               return (
@@ -88,26 +92,55 @@ const PublicLayout: React.FC = () => {
           <div className="flex items-center gap-3">
             <Link
               to="/login"
-              className="rounded-lg px-4 py-2 text-sm font-semibold text-[#B88989] transition hover:text-[#F5E8E8]"
+              className="hidden sm:inline-flex rounded-lg px-4 py-2 text-sm font-semibold text-[#B88989] transition hover:text-[#F5E8E8]"
             >
               Login
             </Link>
             <Link
               to="/request-quote"
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-infamous-red to-infamous-red-dark px-5 py-2 text-sm font-bold text-[#F5E8E8] border border-infamous-red-light/40 transition hover:shadow-[0_0_28px_rgba(255,26,26,0.6)]"
-              style={{ boxShadow: '0 0 18px rgba(255, 26, 26, 0.45)' }}
+              className="inline-flex items-center gap-2 btn-primary text-sm glow-high"
             >
-              Get Started <ArrowRight size={15} />
+              Get a Quote <ArrowRight size={15} />
             </Link>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2 rounded-lg text-[#B88989] hover:text-[#F5E8E8] hover:bg-white/5 transition"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
           </div>
         </div>
+
+        {mobileMenuOpen && (
+          <nav className="lg:hidden border-t border-infamous-border bg-infamous-darker px-5 py-4 space-y-1" aria-label="Mobile navigation">
+            {navLinks.map((item) => (
+              <Link
+                key={item.href}
+                to={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className="block rounded-lg px-3 py-2.5 text-sm font-medium text-[#B88989] transition hover:bg-white/5 hover:text-[#F5E8E8]"
+              >
+                {item.label}
+              </Link>
+            ))}
+            <Link
+              to="/login"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block rounded-lg px-3 py-2.5 text-sm font-medium text-[#B88989] transition hover:text-[#F5E8E8]"
+            >
+              Login
+            </Link>
+          </nav>
+        )}
       </header>
 
       <main id="main-content">
         <Outlet />
       </main>
 
-      <footer className="border-t border-infamous-border bg-infamous-darker px-5 py-12 text-sm text-[#B88989] lg:px-6">
+      <footer className="border-t border-infamous-border bg-infamous-darker px-5 py-14 text-sm text-[#B88989] lg:px-6">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.2fr_2fr]">
           <div>
             <Link to="/" className="flex items-center gap-3 text-[#F5E8E8]" aria-label="Infamous Freight home">
