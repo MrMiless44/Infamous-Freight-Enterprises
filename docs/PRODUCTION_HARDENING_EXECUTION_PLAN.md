@@ -16,6 +16,12 @@ Required outcome:
 - Resolve role from server-side source.
 - Add tests for role escalation and cross-tenant access.
 
+Current repository status:
+
+- Production Express routes default to `AUTH_MODE=trusted` and do not silently accept caller-controlled tenant or role headers.
+- `AUTH_MODE=header` remains available for controlled local/test compatibility and fails fast in production unless `ALLOW_UNSAFE_HEADER_AUTH=true` is deliberately set.
+- The remaining launch work is to connect a concrete auth provider that verifies bearer tokens or sessions and populates the trusted authenticated request context before protected routes run.
+
 Execution doc: `docs/AUTHORIZATION_MIGRATION_PLAN.md`
 
 Tracking issue: #1616

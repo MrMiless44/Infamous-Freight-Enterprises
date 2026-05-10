@@ -1,32 +1,84 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" role="img" aria-labelledby="title desc">
-  <title id="title">Infamous Freight Landing Page Mock</title>
-  <desc id="desc">A branded landing page style mock for the README screenshots section.</desc>
-  <rect width="1440" height="900" fill="#0b0d12"/>
-  <rect x="32" y="32" width="1376" height="836" rx="28" fill="#111827" stroke="#334155"/>
-  <text x="96" y="112" fill="#ef4444" font-size="28" font-weight="800" font-family="Inter, Arial, sans-serif">INFAMOUS FREIGHT</text>
-  <text x="96" y="206" fill="#f8fafc" font-size="68" font-weight="800" font-family="Inter, Arial, sans-serif">Freight operations</text>
-  <text x="96" y="278" fill="#f8fafc" font-size="68" font-weight="800" font-family="Inter, Arial, sans-serif">without the chaos.</text>
-  <text x="96" y="336" fill="#cbd5e1" font-size="28" font-family="Inter, Arial, sans-serif">Dispatch automation, shipment visibility, compliance tooling, and</text>
-  <text x="96" y="374" fill="#cbd5e1" font-size="28" font-family="Inter, Arial, sans-serif">driver operations in one platform built for freight teams.</text>
-  <rect x="96" y="430" width="220" height="54" rx="14" fill="#ef4444"/>
-  <text x="146" y="465" fill="#ffffff" font-size="22" font-weight="700" font-family="Inter, Arial, sans-serif">Book a Demo</text>
-  <rect x="336" y="430" width="220" height="54" rx="14" fill="#172033" stroke="#475569"/>
-  <text x="395" y="465" fill="#f8fafc" font-size="22" font-weight="700" font-family="Inter, Arial, sans-serif">View Platform</text>
-  <rect x="782" y="126" width="530" height="562" rx="24" fill="#0b1220" stroke="#334155"/>
-  <text x="818" y="172" fill="#f8fafc" font-size="24" font-weight="700" font-family="Inter, Arial, sans-serif">Operations Dashboard</text>
-  <rect x="818" y="198" width="150" height="12" rx="6" fill="#ef4444"/>
-  <rect x="818" y="238" width="130" height="88" rx="16" fill="#172033"/>
-  <rect x="964" y="238" width="130" height="88" rx="16" fill="#172033"/>
-  <rect x="1110" y="238" width="166" height="88" rx="16" fill="#172033"/>
-  <rect x="818" y="356" width="458" height="138" rx="18" fill="#111827" stroke="#1f2937"/>
-  <polyline points="850,466 920,430 990,450 1060,386 1130,408 1200,356" fill="none" stroke="#ef4444" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-  <rect x="818" y="526" width="218" height="118" rx="18" fill="#111827" stroke="#1f2937"/>
-  <rect x="1058" y="526" width="218" height="118" rx="18" fill="#111827" stroke="#1f2937"/>
-  <text x="96" y="586" fill="#f8fafc" font-size="22" font-weight="700" font-family="Inter, Arial, sans-serif">Trusted workflow areas</text>
-  <rect x="96" y="620" width="170" height="84" rx="16" fill="#172033"/>
-  <rect x="286" y="620" width="170" height="84" rx="16" fill="#172033"/>
-  <rect x="476" y="620" width="170" height="84" rx="16" fill="#172033"/>
-  <text x="122" y="669" fill="#f8fafc" font-size="20" font-weight="700" font-family="Inter, Arial, sans-serif">Dispatch</text>
-  <text x="320" y="669" fill="#f8fafc" font-size="20" font-weight="700" font-family="Inter, Arial, sans-serif">Tracking</text>
-  <text x="515" y="669" fill="#f8fafc" font-size="20" font-weight="700" font-family="Inter, Arial, sans-serif">Compliance</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900"
+     role="img" aria-labelledby="title desc" focusable="false"
+     shape-rendering="geometricPrecision" text-rendering="optimizeLegibility">
+  <title id="title">Infamous Freight — landing page mock</title>
+  <desc id="desc">Branded landing page preview with hero copy, dual CTAs, an operations dashboard panel showing KPI tiles and a trend chart, and three workflow category tiles (Dispatch, Tracking, Compliance).</desc>
+
+  <defs>
+    <style>
+      .bg{fill:#0b0d12}.frame{fill:#111827;stroke:#334155;stroke-width:1}
+      .panel{fill:#0b1220;stroke:#334155;stroke-width:1}
+      .tile{fill:#172033}.card{fill:#111827;stroke:#1f2937;stroke-width:1}
+      .accent{fill:#ef4444}.text{fill:#f8fafc}.muted{fill:#cbd5e1}
+      .brand{fill:#ef4444;font:800 28px/1 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+      .h1{fill:#f8fafc;font:800 68px/1 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+      .lede{fill:#cbd5e1;font:400 28px/1 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+      .btn{fill:#ffffff;font:700 22px/1 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+      .h2{fill:#f8fafc;font:700 24px/1 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+      .h3{fill:#f8fafc;font:700 22px/1 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+      .tilelbl{fill:#f8fafc;font:700 20px/1 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+      .kpi{fill:#cbd5e1;font:600 14px/1 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+      .kpiv{fill:#f8fafc;font:800 26px/1 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+    </style>
+    <filter id="cta-shadow" x="-10%" y="-20%" width="120%" height="160%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect class="bg" width="1440" height="900"/>
+  <rect class="frame" x="32" y="32" width="1376" height="836" rx="28"/>
+
+  <!-- Hero -->
+  <text class="brand" x="96" y="112">INFAMOUS FREIGHT</text>
+  <text class="h1" x="96" y="206">Freight operations</text>
+  <text class="h1" x="96" y="278">without the chaos.</text>
+  <text class="lede" x="96" y="336">Dispatch automation, shipment visibility, compliance tooling, and</text>
+  <text class="lede" x="96" y="374">driver operations in one platform built for freight teams.</text>
+
+  <!-- CTAs -->
+  <g filter="url(#cta-shadow)">
+    <rect class="accent" x="96" y="430" width="220" height="54" rx="14"/>
+    <rect x="336" y="430" width="220" height="54" rx="14" fill="#172033" stroke="#475569" stroke-width="1"/>
+  </g>
+  <text class="btn" x="146" y="465">Book a Demo</text>
+  <text class="btn" x="395" y="465" fill="#f8fafc">View Platform</text>
+
+  <!-- Dashboard panel -->
+  <rect class="panel" x="782" y="126" width="530" height="562" rx="24"/>
+  <text class="h2" x="818" y="172">Operations Dashboard</text>
+  <rect class="accent" x="818" y="198" width="150" height="12" rx="6"/>
+
+  <!-- KPI tiles -->
+  <g aria-hidden="true">
+    <rect class="tile" x="818"  y="238" width="130" height="88" rx="16"/>
+    <rect class="tile" x="964"  y="238" width="130" height="88" rx="16"/>
+    <rect class="tile" x="1110" y="238" width="166" height="88" rx="16"/>
+  </g>
+  <text class="kpi"  x="834"  y="266">Active loads</text>
+  <text class="kpiv" x="834"  y="304">142</text>
+  <text class="kpi"  x="980"  y="266">On-time</text>
+  <text class="kpiv" x="980"  y="304">98.2%</text>
+  <text class="kpi"  x="1126" y="266">Revenue (MTD)</text>
+  <text class="kpiv" x="1126" y="304">$1.2M</text>
+
+  <!-- Trend chart -->
+  <rect class="card" x="818" y="356" width="458" height="138" rx="18"/>
+  <line x1="830" y1="478" x2="1264" y2="478" stroke="#1f2937" stroke-width="1"/>
+  <!-- Illustrative data only; not real metrics -->
+  <polyline points="850,466 920,430 990,450 1060,386 1130,408 1200,356"
+            fill="none" stroke="#ef4444" stroke-width="8"
+            stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Lower cards -->
+  <rect class="card" x="818"  y="526" width="218" height="118" rx="18"/>
+  <rect class="card" x="1058" y="526" width="218" height="118" rx="18"/>
+
+  <!-- Workflow tiles -->
+  <text class="h3" x="96" y="586">Core workflows</text>
+  <rect class="tile" x="96"  y="620" width="170" height="84" rx="16"/>
+  <rect class="tile" x="286" y="620" width="170" height="84" rx="16"/>
+  <rect class="tile" x="476" y="620" width="170" height="84" rx="16"/>
+  <text class="tilelbl" x="122" y="669">Dispatch</text>
+  <text class="tilelbl" x="320" y="669">Tracking</text>
+  <text class="tilelbl" x="515" y="669">Compliance</text>
 </svg>

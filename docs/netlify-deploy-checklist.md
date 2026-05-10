@@ -84,6 +84,8 @@ Netlify UI path:
 4. `Trigger deploy`
 5. `Deploy site`
 
+The committed Netlify configuration publishes `apps/web/dist` and deploys functions from `netlify/functions`, so a normal Git or UI-triggered production deploy should include both the static web app and Netlify-hosted public API functions.
+
 CLI deploys should rely on the `NETLIFY_AUTH_TOKEN` environment variable instead of passing secrets through command-line flags:
 
 ```bash
@@ -107,6 +109,15 @@ Run the canonical checks first:
 curl --fail --show-error --location --head --retry 5 --retry-delay 10 --retry-connrefused https://www.infamousfreight.com
 curl --fail --show-error --silent --location --retry 5 --retry-delay 10 --retry-connrefused https://www.infamousfreight.com/api/health
 ```
+
+Confirm Netlify-hosted public API routes are not swallowed by the broader Fly API proxy:
+
+```bash
+curl --fail --show-error --silent --location --retry 5 --retry-delay 10 --retry-connrefused --request OPTIONS https://www.infamousfreight.com/api/public/quote-requests
+curl --show-error --silent --location --retry 5 --retry-delay 10 --retry-connrefused --write-out '\n%{http_code}\n' https://www.infamousfreight.com/api/public/shipments/invalid-tracking
+```
+
+Expected result: the quote intake preflight returns an empty 204 response, and the invalid tracking lookup returns HTTP 400 JSON with `invalid_tracking_number`. Do not submit a production quote request during smoke testing unless the test record is intentionally tracked and cleaned up.
 
 Then confirm the bare domain redirects to the canonical www host:
 

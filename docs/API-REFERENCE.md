@@ -6,9 +6,9 @@
 
 # Infamous Freight — API Reference
 
-_Last updated: April 2026_
+_Last updated: May 2026_
 
-This document lists all **implemented** API endpoints in the active Express 4 backend (`apps/api/src/app.ts`).
+This document lists all **implemented** API endpoints in the active Express 5 backend (`apps/api/src/app.ts`).
 
 > For the canonical architecture overview, see [`docs/ARCHITECTURE.md`](ARCHITECTURE.md).
 
@@ -20,7 +20,8 @@ This document lists all **implemented** API endpoints in the active Express 4 ba
 |---|---|
 | Local development | `http://localhost:3000` |
 | Docker Compose | `http://localhost:3001` |
-| Production | `https://api.infamousfreight.com` |
+| Production browser path | `https://www.infamousfreight.com/api` |
+| Production direct API diagnostics | `https://api.infamousfreight.com` |
 
 ---
 
@@ -30,31 +31,47 @@ All tenant-scoped endpoints require these headers:
 
 | Header | Required | Description |
 |---|---|---|
-| `x-tenant-id` | Yes | Carrier / tenant identifier. Can also be passed as `tenantId` in the request body or query string. |
+| `x-tenant-id` | Yes | Carrier / tenant identifier. Request body and query-string tenant values are not accepted for protected routes. |
 | `x-user-role` | Yes | One of `owner`, `admin`, or `dispatcher`. Billing actions additionally require `owner` or `admin`. |
 
 ---
 
 ## Health Checks
 
+All API responses include an `x-request-id` response header. Clients may provide `x-request-id`; otherwise the API generates one.
+
 ### `GET /health`
 
-Returns the API and database health status. No authentication required.
+Returns liveness-style API status plus database status for operator convenience. No authentication required. This endpoint keeps HTTP 200 even if the database is degraded so uptime probes can remain lightweight.
 
 **Response**
 ```json
 {
   "status": "ok",
   "timestamp": "2026-04-27T08:00:00.000Z",
-  "services": { "database": "connected" }
+  "services": { "api": "running", "database": "connected" }
 }
 ```
 
-`status` is `"ok"` when the database is connected, or `"degraded"` when it is not.
+### `GET /health/live`
+
+Returns API liveness only. No authentication required.
+
+### `GET /health/ready`
+
+Returns database readiness. No authentication required. HTTP status is `200` when ready and `503` when the database is disconnected.
 
 ### `GET /api/health`
 
-Identical to `GET /health`. Provided for convenience at the `/api` prefix.
+Returns readiness status at the `/api` prefix for Netlify proxy checks. HTTP status is `200` when ready and `503` when the database is disconnected.
+
+### `GET /api/health/live`
+
+Returns API liveness at the `/api` prefix.
+
+### `GET /api/health/ready`
+
+Returns database readiness at the `/api` prefix.
 
 ---
 
@@ -458,7 +475,7 @@ Common error codes:
 
 ## Planned / Not-Yet-Implemented Routes
 
-The following route patterns are described in planning documents but are **not currently implemented** in the Express layer. They will be added as feature modules are migrated from the NestJS planning files into the active Express server.
+The following route patterns are described in planning documents but are **not currently implemented** in the Express API. They should be added as Express route handlers or route modules when the features are built.
 
 | Route pattern | Planned feature |
 |---|---|

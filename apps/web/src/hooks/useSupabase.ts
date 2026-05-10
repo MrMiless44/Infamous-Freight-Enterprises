@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClient, SupabaseClient, User, AuthError } from '@supabase/supabase-js';
+import { trackFunnelEvent } from '@/lib/analytics';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_DATABASE_URL || '';
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -82,6 +83,7 @@ export function useSupabaseAuth() {
       setError(error);
       throw error;
     }
+    trackFunnelEvent('funnel_signup');
     return data;
   }, []);
 

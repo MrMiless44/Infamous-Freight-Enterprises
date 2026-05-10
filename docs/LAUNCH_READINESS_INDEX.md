@@ -17,6 +17,7 @@ Ready for verification. Not approved for public launch until all critical checks
 | Document | Purpose |
 |---|---|
 | `docs/PRODUCTION_READINESS_VERIFICATION.md` | Main verification checklist, launch gates, severity rules, and sign-off requirements |
+| `docs/PRODUCTION_DASHBOARD_REMAINING_WORK.md` | Remaining production dashboard, secret-management, Stripe webhook, and billing verification work after environment and billing hardening |
 | `docs/LAUNCH_EVIDENCE_LOG.md` | Evidence log template for command output, dashboard checks, blocker notes, and final decision |
 | `docs/ROLLBACK_PLAN.md` | Rollback triggers and recovery process for API, web, database, billing, notifications, and support |
 | `docs/PRODUCTION_TEST_DATA_PLAN.md` | Controlled production test accounts, freight records, documents, billing data, and cleanup rules |

@@ -60,12 +60,12 @@ export function ExitIntentPopup() {
             initial={{ scale: 0.8, y: 50 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.8, y: 50 }}
-            className="relative w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-8"
+            className="relative w-full max-w-md rounded-2xl border border-infamous-border bg-infamous-card p-8"
           >
             <button
               onClick={() => { setShow(false); localStorage.setItem('exit-popup-dismissed', 'true'); }}
               aria-label="Close discount offer"
-              className="absolute right-4 top-4 text-zinc-500 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 rounded"
+              className="absolute right-4 top-4 text-[#B88989]/70 hover:text-[#F5E8E8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 rounded"
             >
               <X className="h-5 w-5" aria-hidden="true" />
             </button>
@@ -76,8 +76,8 @@ export function ExitIntentPopup() {
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-600/10 mb-4">
                     <Gift className="h-8 w-8 text-red-500" aria-hidden="true" />
                   </div>
-                  <h2 id="exit-popup-title" className="text-2xl font-bold text-white">One more thing — 10% off your first 3 months</h2>
-                  <p className="text-zinc-400 mt-2">
+                  <h2 id="exit-popup-title" className="text-2xl font-bold text-[#F5E8E8]">One more thing — 10% off your first 3 months</h2>
+                  <p className="text-[#B88989] mt-2">
                     Plus a free onboarding call to get your fleet dispatching from day one.
                   </p>
                 </div>
@@ -91,7 +91,7 @@ export function ExitIntentPopup() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
                     aria-label="Email address for discount code"
-                    className="border-zinc-700 bg-zinc-800 text-white text-center"
+                    className="border-infamous-border bg-infamous-panel text-[#F5E8E8] text-center"
                     required
                   />
                   <Button
@@ -105,16 +105,16 @@ export function ExitIntentPopup() {
                       'Email me the discount code'
                     )}
                   </Button>
-                  <p className="text-xs text-zinc-500 text-center">
+                  <p className="text-xs text-[#B88989]/70 text-center">
                     No spam. Unsubscribe anytime.
                   </p>
                 </form>
               </>
             ) : (
               <div className="text-center py-4">
-                <CheckCircle className="h-12 w-12 text-emerald-500 mx-auto mb-3" />
-                <h3 className="text-lg font-semibold text-white">Discount Activated!</h3>
-                <p className="text-zinc-400 mt-2">
+                <CheckCircle className="h-12 w-12 text-[#36D399] mx-auto mb-3" />
+                <h3 className="text-lg font-semibold text-[#F5E8E8]">Discount Activated!</h3>
+                <p className="text-[#B88989] mt-2">
                   Check your email for the 10% off code.
                 </p>
                 <Button

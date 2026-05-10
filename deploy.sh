@@ -174,6 +174,38 @@ run_tests() {
 # DEPLOYMENT FUNCTIONS
 # ===========================================================================
 
+validate_container_image_ref() {
+  local image_ref="$1"
+  local expected_app="${2:-}"
+
+  # Conservative validation for container image references used in deployment.
+  if [[ "$image_ref" =~ [[:space:]] ]]; then
+    error "Invalid FLY_DEPLOY_IMAGE: must not contain whitespace"
+    exit 1
+  fi
+
+  if [[ "$image_ref" != registry.fly.io/* ]]; then
+    error "Invalid FLY_DEPLOY_IMAGE: expected image in registry.fly.io/<app>:<tag> format"
+    exit 1
+  fi
+
+  if [[ "$image_ref" != *":"* && "$image_ref" != *@sha256:* ]]; then
+    error "Invalid FLY_DEPLOY_IMAGE: expected a tagged image or digest (example: registry.fly.io/app:tag)"
+    exit 1
+  fi
+
+  if [[ -n "$expected_app" ]]; then
+    local image_app="${image_ref#registry.fly.io/}"
+    image_app="${image_app%%:*}"
+    image_app="${image_app%%@sha256:*}"
+
+    if [[ "$image_app" != "$expected_app" ]]; then
+      error "Invalid FLY_DEPLOY_IMAGE: app mismatch (expected ${expected_app}, got ${image_app})"
+      exit 1
+    fi
+  fi
+}
+
 deploy_fly() {
   local env="$1"
   log "Deploying to Fly.io ($env)..."
@@ -185,15 +217,24 @@ deploy_fly() {
 
   local app_name
   if [[ "$env" == "production" ]]; then
-    app_name="infamous-freight-api"
+    app_name="infamous-freight"
   else
     app_name="infamous-freight-api-${env}"
   fi
   export FLY_APP_NAME="$app_name"
 
   cd "$PROJECT_ROOT"
+
+  local deploy_image="${FLY_DEPLOY_IMAGE:-}"
+  local -a fly_args=(deploy --app "$app_name" --remote-only)
+  if [[ -n "$deploy_image" ]]; then
+    validate_container_image_ref "$deploy_image" "$app_name"
+    log "Deploying prebuilt Fly image: $deploy_image"
+    fly_args+=(--image "$deploy_image")
+  fi
+
   # Redact any lines that look like secrets from the tee'd log
-  flyctl deploy --app "$app_name" --remote-only 2>&1 \
+  flyctl "${fly_args[@]}" 2>&1 \
     | grep -v -iE '(secret|key|token|password)' \
     | tee -a "$LOG_FILE" \
     || true   # let the trap handle real failures; grep exit-codes aren't failures
@@ -450,4 +491,6 @@ main() {
   success "=========================================="
 }
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi

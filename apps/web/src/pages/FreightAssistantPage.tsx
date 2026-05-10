@@ -26,9 +26,9 @@ const FreightAssistantPage: React.FC = () => {
   }, [input]);
 
   return (
-    <main className="min-h-screen bg-[#090909] px-6 py-8 text-white">
+    <main className="min-h-screen bg-[#090909] px-6 py-8 text-[#F5E8E8]">
       <div className="mx-auto max-w-6xl">
-        <Link to="/home" className="mb-8 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white">
+        <Link to="/home" className="mb-8 inline-flex items-center gap-2 text-sm text-[#B88989] hover:text-[#F5E8E8]">
           <ArrowLeft size={16} /> Back to Infamous Freight
         </Link>
 
@@ -38,7 +38,7 @@ const FreightAssistantPage: React.FC = () => {
           </div>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">AI operations assistant</p>
           <h1 className="mt-2 text-3xl font-bold">Turn messy freight requests into dispatch-ready next steps</h1>
-          <p className="mt-2 max-w-3xl text-gray-400">
+          <p className="mt-2 max-w-3xl text-[#B88989]">
             This MVP assistant summarizes quote intake, checks for missing operational details, and gives dispatch a clean action list.
           </p>
         </header>
@@ -52,7 +52,7 @@ const FreightAssistantPage: React.FC = () => {
             <textarea
               value={input}
               onChange={(event) => setInput(event.target.value)}
-              className="min-h-80 w-full rounded-2xl border border-infamous-border bg-[#111] p-4 text-sm leading-6 text-white outline-none transition focus:border-infamous-orange"
+              className="min-h-80 w-full rounded-2xl border border-infamous-border bg-infamous-panel p-4 text-sm leading-6 text-[#F5E8E8] outline-none transition focus:border-infamous-orange"
             />
           </div>
 
@@ -62,17 +62,17 @@ const FreightAssistantPage: React.FC = () => {
               <h2 className="text-xl font-bold">Dispatch summary</h2>
             </div>
 
-            <div className="mb-5 rounded-2xl border border-infamous-border bg-[#111] p-4">
-              <p className="text-xs uppercase tracking-wider text-gray-500">Quote readiness</p>
+            <div className="mb-5 rounded-2xl border border-infamous-border bg-infamous-panel p-4">
+              <p className="text-xs uppercase tracking-wider text-[#B88989]/70">Quote readiness</p>
               <p className="mt-2 text-3xl font-bold">{summary.readiness}/4</p>
-              <p className="mt-1 text-sm text-gray-400">Checks detected from request text.</p>
+              <p className="mt-1 text-sm text-[#B88989]">Checks detected from request text.</p>
             </div>
 
             <div className="space-y-3">
               {summary.nextSteps.map((step) => (
-                <div key={step} className="flex gap-3 rounded-2xl border border-infamous-border bg-[#111] p-4">
+                <div key={step} className="flex gap-3 rounded-2xl border border-infamous-border bg-infamous-panel p-4">
                   <CheckCircle2 className="mt-0.5 flex-shrink-0 text-green-400" size={18} />
-                  <p className="text-sm leading-6 text-gray-300">{step}</p>
+                  <p className="text-sm leading-6 text-[#F5E8E8]/80">{step}</p>
                 </div>
               ))}
             </div>

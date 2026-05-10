@@ -11,7 +11,17 @@ Main tracking issue: #1589
 Related issue: #1583
 
 - Legal entity status:
-- EIN status:
+- Legal business name: INFAMOUS FREIGHT
+- IRS name control: INFA
+- IRS notice: CP575G dated March 21, 2026
+- Legal record update runbook: `docs/production-operations/LEGAL_BUSINESS_RECORD_UPDATE.md`
+- Stripe legal profile status:
+- Business bank legal-name status:
+- DOT/FMCSA legal-name status:
+- Insurance legal-name status:
+- Accounting legal-name status:
+- Tax filing legal-name status:
+- EIN status: Received; full EIN must remain only in secure tax, banking, payment processor, and compliance systems
 - FMCSA broker authority status:
 - FMCSA MC number:
 - BOC-3 status:
@@ -120,7 +130,7 @@ Related issue: #1644
 ### Stripe Account
 
 - Active Stripe account confirmed as correct Infamous Freight production account:
-- Account ID:
+- Account ID recorded in deployment configuration as `STRIPE_ACCOUNT_ID`: (yes / no)
 - Dashboard URL: https://dashboard.stripe.com
 - Confirmed by:
 - Confirmed date:

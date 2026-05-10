@@ -33,7 +33,7 @@ It validates:
 The web app must have a valid API URL configured:
 
 ```env
-VITE_API_URL=https://api.infamousfreight.com
+VITE_API_URL=/api
 ```
 
 The API must have production database access configured through:

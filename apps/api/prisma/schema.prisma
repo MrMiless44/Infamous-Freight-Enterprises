@@ -5,7 +5,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Carrier {
@@ -163,6 +162,28 @@ model QuoteRequest {
 
   @@index([carrierId])
   @@index([status])
+}
+
+model PublicLead {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  company     String?
+  originCity  String?
+  destCity    String?
+  freightType String?
+  weight      Float    @default(0)
+  pickupDate  DateTime?
+  notes       String?
+  source      String   @default("web-form")
+  status      String   @default("new")
+  receivedAt  DateTime @default(now())
+
+  @@index([email])
+  @@index([source])
+  @@index([status])
+  @@index([receivedAt])
 }
 
 model LoadAssignment {

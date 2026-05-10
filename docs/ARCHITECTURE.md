@@ -6,16 +6,16 @@
 
 # Infamous Freight — Canonical Architecture Reference
 
-_Last updated: April 2026_
+_Last updated: May 2026_
 
 This document is the single source of truth for the Infamous Freight backend architecture.
 Update this file whenever the framework, entry point, ports, or route structure changes.
 
 ---
 
-## Canonical Backend: Express 4
+## Canonical Backend: Express 5
 
-The active backend is an **Express 4** application written in TypeScript.
+The active backend is an **Express 5** application written in TypeScript.
 
 | File | Purpose |
 |---|---|
@@ -44,21 +44,19 @@ npm run start            # runs node dist/src/server.js
 |---|---|---|
 | Local development | `3000` | `apps/api/src/server.ts` default (`PORT ?? 3000`) |
 | Docker Compose API | `3001` | `docker-compose.yml` → `PORT: 3001` |
-| Dockerfile.api default | `3000` | `ENV PORT=3000` (overridden by Docker Compose) |
+| Dockerfile.api default | `3001` | `ENV PORT=3001` |
 | Nginx proxy target | `3001` | `nginx.conf` → `proxy_pass http://api:3001` |
 | `.env.example` default | `3001` | `PORT=3001` |
 
-> **Recommendation:** Use `PORT=3001` in all environments to match Docker Compose and nginx. Set this in your local `.env` file.
+> **Recommendation:** Use `PORT=3001` for Docker-based API runtime paths to match Docker Compose, Caddy, and nginx. Local non-Docker development can continue using the server default unless `PORT` is set.
 
 ---
 
 ## Framework Decision
 
-**Canonical backend framework: Express 4**
+**Canonical backend framework: Express 5**
 
-The codebase also contains NestJS module files (`apps/api/src/main.ts`, `apps/api/src/app.module.ts`, and per-feature controllers) that were written during an earlier planning phase. These files are **not wired to the active server entry point** (`server.ts`) and are not executed in production.
-
-The NestJS files represent planned feature modules that have not yet been migrated into the Express layer. See [Planned / In-Development Features](#planned--in-development-features) below.
+The API package uses Express as its only backend runtime. The server starts from `apps/api/src/server.ts`, which imports `createApp()` from `apps/api/src/app.ts`. Earlier alternate-framework planning files were removed because they were not represented in `apps/api/package.json`, were not wired into production, and created a second apparent backend architecture.
 
 ---
 
@@ -66,15 +64,23 @@ The NestJS files represent planned feature modules that have not yet been migrat
 
 | Layer | Technology | Notes |
 |---|---|---|
-| Frontend | React 18, TypeScript, Vite, Tailwind CSS, Zustand, Socket.io | `apps/web` |
-| Backend | **Express 4**, TypeScript | `apps/api` |
+| Frontend | React 19, TypeScript, Vite, Tailwind CSS, Zustand, Socket.io | `apps/web` |
+| Backend | **Express 5**, TypeScript | `apps/api` |
 | ORM | Prisma | PostgreSQL schema in `apps/api/prisma/` |
 | Database | PostgreSQL 16 | |
 | Cache | Redis 7 | |
 | Payments | Stripe | Checkout, Customer Portal, Webhooks |
-| Auth | Supabase Auth + JWT | Tenant ID passed via `x-tenant-id` header |
+| Auth | Supabase Auth + JWT-derived trusted claims | Production protected routes derive user, tenant, and role from verified bearer tokens |
 | Monitoring | Sentry (`@sentry/node`) | Opt-in via `SENTRY_DSN` |
 | Deployment | Fly.io (API), Netlify (Web) | |
+
+## Netlify Web Runtime
+
+Netlify builds only the React/Vite web app and publishes `apps/web/dist`.
+
+The production browser API path is `/api`, not a hardcoded direct API origin. Netlify handles exact public function routes first, proxies `/api/health` and broader `/api/*` traffic to the Fly.io API, and serves the SPA fallback after those API rules.
+
+The canonical public web host is `https://www.infamousfreight.com`. The apex domain and default Netlify hostname redirect to that host.
 
 ---
 
@@ -93,7 +99,7 @@ docker-compose up -d
 Services started:
 - `postgres` — PostgreSQL 16 on port `5432`
 - `redis` — Redis 7 on port `6379`
-- `api` — Express 4 API on port `3001`
+- `api` — Express 5 API on port `3001`
 - `web` — nginx serving the React SPA on port `80`
 
 The API container runs `node dist/src/server.js` with `PORT=3001`.
@@ -117,28 +123,27 @@ npm run dev
 
 ## Planned / In-Development Features
 
-The following NestJS module files exist in `apps/api/src/` but are not connected to the active Express server. They represent planned feature areas that require implementation work before use:
+The following feature areas are not implemented in the active Express API. Add them as Express routes or route modules when they become product priorities:
 
 | Module | Directory | Status |
 |---|---|---|
-| Load board aggregation | `loads/` | NestJS controller exists; not wired to Express routes |
-| Invoice / BOL / POD | `invoice/` | NestJS module exists; not wired to Express routes |
-| ELD integrations | `eld/` | NestJS module exists; not wired to Express routes |
-| Real-time chat | `chat/` | NestJS module exists; not wired to Express routes |
-| Driver payroll | `payroll/` | NestJS module exists; not wired to Express routes |
-| Factoring | `factoring/` | NestJS module exists; not wired to Express routes |
-| CSA compliance monitoring | `compliance-csa/` | NestJS module exists; not wired to Express routes |
-| Document expiry | `compliance-expiry/` | NestJS module exists; not wired to Express routes |
-| Accounting / QuickBooks / Xero | `accounting/` | NestJS module exists; not wired to Express routes |
-| Rate analytics | `rate-analytics/` | NestJS module exists; not wired to Express routes |
-| Broker credit scoring | `broker-credit/` | NestJS module exists; not wired to Express routes |
-| Geofencing / ETA | `geofencing/` | NestJS module exists; not wired to Express routes |
-| IFTA reporting | `ifta/` | NestJS module exists; not wired to Express routes |
-| Role-based access control | `rbac/` | NestJS module exists; not wired to Express routes |
-| Rate confirmations | `ratecon/` | NestJS module exists; not wired to Express routes |
-| Auto-dispatch AI | `dispatch/` | NestJS module exists; not wired to Express routes |
+| Load board aggregation | Express route module | Not implemented |
+| Invoice / BOL / POD | Express route module | Not implemented |
+| ELD integrations | Express route module | Not implemented |
+| Real-time chat | Express route module | Not implemented |
+| Driver payroll | Express route module | Not implemented |
+| Factoring | Express route module | Not implemented |
+| CSA compliance monitoring | Express route module | Not implemented |
+| Document expiry | Express route module | Not implemented |
+| Accounting / QuickBooks / Xero | Express route module | Not implemented |
+| Rate analytics | Express route module | Not implemented |
+| Broker credit scoring | Express route module | Not implemented |
+| Geofencing / ETA | Express route module | Not implemented |
+| IFTA reporting | Express route module | Not implemented |
+| Rate confirmations | Express route module | Not implemented |
+| Auto-dispatch AI | Express route module | Not implemented |
 
-**Migration path:** Each module should be migrated into the Express layer by adding route handlers in `apps/api/src/app.ts` (or extracted into Express Router files) and wiring them to the Prisma data store. The NestJS `main.ts` and `app.module.ts` entry points can be removed once all desired modules are migrated.
+**Implementation path:** Add route handlers in `apps/api/src/app.ts` or extracted Express Router files, then wire them to the Prisma data store and existing framework-free domain helpers.
 
 ---
 
@@ -150,7 +155,6 @@ The following route patterns appear in older planning documents (PDF build packa
 |---|---|---|
 | `GET /api/freight/:resource` | Not implemented | Superseded by `/api/freight-operations/:resource` |
 | `POST /api/freight/:resource` | Not implemented | Superseded by `/api/freight-operations/:resource` |
-| Express 5 features | Not used | API uses Express 4 |
 | tRPC-style type-safe RPC | Not used | API uses REST over HTTP |
 
 ---

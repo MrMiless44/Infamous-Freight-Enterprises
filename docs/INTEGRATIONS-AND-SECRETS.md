@@ -53,7 +53,7 @@ Set these in **Netlify → Site settings → Environment variables** for the web
 
 | Variable | Owner | Value / Format | Purpose |
 |----------|-------|----------------|---------|
-| `VITE_API_URL` | Platform team | `https://api.infamousfreight.com` | Sets the production API base URL used by the React app |
+| `VITE_API_URL` | Platform team | `/api` | Sets the production API base URL used by the React app through the Netlify proxy |
 | `VITE_STRIPE_PUBLIC_KEY` | Payments team | Stripe publishable key, `pk_live_...` | Used by `@stripe/stripe-js` to initialise the Stripe payment element |
 | `VITE_SUPABASE_URL` | Platform team | Supabase project URL | Used by the web client for Supabase auth and client calls |
 | `VITE_SUPABASE_ANON_KEY` | Platform team | Supabase anon key | Public Supabase client key used by the browser app |
@@ -171,7 +171,7 @@ push to `main`. GitHub Actions does not deploy the web app.
 2. **Build error (TypeScript / Vite):**
    Reproduce locally before investigating:
    ```bash
-   VITE_API_URL=https://api.infamousfreight.com \
+   VITE_API_URL=/api \
    VITE_STRIPE_PUBLIC_KEY=pk_live_... \
    VITE_SENTRY_DSN=https://<public-key>@o<org-id>.ingest.us.sentry.io/<project-id> \
    VITE_SENTRY_ENABLED=true \

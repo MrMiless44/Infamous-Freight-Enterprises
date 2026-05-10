@@ -33,10 +33,16 @@ jobs:
       actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
     name: Codacy Security Scan
     runs-on: ubuntu-latest
+    # Skip on pull requests opened from forks: CODACY_PROJECT_TOKEN is not
+    # exposed to fork PR workflows, and GITHUB_TOKEN's `security-events: write`
+    # permission is downgraded to read-only for fork PRs, so the SARIF upload
+    # step would fail. Codacy still runs on push to main, schedule, and
+    # same-repo PRs, which is sufficient coverage.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     steps:
       # Checkout the repository to the GitHub Actions runner
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       # Execute Codacy Analysis CLI and generate a SARIF output with the security issues identified during the analysis
       - name: Run Codacy Analysis CLI
@@ -85,12 +91,16 @@ jobs:
               | if . == "" then "tool-\($i)" else . end
             ' results.sarif)
             file="sarif-split/codacy-${i}-${tool}.sarif"
-            jq --argjson i "$i" '{
+            category="codacy-${tool}"
+            # Embed the unique category as runs[0].automationDetails.id inside
+            # the SARIF document itself. The Code Scanning "upload an analysis
+            # as SARIF data" REST API does not accept a top-level "category"
+            # parameter; per-run categories must be carried in the SARIF.
+            jq --argjson i "$i" --arg category "$category" '{
               "$schema": .["$schema"],
               version: .version,
-              runs: [ .runs[$i] ]
+              runs: [ .runs[$i] | .automationDetails = ((.automationDetails // {}) + {id: $category}) ]
             }' results.sarif > "$file"
-            category="codacy-${tool}"
             echo "Uploading ${file} with category ${category}"
             sarif_b64=$(gzip -c "$file" | base64 -w0)
             gh api \
@@ -100,6 +110,5 @@ jobs:
               -f commit_sha="${GITHUB_SHA}" \
               -f ref="${GITHUB_REF}" \
               -f sarif="${sarif_b64}" \
-              -f category="${category}" \
               -F validate=true
           done

@@ -35,7 +35,15 @@ try {
     res.status(503).json(degradedResponse());
   });
 
+  fallback.get('/health/live', (_req, res) => {
+    res.status(503).json(degradedResponse());
+  });
+
   fallback.get('/api/health', (_req, res) => {
+    res.status(503).json(degradedResponse());
+  });
+
+  fallback.get('/api/health/live', (_req, res) => {
     res.status(503).json(degradedResponse());
   });
 
