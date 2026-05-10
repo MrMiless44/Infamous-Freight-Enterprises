@@ -52,6 +52,7 @@
     "@vitejs/plugin-react": "^6.0.1",
     "autoprefixer": "^10.4.16",
     "jsdom": "^29.1.1",
+    "playwright": "^1.59.1",
     "postcss": "^8.5.14",
     "tailwindcss": "^4.2.4",
     "terser": "^5.47.1",
