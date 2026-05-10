@@ -8,14 +8,14 @@ const TopBar: React.FC = () => {
   const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <header role="banner" className={`h-16 bg-infamous-navy/80 backdrop-blur-xl border-b border-infamous-border flex items-center justify-between px-6 transition-all duration-300 ${sidebarOpen ? '' : ''}`}>
+    <header role="banner" className={`h-16 bg-infamous-navy/85 backdrop-blur-xl border-b border-infamous-border flex items-center justify-between px-4 md:px-6 transition-all duration-300 ${sidebarOpen ? '' : ''}`}>
       {/* Command Center Title */}
       <div className="flex items-center gap-4">
         <div>
           <h1 className="font-display text-base font-bold uppercase tracking-wide text-[#F5E8E8]">Command Center</h1>
           <p className="text-[11px] text-infamous-muted">Real-time operations overview</p>
         </div>
-        <div className="hidden md:flex items-center gap-1.5 rounded-full border border-infamous-red/20 bg-infamous-red/10 px-3 py-1">
+        <div className="hidden md:flex items-center gap-1.5 rounded-full border border-infamous-red/30 bg-infamous-red/10 px-3 py-1 shadow-[0_0_14px_rgba(255,26,26,0.18)]">
           <CircleDot size={8} className="text-infamous-red-light animate-pulse" />
           <span className="text-[10px] text-infamous-red-light font-medium">Live</span>
         </div>

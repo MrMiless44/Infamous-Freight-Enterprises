@@ -15,6 +15,33 @@ fi
 
 printf '\n== Codex Environment Check ==\n\n'
 
+# Load local dotenv files when present so the check matches repo configuration.
+# Precedence: existing exported env vars > .env.local > .env
+load_dotenv_file() {
+  local file_path="$1"
+  [[ -f "$file_path" ]] || return 0
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+    [[ "$line" != *=* ]] && continue
+
+    local name="${line%%=*}"
+    local value="${line#*=}"
+
+    # Trim leading/trailing whitespace around key only.
+    name="${name#${name%%[![:space:]]*}}"
+    name="${name%${name##*[![:space:]]}}"
+
+    # Do not override already-exported environment variables.
+    if [[ -z "${!name:-}" ]]; then
+      export "${name}=${value}"
+    fi
+  done < "$file_path"
+}
+
+load_dotenv_file ".env"
+load_dotenv_file ".env.local"
+
 required_vars=(
   NODE_ENV
   DATABASE_URL

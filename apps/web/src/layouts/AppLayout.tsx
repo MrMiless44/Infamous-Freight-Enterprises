@@ -148,12 +148,12 @@ const AppLayout: React.FC = () => {
   }
 
   return (
-    <div className="flex h-screen w-screen bg-infamous-dark overflow-hidden">
+    <div className="ops-shell flex h-screen w-screen bg-infamous-dark overflow-hidden">
       <Sidebar />
       <div className={`flex flex-col flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'} max-md:!ml-0`}>
         {offlineBanner}
         <TopBar />
-        <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto p-6 pb-20 md:pb-6">
+        <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6">
           <Outlet />
         </main>
       </div>

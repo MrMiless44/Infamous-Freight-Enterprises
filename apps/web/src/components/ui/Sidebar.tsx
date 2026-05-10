@@ -58,7 +58,7 @@ const Sidebar: React.FC = () => {
   return (
     <aside
       aria-label="Primary navigation"
-      className={`fixed left-0 top-0 h-full bg-infamous-navy border-r border-infamous-border z-50 flex flex-col transition-all duration-300 max-md:hidden ${
+      className={`fixed left-0 top-0 h-full bg-infamous-navy/95 backdrop-blur-xl border-r border-infamous-border z-50 flex flex-col transition-all duration-300 max-md:hidden ${
         sidebarOpen ? 'w-64' : 'w-16'
       }`}
     >
@@ -92,7 +92,7 @@ const Sidebar: React.FC = () => {
             aria-label={item.label}
             className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group relative ${
               isActive
-                ? 'bg-infamous-red/10 text-infamous-red-light border border-infamous-red/20'
+                ? 'bg-infamous-red/12 text-infamous-red-light border border-infamous-red/30 shadow-[0_0_18px_rgba(255,26,26,0.16)]'
                 : 'text-[#B88989] hover:text-[#F5E8E8] hover:bg-infamous-border/50'
             } ${!sidebarOpen ? 'justify-center' : ''}`}
           >
