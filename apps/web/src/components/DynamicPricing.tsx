@@ -44,7 +44,7 @@ const DynamicPricing: React.FC<DynamicPricingProps> = ({ origin = 'Chicago, IL',
   const trendConfig = {
     up: { icon: <TrendingUp size={16} className="text-green-400" />, color: 'text-green-400', label: 'Trending Up' },
     down: { icon: <TrendingDown size={16} className="text-red-400" />, color: 'text-red-400', label: 'Trending Down' },
-    stable: { icon: <Minus size={16} className="text-gray-400" />, color: 'text-gray-400', label: 'Stable' },
+    stable: { icon: <Minus size={16} className="text-[#B88989]" />, color: 'text-[#B88989]', label: 'Stable' },
   };
 
   const cfg = trendConfig[trend];
@@ -58,7 +58,7 @@ const DynamicPricing: React.FC<DynamicPricingProps> = ({ origin = 'Chicago, IL',
             <Zap size={20} className="text-infamous-orange" />
             Dynamic Pricing
           </h2>
-          <p className="text-sm text-gray-500 mt-0.5">{origin} → {dest} · {equipment}</p>
+          <p className="text-sm text-[#B88989]/70 mt-0.5">{origin} → {dest} · {equipment}</p>
         </div>
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full bg-infamous-dark ${cfg.color}`}>
           {cfg.icon}
@@ -69,19 +69,19 @@ const DynamicPricing: React.FC<DynamicPricingProps> = ({ origin = 'Chicago, IL',
       {/* Rate Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-infamous-dark rounded-xl p-4 text-center border border-infamous-border">
-          <p className="text-xs text-gray-500 mb-1">Current Market Avg</p>
+          <p className="text-xs text-[#B88989]/70 mb-1">Current Market Avg</p>
           <p className="text-2xl font-bold text-blue-400">${marketAvg.toFixed(2)}</p>
-          <p className="text-xs text-gray-600">$/mile</p>
+          <p className="text-xs text-[#B88989]/60">$/mile</p>
         </div>
         <div className="bg-gradient-to-br from-infamous-orange/20 to-infamous-orange/5 rounded-xl p-4 text-center border border-infamous-orange/30">
           <p className="text-xs text-infamous-orange mb-1">AI Suggested Rate</p>
           <p className="text-3xl font-bold text-infamous-orange">${suggestedRate.toFixed(2)}</p>
-          <p className="text-xs text-gray-500">$/mile · {confidence}% confidence</p>
+          <p className="text-xs text-[#B88989]/70">$/mile · {confidence}% confidence</p>
         </div>
         <div className="bg-infamous-dark rounded-xl p-4 text-center border border-infamous-border">
-          <p className="text-xs text-gray-500 mb-1">Potential Uplift</p>
+          <p className="text-xs text-[#B88989]/70 mb-1">Potential Uplift</p>
           <p className="text-2xl font-bold text-green-400">+${(suggestedRate - marketAvg).toFixed(2)}</p>
-          <p className="text-xs text-gray-600">+{Math.round(((suggestedRate - marketAvg) / marketAvg) * 100)}% vs market</p>
+          <p className="text-xs text-[#B88989]/60">+{Math.round(((suggestedRate - marketAvg) / marketAvg) * 100)}% vs market</p>
         </div>
       </div>
 
@@ -93,7 +93,7 @@ const DynamicPricing: React.FC<DynamicPricingProps> = ({ origin = 'Chicago, IL',
             <XAxis dataKey="date" stroke="#555" fontSize={12} />
             <YAxis domain={['auto', 'auto']} stroke="#555" fontSize={12} tickFormatter={(v) => `$${v}`} />
             <Tooltip
-              contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: '8px', fontSize: '12px' }}
+              contentStyle={{ background: '#241013', border: '1px solid #3A0D12', borderRadius: '8px', fontSize: '12px' }}
               formatter={(value) => {
                 const parsedValue = Array.isArray(value) ? value[0] : value;
                 const numericValue = typeof parsedValue === 'number' ? parsedValue : Number(parsedValue ?? 0);
@@ -110,7 +110,7 @@ const DynamicPricing: React.FC<DynamicPricingProps> = ({ origin = 'Chicago, IL',
       {/* Factors */}
       <div className="space-y-2">
         <p className="text-sm font-medium flex items-center gap-2">
-          <Info size={14} className="text-gray-500" />
+          <Info size={14} className="text-[#B88989]/70" />
           Pricing Factors
         </p>
         {[
@@ -122,7 +122,7 @@ const DynamicPricing: React.FC<DynamicPricingProps> = ({ origin = 'Chicago, IL',
           <div key={f.factor} className="flex items-center gap-3 p-3 bg-infamous-dark rounded-xl">
             <div className="flex-1">
               <p className="text-sm font-medium">{f.factor}</p>
-              <p className="text-xs text-gray-500">{f.desc}</p>
+              <p className="text-xs text-[#B88989]/70">{f.desc}</p>
             </div>
             <span className="text-sm font-semibold text-green-400">{f.impact}</span>
           </div>

@@ -3,6 +3,13 @@ import crypto from 'crypto';
 export type BillingPlan = 'starter' | 'professional' | 'enterprise';
 export type BillingInterval = 'month' | 'year';
 export type BillingStatus = 'active' | 'trial' | 'past_due' | 'canceled' | 'unpaid' | 'incomplete' | 'inactive';
+export type OneTimePurchaseType =
+  | 'ai_addon_pack'
+  | 'ai_action_pack_2000'
+  | 'ai_action_pack_10000'
+  | 'ai_action_pack_50000'
+  | 'document_ai_pack_500'
+  | 'voice_ai_minutes_1000';
 
 export type BillingSyncPayload = {
   carrierId?: string;
@@ -21,7 +28,7 @@ export type CheckoutSessionInput = {
 export type OneTimeCheckoutSessionInput = {
   carrierId: string;
   stripeCustomerId?: string | null;
-  purchaseType?: string;
+  purchaseType?: OneTimePurchaseType;
 };
 
 export type StripeOneTimePaymentPayload = {
@@ -47,7 +54,7 @@ export type StripeEvent = {
 
 const STRIPE_SIGNATURE_TOLERANCE_SECONDS = 300;
 const STRIPE_CHECKOUT_SESSION_TOKEN = '{CHECKOUT_SESSION_ID}';
-const DEFAULT_ONE_TIME_PURCHASE_TYPE = 'ai_addon_pack';
+const DEFAULT_ONE_TIME_PURCHASE_TYPE: OneTimePurchaseType = 'ai_addon_pack';
 
 const PRICE_BY_PLAN_INTERVAL: Record<BillingPlan, Record<BillingInterval, string>> = {
   starter: {
@@ -64,6 +71,26 @@ const PRICE_BY_PLAN_INTERVAL: Record<BillingPlan, Record<BillingInterval, string
   },
 };
 
+const PRICE_BY_ONE_TIME_PURCHASE_TYPE: Record<OneTimePurchaseType, string> = {
+  ai_addon_pack: 'price_1TQeyLKCNuZqDozY0tb8Mwt8',
+  ai_action_pack_2000: 'price_1TQeyLKCNuZqDozY0tb8Mwt8',
+  ai_action_pack_10000: 'price_1TQf0BKCNuZqDozYU5RBJVKo',
+  ai_action_pack_50000: 'price_1TQf0TKCNuZqDozY3dghvydQ',
+  document_ai_pack_500: 'price_1TQf0zKCNuZqDozYJSTRv4iY',
+  voice_ai_minutes_1000: 'price_1TQf1IKCNuZqDozYebKKmHpu',
+};
+
+const ENV_PRICE_BY_ONE_TIME_PURCHASE_TYPE: Record<OneTimePurchaseType, string[]> = {
+  ai_addon_pack: ['STRIPE_PRICE_ONE_TIME', 'STRIPE_PRICE_AI_ADDON_PACK'],
+  ai_action_pack_2000: ['STRIPE_PRICE_AI_ACTION_PACK_2000', 'STRIPE_PRICE_AI_ADDON_PACK', 'STRIPE_PRICE_ONE_TIME'],
+  ai_action_pack_10000: ['STRIPE_PRICE_AI_ACTION_PACK_10000'],
+  ai_action_pack_50000: ['STRIPE_PRICE_AI_ACTION_PACK_50000'],
+  document_ai_pack_500: ['STRIPE_PRICE_DOCUMENT_AI_PACK_500'],
+  voice_ai_minutes_1000: ['STRIPE_PRICE_VOICE_AI_MINUTES_1000'],
+};
+
+export const ONE_TIME_PURCHASE_TYPES = Object.keys(PRICE_BY_ONE_TIME_PURCHASE_TYPE) as OneTimePurchaseType[];
+
 const PLAN_BY_PRICE_ID: Record<string, BillingPlan> = Object.entries(PRICE_BY_PLAN_INTERVAL).reduce(
   (acc, [plan, intervals]) => ({
     ...acc,
@@ -73,6 +100,10 @@ const PLAN_BY_PRICE_ID: Record<string, BillingPlan> = Object.entries(PRICE_BY_PL
   {} as Record<string, BillingPlan>,
 );
 
+export function isOneTimePurchaseType(value: unknown): value is OneTimePurchaseType {
+  return typeof value === 'string' && ONE_TIME_PURCHASE_TYPES.includes(value as OneTimePurchaseType);
+}
+
 export function getStripeSecretKey(): string | null {
   return process.env.STRIPE_SECRET_KEY?.trim() || null;
 }
@@ -81,10 +112,31 @@ export function getStripeWebhookSecret(): string | null {
   return process.env.STRIPE_WEBHOOK_SECRET?.trim() || null;
 }
 
-export function getStripeOneTimePriceId(): string | null {
-  return process.env.STRIPE_PRICE_ONE_TIME?.trim()
-    || process.env.STRIPE_PRICE_AI_ADDON_PACK?.trim()
-    || null;
+function getFirstConfiguredEnvValue(envNames: string[]): string | null {
+  for (const envName of envNames) {
+    const value = process.env[envName]?.trim();
+    if (value) {
+      return value;
+    }
+  }
+
+  return null;
+}
+
+export function getStripeOneTimePriceId(
+  purchaseType: OneTimePurchaseType = DEFAULT_ONE_TIME_PURCHASE_TYPE,
+): string | null {
+  const configured = getFirstConfiguredEnvValue(ENV_PRICE_BY_ONE_TIME_PURCHASE_TYPE[purchaseType]);
+
+  if (configured) {
+    return configured;
+  }
+
+  if (purchaseType === DEFAULT_ONE_TIME_PURCHASE_TYPE) {
+    return null;
+  }
+
+  return PRICE_BY_ONE_TIME_PURCHASE_TYPE[purchaseType] || null;
 }
 
 export function getBillingPortalReturnUrl(): string {
@@ -280,6 +332,20 @@ export function getBillingSyncFromStripeEvent(event: StripeEvent): BillingSyncPa
         status: 'canceled',
       };
     }
+    case 'customer.subscription.paused': {
+      return {
+        carrierId,
+        stripeCustomerId,
+        status: 'inactive',
+      };
+    }
+    case 'customer.subscription.resumed': {
+      return {
+        carrierId,
+        stripeCustomerId,
+        status: 'active',
+      };
+    }
     case 'invoice.payment_succeeded': {
       return {
         stripeCustomerId,
@@ -289,6 +355,20 @@ export function getBillingSyncFromStripeEvent(event: StripeEvent): BillingSyncPa
     case 'invoice.payment_failed': {
       return {
         stripeCustomerId,
+        status: 'past_due',
+      };
+    }
+    case 'charge.refunded': {
+      return {
+        stripeCustomerId,
+        carrierId,
+        status: 'past_due',
+      };
+    }
+    case 'charge.dispute.created': {
+      return {
+        stripeCustomerId,
+        carrierId,
         status: 'past_due',
       };
     }
@@ -315,6 +395,11 @@ export function getStripeOneTimePaymentFromStripeEvent(event: StripeEvent): Stri
     return null;
   }
 
+  const metadataPurchaseType = getString(metadata.purchaseType);
+  const purchaseType = isOneTimePurchaseType(metadataPurchaseType)
+    ? metadataPurchaseType
+    : DEFAULT_ONE_TIME_PURCHASE_TYPE;
+
   return {
     eventId: event.id,
     carrierId,
@@ -324,8 +409,8 @@ export function getStripeOneTimePaymentFromStripeEvent(event: StripeEvent): Stri
     amountTotal: getNumber(object.amount_total) ?? 0,
     currency: getString(object.currency) ?? 'usd',
     status: getString(object.payment_status) ?? getString(object.status) ?? 'unknown',
-    purchaseType: getString(metadata.purchaseType) ?? DEFAULT_ONE_TIME_PURCHASE_TYPE,
-    priceId: getString(metadata.priceId) ?? getStripeOneTimePriceId(),
+    purchaseType,
+    priceId: getString(metadata.priceId) ?? getStripeOneTimePriceId(purchaseType),
   };
 }
 
@@ -391,13 +476,13 @@ export async function createStripeCheckoutSession(input: CheckoutSessionInput): 
 }
 
 export async function createStripeOneTimeCheckoutSession(input: OneTimeCheckoutSessionInput): Promise<string> {
-  const price = getStripeOneTimePriceId();
+  const purchaseType = input.purchaseType ?? DEFAULT_ONE_TIME_PURCHASE_TYPE;
+  const price = getStripeOneTimePriceId(purchaseType);
 
   if (!price) {
     throw new Error('stripe_one_time_price_required');
   }
 
-  const purchaseType = input.purchaseType?.trim() || DEFAULT_ONE_TIME_PURCHASE_TYPE;
   const body = new URLSearchParams({
     mode: 'payment',
     success_url: getCheckoutSuccessUrl(),

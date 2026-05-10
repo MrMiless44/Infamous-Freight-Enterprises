@@ -14,6 +14,7 @@ export type StripeWebhookEventInput = {
 
 interface StripeWebhookEventStore {
   upsert(input: StripeWebhookEventInput): Promise<void>;
+  findByEventId(eventId: string): Promise<{ status: StripeWebhookEventStatus } | null>;
 }
 
 class MemoryStripeWebhookEventStore implements StripeWebhookEventStore {
@@ -25,6 +26,11 @@ class MemoryStripeWebhookEventStore implements StripeWebhookEventStore {
       ...current,
       ...input,
     });
+  }
+
+  async findByEventId(eventId: string): Promise<{ status: StripeWebhookEventStatus } | null> {
+    const entry = this.events.get(eventId);
+    return entry ? { status: entry.status } : null;
   }
 }
 
@@ -50,6 +56,14 @@ class PrismaStripeWebhookEventStore implements StripeWebhookEventStore {
         processedAt: input.processedAt,
       },
     });
+  }
+
+  async findByEventId(eventId: string): Promise<{ status: StripeWebhookEventStatus } | null> {
+    const row = await this.prisma.stripeWebhookEvent.findUnique({
+      where: { eventId },
+      select: { status: true },
+    });
+    return row ? { status: row.status as StripeWebhookEventStatus } : null;
   }
 }
 

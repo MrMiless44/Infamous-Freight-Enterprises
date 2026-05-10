@@ -1,120 +1,47 @@
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, Sparkles } from 'lucide-react';
+import {
+  STRIPE_ADD_ON_PLANS,
+  STRIPE_SUBSCRIPTION_PLANS,
+  StripeCatalogCta,
+  StripeCatalogPlan,
+} from '@/lib/stripeCatalog';
 
-type Plan = {
-  name: string;
-  price: string;
-  cadence?: string;
-  tagline: string;
-  features: string[];
-  cta: { label: string; href: string };
-  highlighted?: boolean;
+const isExternalHref = (href: string) => href.startsWith('http://') || href.startsWith('https://');
+
+const ctaClassName = (highlighted?: boolean) =>
+  `inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 font-semibold transition ${
+    highlighted
+      ? 'bg-infamous-orange text-[#F5E8E8] hover:opacity-90'
+      : 'border border-infamous-border bg-infamous-panel text-[#F5E8E8] hover:border-infamous-orange/50'
+  }`;
+
+const secondaryCtaClassName =
+  'inline-flex w-full items-center justify-center gap-2 rounded-xl border border-infamous-border px-5 py-3 text-sm font-semibold text-gray-200 transition hover:border-infamous-orange/50 hover:text-[#F5E8E8]';
+
+const PlanAction: React.FC<{ cta: StripeCatalogCta; highlighted?: boolean; secondary?: boolean }> = ({
+  cta,
+  highlighted,
+  secondary,
+}) => {
+  const className = secondary ? secondaryCtaClassName : ctaClassName(highlighted);
+
+  if (isExternalHref(cta.href)) {
+    return (
+      <a href={cta.href} target="_blank" rel="noreferrer" className={className}>
+        {cta.label} <ArrowRight size={16} />
+      </a>
+    );
+  }
+
+  return (
+    <Link to={cta.href} className={className}>
+      {cta.label} <ArrowRight size={16} />
+    </Link>
+  );
 };
 
-const shipperPlans: Plan[] = [
-  {
-    name: 'Free',
-    price: '$0',
-    tagline: 'Start with quotes, booking, and tracking — no commitment.',
-    features: [
-      'Unlimited quote requests',
-      'Standard booking and dispatch',
-      'Live shipment tracking',
-      'Proof of delivery on every load',
-      'Email support',
-    ],
-    cta: { label: 'Get a Freight Quote', href: '/request-quote' },
-  },
-  {
-    name: 'Business',
-    price: '$79',
-    cadence: '/month',
-    tagline: 'For shippers booking weekly with a couple of locations.',
-    features: [
-      'Everything in Free',
-      'Priority dispatch on open lanes',
-      'Recurring shipment scheduling',
-      'Saved routes and contacts',
-      'Reports and invoice exports',
-      'Proof-of-delivery archive',
-    ],
-    cta: { label: 'Start Business plan', href: '/request-quote?plan=business' },
-    highlighted: true,
-  },
-  {
-    name: 'Pro Logistics',
-    price: '$249',
-    cadence: '/month',
-    tagline: 'For multi-location shippers managing freight as a function.',
-    features: [
-      'Everything in Business',
-      'Multi-location and team access',
-      'Advanced tracking and exception alerts',
-      'Dedicated dispatch contact',
-      'Custom reporting cadence',
-    ],
-    cta: { label: 'Start Pro Logistics', href: '/request-quote?plan=pro' },
-  },
-  {
-    name: 'Enterprise',
-    price: 'Custom',
-    tagline: 'Higher volume, integrations, and account-level SLAs.',
-    features: [
-      'Volume pricing and committed capacity',
-      'API and TMS integration',
-      'Custom SLAs and escalations',
-      'Onboarding and training',
-    ],
-    cta: { label: 'Talk to sales', href: '/request-quote?plan=enterprise' },
-  },
-];
-
-const driverPlans: Plan[] = [
-  {
-    name: 'Driver Basic',
-    price: '$0',
-    tagline: 'Apply, get verified, and start hauling — no fee to begin.',
-    features: [
-      'Free signup and document upload',
-      'Identity, insurance, and authority verification',
-      'Access to standard load board',
-      'Faster payment after delivery',
-    ],
-    cta: { label: 'Apply to Drive', href: '/drive' },
-  },
-  {
-    name: 'Driver Pro',
-    price: '$29',
-    cadence: '/month',
-    tagline: 'For drivers who have proven they can deliver clean.',
-    features: [
-      'Early access to higher-paying loads',
-      'Route optimization tools',
-      'Faster payout option',
-      'Preferred driver badge',
-      'Document vault and reminders',
-      'Performance insights',
-    ],
-    cta: { label: 'Upgrade after first loads', href: '/drive?plan=pro' },
-    highlighted: true,
-  },
-  {
-    name: 'Fleet',
-    price: '$149',
-    cadence: '/month',
-    tagline: 'For small carriers running a handful of trucks.',
-    features: [
-      'Everything in Driver Pro',
-      'Up to 10 verified drivers',
-      'Fleet dispatch dashboard',
-      'Document and insurance tracking',
-      'Centralized payouts and reporting',
-    ],
-    cta: { label: 'Start Fleet plan', href: '/drive?plan=fleet' },
-  },
-];
-
-const PlanCard: React.FC<{ plan: Plan }> = ({ plan }) => (
+const PlanCard: React.FC<{ plan: StripeCatalogPlan }> = ({ plan }) => (
   <div
     className={`flex h-full flex-col rounded-3xl border bg-infamous-card p-6 ${
       plan.highlighted
@@ -122,7 +49,7 @@ const PlanCard: React.FC<{ plan: Plan }> = ({ plan }) => (
         : 'border-infamous-border'
     }`}
   >
-    <div className="mb-4 flex items-center justify-between">
+    <div className="mb-4 flex items-center justify-between gap-3">
       <h3 className="text-lg font-bold">{plan.name}</h3>
       {plan.highlighted ? (
         <span className="inline-flex items-center gap-1 rounded-full bg-infamous-orange/10 px-3 py-1 text-xs font-semibold text-infamous-orange">
@@ -132,64 +59,55 @@ const PlanCard: React.FC<{ plan: Plan }> = ({ plan }) => (
     </div>
     <div className="flex items-baseline gap-1">
       <span className="text-4xl font-black tracking-tight">{plan.price}</span>
-      {plan.cadence ? <span className="text-sm text-gray-500">{plan.cadence}</span> : null}
+      {plan.cadence ? <span className="text-sm text-[#B88989]/70">{plan.cadence}</span> : null}
     </div>
-    <p className="mt-3 text-sm leading-6 text-gray-400">{plan.tagline}</p>
+    <p className="mt-3 text-sm leading-6 text-[#B88989]">{plan.tagline}</p>
     <ul className="mt-5 space-y-3 text-sm">
       {plan.features.map((feature) => (
-        <li key={feature} className="flex gap-2 text-gray-300">
+        <li key={feature} className="flex gap-2 text-[#F5E8E8]/80">
           <Check size={16} className="mt-0.5 flex-shrink-0 text-infamous-orange" />
           <span>{feature}</span>
         </li>
       ))}
     </ul>
-    <div className="mt-6">
-      <Link
-        to={plan.cta.href}
-        className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 font-semibold transition ${
-          plan.highlighted
-            ? 'bg-infamous-orange text-white hover:opacity-90'
-            : 'border border-infamous-border bg-[#111] text-white hover:border-infamous-orange/50'
-        }`}
-      >
-        {plan.cta.label} <ArrowRight size={16} />
-      </Link>
+    <div className="mt-auto space-y-3 pt-6">
+      <PlanAction cta={plan.cta} highlighted={plan.highlighted} />
+      {plan.secondaryCta ? <PlanAction cta={plan.secondaryCta} secondary /> : null}
     </div>
   </div>
 );
 
 const PricingPage: React.FC = () => {
   return (
-    <main className="min-h-screen bg-[#090909] px-6 py-10 text-white">
+    <main className="min-h-screen bg-[#090909] px-6 py-10 text-[#F5E8E8]">
       <div className="mx-auto max-w-7xl">
-        <Link to="/home" className="mb-8 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white">
+        <Link to="/home" className="mb-8 inline-flex items-center gap-2 text-sm text-[#B88989] hover:text-[#F5E8E8]">
           <ArrowLeft size={16} /> Back to Infamous Freight
         </Link>
 
         <header className="mb-10 max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Pricing</p>
           <h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">
-            Simple pricing that follows the freight.
+            Stripe-backed pricing for freight operators ready to move faster.
           </h1>
-          <p className="mt-4 text-lg leading-8 text-gray-300">
-            Quoting, booking, tracking, and proof of delivery are free. Paid plans add priority dispatch, scheduling,
-            reporting, and team access for shippers and carriers that move freight every week.
+          <p className="mt-4 text-lg leading-8 text-[#F5E8E8]/80">
+            Choose the Infamous Freight plan that matches your operation, then add AI action, document, or voice packs
+            when your team needs more automation capacity. Payments are processed securely through Stripe.
           </p>
         </header>
 
         <section className="mb-16">
           <div className="mb-6 flex flex-col justify-between gap-2 lg:flex-row lg:items-end">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Shippers</p>
-              <h2 className="mt-2 text-2xl font-bold">Built around completed shipments, not paywalls.</h2>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Platform plans</p>
+              <h2 className="mt-2 text-2xl font-bold">Monthly or annual subscriptions.</h2>
             </div>
-            <p className="max-w-md text-sm text-gray-400">
-              Free for everyday booking. Upgrade only when scheduling, reporting, or multi-location control starts
-              saving real time.
+            <p className="max-w-md text-sm text-[#B88989]">
+              Starter, Professional, and Enterprise use the live Stripe products and prices configured for Infamous Freight.
             </p>
           </div>
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-            {shipperPlans.map((plan) => (
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {STRIPE_SUBSCRIPTION_PLANS.map((plan) => (
               <PlanCard key={plan.name} plan={plan} />
             ))}
           </div>
@@ -198,16 +116,15 @@ const PricingPage: React.FC = () => {
         <section className="mb-16">
           <div className="mb-6 flex flex-col justify-between gap-2 lg:flex-row lg:items-end">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Drivers and carriers</p>
-              <h2 className="mt-2 text-2xl font-bold">Earn first. Upgrade after the platform proves itself.</h2>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">AI add-ons</p>
+              <h2 className="mt-2 text-2xl font-bold">One-time capacity packs for heavier workflows.</h2>
             </div>
-            <p className="max-w-md text-sm text-gray-400">
-              No fee to start. Driver Pro and Fleet are for drivers and small carriers that want priority access to
-              better loads.
+            <p className="max-w-md text-sm text-[#B88989]">
+              Add more AI actions, document scans, or voice minutes without changing the customer’s base subscription.
             </p>
           </div>
-          <div className="grid gap-5 md:grid-cols-3">
-            {driverPlans.map((plan) => (
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {STRIPE_ADD_ON_PLANS.map((plan) => (
               <PlanCard key={plan.name} plan={plan} />
             ))}
           </div>
@@ -216,22 +133,155 @@ const PricingPage: React.FC = () => {
         <section className="rounded-3xl border border-infamous-border bg-[#0f0f0f] p-8">
           <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">
-                Partner network
-              </p>
-              <h2 className="mt-2 text-2xl font-bold">Reach the freight ecosystem, not random eyeballs.</h2>
-              <p className="mt-3 max-w-2xl text-gray-400">
-                Fuel cards, insurance, factoring, repair, leasing, ELD, and lending providers can sponsor placements
-                inside the Infamous Freight network. Listings start at $99/month — featured, sponsored category, and
-                regional exclusive tiers are available.
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Need a custom invoice?</p>
+              <h2 className="mt-2 text-2xl font-bold">Use Stripe Invoicing for B2B freight customers.</h2>
+              <p className="mt-3 max-w-2xl text-[#B88989]">
+                For contract lanes, implementation work, enterprise onboarding, or custom account terms, request a quote
+                and Infamous Freight can issue a Stripe invoice instead of sending a public payment link.
               </p>
             </div>
             <Link
-              to="/partners"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-infamous-border bg-infamous-card px-5 py-3 font-semibold text-white transition hover:border-infamous-orange/50"
+              to="/request-quote"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-infamous-border bg-infamous-card px-5 py-3 font-semibold text-[#F5E8E8] transition hover:border-infamous-orange/50"
             >
-              See partner tiers <ArrowRight size={16} />
+              Request invoice quote <ArrowRight size={16} />
             </Link>
+          </div>
+        </section>
+
+        <section className="mt-16">
+          <div className="mb-6 max-w-2xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Carrier plans</p>
+            <h2 className="mt-2 text-2xl font-bold">Free to run loads. Premium tools when you want them.</h2>
+            <p className="mt-3 text-sm text-[#B88989]">
+              Carriers can find, accept, and run Infamous loads without paying a platform fee. Premium tiers add load
+              alerts, RPM tools, dispatch automation, and settlement dashboards for owner-operators and small fleets.
+            </p>
+          </div>
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            {[
+              {
+                name: 'Carrier Free',
+                price: '$0',
+                cadence: '/month',
+                tagline: 'Run Infamous loads with the basics included.',
+                features: [
+                  'Find and accept Infamous loads',
+                  'Document vault for COI, W-9, MC#',
+                  'Live tracking and POD upload',
+                  'Standard carrier pay terms',
+                ],
+              },
+              {
+                name: 'Carrier Pro',
+                price: '$29',
+                cadence: '/month',
+                tagline: 'For owner-operators who want an edge.',
+                features: [
+                  'Load alerts on saved lanes',
+                  'RPM and deadhead calculator',
+                  'Preferred lane suggestions',
+                  'Document vault and reminders',
+                ],
+              },
+              {
+                name: 'Carrier Elite',
+                price: '$79',
+                cadence: '/month',
+                tagline: 'For small fleets running multiple trucks.',
+                features: [
+                  'Everything in Pro',
+                  'AI route + backhaul planning',
+                  'Settlement dashboard',
+                  'Driver-app dispatch tools',
+                ],
+              },
+              {
+                name: 'Dispatch Partner',
+                price: '5–8%',
+                cadence: 'of gross',
+                tagline: 'Full dispatch service with paperwork support.',
+                features: [
+                  'Load sourcing and negotiation',
+                  'Rate confirmations and BOLs',
+                  'Detention and accessorial handling',
+                  'Compliance and document management',
+                ],
+              },
+            ].map((plan) => (
+              <div
+                key={plan.name}
+                className="flex h-full flex-col rounded-3xl border border-infamous-border bg-infamous-card p-6"
+              >
+                <h3 className="text-lg font-bold">{plan.name}</h3>
+                <div className="mt-3 flex items-baseline gap-1">
+                  <span className="text-4xl font-black tracking-tight">{plan.price}</span>
+                  <span className="text-sm text-[#B88989]/70">{plan.cadence}</span>
+                </div>
+                <p className="mt-3 text-sm leading-6 text-[#B88989]">{plan.tagline}</p>
+                <ul className="mt-5 space-y-3 text-sm">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex gap-2 text-[#F5E8E8]/80">
+                      <Check size={16} className="mt-0.5 flex-shrink-0 text-infamous-orange" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-16 grid gap-6 lg:grid-cols-2">
+          <div className="rounded-3xl border border-infamous-border bg-[#0f0f0f] p-6">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Payment options</p>
+            <h2 className="mt-2 text-2xl font-bold">Carrier pay terms, in plain language.</h2>
+            <ul className="mt-5 space-y-3 text-sm">
+              {[
+                ['Standard carrier pay', 'Free'],
+                ['48-hour QuickPay', '2.5%'],
+                ['Same-day QuickPay', '3.5%'],
+                ['Instant payout', '4% (or pass-through + markup)'],
+                ['Shipper card payment fee', 'Pass-through'],
+                ['Shipper ACH', 'Free or $5 admin cap'],
+              ].map(([label, value]) => (
+                <li
+                  key={label}
+                  className="flex items-center justify-between gap-4 rounded-xl border border-infamous-border bg-infamous-panel px-4 py-3 text-gray-200"
+                >
+                  <span className="font-semibold">{label}</span>
+                  <span className="text-sm text-[#F5E8E8]/80">{value}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-xs text-[#B88989]/70">
+              Final terms are confirmed at onboarding. Card processing fees follow Stripe&apos;s posted rates.
+            </p>
+          </div>
+
+          <div className="rounded-3xl border border-infamous-border bg-[#0f0f0f] p-6">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Dispatch services</p>
+            <h2 className="mt-2 text-2xl font-bold">Productized dispatch packages.</h2>
+            <ul className="mt-5 space-y-3 text-sm">
+              {[
+                ['Owner-operator dispatch', '5–8% of gross'],
+                ['Small fleet dispatch', '4–6% of gross'],
+                ['Dedicated dispatcher', '$599–$1,499/mo + lower %'],
+                ['Paperwork-only package', '$99–$299/mo'],
+                ['Compliance and docs', '$49–$149/mo'],
+              ].map(([label, value]) => (
+                <li
+                  key={label}
+                  className="flex items-center justify-between gap-4 rounded-xl border border-infamous-border bg-infamous-panel px-4 py-3 text-gray-200"
+                >
+                  <span className="font-semibold">{label}</span>
+                  <span className="text-sm text-[#F5E8E8]/80">{value}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-xs text-[#B88989]/70">
+              Need a custom package or fleet pricing? Use the contact form to scope it directly with operations.
+            </p>
           </div>
         </section>
       </div>

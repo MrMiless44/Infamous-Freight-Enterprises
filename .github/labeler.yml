@@ -1,0 +1,52 @@
+frontend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'apps/web/**'
+          - 'web/**'
+          - 'src/**/*.tsx'
+          - 'src/**/*.jsx'
+
+backend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'apps/api/**'
+          - 'api/**'
+          - 'server/**'
+          - 'src/**/*.ts'
+          - 'src/**/*.js'
+
+infrastructure:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/**'
+          - 'Dockerfile'
+          - 'docker/**'
+          - 'docker-compose*.yml'
+          - 'infra/**'
+          - 'scripts/**'
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.md'
+          - 'docs/**'
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'package.json'
+          - 'package-lock.json'
+          - 'pnpm-lock.yaml'
+          - 'yarn.lock'
+          - 'apps/**/package.json'
+          - 'apps/**/package-lock.json'
+          - 'apps/**/pnpm-lock.yaml'
+          - 'apps/**/yarn.lock'
+
+security:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/dependabot.yml'
+          - '.github/workflows/codeql.yml'
+          - '.github/workflows/scorecard.yml'
+          - 'docs/SBOM-POLICY.md'

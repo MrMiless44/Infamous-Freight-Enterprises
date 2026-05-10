@@ -1,0 +1,43 @@
+{
+  "name": "Infamous Freight",
+  "short_name": "Infamous",
+  "description": "Verified freight command center for quote intake, dispatch coordination, carrier execution, shipment visibility, and proof workflows.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#080204",
+  "theme_color": "#080204",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Request quote",
+      "short_name": "Quote",
+      "url": "/request-quote"
+    },
+    {
+      "name": "Apply to drive",
+      "short_name": "Drive",
+      "url": "/drive"
+    },
+    {
+      "name": "Contact support",
+      "short_name": "Support",
+      "url": "/contact"
+    }
+  ]
+}

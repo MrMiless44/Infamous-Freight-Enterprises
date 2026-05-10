@@ -4,8 +4,8 @@
 
 set -euo pipefail
 
-API_URL="${1:-https://api.infamousfreight.com}"
-WEB_URL="${2:-https://infamousfreight.com}"
+API_URL="${1:-https://www.infamousfreight.com}"
+WEB_URL="${2:-https://www.infamousfreight.com}"
 TENANT_ID="${3:-deployment-smoke-tenant}"
 ROLE="${4:-dispatcher}"
 
@@ -21,6 +21,7 @@ SKIP=0
 CURL_OPTS=(--silent --show-error --location --max-time 20)
 ALLOW_UNREACHABLE="${ALLOW_UNREACHABLE:-false}"
 CHECK_STRIPE_WEBHOOK="${CHECK_STRIPE_WEBHOOK:-true}"
+CHECK_DIRECT_API_ROOT="${CHECK_DIRECT_API_ROOT:-false}"
 
 pass() {
   echo -e "${GREEN}PASS${NC}"
@@ -136,7 +137,12 @@ echo "=================================="
 echo ""
 
 echo "--- API Health Checks ---"
-check_status "Health endpoint" "200" "$API_URL/health"
+if [ "$CHECK_DIRECT_API_ROOT" = "true" ]; then
+  check_status "Health endpoint" "200" "$API_URL/health"
+else
+  echo -n "Testing Health endpoint... "
+  skip_check
+fi
 check_status "API health endpoint" "200" "$API_URL/api/health"
 
 echo ""

@@ -1,0 +1,33 @@
+name: Auto Assign
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened]
+
+jobs:
+  assign-issue:
+    name: Assign Issue
+    if: github.event_name == 'issues'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Auto-assign issue
+        uses: pozil/auto-assign-issue@v1
+        with:
+          assignees: MrMiless44
+          numOfAssignee: 1
+
+  assign-pr:
+    name: Assign Pull Request
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Auto-assign PR
+        uses: kentaro-m/auto-assign-action@v1.2.3
+        with:
+          configuration-path: .github/auto_assign.yml

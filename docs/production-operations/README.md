@@ -15,6 +15,7 @@ It contains operations, compliance, dispatch, carrier, sales, launch readiness, 
 - [Operating Model](OPERATING_MODEL.md)
 - [Launch Checklist](LAUNCH_CHECKLIST.md)
 - [Compliance Checklist](COMPLIANCE_CHECKLIST.md)
+- [Legal Business Record Update](LEGAL_BUSINESS_RECORD_UPDATE.md)
 - [Carrier Vetting SOP](CARRIER_VETTING_SOP.md)
 - [Dispatch Workflow](DISPATCH_WORKFLOW.md)
 - [Daily Operations SOP](DAILY_OPERATIONS_SOP.md)
@@ -37,7 +38,7 @@ Do not prioritize advanced automation until the core freight lifecycle works end
 
 ## Architecture Rule
 
-Extend the existing NestJS modules and Prisma models before creating new ones. Use the MVP architecture alignment document to avoid duplicate domain models and conflicting workflows.
+Extend the existing Express API and Prisma models before creating new backend patterns. Use the MVP architecture alignment document to avoid duplicate domain models and conflicting workflows.
 
 ## Launch Rule
 

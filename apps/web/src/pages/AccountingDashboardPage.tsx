@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import {
   DollarSign, FileText, Send, CheckCircle, AlertTriangle,
-  Clock, TrendingUp, Download, ChevronRight, Truck
+  Clock, TrendingUp, Download, ChevronRight, Truck, Activity
 } from 'lucide-react';
+import WidgetErrorBoundary from '@/components/ui/WidgetErrorBoundary';
+import EmptyState from '@/components/ui/EmptyState';
 
 type InvoiceStatus = 'draft' | 'sent' | 'overdue' | 'paid';
 
@@ -32,7 +34,7 @@ interface CarrierPayRecord {
 }
 
 const mockInvoices: AccountingInvoice[] = [
-  { id: '1', number: 'INV-240427-001', shipper: 'Acme Corp', loadRef: 'LD-4815', shipperAmount: 3500, carrierPay: 2800, grossMargin: 700, grossMarginPct: 20, status: 'paid', podAttached: true, issueDate: 'Apr 1', dueDate: 'May 1', daysAge: 0 },
+  { id: '1', number: 'INV-240427-001', shipper: 'Harborside Retail Group', loadRef: 'LD-4815', shipperAmount: 3500, carrierPay: 2800, grossMargin: 700, grossMarginPct: 20, status: 'paid', podAttached: true, issueDate: 'Apr 1', dueDate: 'May 1', daysAge: 0 },
   { id: '2', number: 'INV-240427-002', shipper: 'Global Trade Inc.', loadRef: 'LD-4816', shipperAmount: 2200, carrierPay: 1750, grossMargin: 450, grossMarginPct: 20.5, status: 'sent', podAttached: true, issueDate: 'Apr 16', dueDate: 'May 16', daysAge: 11 },
   { id: '3', number: 'INV-240427-003', shipper: 'Pacific Imports', loadRef: 'LD-4817', shipperAmount: 4800, carrierPay: 3700, grossMargin: 1100, grossMarginPct: 22.9, status: 'sent', podAttached: true, issueDate: 'Apr 17', dueDate: 'May 17', daysAge: 10 },
   { id: '4', number: 'INV-240415-004', shipper: 'Midwest Supplies', loadRef: 'LD-4809', shipperAmount: 2100, carrierPay: 1680, grossMargin: 420, grossMarginPct: 20, status: 'overdue', podAttached: true, issueDate: 'Apr 10', dueDate: 'Apr 25', daysAge: 2 },
@@ -98,14 +100,21 @@ const AccountingDashboardPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Accounting</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Invoices, payments, and margin tracking</p>
+          <p className="text-sm text-[#B88989]/70 mt-0.5">Invoices, payments, and margin tracking · sample data</p>
         </div>
-        <button className="btn-primary flex items-center gap-2">
-          <FileText size={16} /> Create Invoice
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 bg-infamous-card border border-infamous-border rounded-xl px-3 py-2">
+            <Activity size={14} className="text-[#B88989]/70" />
+            <span className="text-xs text-[#B88989]/70">Demo data</span>
+          </div>
+          <button className="btn-primary flex items-center gap-2">
+            <FileText size={16} /> Create Invoice
+          </button>
+        </div>
       </div>
 
       {/* Summary Cards */}
+      <WidgetErrorBoundary label="Accounting summary">
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {[
           { label: 'Draft Invoices',    value: invoiceCounts.draft,                             icon: <Clock size={18} />,       color: 'text-yellow-400' },
@@ -119,11 +128,12 @@ const AccountingDashboardPage: React.FC = () => {
             <span className={stat.color}>{stat.icon}</span>
             <div>
               <p className="text-lg font-bold">{stat.value}</p>
-              <p className="text-xs text-gray-500">{stat.label}</p>
+              <p className="text-xs text-[#B88989]/70">{stat.label}</p>
             </div>
           </div>
         ))}
       </div>
+      </WidgetErrorBoundary>
 
       {/* Margin Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -134,7 +144,7 @@ const AccountingDashboardPage: React.FC = () => {
         ].map((item, i) => (
           <div key={i} className="card">
             <p className={`text-2xl font-bold ${item.color}`}>{item.value}</p>
-            <p className="text-sm text-gray-500 mt-1">{item.label}</p>
+            <p className="text-sm text-[#B88989]/70 mt-1">{item.label}</p>
           </div>
         ))}
       </div>
@@ -149,12 +159,12 @@ const AccountingDashboardPage: React.FC = () => {
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`px-4 py-3 text-sm font-medium border-b-2 transition-all ${
-              tab === t.key ? 'border-infamous-orange text-infamous-orange' : 'border-transparent text-gray-500 hover:text-white'
+              tab === t.key ? 'border-infamous-orange text-infamous-orange' : 'border-transparent text-[#B88989]/70 hover:text-[#F5E8E8]'
             }`}
           >
             {t.label}
             {t.key === 'invoices' && invoiceCounts.overdue > 0 && (
-              <span className="ml-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{invoiceCounts.overdue}</span>
+              <span className="ml-2 bg-red-500 text-[#F5E8E8] text-[10px] font-bold px-1.5 py-0.5 rounded-full">{invoiceCounts.overdue}</span>
             )}
           </button>
         ))}
@@ -171,7 +181,7 @@ const AccountingDashboardPage: React.FC = () => {
                   key={f}
                   onClick={() => setInvoiceFilter(f)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-medium capitalize transition-all ${
-                    invoiceFilter === f ? 'bg-infamous-orange text-white' : 'bg-infamous-card text-gray-400 hover:text-white border border-infamous-border'
+                    invoiceFilter === f ? 'bg-infamous-orange text-[#F5E8E8]' : 'bg-infamous-card text-[#B88989] hover:text-[#F5E8E8] border border-infamous-border'
                   }`}
                 >
                   {f} {count !== undefined && (
@@ -203,12 +213,12 @@ const AccountingDashboardPage: React.FC = () => {
                 </thead>
                 <tbody>
                   {filteredInvoices.map((inv) => (
-                    <tr key={inv.id} className="hover:bg-[#1a1a1a] transition-colors">
+                    <tr key={inv.id} className="hover:bg-infamous-panel transition-colors">
                       <td className="table-cell font-mono text-xs">{inv.number}</td>
                       <td className="table-cell font-medium">{inv.shipper}</td>
-                      <td className="table-cell text-xs text-gray-500">{inv.loadRef}</td>
+                      <td className="table-cell text-xs text-[#B88989]/70">{inv.loadRef}</td>
                       <td className="table-cell text-right font-semibold">${inv.shipperAmount.toLocaleString()}</td>
-                      <td className="table-cell text-right text-gray-400">${inv.carrierPay.toLocaleString()}</td>
+                      <td className="table-cell text-right text-[#B88989]">${inv.carrierPay.toLocaleString()}</td>
                       <td className="table-cell text-right text-green-400 font-semibold">${inv.grossMargin.toLocaleString()}</td>
                       <td className="table-cell text-right">
                         <span className={`text-xs font-medium ${inv.grossMarginPct >= 20 ? 'text-green-400' : inv.grossMarginPct >= 15 ? 'text-yellow-400' : 'text-red-400'}`}>
@@ -225,7 +235,7 @@ const AccountingDashboardPage: React.FC = () => {
                           {invoiceStatusIcon[inv.status]} {inv.status}
                         </span>
                       </td>
-                      <td className="table-cell text-xs text-gray-500">
+                      <td className="table-cell text-xs text-[#B88989]/70">
                         {inv.dueDate}
                         {inv.daysAge > 0 && (
                           <span className={`ml-1 ${inv.daysAge > 7 ? 'text-red-400' : 'text-yellow-400'}`}>
@@ -235,16 +245,16 @@ const AccountingDashboardPage: React.FC = () => {
                       </td>
                       <td className="table-cell">
                         <div className="flex gap-1">
-                          <button className="p-1.5 rounded-lg hover:bg-infamous-border text-gray-500 hover:text-white transition-colors">
+                          <button className="p-1.5 rounded-lg hover:bg-infamous-border text-[#B88989]/70 hover:text-[#F5E8E8] transition-colors">
                             <Download size={13} />
                           </button>
                           {inv.status === 'draft' && inv.podAttached && (
-                            <button className="p-1.5 rounded-lg hover:bg-infamous-border text-gray-500 hover:text-infamous-orange transition-colors">
+                            <button className="p-1.5 rounded-lg hover:bg-infamous-border text-[#B88989]/70 hover:text-infamous-orange transition-colors">
                               <Send size={13} />
                             </button>
                           )}
                           {inv.status !== 'paid' && (
-                            <button className="p-1.5 rounded-lg hover:bg-infamous-border text-gray-500 hover:text-white transition-colors" title="View detail">
+                            <button className="p-1.5 rounded-lg hover:bg-infamous-border text-[#B88989]/70 hover:text-[#F5E8E8] transition-colors" title="View detail">
                               <ChevronRight size={13} />
                             </button>
                           )}
@@ -254,7 +264,9 @@ const AccountingDashboardPage: React.FC = () => {
                   ))}
                   {filteredInvoices.length === 0 && (
                     <tr>
-                      <td colSpan={11} className="py-10 text-center text-gray-500 text-sm">No invoices</td>
+                      <td colSpan={11}>
+                        <EmptyState title="No invoices" description="No invoices match the selected status filter" />
+                      </td>
                     </tr>
                   )}
                 </tbody>
@@ -280,17 +292,17 @@ const AccountingDashboardPage: React.FC = () => {
               </thead>
               <tbody>
                 {mockCarrierPay.map((pay) => (
-                  <tr key={pay.id} className="hover:bg-[#1a1a1a] transition-colors">
+                  <tr key={pay.id} className="hover:bg-infamous-panel transition-colors">
                     <td className="table-cell font-medium">{pay.carrier}</td>
-                    <td className="table-cell text-xs text-gray-500">{pay.loadRef}</td>
+                    <td className="table-cell text-xs text-[#B88989]/70">{pay.loadRef}</td>
                     <td className="table-cell text-right font-semibold">${pay.amount.toLocaleString()}</td>
-                    <td className="table-cell text-xs text-gray-500">{pay.dueDate}</td>
+                    <td className="table-cell text-xs text-[#B88989]/70">{pay.dueDate}</td>
                     <td className="table-cell">
                       <span className={`badge ${carrierPayBadge[pay.status]} capitalize`}>{pay.status}</span>
                     </td>
                     <td className="table-cell">
                       {pay.status === 'pending' && (
-                        <button className="px-3 py-1 rounded-lg bg-infamous-orange/10 text-infamous-orange text-xs font-medium hover:bg-infamous-orange hover:text-white transition-all">
+                        <button className="px-3 py-1 rounded-lg bg-infamous-orange/10 text-infamous-orange text-xs font-medium hover:bg-infamous-orange hover:text-[#F5E8E8] transition-all">
                           Pay Now
                         </button>
                       )}

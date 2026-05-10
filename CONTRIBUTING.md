@@ -18,6 +18,15 @@ This repository uses a small, strict workflow so production work stays clean and
 6. Squash merge.
 7. Delete the branch after merge.
 
+## Package manager policy
+
+This repository is standardized on **pnpm**.
+
+- Use `pnpm install`, not `npm install`.
+- Keep `pnpm-lock.yaml` in sync with any dependency or package manifest changes.
+- Do not mix npm and pnpm lockfile workflows.
+- If a PR changes `package.json`, `apps/**/package.json`, or workspace dependency configuration, update the lockfile when required.
+
 ## Branch naming
 
 Use clear prefixes:
@@ -37,17 +46,17 @@ Avoid reviving stale Codex/Copilot branches. Cherry-pick unique work into a fres
 Run from the repository root:
 
 ```bash
-npm ci
-npm run lint
-npx tsc -p apps/api/tsconfig.json --noEmit
-npx tsc -p apps/web/tsconfig.json --noEmit
-npm --prefix apps/api run test:coverage
+pnpm install --frozen-lockfile
+pnpm run lint
+pnpm -C apps/api exec tsc -p tsconfig.json --noEmit
+pnpm -C apps/web exec tsc -p tsconfig.json --noEmit
+pnpm -C apps/api run test:coverage
 ```
 
 If available, run the repo validator:
 
 ```bash
-npm run validate
+pnpm run validate
 ```
 
 ## Pull request requirements
@@ -80,10 +89,23 @@ Use Conventional Commits:
 ```text
 feat: add dispatch workflow
 fix: correct API health check
-chore: update CI runtime
 docs: add launch checklist
+chore: update CI runtime
 security: tighten CORS policy
 ```
+
+## Pull requests from forks
+
+If you are contributing from a fork, a few CI behaviors are expected and not bugs:
+
+- **First-time contributors require maintainer approval.** GitHub will hold workflow runs from forks until a maintainer clicks **Approve and run** on the PR. This is a repository-level security setting, not a workflow misconfiguration.
+- **Some checks intentionally skip on fork PRs.** Workflows that require repository secrets cannot run from a fork because GitHub does not expose those secrets to fork-triggered `pull_request` runs, and `GITHUB_TOKEN`'s `security-events: write` permission is downgraded to read-only. Today this affects two workflows, which are explicitly gated to skip on fork PRs:
+  - **Vercel Preview** — needs `VERCEL_TOKEN` / `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID`. Netlify is the required deploy gate, so skipping here is non-blocking.
+  - **Codacy Security Scan** — needs `CODACY_PROJECT_TOKEN` and write access to code-scanning. Codacy still runs on push to `main`, on schedule, and on same-repo PRs, so coverage of the production branch is unchanged.
+
+  Other workflows that use secrets (Fly deploy, npm publish, etc.) only run on push, release, or `workflow_dispatch`, so they are not invoked by fork PRs in the first place.
+- **The following must still pass on fork PRs before merge:** lint, API and web TypeScript typecheck, unit tests, the smoke-test workflow's required checks, and CodeQL. If any of these fail, fix them in the PR; do not merge around them.
+- **Maintainers:** when re-running a fork PR after pushing fixes, click **Approve and run** again rather than merging green-checked-but-stale runs.
 
 ## Secrets
 

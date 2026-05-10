@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosError, AxiosRequestConfig, Method } from 'axios';
 import toast from 'react-hot-toast';
 import { useAppStore } from '@/store/app-store';
 
@@ -6,6 +6,28 @@ import { useAppStore } from '@/store/app-store';
 // to the Fly.io backend. Set VITE_API_URL to an absolute URL (e.g.
 // https://api.infamousfreight.com) only when bypassing the proxy.
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
+
+const MAX_RETRIES = 2;
+const RETRY_BASE_MS = 500;
+
+function isRetryable(error: AxiosError): boolean {
+  if (!error.response) return true;
+  const status = error.response.status;
+  return status === 502 || status === 503 || status === 504;
+}
+
+function retryDelay(attempt: number, error: AxiosError): number {
+  const retryAfter = error.response?.headers?.['retry-after'];
+  if (retryAfter) {
+    const seconds = Number(retryAfter);
+    if (!Number.isNaN(seconds) && seconds > 0 && seconds <= 60) return seconds * 1000;
+  }
+  return RETRY_BASE_MS * 2 ** attempt;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 class ApiClient {
   private client: AxiosInstance;
@@ -36,7 +58,16 @@ class ApiClient {
 
     this.client.interceptors.response.use(
       (response) => response,
-      (error: AxiosError<{ message?: string }>) => {
+      async (error: AxiosError<{ message?: string }>) => {
+        const config = error.config as AxiosRequestConfig & { _retryCount?: number };
+        const attempt = config?._retryCount ?? 0;
+
+        if (config && attempt < MAX_RETRIES && isRetryable(error)) {
+          config._retryCount = attempt + 1;
+          await sleep(retryDelay(attempt, error));
+          return this.client.request(config);
+        }
+
         const message = error.response?.data?.message || error.message || 'Something went wrong';
 
         if (error.response?.status === 401) {
@@ -58,6 +89,10 @@ class ApiClient {
     );
   }
 
+  // Legacy convenience methods include planned endpoints from earlier product
+  // slices. New code should prefer focused clients under src/lib that map to
+  // implemented Express routes documented in docs/API-REFERENCE.md.
+
   // Auth
   async login(email: string, password: string) {
     const { data } = await this.client.post('/auth/login', { email, password });
@@ -77,7 +112,7 @@ class ApiClient {
   }
 
   // Loads
-  async searchLoads(filters: Record<string, any>) {
+  async searchLoads(filters: Record<string, unknown>) {
     const { data } = await this.client.get('/loads/search', { params: filters });
     return data;
   }
@@ -130,7 +165,7 @@ class ApiClient {
     return data;
   }
 
-  async createInvoice(invoiceData: any) {
+  async createInvoice(invoiceData: Record<string, unknown>) {
     const { data } = await this.client.post('/invoices', invoiceData);
     return data;
   }
@@ -198,13 +233,18 @@ class ApiClient {
   }
 
   // Rate Con
-  async generateRateCon(loadData: any) {
+  async generateRateCon(loadData: Record<string, unknown>) {
     const { data } = await this.client.post('/ratecons/generate', loadData);
     return data;
   }
 
   // Generic request method
-  async request<T = any>(method: string, path: string, body?: any, config?: any): Promise<T> {
+  async request<T = unknown>(
+    method: Method,
+    path: string,
+    body?: unknown,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
     const { data } = await this.client.request({ method, url: path, data: body, ...config });
     return data;
   }

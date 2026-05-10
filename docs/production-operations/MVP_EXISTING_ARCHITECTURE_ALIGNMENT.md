@@ -4,19 +4,7 @@ This document maps the GitHub-native MVP build plan to the current repository ar
 
 ## Existing Backend Foundation
 
-The current NestJS app already imports these relevant modules:
-
-- `LoadsModule`
-- `InvoiceModule`
-- `RBACModule`
-- `RateConModule`
-- `AccountingModule`
-- `ComplianceExpiryModule`
-- `BrokerCreditModule`
-- `GeofencingModule`
-- `AuditLog` model in Prisma
-
-The MVP should extend this foundation instead of creating parallel systems.
+The current API is an Express service backed by Prisma. The MVP should extend the active Express routes, framework-free domain helpers, and Prisma schema instead of creating parallel backend systems.
 
 ## Existing Prisma Models That Support the MVP
 

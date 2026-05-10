@@ -1,7 +1,7 @@
 # Stripe Billing Automation
 
-Date: May 3, 2026
-Status: Checkout, webhook sync, customer portal, webhook logging, duplicate checkout guard, Checkout Session return IDs, webhook replay protection, one-time add-on checkout, and AI usage ledger foundation added
+Date: May 5, 2026
+Status: Checkout, webhook sync, customer portal, webhook logging, duplicate checkout guard, Checkout Session return IDs, webhook replay protection, mapped one-time add-on checkout, and AI usage ledger foundation added
 
 ## Purpose
 
@@ -10,8 +10,9 @@ This runbook documents Stripe billing automation for Infamous Freight after cata
 The implementation adds:
 
 - Backend-created Stripe Checkout Sessions
-- Server-side Stripe Price ID selection
-- One-time add-on Checkout Sessions
+- Server-side Stripe Price ID selection for subscriptions
+- Server-side Stripe Price ID selection for one-time AI add-ons
+- Public Stripe Payment Links surfaced on the pricing page
 - Stripe webhook verification
 - Stripe webhook replay protection with a 5-minute signature timestamp tolerance
 - Stripe webhook event logging
@@ -109,11 +110,33 @@ Request:
 
 ```json
 {
-  "purchaseType": "ai_addon_pack"
+  "purchaseType": "ai_action_pack_10000"
 }
 ```
 
-This endpoint creates a Stripe Checkout Session in `payment` mode using the trusted server-side one-time Price ID from `STRIPE_PRICE_ONE_TIME` or `STRIPE_PRICE_AI_ADDON_PACK`.
+Supported purchase types:
+
+```text
+ai_addon_pack
+ai_action_pack_2000
+ai_action_pack_10000
+ai_action_pack_50000
+document_ai_pack_500
+voice_ai_minutes_1000
+```
+
+Price mapping:
+
+| purchaseType | Stripe Price ID | Product |
+|---|---|---|
+| `ai_addon_pack` | `price_1TQeyLKCNuZqDozY0tb8Mwt8` | Legacy alias for AI Action Pack 2,000 |
+| `ai_action_pack_2000` | `price_1TQeyLKCNuZqDozY0tb8Mwt8` | AI Action Pack 2,000 |
+| `ai_action_pack_10000` | `price_1TQf0BKCNuZqDozYU5RBJVKo` | AI Action Pack 10,000 |
+| `ai_action_pack_50000` | `price_1TQf0TKCNuZqDozY3dghvydQ` | AI Action Pack 50,000 |
+| `document_ai_pack_500` | `price_1TQf0zKCNuZqDozYJSTRv4iY` | Document AI Pack 500 |
+| `voice_ai_minutes_1000` | `price_1TQf1IKCNuZqDozYebKKmHpu` | Voice AI Minutes 1,000 |
+
+This endpoint creates a Stripe Checkout Session in `payment` mode using the trusted server-side Price ID mapped from `purchaseType`. Environment variables can override those Price IDs per purchase type for future catalog migrations.
 
 A linked Stripe customer is required before one-time add-ons can be purchased. This keeps add-on purchases tied to an existing carrier billing account.
 
@@ -191,17 +214,27 @@ API:
 ```env
 STRIPE_SECRET_KEY=replace-with-stripe-secret-key
 STRIPE_WEBHOOK_SECRET=replace-with-stripe-webhook-signing-secret
-STRIPE_PRICE_ONE_TIME=replace-with-one-time-price-id
 STRIPE_PORTAL_RETURN_URL=https://www.infamousfreight.com/settings
 STRIPE_CHECKOUT_SUCCESS_URL=https://www.infamousfreight.com/settings?checkout=success&session_id={CHECKOUT_SESSION_ID}
 STRIPE_CHECKOUT_CANCEL_URL=https://www.infamousfreight.com/settings?checkout=canceled
+```
+
+Optional one-time add-on Price ID overrides:
+
+```env
+STRIPE_PRICE_ONE_TIME=price_1TQeyLKCNuZqDozY0tb8Mwt8
+STRIPE_PRICE_AI_ADDON_PACK=price_1TQeyLKCNuZqDozY0tb8Mwt8
+STRIPE_PRICE_AI_ACTION_PACK_2000=price_1TQeyLKCNuZqDozY0tb8Mwt8
+STRIPE_PRICE_AI_ACTION_PACK_10000=price_1TQf0BKCNuZqDozYU5RBJVKo
+STRIPE_PRICE_AI_ACTION_PACK_50000=price_1TQf0TKCNuZqDozY3dghvydQ
+STRIPE_PRICE_DOCUMENT_AI_PACK_500=price_1TQf0zKCNuZqDozYJSTRv4iY
+STRIPE_PRICE_VOICE_AI_MINUTES_1000=price_1TQf1IKCNuZqDozYebKKmHpu
 ```
 
 Optional fallback:
 
 ```env
 WEB_APP_URL=https://www.infamousfreight.com
-STRIPE_PRICE_AI_ADDON_PACK=replace-with-one-time-price-id
 ```
 
 If `STRIPE_CHECKOUT_SUCCESS_URL` does not include `session_id`, the API automatically appends `session_id={CHECKOUT_SESSION_ID}` before creating the Stripe Checkout Session.
@@ -335,6 +368,16 @@ client_reference_id: carrierId
 
 Use `metadata.carrierId` and `client_reference_id` to connect Stripe activity back to the internal carrier/order context.
 
+## Public pricing page catalog
+
+The public pricing page reads public Stripe Payment Links from:
+
+```text
+apps/web/src/lib/stripeCatalog.ts
+```
+
+Keep this file synchronized with Stripe whenever public prices or hosted Payment Links change. Do not put secret keys in this file.
+
 ## Customer portal setup
 
 In Stripe Dashboard:
@@ -381,7 +424,7 @@ After deployment:
    - `stripeCustomerId`
    - correct `subscriptionTier`
    - correct `status`
-10. Start one-time add-on checkout for the same internal carrier.
+10. Start one-time add-on checkout for each supported purchase type from the same internal carrier.
 11. Complete one-time checkout.
 12. Confirm `StripeOneTimePayment` has a record for the Checkout Session.
 13. Confirm `StripeWebhookEvent` logged both webhooks as `processed`.

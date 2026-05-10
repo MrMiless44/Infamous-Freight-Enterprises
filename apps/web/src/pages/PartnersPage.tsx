@@ -10,6 +10,7 @@ import {
   Send,
   Sparkles,
 } from 'lucide-react';
+import { submitNetlifyForm } from '@/lib/netlifyForms';
 
 type Tier = {
   name: string;
@@ -99,19 +100,31 @@ const initialForm = {
 const PartnersPage: React.FC = () => {
   const [form, setForm] = useState(initialForm);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const update = (key: keyof typeof initialForm, value: string) =>
     setForm((current) => ({ ...current, [key]: value }));
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    setError('');
+
+    try {
+      await submitNetlifyForm('partner-application', form);
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not submit the application.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <main className="min-h-screen bg-[#090909] px-6 py-10 text-white">
+    <main className="min-h-screen bg-[#090909] px-6 py-10 text-[#F5E8E8]">
       <div className="mx-auto max-w-6xl">
-        <Link to="/home" className="mb-8 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white">
+        <Link to="/home" className="mb-8 inline-flex items-center gap-2 text-sm text-[#B88989] hover:text-[#F5E8E8]">
           <ArrowLeft size={16} /> Back to Infamous Freight
         </Link>
 
@@ -122,7 +135,7 @@ const PartnersPage: React.FC = () => {
           <h1 className="text-4xl font-black tracking-tight sm:text-5xl">
             Reach shippers, drivers, and carriers who actually move freight.
           </h1>
-          <p className="mt-4 text-lg leading-8 text-gray-300">
+          <p className="mt-4 text-lg leading-8 text-[#F5E8E8]/80">
             The Partner Network connects vetted logistics-adjacent businesses with the people on Infamous Freight
             every day — no banner ads, no random retargeting, just curated placements where decisions are made.
           </p>
@@ -148,12 +161,12 @@ const PartnersPage: React.FC = () => {
               </div>
               <div className="flex items-baseline gap-1">
                 <span className="text-4xl font-black tracking-tight">{tier.price}</span>
-                <span className="text-sm text-gray-500">{tier.cadence}</span>
+                <span className="text-sm text-[#B88989]/70">{tier.cadence}</span>
               </div>
-              <p className="mt-3 text-sm leading-6 text-gray-400">{tier.tagline}</p>
+              <p className="mt-3 text-sm leading-6 text-[#B88989]">{tier.tagline}</p>
               <ul className="mt-5 space-y-3 text-sm">
                 {tier.features.map((feature) => (
-                  <li key={feature} className="flex gap-2 text-gray-300">
+                  <li key={feature} className="flex gap-2 text-[#F5E8E8]/80">
                     <Check size={16} className="mt-0.5 flex-shrink-0 text-infamous-orange" />
                     <span>{feature}</span>
                   </li>
@@ -170,7 +183,7 @@ const PartnersPage: React.FC = () => {
                 Who fits the network
               </p>
               <h2 className="mt-2 text-2xl font-bold">We approve partners by category fit, not by who pays first.</h2>
-              <p className="mt-3 text-gray-400">
+              <p className="mt-3 text-[#B88989]">
                 Placements are filtered to logistics-adjacent businesses our shippers and drivers actually use. That
                 keeps the network valuable to the user — and the leads useful to you.
               </p>
@@ -179,7 +192,7 @@ const PartnersPage: React.FC = () => {
               {targetPartners.map((partner) => (
                 <li
                   key={partner}
-                  className="flex items-center gap-2 rounded-xl border border-infamous-border bg-infamous-card px-3 py-2 text-sm text-gray-300"
+                  className="flex items-center gap-2 rounded-xl border border-infamous-border bg-infamous-card px-3 py-2 text-sm text-[#F5E8E8]/80"
                 >
                   <Building2 size={14} className="text-infamous-orange" />
                   {partner}
@@ -193,7 +206,7 @@ const PartnersPage: React.FC = () => {
           <div className="mb-6">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Apply to partner</p>
             <h2 className="mt-2 text-2xl font-bold">Tell us about your business and where you want to show up.</h2>
-            <p className="mt-2 max-w-2xl text-gray-400">
+            <p className="mt-2 max-w-2xl text-[#B88989]">
               We approve partners by category fit. Submit your details and a partnerships contact will respond with
               available placements and pricing.
             </p>
@@ -203,7 +216,7 @@ const PartnersPage: React.FC = () => {
             <div className="rounded-2xl border border-green-500/30 bg-green-500/10 p-6">
               <CheckCircle2 className="mb-3 text-green-400" size={32} />
               <h3 className="text-xl font-bold">Application received</h3>
-              <p className="mt-2 text-gray-300">
+              <p className="mt-2 text-[#F5E8E8]/80">
                 Thanks — partnerships will review your category and region fit and respond within a few business
                 days.
               </p>
@@ -213,7 +226,7 @@ const PartnersPage: React.FC = () => {
                   setSubmitted(false);
                   setForm(initialForm);
                 }}
-                className="mt-5 rounded-xl bg-infamous-orange px-4 py-2 font-semibold text-white"
+                className="mt-5 rounded-xl bg-infamous-orange px-4 py-2 font-semibold text-[#F5E8E8]"
               >
                 Submit another application
               </button>
@@ -230,32 +243,34 @@ const PartnersPage: React.FC = () => {
                   ['region', 'Region or coverage area'],
                 ].map(([key, label]) => (
                   <label key={key} className="block">
-                    <span className="mb-2 block text-sm font-medium text-gray-300">{label}</span>
+                    <span className="mb-2 block text-sm font-medium text-[#F5E8E8]/80">{label}</span>
                     <input
                       value={form[key as keyof typeof initialForm]}
                       onChange={(event) => update(key as keyof typeof initialForm, event.target.value)}
-                      className="w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"
+                      className="w-full rounded-xl border border-infamous-border bg-infamous-panel px-4 py-3 text-[#F5E8E8] outline-none transition focus:border-infamous-orange"
                       placeholder={label}
                     />
                   </label>
                 ))}
               </div>
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-gray-300">Notes</span>
+                <span className="mb-2 block text-sm font-medium text-[#F5E8E8]/80">Notes</span>
                 <textarea
                   value={form.notes}
                   onChange={(event) => update('notes', event.target.value)}
-                  className="min-h-32 w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"
+                  className="min-h-32 w-full rounded-xl border border-infamous-border bg-infamous-panel px-4 py-3 text-[#F5E8E8] outline-none transition focus:border-infamous-orange"
                   placeholder="Tell us what your business offers and which placement tier you are interested in."
                 />
               </label>
+              {error ? <p className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">{error}</p> : null}
               <button
                 type="submit"
-                className="inline-flex items-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 font-semibold text-white transition hover:opacity-90"
+                disabled={loading}
+                className="inline-flex items-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 font-semibold text-[#F5E8E8] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Submit application <Send size={17} />
+                {loading ? 'Submitting...' : 'Submit application'} <Send size={17} />
               </button>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-[#B88989]/70">
                 Prefer to talk first?{' '}
                 <Link to="/request-quote?partner=true" className="text-infamous-orange hover:underline">
                   Send a partnerships note <ArrowRight size={12} className="inline" />

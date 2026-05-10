@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # Optional: load environment variables from ENV_FILE (default: .env)
-ENV_FILE="${ENV_FILE:-.env}"
-if [[ -f "$ENV_FILE" ]]; then
+ENV_FILE="${ENV_FILE:-}"
+if [[ -n "$ENV_FILE" && -f "$ENV_FILE" ]]; then
   set -a
   # shellcheck disable=SC1090
   source "$ENV_FILE"
