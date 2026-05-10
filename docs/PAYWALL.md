@@ -19,6 +19,7 @@ Allowed statuses:
 ```text
 active
 trialing
+trial
 ```
 
 Unpaid users are redirected to:
@@ -50,13 +51,14 @@ Public routes remain outside the paywall:
 
 ## API behavior
 
-Protected operational API routes require a paid subscription header until subscription status is moved into verified server-side auth claims or tenant billing lookup.
+Protected operational API routes require an active or trial billing status. The API prefers carrier status stored by Stripe webhook sync; client-set subscription headers are only accepted in tests or when `ALLOW_CLIENT_SUBSCRIPTION_STATUS_HEADER=true` is set for a transitional environment.
 
-Accepted headers:
+Transitional headers:
 
 ```text
 x-subscription-status: active
 x-subscription-status: trialing
+x-subscription-status: trial
 ```
 
 Aliases:
@@ -101,10 +103,4 @@ POST /api/billing/webhook
 
 ## Production hardening needed
 
-The API header-based gate is a transitional control. For stronger enforcement, move subscription status lookup server-side by using one of these approaches:
-
-1. Validate Supabase JWT server-side and read trusted `app_metadata.subscription_status`.
-2. Query carrier billing status from the database using `x-tenant-id`.
-3. Sync Stripe subscription status to the carrier record on webhook events and enforce from that stored value.
-
-Do not rely on client-set billing headers as the final production authority for sensitive operations.
+The remaining header-based tenant and role gate is transitional. For stronger enforcement, validate Supabase JWTs server-side, derive tenant and role from trusted claims or database membership, and stop accepting caller-controlled role headers for sensitive operations.

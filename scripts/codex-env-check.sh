@@ -33,6 +33,7 @@ optional_vars=(
   STRIPE_CHECKOUT_SUCCESS_URL
   STRIPE_CHECKOUT_CANCEL_URL
   STRIPE_PORTAL_RETURN_URL
+  STRIPE_ACCOUNT_ID
   STRIPE_PUBLISHABLE_KEY
   VITE_STRIPE_PUBLIC_KEY
   SUPABASE_ANON_KEY
@@ -196,6 +197,11 @@ for var in "${optional_vars[@]}"; do
   check_var "$var" "false"
 done
 check_one_of "false" STRIPE_PUBLISHABLE_KEY VITE_STRIPE_PUBLIC_KEY
+
+if [[ -n "${STRIPE_ACCOUNT_ID:-}" && ! "${STRIPE_ACCOUNT_ID}" =~ ^acct_[A-Za-z0-9]+$ ]]; then
+  echo "❌ STRIPE_ACCOUNT_ID does not look like a Stripe account ID"
+  placeholder_values=$((placeholder_values + 1))
+fi
 
 printf '\nSafe environment inventory — names only, no values:\n'
 printenv | cut -d= -f1 | sort

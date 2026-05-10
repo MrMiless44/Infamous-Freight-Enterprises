@@ -21,11 +21,11 @@
     "test:coverage": "node scripts/ensure-api-workspace.js && pnpm -C apps/api run test:coverage",
     "prisma:generate": "node scripts/ensure-api-workspace.js && pnpm -C apps/api run prisma:generate",
     "prisma:migrate": "node scripts/ensure-api-workspace.js && pnpm -C apps/api exec prisma migrate dev --schema prisma/schema.prisma",
-    "prisma:seed": "node scripts/ensure-api-workspace.js && pnpm -C apps/api exec prisma db seed --schema prisma/schema.prisma",
+    "prisma:seed": "pnpm run prisma:generate && node scripts/ensure-api-workspace.js && pnpm -C apps/api exec prisma db seed --schema prisma/schema.prisma",
     "db:setup": "pnpm run prisma:generate && pnpm run prisma:migrate && pnpm run prisma:seed",
-    "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
-    "docker:build": "docker-compose build",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:build": "docker compose build",
     "docker:install-cli": "bash scripts/install-docker-cli.sh",
     "deploy:install-clis": "sh -c 'if [ \"$(id -u)\" -eq 0 ]; then bash scripts/install-dev-clis.sh; elif command -v sudo >/dev/null 2>&1; then sudo bash scripts/install-dev-clis.sh; else echo \"Error: scripts/install-dev-clis.sh requires root. Re-run with sudo: sudo pnpm run deploy:install-clis\" >&2; exit 1; fi'",
     "ai:check": "bash scripts/check-ai-runtime.sh",
@@ -41,6 +41,9 @@
     "production:preflight": "bash scripts/production-preflight.sh",
     "production:canonical-env": "bash scripts/production-canonical-env.sh",
     "production:smoke-test": "bash scripts/production-smoke-test.sh",
+    "production:deploy-vps": "bash scripts/deploy-vps.sh",
+    "production:backup-postgres": "bash scripts/backup-postgres.sh",
+    "production:restore-postgres": "bash scripts/restore-postgres.sh",
     "setup:clis": "bash scripts/install-required-clis.sh",
     "tools:install": "pnpm run setup:clis",
     "tools:verify": "bash scripts/verify-required-clis.sh",
@@ -51,17 +54,21 @@
     "bootstrap": "bash scripts/bootstrap.sh",
     "netlify:production:readiness": "bash scripts/netlify-production-readiness.sh",
     "production:secrets:setup": "bash scripts/setup-production-secrets.sh",
-    "production:secrets:dry-run": "DRY_RUN=true bash scripts/setup-production-secrets.sh"
+    "production:secrets:dry-run": "DRY_RUN=true bash scripts/setup-production-secrets.sh",
+    "check:prisma-versions": "node scripts/check-prisma-version-alignment.js"
   },
   "devDependencies": {
+    "@netlify/edge-functions": "^3.0.6",
+    "@netlify/functions": "^5.2.0",
     "@resvg/resvg-js": "2.6.2",
-    "concurrently": "^9.0.0"
+    "concurrently": "^9.0.0",
+    "prisma": "7.8.0"
   },
   "overrides": {
     "react-is": "^18.3.1",
     "tar-fs": "~2.1.4",
-    "prisma": "6.19.3",
-    "@prisma/client": "6.19.3"
+    "prisma": "7.8.0",
+    "@prisma/client": "7.8.0"
   },
   "workspaces": [
     "apps/*"
@@ -78,5 +85,9 @@
       "esbuild",
       "prisma"
     ]
+  },
+  "dependencies": {
+    "@netlify/database": "^1.0.0",
+    "netlify-build-plugin-pagewatch": "^1.0.2"
   }
 }

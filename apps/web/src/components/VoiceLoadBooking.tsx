@@ -1,5 +1,30 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, MicOff, Loader2, CheckCircle, Truck, MapPin, DollarSign, Clock } from 'lucide-react';
+import { Mic, MicOff, Loader2, CheckCircle, Truck, MapPin, Clock } from 'lucide-react';
+
+interface SpeechRecognitionResult {
+  readonly transcript: string;
+  readonly confidence: number;
+}
+
+interface SpeechRecognitionResultList {
+  readonly length: number;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionEvent {
+  readonly results: SpeechRecognitionResultList[];
+}
+
+interface SpeechRecognitionInstance {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onend: (() => void) | null;
+  onerror: (() => void) | null;
+  start(): void;
+  stop(): void;
+}
 
 interface VoiceResult {
   command: string;
@@ -13,24 +38,29 @@ interface VoiceResult {
   }>;
 }
 
+function getSpeechRecognitionConstructor(): (new () => SpeechRecognitionInstance) | null {
+  const win = window as unknown as Record<string, unknown>;
+  return (win.SpeechRecognition ?? win.webkitSpeechRecognition ?? null) as (new () => SpeechRecognitionInstance) | null;
+}
+
 const VoiceLoadBooking: React.FC = () => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [result, setResult] = useState<VoiceResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
 
   useEffect(() => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition = getSpeechRecognitionConstructor();
     if (SpeechRecognition) {
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = true;
       recognitionRef.current.lang = 'en-US';
 
-      recognitionRef.current.onresult = (event: any) => {
+      recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
         const text = Array.from(event.results)
-          .map((r: any) => r[0].transcript)
+          .map((resultList) => resultList[0].transcript)
           .join('');
         setTranscript(text);
       };
@@ -74,13 +104,13 @@ const VoiceLoadBooking: React.FC = () => {
     setLoading(false);
   };
 
-  const browserSupported = !!(window as any).SpeechRecognition || !!(window as any).webkitSpeechRecognition;
+  const browserSupported = !!getSpeechRecognitionConstructor();
 
   return (
     <div className="card max-w-2xl mx-auto">
       <div className="text-center mb-6">
         <h2 className="text-xl font-bold mb-1">Voice Load Booking</h2>
-        <p className="text-sm text-gray-500">Speak naturally — no typing required</p>
+        <p className="text-sm text-[#B88989]/70">Speak naturally — no typing required</p>
       </div>
 
       {!browserSupported && (
@@ -100,7 +130,7 @@ const VoiceLoadBooking: React.FC = () => {
               : 'bg-gradient-to-br from-infamous-orange to-infamous-orange-light hover:scale-105 shadow-xl shadow-infamous-orange/20'
           } disabled:opacity-30`}
         >
-          {isListening ? <MicOff size={28} className="text-white" /> : <Mic size={28} className="text-white" />}
+          {isListening ? <MicOff size={28} className="text-[#F5E8E8]" /> : <Mic size={28} className="text-[#F5E8E8]" />}
         </button>
       </div>
 
@@ -124,13 +154,13 @@ const VoiceLoadBooking: React.FC = () => {
       {/* Transcript */}
       {transcript && (
         <div className="bg-infamous-dark rounded-xl p-4 mb-4">
-          <p className="text-xs text-gray-500 mb-1">You said:</p>
-          <p className="text-white italic">"{transcript}"</p>
+          <p className="text-xs text-[#B88989]/70 mb-1">You said:</p>
+          <p className="text-[#F5E8E8] italic">"{transcript}"</p>
         </div>
       )}
 
       {loading && (
-        <div className="flex items-center justify-center gap-2 text-gray-400 py-8">
+        <div className="flex items-center justify-center gap-2 text-[#B88989] py-8">
           <Loader2 size={18} className="animate-spin" />
           <span>Analyzing your request...</span>
         </div>
@@ -148,19 +178,19 @@ const VoiceLoadBooking: React.FC = () => {
             <div key={i} className="flex items-center gap-4 p-3 bg-infamous-dark rounded-xl border border-infamous-border hover:border-infamous-orange/30 transition-all">
               <div className="flex-1">
                 <div className="flex items-center gap-2 text-sm">
-                  <MapPin size={12} className="text-gray-500" />
+                  <MapPin size={12} className="text-[#B88989]/70" />
                   <span>{match.origin}</span>
-                  <span className="text-gray-600">→</span>
+                  <span className="text-[#B88989]/60">→</span>
                   <span>{match.dest}</span>
                 </div>
-                <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                <div className="flex items-center gap-3 mt-1 text-xs text-[#B88989]/70">
                   <span className="flex items-center gap-1"><Truck size={10} /> {match.equipment}</span>
                   <span className="flex items-center gap-1"><Clock size={10} /> {match.distance} mi</span>
                 </div>
               </div>
               <div className="text-right">
                 <p className="font-bold text-infamous-orange">${match.rate.toLocaleString()}</p>
-                <p className="text-xs text-gray-500">${(match.rate / match.distance).toFixed(2)}/mi</p>
+                <p className="text-xs text-[#B88989]/70">${(match.rate / match.distance).toFixed(2)}/mi</p>
               </div>
               <button className="btn-primary text-xs py-1.5 px-3">Book</button>
             </div>
@@ -171,7 +201,7 @@ const VoiceLoadBooking: React.FC = () => {
       {/* Suggestions */}
       {!result && !loading && !transcript && (
         <div className="grid grid-cols-1 gap-2 mt-4">
-          <p className="text-xs text-gray-600 mb-2">Try saying:</p>
+          <p className="text-xs text-[#B88989]/60 mb-2">Try saying:</p>
           {[
             '"Find me a dry van load from Chicago"',
             '"Book the highest paying reefer near Dallas"',
@@ -181,7 +211,7 @@ const VoiceLoadBooking: React.FC = () => {
             <button
               key={s}
               onClick={() => { setTranscript(s.replace(/"/g, '')); processCommand(s.replace(/"/g, '')); }}
-              className="text-left text-sm text-gray-400 hover:text-white bg-infamous-dark border border-infamous-border hover:border-infamous-orange/30 rounded-xl px-4 py-2.5 transition-all"
+              className="text-left text-sm text-[#B88989] hover:text-[#F5E8E8] bg-infamous-dark border border-infamous-border hover:border-infamous-orange/30 rounded-xl px-4 py-2.5 transition-all"
             >
               {s}
             </button>

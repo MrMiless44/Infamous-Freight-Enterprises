@@ -66,6 +66,36 @@ If Netlify needs a site ID, set it explicitly:
 NETLIFY_SITE_ID=<site-id> bash scripts/setup-production-secrets.sh .env.production.secrets
 ```
 
+
+## Stripe production hardening checklist
+
+Complete these after applying or rotating production secrets:
+
+- [ ] Confirm all Stripe runtime values are stored as hidden/secret values in provider settings.
+- [ ] Rotate any Stripe key or webhook signing secret previously entered as visible/plain-text.
+- [ ] Re-add rotated values only via secret managers (never in git, comments, screenshots, or logs).
+- [ ] Use a restricted live secret key for backend operations when endpoint compatibility allows.
+- [ ] Ensure the frontend uses only `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`.
+- [ ] Trigger a fresh Fly.io API deploy and a fresh Netlify production deploy after updates.
+
+Required webhook events:
+
+- `checkout.session.completed`
+- `customer.subscription.created`
+- `customer.subscription.updated`
+- `customer.subscription.deleted`
+- `invoice.payment_succeeded`
+- `invoice.payment_failed`
+- `payment_intent.succeeded`
+- `payment_intent.payment_failed`
+
+Validation steps:
+
+- [ ] Successful checkout.session and subscription activation path.
+- [ ] Webhook delivery success for each required event type.
+- [ ] Customer portal access from production billing UI.
+- [ ] Failed payment flow updates access state correctly.
+
 ## Required dashboard checks
 
 ### Stripe

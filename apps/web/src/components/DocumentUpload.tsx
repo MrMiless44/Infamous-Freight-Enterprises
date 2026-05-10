@@ -8,10 +8,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, File, X, Loader2, CheckCircle, FileText, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+interface UploadedDocument {
+  url: string;
+  loadId: string;
+  type: string;
+  fileName: string;
+}
+
 interface DocumentUploadProps {
   loadId: string;
   documentType: 'BOL' | 'POD' | 'RATE_CONFIRMATION';
-  onUploadComplete?: (doc: any) => void;
+  onUploadComplete?: (doc: UploadedDocument) => void;
 }
 
 export function DocumentUpload({ loadId, documentType, onUploadComplete }: DocumentUploadProps) {
@@ -66,7 +73,7 @@ export function DocumentUpload({ loadId, documentType, onUploadComplete }: Docum
         body: formData,
       });
 
-      const data = await response.json();
+      const data: UploadedDocument = await response.json();
 
       setFiles(prev => prev.map((f, idx) => 
         idx === index ? { ...f, status: 'done', url: data.url } : f
@@ -107,15 +114,15 @@ export function DocumentUpload({ loadId, documentType, onUploadComplete }: Docum
         className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 ${
           isDragActive
             ? 'border-red-600 bg-red-600/5'
-            : 'border-zinc-700 bg-zinc-900/50 hover:border-zinc-500'
+            : 'border-infamous-border bg-infamous-card/50 hover:border-zinc-500'
         }`}
       >
         <input {...getInputProps()} />
-        <Upload aria-hidden="true" className="h-10 w-10 text-zinc-500 mx-auto mb-3" />
-        <p className="text-white font-medium">
+        <Upload aria-hidden="true" className="h-10 w-10 text-[#B88989]/70 mx-auto mb-3" />
+        <p className="text-[#F5E8E8] font-medium">
           {isDragActive ? 'Drop files here' : `Upload ${typeLabels[documentType]}`}
         </p>
-        <p className="text-sm text-zinc-400 mt-1">
+        <p className="text-sm text-[#B88989] mt-1">
           Drag & drop or click to browse. PDF, PNG, JPG up to 10MB.
         </p>
       </div>
@@ -128,28 +135,28 @@ export function DocumentUpload({ loadId, documentType, onUploadComplete }: Docum
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="flex items-center gap-3 p-3 rounded-lg border border-zinc-800 bg-zinc-900/50"
+            className="flex items-center gap-3 p-3 rounded-lg border border-infamous-border bg-infamous-card/50"
           >
             <div className="text-red-500">
               {typeIcons[documentType]}
             </div>
             
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-white truncate">{file.file.name}</p>
+              <p className="text-sm text-[#F5E8E8] truncate">{file.file.name}</p>
               <div className="flex items-center gap-2 mt-1">
                 {file.status === 'uploading' && (
                   <>
-                    <div className="flex-1 h-1.5 rounded-full bg-zinc-800 overflow-hidden">
+                    <div className="flex-1 h-1.5 rounded-full bg-infamous-panel overflow-hidden">
                       <motion.div
                         className="h-full bg-red-600"
                         animate={{ width: `${file.progress}%` }}
                       />
                     </div>
-                    <span className="text-xs text-zinc-400">{file.progress}%</span>
+                    <span className="text-xs text-[#B88989]">{file.progress}%</span>
                   </>
                 )}
                 {file.status === 'done' && (
-                  <span className="flex items-center gap-1 text-xs text-emerald-400">
+                  <span className="flex items-center gap-1 text-xs text-[#36D399]">
                     <CheckCircle className="h-3 w-3" />
                     Uploaded
                   </span>
@@ -163,7 +170,7 @@ export function DocumentUpload({ loadId, documentType, onUploadComplete }: Docum
             <button
               onClick={() => removeFile(index)}
               aria-label={`Remove ${file.file.name}`}
-              className="text-zinc-500 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 rounded"
+              className="text-[#B88989]/70 hover:text-[#F5E8E8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 rounded"
             >
               <X className="h-4 w-4" aria-hidden="true" />
             </button>

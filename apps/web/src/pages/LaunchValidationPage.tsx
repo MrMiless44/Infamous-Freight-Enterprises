@@ -216,14 +216,14 @@ const LaunchValidationPage: React.FC = () => {
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
             <AlertTriangle className="text-red-400" size={24} />
           </div>
-          <h1 className="text-2xl font-bold text-white">Launch validation restricted</h1>
-          <p className="mt-3 text-sm text-gray-400">
+          <h1 className="text-2xl font-bold text-[#F5E8E8]">Launch validation restricted</h1>
+          <p className="mt-3 text-sm text-[#B88989]">
             This tool creates real workflow records. Access is limited to owner/admin users and requires
             <span className="font-mono text-gray-200"> VITE_LAUNCH_VALIDATION_ENABLED=true</span> in production.
           </p>
-          <div className="mt-5 rounded-xl border border-infamous-border bg-black/20 p-4 text-left text-sm text-gray-400">
-            <p>Feature flag: <span className="font-mono text-white">{String(launchValidationEnabled)}</span></p>
-            <p>Current role: <span className="font-mono text-white">{context.role}</span></p>
+          <div className="mt-5 rounded-xl border border-infamous-border bg-black/20 p-4 text-left text-sm text-[#B88989]">
+            <p>Feature flag: <span className="font-mono text-[#F5E8E8]">{String(launchValidationEnabled)}</span></p>
+            <p>Current role: <span className="font-mono text-[#F5E8E8]">{context.role}</span></p>
           </div>
         </div>
       </div>
@@ -235,8 +235,8 @@ const LaunchValidationPage: React.FC = () => {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="text-sm uppercase tracking-[0.25em] text-infamous-orange">Phase 5</p>
-          <h1 className="mt-2 text-3xl font-bold text-white">Launch Validation</h1>
-          <p className="mt-2 max-w-3xl text-sm text-gray-400">
+          <h1 className="mt-2 text-3xl font-bold text-[#F5E8E8]">Launch Validation</h1>
+          <p className="mt-2 max-w-3xl text-sm text-[#B88989]">
             Validate the core freight workflows against the live API using the current carrier context.
             Run this before production migration, launch demos, or customer onboarding.
           </p>
@@ -244,7 +244,7 @@ const LaunchValidationPage: React.FC = () => {
         <button
           onClick={runValidation}
           disabled={isRunning}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 text-sm font-semibold text-white transition hover:bg-infamous-orange-light disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 text-sm font-semibold text-[#F5E8E8] transition hover:bg-infamous-orange-light disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isRunning ? <Loader2 size={18} className="animate-spin" /> : <PlayCircle size={18} />}
           {isRunning ? 'Running validation' : 'Run validation'}
@@ -253,19 +253,19 @@ const LaunchValidationPage: React.FC = () => {
 
       <div className="grid gap-4 md:grid-cols-4">
         <div className="rounded-2xl border border-infamous-border bg-infamous-card p-4">
-          <p className="text-xs uppercase tracking-wide text-gray-500">Carrier context</p>
-          <p className="mt-2 truncate text-lg font-semibold text-white">{context.tenantId}</p>
+          <p className="text-xs uppercase tracking-wide text-[#B88989]/70">Carrier context</p>
+          <p className="mt-2 truncate text-lg font-semibold text-[#F5E8E8]">{context.tenantId}</p>
         </div>
         <div className="rounded-2xl border border-infamous-border bg-infamous-card p-4">
-          <p className="text-xs uppercase tracking-wide text-gray-500">Role</p>
-          <p className="mt-2 text-lg font-semibold text-white">{context.role}</p>
+          <p className="text-xs uppercase tracking-wide text-[#B88989]/70">Role</p>
+          <p className="mt-2 text-lg font-semibold text-[#F5E8E8]">{context.role}</p>
         </div>
         <div className="rounded-2xl border border-infamous-border bg-infamous-card p-4">
-          <p className="text-xs uppercase tracking-wide text-gray-500">Passed</p>
+          <p className="text-xs uppercase tracking-wide text-[#B88989]/70">Passed</p>
           <p className="mt-2 text-lg font-semibold text-green-400">{passedCount}/{checks.length}</p>
         </div>
         <div className="rounded-2xl border border-infamous-border bg-infamous-card p-4">
-          <p className="text-xs uppercase tracking-wide text-gray-500">Failed</p>
+          <p className="text-xs uppercase tracking-wide text-[#B88989]/70">Failed</p>
           <p className="mt-2 text-lg font-semibold text-red-400">{failedCount}</p>
         </div>
       </div>
@@ -278,13 +278,13 @@ const LaunchValidationPage: React.FC = () => {
                 {check.status === 'passed' && <CheckCircle2 className="text-green-400" size={22} />}
                 {check.status === 'failed' && <XCircle className="text-red-400" size={22} />}
                 {check.status === 'running' && <Loader2 className="animate-spin text-infamous-orange" size={22} />}
-                {check.status === 'pending' && <ClipboardCheck className="text-gray-500" size={22} />}
+                {check.status === 'pending' && <ClipboardCheck className="text-[#B88989]/70" size={22} />}
               </div>
               <div className="min-w-0 flex-1">
-                <h2 className="font-semibold text-white">{check.name}</h2>
-                <p className="mt-1 text-sm text-gray-400">{check.detail ?? 'Not run yet'}</p>
+                <h2 className="font-semibold text-[#F5E8E8]">{check.name}</h2>
+                <p className="mt-1 text-sm text-[#B88989]">{check.detail ?? 'Not run yet'}</p>
               </div>
-              <span className="rounded-full border border-infamous-border px-2.5 py-1 text-xs uppercase text-gray-400">
+              <span className="rounded-full border border-infamous-border px-2.5 py-1 text-xs uppercase text-[#B88989]">
                 {check.status}
               </span>
             </div>
@@ -295,33 +295,33 @@ const LaunchValidationPage: React.FC = () => {
       <div className="rounded-2xl border border-infamous-border bg-infamous-card p-5">
         <div className="flex items-center gap-3">
           <ShieldCheck className="text-infamous-orange" size={24} />
-          <h2 className="text-xl font-semibold text-white">Launch gates</h2>
+          <h2 className="text-xl font-semibold text-[#F5E8E8]">Launch gates</h2>
         </div>
         <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-xl border border-infamous-border bg-black/20 p-4">
             <Truck className="mb-3 text-infamous-orange" size={20} />
-            <h3 className="font-semibold text-white">Dispatcher workflow</h3>
-            <p className="mt-2 text-sm text-gray-400">Quote, load, assignment, dispatch, and tracking lifecycle.</p>
+            <h3 className="font-semibold text-[#F5E8E8]">Dispatcher workflow</h3>
+            <p className="mt-2 text-sm text-[#B88989]">Quote, load, assignment, dispatch, and tracking lifecycle.</p>
           </div>
           <div className="rounded-xl border border-infamous-border bg-black/20 p-4">
             <FileCheck2 className="mb-3 text-infamous-orange" size={20} />
-            <h3 className="font-semibold text-white">POD workflow</h3>
-            <p className="mt-2 text-sm text-gray-400">Delivery confirmation, POD verification, and delivered tracking state.</p>
+            <h3 className="font-semibold text-[#F5E8E8]">POD workflow</h3>
+            <p className="mt-2 text-sm text-[#B88989]">Delivery confirmation, POD verification, and delivered tracking state.</p>
           </div>
           <div className="rounded-xl border border-infamous-border bg-black/20 p-4">
             <ClipboardCheck className="mb-3 text-infamous-orange" size={20} />
-            <h3 className="font-semibold text-white">Payment workflow</h3>
-            <p className="mt-2 text-sm text-gray-400">Carrier payment creation and status lifecycle.</p>
+            <h3 className="font-semibold text-[#F5E8E8]">Payment workflow</h3>
+            <p className="mt-2 text-sm text-[#B88989]">Carrier payment creation and status lifecycle.</p>
           </div>
           <div className="rounded-xl border border-infamous-border bg-black/20 p-4">
             <Radio className="mb-3 text-infamous-orange" size={20} />
-            <h3 className="font-semibold text-white">Reporting workflow</h3>
-            <p className="mt-2 text-sm text-gray-400">Operational metric rollup and load-board lifecycle checks.</p>
+            <h3 className="font-semibold text-[#F5E8E8]">Reporting workflow</h3>
+            <p className="mt-2 text-sm text-[#B88989]">Operational metric rollup and load-board lifecycle checks.</p>
           </div>
         </div>
         {lastLoadId && (
-          <p className="mt-5 rounded-xl border border-infamous-border bg-black/20 px-4 py-3 text-sm text-gray-400">
-            Last validation load: <span className="font-mono text-white">{lastLoadId}</span>
+          <p className="mt-5 rounded-xl border border-infamous-border bg-black/20 px-4 py-3 text-sm text-[#B88989]">
+            Last validation load: <span className="font-mono text-[#F5E8E8]">{lastLoadId}</span>
           </p>
         )}
       </div>

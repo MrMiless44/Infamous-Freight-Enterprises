@@ -59,6 +59,17 @@ describe('quote intake workflow', () => {
     expect(response.body.error).toBe('quote_lead_missing_fields');
   });
 
+  it('rejects public lead submissions that fill honeypot fields', async () => {
+    const app = createApp();
+
+    const response = await request(app)
+      .post('/api/leads/quote')
+      .send({ ...validQuotePayload, website: 'https://spam.example' })
+      .expect(400);
+
+    expect(response.body.error).toBe('lead_honeypot_rejected');
+  });
+
   it('does not require authentication to submit a quote lead', async () => {
     const app = createApp();
 
@@ -127,4 +138,18 @@ describe('quote intake workflow', () => {
 
     expect(response.body.error).toBe('discount_lead_missing_email');
   });
+
+  it('rejects state-changing requests with cookies from untrusted origins', async () => {
+    const app = createApp();
+
+    const response = await request(app)
+      .post('/api/leads/quote')
+      .set('Cookie', 'session=test-session')
+      .set('Origin', 'https://attacker.example')
+      .send(validQuotePayload)
+      .expect(403);
+
+    expect(response.body.error).toBe('csrf_validation_failed');
+  });
+
 });

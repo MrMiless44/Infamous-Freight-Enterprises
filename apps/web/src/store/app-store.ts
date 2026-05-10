@@ -3,7 +3,7 @@ import type { SubscriptionStatus } from '@/lib/paywall';
 
 export type AppPage =
   | 'dashboard' | 'loads' | 'dispatch' | 'drivers' | 'invoices'
-  | 'chat' | 'analytics' | 'compliance' | 'settings';
+  | 'messages' | 'analytics' | 'compliance' | 'settings' | 'driver-app';
 
 interface User {
   id: string;
@@ -49,8 +49,8 @@ interface AppState {
 
   // Modals
   activeModal: string | null;
-  modalData: any;
-  openModal: (modal: string, data?: any) => void;
+  modalData: unknown;
+  openModal: (modal: string, data?: unknown) => void;
   closeModal: () => void;
 
   // Filters

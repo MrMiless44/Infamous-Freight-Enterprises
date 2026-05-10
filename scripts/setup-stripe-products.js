@@ -9,9 +9,13 @@
 
 const Stripe = require('stripe');
 
+const LEGAL_BUSINESS_NAME = 'INFAMOUS FREIGHT';
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-04-10',
 });
+
+const expectedStripeAccountId = process.env.STRIPE_ACCOUNT_ID?.trim();
 
 const PRODUCTS = {
   starter: {
@@ -73,7 +77,7 @@ async function createProducts() {
       name: product.name,
       description: product.description,
       features: product.features.map(f => ({ name: f })),
-      metadata: { plan_key: key },
+      metadata: { plan_key: key, legal_business_name: LEGAL_BUSINESS_NAME },
     });
 
     console.log(`  ✅ Product: ${stripeProduct.id}`);
@@ -186,7 +190,12 @@ async function main() {
   try {
     // Verify Stripe key
     const account = await stripe.accounts.retrieve();
-    console.log(`Connected to Stripe account: ${account.settings?.dashboard?.display_name || account.id}\n`);
+    if (expectedStripeAccountId && account.id !== expectedStripeAccountId) {
+      throw new Error('STRIPE_SECRET_KEY is connected to a different Stripe account than STRIPE_ACCOUNT_ID');
+    }
+
+    const accountLabel = account.settings?.dashboard?.display_name || account.id;
+    console.log(`Connected to Stripe account: ${accountLabel}\n`);
 
     await createProducts();
     await createCoupon();

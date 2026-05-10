@@ -113,15 +113,27 @@ describe('requirePaidSubscription middleware', () => {
 });
 
 describe('tenant ID resolution', () => {
-  it('accepts tenant ID via query parameter', async () => {
+  it('rejects tenant ID supplied only by query parameter', async () => {
     const app = createApp();
 
     const response = await request(app)
       .get('/api/loads?tenantId=carrier_via_query')
       .set({ 'x-user-role': 'dispatcher', 'x-subscription-status': 'active' });
 
-    expect(response.status).toBe(200);
-    expect(response.body.data).toEqual([]);
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe('tenant_id_required');
+  });
+
+  it('rejects tenant ID supplied only by request body', async () => {
+    const app = createApp();
+
+    const response = await request(app)
+      .post('/api/loads')
+      .set({ 'x-user-role': 'dispatcher', 'x-subscription-status': 'active' })
+      .send({ tenantId: 'carrier_via_body' });
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe('tenant_id_required');
   });
 });
 

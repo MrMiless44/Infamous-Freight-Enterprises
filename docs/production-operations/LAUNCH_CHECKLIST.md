@@ -3,7 +3,8 @@
 ## Business
 
 - [ ] LLC formed
-- [ ] EIN received
+- [x] EIN received
+- [ ] Legal business record updates completed for Stripe, banking, DOT/FMCSA, insurance, accounting, and tax filings
 - [ ] Business bank account opened
 - [ ] Business email created
 - [ ] Business phone created

@@ -48,10 +48,12 @@ function requireAuthenticatedUser(req, res, next) {
 
 ### Phase 1 — Add middleware behind feature flag
 
-- Add `AUTH_MODE=header|bearer`.
-- Default non-test production to `bearer`.
+- Add `AUTH_MODE=header|trusted`.
+- Default production to `trusted`.
 - Keep header mode only for tests/local controlled environments.
 - Add clear startup failure if production is configured with unsafe header mode.
+
+Current status: production now defaults to `AUTH_MODE=trusted`, requires a JWT verification secret at startup, and protected Express routes no longer silently accept caller-controlled `x-tenant-id` and `x-user-role` headers in that mode. Header mode remains available for local/test compatibility and is blocked at production startup unless `ALLOW_UNSAFE_HEADER_AUTH=true` is deliberately set.
 
 ### Phase 2 — Add tests
 
@@ -74,6 +76,8 @@ Replace:
 
 with guards that use trusted authenticated user context.
 
+Current status: the Express middleware verifies `Authorization: Bearer <token>` with `SUPABASE_JWT_SECRET` or `JWT_SECRET`, derives the user ID from `sub`, and derives tenant and role from trusted JWT claims before protected route guards run. Tenant can be supplied as `app_metadata.tenant_id`, `app_metadata.tenantId`, `app_metadata.carrier_id`, `app_metadata.carrierId`, matching `user_metadata` fields, or top-level `tenant_id`/`tenantId`/`carrier_id`/`carrierId`. Role can be supplied as `app_metadata.role`, `app_metadata.user_role`, matching `user_metadata` fields, or top-level `role`/`user_role`, and must be `owner`, `admin`, or `dispatcher`. Route guards only fall back to header-derived tenant/role values in `AUTH_MODE=header`.
+
 ### Phase 4 — Remove unsafe production path
 
 After frontend and tests are updated:
@@ -89,7 +93,7 @@ Supported target options:
 
 | Option | Required env |
 |---|---|
-| Supabase JWT verification | `SUPABASE_URL`, JWT verification secret/JWKS config |
+| Supabase JWT verification | `SUPABASE_JWT_SECRET`, optional `SUPABASE_JWT_AUDIENCE` |
 | Internal JWT verification | `JWT_SECRET`, issuer, audience |
 | External OIDC/JWKS | `AUTH_JWKS_URL`, issuer, audience |
 

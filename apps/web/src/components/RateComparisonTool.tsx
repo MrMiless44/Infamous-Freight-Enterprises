@@ -44,40 +44,40 @@ const RateComparisonTool: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white p-6">
+    <div className="min-h-screen bg-infamous-dark text-[#F5E8E8] p-6">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">Compare a broker's rate to the market</h1>
-          <p className="text-gray-400">Paste a broker's rate and see how it compares to market</p>
+          <p className="text-[#B88989]">Paste a broker's rate and see how it compares to market</p>
         </div>
 
-        <div className="bg-[#141414] border border-[#222] rounded-2xl p-6 space-y-4">
+        <div className="bg-infamous-panel border border-infamous-border rounded-2xl p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="rate-origin" className="block text-sm text-gray-400 mb-1">Origin State</label>
+              <label htmlFor="rate-origin" className="block text-sm text-[#B88989] mb-1">Origin State</label>
               <div className="relative">
-                <MapPin size={16} aria-hidden="true" className="absolute left-3 top-3.5 text-gray-500" />
+                <MapPin size={16} aria-hidden="true" className="absolute left-3 top-3.5 text-[#B88989]/70" />
                 <input
                   id="rate-origin"
                   type="text"
                   placeholder="IL"
                   value={origin}
                   onChange={e => setOrigin(e.target.value.toUpperCase())}
-                  className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg pl-10 pr-4 py-3 text-white focus:border-[#ff3d00] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff3d00]"
+                  className="w-full bg-infamous-panel border border-infamous-border rounded-lg pl-10 pr-4 py-3 text-[#F5E8E8] focus:border-infamous-red focus:outline-none focus-visible:ring-2 focus-visible:ring-infamous-red"
                 />
               </div>
             </div>
             <div>
-              <label htmlFor="rate-dest" className="block text-sm text-gray-400 mb-1">Dest State</label>
+              <label htmlFor="rate-dest" className="block text-sm text-[#B88989] mb-1">Dest State</label>
               <div className="relative">
-                <MapPin size={16} aria-hidden="true" className="absolute left-3 top-3.5 text-gray-500" />
+                <MapPin size={16} aria-hidden="true" className="absolute left-3 top-3.5 text-[#B88989]/70" />
                 <input
                   id="rate-dest"
                   type="text"
                   placeholder="TX"
                   value={dest}
                   onChange={e => setDest(e.target.value.toUpperCase())}
-                  className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg pl-10 pr-4 py-3 text-white focus:border-[#ff3d00] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff3d00]"
+                  className="w-full bg-infamous-panel border border-infamous-border rounded-lg pl-10 pr-4 py-3 text-[#F5E8E8] focus:border-infamous-red focus:outline-none focus-visible:ring-2 focus-visible:ring-infamous-red"
                 />
               </div>
             </div>
@@ -85,14 +85,14 @@ const RateComparisonTool: React.FC = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="rate-equipment" className="block text-sm text-gray-400 mb-1">Equipment Type</label>
+              <label htmlFor="rate-equipment" className="block text-sm text-[#B88989] mb-1">Equipment Type</label>
               <div className="relative">
-                <Truck size={16} aria-hidden="true" className="absolute left-3 top-3.5 text-gray-500" />
+                <Truck size={16} aria-hidden="true" className="absolute left-3 top-3.5 text-[#B88989]/70" />
                 <select
                   id="rate-equipment"
                   value={equipment}
                   onChange={e => setEquipment(e.target.value)}
-                  className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg pl-10 pr-4 py-3 text-white focus:border-[#ff3d00] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff3d00] appearance-none"
+                  className="w-full bg-infamous-panel border border-infamous-border rounded-lg pl-10 pr-4 py-3 text-[#F5E8E8] focus:border-infamous-red focus:outline-none focus-visible:ring-2 focus-visible:ring-infamous-red appearance-none"
                 >
                   <option>Dry Van</option>
                   <option>Reefer</option>
@@ -103,9 +103,9 @@ const RateComparisonTool: React.FC = () => {
               </div>
             </div>
             <div>
-              <label htmlFor="rate-broker-offer" className="block text-sm text-gray-400 mb-1">Broker's Offer ($/mile)</label>
+              <label htmlFor="rate-broker-offer" className="block text-sm text-[#B88989] mb-1">Broker's Offer ($/mile)</label>
               <div className="relative">
-                <DollarSign size={16} aria-hidden="true" className="absolute left-3 top-3.5 text-gray-500" />
+                <DollarSign size={16} aria-hidden="true" className="absolute left-3 top-3.5 text-[#B88989]/70" />
                 <input
                   id="rate-broker-offer"
                   type="number"
@@ -113,7 +113,7 @@ const RateComparisonTool: React.FC = () => {
                   placeholder="2.50"
                   value={brokerRate}
                   onChange={e => setBrokerRate(e.target.value)}
-                  className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg pl-10 pr-4 py-3 text-white focus:border-[#ff3d00] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff3d00]"
+                  className="w-full bg-infamous-panel border border-infamous-border rounded-lg pl-10 pr-4 py-3 text-[#F5E8E8] focus:border-infamous-red focus:outline-none focus-visible:ring-2 focus-visible:ring-infamous-red"
                 />
               </div>
             </div>
@@ -122,7 +122,7 @@ const RateComparisonTool: React.FC = () => {
           <button
             onClick={handleCompare}
             disabled={!origin || !dest || !brokerRate || loading}
-            className="w-full bg-gradient-to-r from-[#ff3d00] to-[#ff6d00] hover:from-[#ff6d00] hover:to-[#ff8d00] text-white font-bold py-4 rounded-xl transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            className="w-full bg-gradient-to-r from-infamous-red to-infamous-ember hover:from-infamous-ember hover:to-infamous-orange text-[#F5E8E8] font-bold py-4 rounded-xl transition-all disabled:opacity-30 disabled:cursor-not-allowed"
           >
             {loading ? 'Analyzing market data...' : 'Compare to Market Rate'}
           </button>
@@ -131,7 +131,7 @@ const RateComparisonTool: React.FC = () => {
         {result && (
           <div className="mt-6 space-y-4">
             {/* Result Card */}
-            <div className={`bg-[#141414] border rounded-2xl p-6 ${
+            <div className={`bg-infamous-panel border rounded-2xl p-6 ${
               result.potentialSavings > 0 ? 'border-green-500/30' : 'border-red-500/30'
             }`}>
               <div className="flex items-center gap-3 mb-4">
@@ -148,35 +148,35 @@ const RateComparisonTool: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-3 gap-4 mb-4">
-                <div className="bg-[#1a1a1a] rounded-xl p-4 text-center">
-                  <p className="text-2xl font-bold text-gray-400">${result.brokerOffer.toFixed(2)}</p>
-                  <p className="text-xs text-gray-500 mt-1">Broker Offer</p>
+                <div className="bg-infamous-panel rounded-xl p-4 text-center">
+                  <p className="text-2xl font-bold text-[#B88989]">${result.brokerOffer.toFixed(2)}</p>
+                  <p className="text-xs text-[#B88989]/70 mt-1">Broker Offer</p>
                 </div>
-                <div className="bg-[#1a1a1a] rounded-xl p-4 text-center">
+                <div className="bg-infamous-panel rounded-xl p-4 text-center">
                   <p className="text-2xl font-bold text-blue-400">${result.marketRate.toFixed(2)}</p>
-                  <p className="text-xs text-gray-500 mt-1">Market Average</p>
+                  <p className="text-xs text-[#B88989]/70 mt-1">Market Average</p>
                 </div>
-                <div className="bg-[#1a1a1a] rounded-xl p-4 text-center">
+                <div className="bg-infamous-panel rounded-xl p-4 text-center">
                   <p className="text-2xl font-bold text-green-400">${result.suggestedCounter.toFixed(2)}</p>
-                  <p className="text-xs text-gray-500 mt-1">Suggested Counter</p>
+                  <p className="text-xs text-[#B88989]/70 mt-1">Suggested Counter</p>
                 </div>
               </div>
 
               <div className="space-y-2">
                 {result.reasoning.map((r, i) => (
-                  <div key={i} className="flex items-center gap-2 text-sm text-gray-300">
-                    <CheckCircle size={14} className="text-[#ff3d00] flex-shrink-0" />
+                  <div key={i} className="flex items-center gap-2 text-sm text-[#F5E8E8]/80">
+                    <CheckCircle size={14} className="text-infamous-red-light flex-shrink-0" />
                     {r}
                   </div>
                 ))}
               </div>
 
               <div className="mt-4 flex items-center gap-2">
-                <span className="text-sm text-gray-400">Confidence:</span>
+                <span className="text-sm text-[#B88989]">Confidence:</span>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   result.confidence === 'high' ? 'bg-green-500/20 text-green-400' :
                   result.confidence === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
-                  'bg-gray-500/20 text-gray-400'
+                  'bg-gray-500/20 text-[#B88989]'
                 }`}>
                   {result.confidence.toUpperCase()}
                 </span>
@@ -184,16 +184,16 @@ const RateComparisonTool: React.FC = () => {
             </div>
 
             {/* Weekly Trend Preview */}
-            <div className="bg-[#141414] border border-[#222] rounded-2xl p-6">
+            <div className="bg-infamous-panel border border-infamous-border rounded-2xl p-6">
               <h3 className="text-lg font-semibold mb-4">{origin} → {dest} {equipment} — 7 Day Trend</h3>
               <div className="flex items-end gap-2 h-32">
                 {[2.65, 2.71, 2.68, 2.74, 2.80, 2.77, 2.84].map((v, i) => (
                   <div key={i} className="flex-1 flex flex-col items-center gap-1">
                     <div
-                      className="w-full bg-gradient-to-t from-[#ff3d00] to-[#ff6d00] rounded-t-lg transition-all"
+                      className="w-full bg-gradient-to-t from-infamous-red to-infamous-ember rounded-t-lg transition-all"
                       style={{ height: `${(v / 3.2) * 100}%` }}
                     />
-                    <span className="text-xs text-gray-500">{['M','T','W','T','F','S','S'][i]}</span>
+                    <span className="text-xs text-[#B88989]/70">{['M','T','W','T','F','S','S'][i]}</span>
                   </div>
                 ))}
               </div>

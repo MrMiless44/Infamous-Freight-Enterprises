@@ -20,7 +20,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
 
 const INPUT_SVG = resolve(ROOT, 'docs/screenshots/infamousfreight-header.svg');
-const OUTPUT_PNG = resolve(ROOT, 'docs/screenshots/infamousfreight-social-preview.png');
+const OUTPUT_PNG = resolve(ROOT, '.github/social-preview.png');
 
 const TARGET_WIDTH = 1280;
 const TARGET_HEIGHT = 640;

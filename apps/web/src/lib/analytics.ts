@@ -1,0 +1,73 @@
+export type PublicEventName =
+  | 'quote_cta_click'
+  | 'tracking_cta_click'
+  | 'pricing_cta_click'
+  | 'portal_cta_click'
+  | 'tracking_search'
+  | 'driver_cta_click'
+  | 'login_cta_click'
+  | 'partner_cta_click'
+  | 'contact_cta_click'
+  | 'form_submit_success'
+  | 'form_submit_error'
+  | 'load_board_view'
+  | 'load_board_filter'
+  | 'load_board_book_click'
+  | 'load_board_book_submit_success'
+  | 'load_board_book_submit_error';
+
+export type FunnelEventName =
+  | 'funnel_landing_visit'
+  | 'funnel_quote_request'
+  | 'funnel_demo_request'
+  | 'funnel_signup'
+  | 'funnel_billing_start'
+  | 'funnel_first_load'
+  | 'funnel_first_dispatch'
+  | 'funnel_first_pod';
+
+export type PublicEventPayload = Record<string, string | number | boolean | undefined | null>;
+
+const safeWindow = (): Window | undefined => (typeof window === 'undefined' ? undefined : window);
+
+export const trackPublicEvent = (eventName: PublicEventName, payload: PublicEventPayload = {}) => {
+  const currentWindow = safeWindow();
+
+  if (!currentWindow) {
+    return;
+  }
+
+  const event = {
+    eventName,
+    payload,
+    path: currentWindow.location.pathname,
+    timestamp: new Date().toISOString(),
+  };
+
+  currentWindow.dispatchEvent(new CustomEvent('infamousfreight:analytics', { detail: event }));
+
+  const existing = JSON.parse(currentWindow.localStorage.getItem('infamous_public_events') ?? '[]') as unknown[];
+  const next = [...existing.slice(-49), event];
+  currentWindow.localStorage.setItem('infamous_public_events', JSON.stringify(next));
+};
+
+export const trackFunnelEvent = (eventName: FunnelEventName, payload: PublicEventPayload = {}) => {
+  const currentWindow = safeWindow();
+
+  if (!currentWindow) {
+    return;
+  }
+
+  const event = {
+    eventName,
+    payload,
+    path: currentWindow.location.pathname,
+    timestamp: new Date().toISOString(),
+  };
+
+  currentWindow.dispatchEvent(new CustomEvent('infamousfreight:funnel', { detail: event }));
+
+  const existing = JSON.parse(currentWindow.localStorage.getItem('infamous_funnel_events') ?? '[]') as unknown[];
+  const next = [...existing.slice(-99), event];
+  currentWindow.localStorage.setItem('infamous_funnel_events', JSON.stringify(next));
+};
