@@ -21,9 +21,20 @@ const DISPATCH_TERMINAL: ReadonlySet<string> = new Set(['confirmed', 'cancelled'
 
 const TRACKING_TERMINAL: ReadonlySet<string> = new Set(['delivered']);
 
+const DELIVERY_CONFIRMATION_TERMINAL: ReadonlySet<string> = new Set(['verified', 'disputed']);
+
 const CARRIER_PAYMENT_TERMINAL: ReadonlySet<string> = new Set(['paid', 'refunded']);
 
 const LOAD_BOARD_POST_TERMINAL: ReadonlySet<string> = new Set(['expired', 'closed', 'awarded']);
+
+const TRACKING_STATUS_ORDER: ReadonlyMap<string, number> = new Map([
+  ['pending', 0],
+  ['dispatched', 1],
+  ['picked_up', 2],
+  ['in_transit', 3],
+  ['at_delivery', 4],
+  ['delivered', 5],
+]);
 
 export function assertQuoteCanConvertToLoad(quoteRequest: QuoteLike): void {
   if (quoteRequest.status !== 'approved') {
@@ -61,6 +72,28 @@ export function assertLoadCanReceiveTracking(latestTracking: StatusLike | null):
     throw new FreightWorkflowRuleError(
       'load_already_delivered',
       'Cannot add tracking updates after delivery has been recorded.',
+    );
+  }
+}
+
+export function assertTrackingStatusProgression(currentStatus: string | null, nextStatus: string): void {
+  if (!currentStatus) return;
+  const currentOrder = TRACKING_STATUS_ORDER.get(currentStatus);
+  const nextOrder = TRACKING_STATUS_ORDER.get(nextStatus);
+  if (currentOrder !== undefined && nextOrder !== undefined && nextOrder < currentOrder) {
+    throw new FreightWorkflowRuleError(
+      'tracking_status_regression',
+      `Cannot move tracking status backward from "${currentStatus}" to "${nextStatus}".`,
+    );
+  }
+}
+
+export function assertDeliveryConfirmationCanTransition(confirmation: StatusLike): void {
+  const current = typeof confirmation.status === 'string' ? confirmation.status : '';
+  if (DELIVERY_CONFIRMATION_TERMINAL.has(current)) {
+    throw new FreightWorkflowRuleError(
+      'delivery_confirmation_terminal',
+      `Delivery confirmation is already ${current} and cannot be updated.`,
     );
   }
 }

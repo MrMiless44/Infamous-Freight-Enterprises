@@ -7,6 +7,7 @@ export type AuditEntry = {
   userId: string;
   userName: string;
   details?: string;
+  requestId?: string;
 };
 
 export interface AuditLogger {
@@ -25,7 +26,9 @@ class PrismaAuditLogger implements AuditLogger {
           action: entry.action,
           userId: entry.userId,
           userName: entry.userName,
-          details: entry.details,
+          details: entry.details
+            ? (entry.requestId ? `${entry.details} [rid:${entry.requestId}]` : entry.details)
+            : (entry.requestId ? `[rid:${entry.requestId}]` : undefined),
         },
       });
     } catch {

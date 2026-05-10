@@ -1,5 +1,6 @@
 import { Component, type ReactNode } from 'react';
 import { AlertTriangle } from 'lucide-react';
+import * as Sentry from '@sentry/react';
 
 type Props = {
   children: ReactNode;
@@ -13,6 +14,12 @@ class WidgetErrorBoundary extends Component<Props, State> {
 
   static getDerivedStateFromError(): State {
     return { hasError: true };
+  }
+
+  componentDidCatch(error: Error) {
+    Sentry.captureException(error, {
+      tags: { widget: this.props.label ?? 'unknown' },
+    });
   }
 
   render() {

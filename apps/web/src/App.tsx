@@ -146,8 +146,8 @@ function App() {
             <Route path="/quotes" element={<RouteGuard minRole="dispatcher"><QuoteRequestsPage /></RouteGuard>} />
             <Route path="/customers" element={<RouteGuard minRole="admin"><CustomersPage /></RouteGuard>} />
             <Route path="/audit" element={<RouteGuard minRole="admin"><AuditLogPage /></RouteGuard>} />
-            <Route path="/messages" element={<MessagesPage />} />
-            <Route path="/driver-app" element={<DriverAppPage />} />
+            <Route path="/messages" element={<RouteGuard minRole="driver"><MessagesPage /></RouteGuard>} />
+            <Route path="/driver-app" element={<RouteGuard minRole="driver"><DriverAppPage /></RouteGuard>} />
           </Route>
 
           <Route path="*" element={<NotFoundPage />} />

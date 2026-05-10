@@ -31,7 +31,7 @@ const SEO: Record<string, SeoEntry> = {
   '/services': {
     title: 'Freight Services | Infamous Freight',
     description:
-      'Review local, regional, box truck, cargo van, sprinter van, and dispatch support services.',
+      'Full truckload, LTL, flatbed, reefer, expedited, dedicated lanes, freight brokerage, final mile, and more — all with verified carriers and real-time tracking.',
   },
   '/services/box-truck': {
     title: 'Box Truck Freight Services | Infamous Freight',
@@ -62,6 +62,46 @@ const SEO: Record<string, SeoEntry> = {
     title: 'Freight Dispatch Support Services | Infamous Freight',
     description:
       'Quote-to-dispatch workflow support for dispatch teams, small fleets, brokerage operations, and shipper coordination.',
+  },
+  '/services/full-truckload': {
+    title: 'Full Truckload (FTL) Freight Services | Infamous Freight',
+    description:
+      'Dedicated full truckload freight with verified carriers — dry van, flatbed, and reefer. Direct pickup to direct delivery with safety and insurance checks.',
+  },
+  '/services/ltl-freight': {
+    title: 'Less Than Truckload (LTL) Freight Services | Infamous Freight',
+    description:
+      'Cost-effective LTL freight for palletized shipments that don\'t need an entire trailer. Tracking, status updates, and proof of delivery included.',
+  },
+  '/services/flatbed': {
+    title: 'Flatbed Freight Services | Infamous Freight',
+    description:
+      'Open-deck flatbed freight for construction materials, heavy machinery, steel, lumber, and oversized loads with tarping and permit coordination.',
+  },
+  '/services/reefer': {
+    title: 'Reefer Temperature-Controlled Freight | Infamous Freight',
+    description:
+      'Temperature-controlled reefer freight for perishable goods, pharmaceuticals, and frozen products with continuous monitoring and compliance documentation.',
+  },
+  '/services/expedited': {
+    title: 'Expedited Freight Services | Infamous Freight',
+    description:
+      'Time-critical expedited freight with same-day and next-day options. Dedicated driver and equipment, direct routing, and priority dispatch.',
+  },
+  '/services/dedicated-lanes': {
+    title: 'Dedicated Lane Freight Services | Infamous Freight',
+    description:
+      'Recurring freight lanes with locked-in pricing, consistent carrier assignment, and performance tracking for reliable supply chain operations.',
+  },
+  '/services/freight-brokerage': {
+    title: 'Freight Brokerage Services | Infamous Freight',
+    description:
+      'Licensed freight brokerage connecting shippers with vetted carriers across all equipment types. Rate negotiation, compliance, and end-to-end management.',
+  },
+  '/services/final-mile': {
+    title: 'Final Mile Delivery Services | Infamous Freight',
+    description:
+      'Last-mile freight delivery from distribution center to end customer with delivery window scheduling, photo proof, and customer notifications.',
   },
   '/pricing': {
     title: 'Freight Pricing | Infamous Freight',
@@ -162,7 +202,7 @@ const FAQ_DATA = [
   },
   {
     q: 'What types of freight services do you offer?',
-    a: 'Infamous Freight handles box truck (16–26 ft), cargo van, sprinter van, local metro, and regional multi-city freight. We also provide full freight dispatch support for owner-operators, small fleets, and brokerage operations.',
+    a: 'Infamous Freight handles full truckload, LTL, flatbed, reefer, expedited, dedicated lanes, freight brokerage, final mile, box truck, cargo van, sprinter van, local, and regional freight. We also provide full freight dispatch support for owner-operators, small fleets, and brokerage operations.',
   },
   {
     q: 'How does real-time shipment tracking work?',

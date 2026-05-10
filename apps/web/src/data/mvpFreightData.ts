@@ -40,7 +40,7 @@ const _demoShipments = [
     route: 'Houston, TX → Phoenix, AZ',
     origin: 'Houston, TX',
     destination: 'Phoenix, AZ',
-    status: 'Exception review',
+    status: 'Delayed',
     pickupDate: 'Apr 28, 2026',
     deliveryDate: 'Apr 30, 2026',
     eta: 'Delayed · recovery plan pending',
@@ -59,7 +59,7 @@ const _demoQuotes = [
     freight: 'Palletized retail goods',
     equipment: 'Dry van',
     weight: '24,000 lb',
-    status: 'Needs review',
+    status: 'Quote Pending',
     priority: 'High',
   },
   {
@@ -69,7 +69,7 @@ const _demoQuotes = [
     freight: 'Refrigerated food product',
     equipment: 'Reefer',
     weight: '18,500 lb',
-    status: 'Rate pending',
+    status: 'Rate Pending',
     priority: 'Medium',
   },
   {
@@ -79,7 +79,7 @@ const _demoQuotes = [
     freight: 'Building materials',
     equipment: 'Flatbed',
     weight: '42,000 lb',
-    status: 'Ready to book',
+    status: 'Booked',
     priority: 'High',
   },
 ];
