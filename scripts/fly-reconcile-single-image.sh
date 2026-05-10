@@ -84,6 +84,11 @@ fi
 
 echo "Selected image to keep: $target_image"
 
+if [[ -z "$target_image" || "$target_image" == "<unknown-image>" ]]; then
+  echo "Error: unable to determine a valid image to keep. Set KEEP_IMAGE explicitly and retry." >&2
+  exit 1
+fi
+
 if [[ "$PRUNE_OLD_IMAGES" != "true" ]]; then
   echo "No changes made. To prune old-image machines, rerun with:"
   echo "PRUNE_OLD_IMAGES=true APP_NAME=$APP_NAME KEEP_IMAGE=$target_image bash scripts/fly-reconcile-single-image.sh"
