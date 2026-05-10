@@ -135,15 +135,15 @@ export const ShipmentRouteMap: React.FC<ShipmentRouteMapProps> = ({ origin, dest
         type: 'line',
         source: 'shipment-route',
         paint: {
-          'line-color': '#f97316',
+          'line-color': '#FF1A1A',
           'line-width': 4,
           'line-opacity': 0.95,
         },
       });
 
-      new maplibregl.Marker({ color: '#38bdf8' }).setLngLat(route.start).setPopup(new maplibregl.Popup().setText(`Pickup: ${origin}`)).addTo(map);
-      new maplibregl.Marker({ color: '#22c55e' }).setLngLat(route.end).setPopup(new maplibregl.Popup().setText(`Delivery: ${destination}`)).addTo(map);
-      new maplibregl.Marker({ color: status === 'Exception review' ? '#f59e0b' : '#f97316' })
+      new maplibregl.Marker({ color: '#FF3B30' }).setLngLat(route.start).setPopup(new maplibregl.Popup().setText(`Pickup: ${origin}`)).addTo(map);
+      new maplibregl.Marker({ color: '#36D399' }).setLngLat(route.end).setPopup(new maplibregl.Popup().setText(`Delivery: ${destination}`)).addTo(map);
+      new maplibregl.Marker({ color: status === 'Exception review' ? '#FF8A00' : '#FF1A1A' })
         .setLngLat(route.truck)
         .setPopup(new maplibregl.Popup().setText(`Current status: ${status}`))
         .addTo(map);
@@ -179,7 +179,7 @@ export const ShipmentRouteMap: React.FC<ShipmentRouteMapProps> = ({ origin, dest
 
   if (!route) {
     return (
-      <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-infamous-border bg-[#101010] p-6 text-center text-sm text-gray-400">
+      <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-infamous-border bg-[#101010] p-6 text-center text-sm text-[#B88989]">
         Route map will appear after pickup and delivery coordinates are available.
       </div>
     );
@@ -190,9 +190,9 @@ export const ShipmentRouteMap: React.FC<ShipmentRouteMapProps> = ({ origin, dest
       <div className="flex items-center justify-between gap-4 border-b border-infamous-border px-4 py-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-infamous-orange">Live route</p>
-          <h3 className="mt-1 text-lg font-bold text-white">{origin} to {destination}</h3>
+          <h3 className="mt-1 text-lg font-bold text-[#F5E8E8]">{origin} to {destination}</h3>
         </div>
-        <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-gray-300">
+        <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-[#F5E8E8]/80">
           MapLibre GL
         </span>
       </div>

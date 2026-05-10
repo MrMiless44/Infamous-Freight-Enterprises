@@ -89,7 +89,7 @@ const InvoicesPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Invoices</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Manage billing and track payments</p>
+          <p className="text-sm text-[#B88989]/70 mt-0.5">Manage billing and track payments</p>
         </div>
         <button className="btn-primary flex items-center gap-2">
           <FileText size={16} /> Create Invoice
@@ -108,7 +108,7 @@ const InvoicesPage: React.FC = () => {
             <span className={stat.color}>{stat.icon}</span>
             <div>
               <p className="text-lg font-bold">{stat.value}</p>
-              <p className="text-xs text-gray-500">{stat.label}</p>
+              <p className="text-xs text-[#B88989]/70">{stat.label}</p>
             </div>
           </div>
         ))}
@@ -127,7 +127,7 @@ const InvoicesPage: React.FC = () => {
               </span>
               <div>
                 <h2 className="text-base font-bold">PODs ready to invoice</h2>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-[#B88989]">
                   {podReadyLoads.length} delivered load{podReadyLoads.length === 1 ? '' : 's'} with a clean POD on file. One click drafts the invoice with carrier rate and broker billing details pre-filled.
                 </p>
               </div>
@@ -140,22 +140,22 @@ const InvoicesPage: React.FC = () => {
             {podReadyLoads.map((load) => (
               <li
                 key={load.loadRef}
-                className="flex flex-wrap items-center gap-3 rounded-xl border border-infamous-border bg-[#111] p-3"
+                className="flex flex-wrap items-center gap-3 rounded-xl border border-infamous-border bg-infamous-panel p-3"
               >
                 <div className="flex-1 min-w-[180px]">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono text-xs text-gray-500">{load.loadRef}</span>
+                    <span className="font-mono text-xs text-[#B88989]/70">{load.loadRef}</span>
                     <span className="badge badge-green text-[10px]">POD received</span>
-                    <span className="text-[10px] text-gray-500">{load.podReceivedAt}</span>
+                    <span className="text-[10px] text-[#B88989]/70">{load.podReceivedAt}</span>
                   </div>
                   <p className="mt-1 text-sm font-medium">{load.lane}</p>
-                  <p className="text-xs text-gray-500">{load.broker} · OCR confidence {load.ocrConfidence}%</p>
+                  <p className="text-xs text-[#B88989]/70">{load.broker} · OCR confidence {load.ocrConfidence}%</p>
                 </div>
-                <p className="text-sm font-semibold text-white">${load.amount.toLocaleString()}</p>
+                <p className="text-sm font-semibold text-[#F5E8E8]">${load.amount.toLocaleString()}</p>
                 <button
                   type="button"
                   onClick={() => draftFromPod(load)}
-                  className="rounded-xl bg-infamous-orange px-4 py-2 text-xs font-semibold text-white hover:bg-[#ff6d00]"
+                  className="rounded-xl bg-infamous-orange px-4 py-2 text-xs font-semibold text-[#F5E8E8] hover:bg-[#ff6d00]"
                 >
                   Create invoice draft
                 </button>
@@ -172,7 +172,7 @@ const InvoicesPage: React.FC = () => {
             key={f}
             onClick={() => setFilter(f)}
             className={`px-4 py-2 rounded-xl text-sm font-medium capitalize transition-all ${
-              filter === f ? 'bg-infamous-orange text-white' : 'bg-infamous-card text-gray-400 hover:text-white border border-infamous-border'
+              filter === f ? 'bg-infamous-orange text-[#F5E8E8]' : 'bg-infamous-card text-[#B88989] hover:text-[#F5E8E8] border border-infamous-border'
             }`}
           >
             {f} {f !== 'all' && <span className="text-xs opacity-70">({allInvoices.filter((i) => i.status === f).length})</span>}
@@ -199,32 +199,32 @@ const InvoicesPage: React.FC = () => {
             </thead>
             <tbody>
               {filtered.map((inv) => (
-                <tr key={inv.id} className="hover:bg-[#1a1a1a] transition-colors">
+                <tr key={inv.id} className="hover:bg-infamous-panel transition-colors">
                   <td className="table-cell font-mono text-xs">{inv.number}</td>
                   <td className="table-cell font-medium">{inv.broker}</td>
-                  <td className="table-cell text-xs text-gray-500">{inv.loadRef}</td>
+                  <td className="table-cell text-xs text-[#B88989]/70">{inv.loadRef}</td>
                   <td className="table-cell text-right font-semibold">${inv.amount.toLocaleString()}</td>
                   <td className="table-cell">
                     <span className={`badge ${statusBadge[inv.status]} flex items-center gap-1 w-fit`}>
                       {statusIcon[inv.status]} {inv.status}
                     </span>
                   </td>
-                  <td className="table-cell text-xs text-gray-500">{inv.issueDate}</td>
-                  <td className="table-cell text-xs text-gray-500">{inv.dueDate}</td>
+                  <td className="table-cell text-xs text-[#B88989]/70">{inv.issueDate}</td>
+                  <td className="table-cell text-xs text-[#B88989]/70">{inv.dueDate}</td>
                   <td className="table-cell text-right">
                     {inv.age > 0 ? (
                       <span className={`text-xs font-medium ${inv.age > 7 ? 'text-red-400' : 'text-yellow-400'}`}>{inv.age}d</span>
                     ) : (
-                      <span className="text-xs text-gray-600">—</span>
+                      <span className="text-xs text-[#B88989]/60">—</span>
                     )}
                   </td>
                   <td className="table-cell">
                     <div className="flex gap-1">
-                      <button className="p-1.5 rounded-lg hover:bg-infamous-border text-gray-500 hover:text-white transition-colors">
+                      <button className="p-1.5 rounded-lg hover:bg-infamous-border text-[#B88989]/70 hover:text-[#F5E8E8] transition-colors">
                         <Download size={14} />
                       </button>
                       {inv.status === 'draft' && (
-                        <button className="p-1.5 rounded-lg hover:bg-infamous-border text-gray-500 hover:text-infamous-orange transition-colors">
+                        <button className="p-1.5 rounded-lg hover:bg-infamous-border text-[#B88989]/70 hover:text-infamous-orange transition-colors">
                           <Send size={14} />
                         </button>
                       )}

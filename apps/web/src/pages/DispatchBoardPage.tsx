@@ -42,14 +42,14 @@ const mockLoads: DispatchLoad[] = [
 ];
 
 const statusConfig: Record<DispatchStatus, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
-  pending:     { label: 'Pending',     color: 'text-gray-400',            bg: 'bg-gray-500/10 border-gray-500/20',              icon: <Clock size={12} /> },
+  pending:     { label: 'Pending',     color: 'text-[#B88989]',            bg: 'bg-gray-500/10 border-gray-500/20',              icon: <Clock size={12} /> },
   assigned:    { label: 'Assigned',    color: 'text-blue-400',            bg: 'bg-blue-500/10 border-blue-500/20',              icon: <Users size={12} /> },
   dispatched:  { label: 'Dispatched',  color: 'text-infamous-orange',     bg: 'bg-infamous-orange/10 border-infamous-orange/20', icon: <Zap size={12} /> },
   at_pickup:   { label: 'At Pickup',   color: 'text-yellow-400',          bg: 'bg-yellow-500/10 border-yellow-500/20',          icon: <Package size={12} /> },
   loaded:      { label: 'Loaded',      color: 'text-cyan-400',            bg: 'bg-cyan-500/10 border-cyan-500/20',              icon: <Truck size={12} /> },
   in_transit:  { label: 'In Transit',  color: 'text-purple-400',          bg: 'bg-purple-500/10 border-purple-500/20',          icon: <ArrowRight size={12} /> },
   at_delivery: { label: 'At Delivery', color: 'text-indigo-400',          bg: 'bg-indigo-500/10 border-indigo-500/20',          icon: <MapPin size={12} /> },  delivered:   { label: 'Delivered',   color: 'text-green-400',           bg: 'bg-green-500/10 border-green-500/20',            icon: <CheckCircle size={12} /> },
-  pod_received:{ label: 'POD Received',color: 'text-emerald-400',         bg: 'bg-emerald-500/10 border-emerald-500/20',        icon: <FileCheck size={12} /> },
+  pod_received:{ label: 'POD Received',color: 'text-[#36D399]',         bg: 'bg-[#36D399]/10 border-[#36D399]/20',        icon: <FileCheck size={12} /> },
   exception:   { label: 'Exception',   color: 'text-red-400',             bg: 'bg-red-500/10 border-red-500/20',                icon: <AlertTriangle size={12} /> },
 };
 
@@ -171,21 +171,21 @@ const CarrierMatchModal: React.FC<CarrierMatchModalProps> = ({ load, onClose }) 
           </div>
           <div className="flex-1 min-w-0">
             <h2 id="carrier-match-title" className="text-base font-semibold">AI Carrier Match — {load.ref}</h2>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <p className="text-xs text-[#B88989] mt-0.5">
               {load.origin} <ArrowRight size={10} className="inline mx-1" /> {load.dest} · {load.equipment} · ${load.rate.toLocaleString()}
             </p>
           </div>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="text-gray-500 hover:text-white p-1 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-orange"
+            className="text-[#B88989]/70 hover:text-[#F5E8E8] p-1 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-orange"
           >
             <X size={18} />
           </button>
         </div>
 
         <div className="p-5 space-y-3">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-[#B88989]/70">
             Ranked by safety, insurance, lane history, claims, acceptance, and app responsiveness. Carriers with blocking issues are still shown so dispatch sees why they were filtered.
           </p>
           {ranked.map((entry, index) => {
@@ -196,7 +196,7 @@ const CarrierMatchModal: React.FC<CarrierMatchModalProps> = ({ load, onClose }) 
                 className={`rounded-xl border p-4 ${blocked ? 'border-red-500/20 bg-red-500/5' : 'border-infamous-border bg-infamous-bg/50'}`}
               >
                 <div className="flex items-center gap-3 flex-wrap">
-                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold ${index === 0 && !blocked ? 'bg-infamous-orange text-white' : 'bg-infamous-card text-gray-400 border border-infamous-border'}`}>
+                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold ${index === 0 && !blocked ? 'bg-infamous-orange text-[#F5E8E8]' : 'bg-infamous-card text-[#B88989] border border-infamous-border'}`}>
                     {index + 1}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -208,21 +208,21 @@ const CarrierMatchModal: React.FC<CarrierMatchModalProps> = ({ load, onClose }) 
                         <Shield size={14} className="text-red-400 flex-shrink-0" aria-label="Authority or insurance issue" />
                       )}
                     </div>
-                    <div className="text-[11px] text-gray-500 mt-0.5">
+                    <div className="text-[11px] text-[#B88989]/70 mt-0.5">
                       {entry.carrier.mc} · {entry.carrier.homeBase} · {entry.carrier.equipmentTypes.join(', ')}
                     </div>
                   </div>
                   <div className="text-right">
                     <div className={`text-lg font-bold ${blocked ? 'text-red-400' : 'text-infamous-orange'}`}>{entry.total}</div>
-                    <div className="text-[10px] uppercase tracking-wider text-gray-600">match score</div>
+                    <div className="text-[10px] uppercase tracking-wider text-[#B88989]/60">match score</div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3 text-xs">
-                  <div className="flex items-center gap-1 text-gray-400"><Star size={11} /> Safety <span className="text-white font-medium ml-auto">{entry.carrier.safetyScore}</span></div>
-                  <div className="flex items-center gap-1 text-gray-400"><CheckCircle size={11} /> On-time <span className="text-white font-medium ml-auto">{entry.carrier.onTimePct}%</span></div>
-                  <div className="flex items-center gap-1 text-gray-400"><AlertTriangle size={11} /> Claims <span className="text-white font-medium ml-auto">{entry.carrier.claimsLast12Mo}</span></div>
-                  <div className="flex items-center gap-1 text-gray-400"><Clock size={11} /> Resp <span className="text-white font-medium ml-auto">{entry.carrier.appResponsiveMin}m</span></div>
+                  <div className="flex items-center gap-1 text-[#B88989]"><Star size={11} /> Safety <span className="text-[#F5E8E8] font-medium ml-auto">{entry.carrier.safetyScore}</span></div>
+                  <div className="flex items-center gap-1 text-[#B88989]"><CheckCircle size={11} /> On-time <span className="text-[#F5E8E8] font-medium ml-auto">{entry.carrier.onTimePct}%</span></div>
+                  <div className="flex items-center gap-1 text-[#B88989]"><AlertTriangle size={11} /> Claims <span className="text-[#F5E8E8] font-medium ml-auto">{entry.carrier.claimsLast12Mo}</span></div>
+                  <div className="flex items-center gap-1 text-[#B88989]"><Clock size={11} /> Resp <span className="text-[#F5E8E8] font-medium ml-auto">{entry.carrier.appResponsiveMin}m</span></div>
                 </div>
 
                 {entry.strengths.length > 0 && (
@@ -242,13 +242,13 @@ const CarrierMatchModal: React.FC<CarrierMatchModalProps> = ({ load, onClose }) 
                 )}
 
                 <div className="flex items-center justify-between mt-4 pt-3 border-t border-infamous-border">
-                  <div className="text-xs text-gray-500">
-                    Suggested carrier rate <span className="text-white font-semibold">${entry.rate.toLocaleString()}</span>
+                  <div className="text-xs text-[#B88989]/70">
+                    Suggested carrier rate <span className="text-[#F5E8E8] font-semibold">${entry.rate.toLocaleString()}</span>
                   </div>
                   <button
                     type="button"
                     disabled={blocked}
-                    className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all ${blocked ? 'bg-infamous-card text-gray-600 cursor-not-allowed' : 'bg-infamous-orange text-white hover:bg-infamous-orange-light'}`}
+                    className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all ${blocked ? 'bg-infamous-card text-[#B88989]/60 cursor-not-allowed' : 'bg-infamous-orange text-[#F5E8E8] hover:bg-infamous-orange-light'}`}
                   >
                     {blocked ? 'Blocked' : 'Send rate con'}
                   </button>
@@ -280,12 +280,12 @@ const DispatchBoardPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Dispatch Board</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Full load lifecycle — from pending to POD received · sample data</p>
+          <p className="text-sm text-[#B88989]/70 mt-0.5">Full load lifecycle — from pending to POD received · sample data</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 bg-infamous-card border border-infamous-border rounded-xl px-3 py-2">
-            <Activity size={14} className="text-gray-500" />
-            <span className="text-xs text-gray-500">Demo data</span>
+            <Activity size={14} className="text-[#B88989]/70" />
+            <span className="text-xs text-[#B88989]/70">Demo data</span>
           </div>
           <div role="tablist" aria-label="Dispatch view" className="flex gap-2">
           <button
@@ -293,7 +293,7 @@ const DispatchBoardPage: React.FC = () => {
             aria-selected={activeTab === 'board'}
             aria-controls="dispatch-panel"
             onClick={() => setActiveTab('board')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-orange ${activeTab === 'board' ? 'bg-infamous-orange text-white' : 'bg-infamous-card text-gray-400 hover:text-white'}`}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-red ${activeTab === 'board' ? 'bg-infamous-red text-[#F5E8E8]' : 'bg-infamous-card text-[#B88989] hover:text-[#F5E8E8]'}`}
           >
             Board
           </button>
@@ -302,7 +302,7 @@ const DispatchBoardPage: React.FC = () => {
             aria-selected={activeTab === 'voice'}
             aria-controls="dispatch-panel"
             onClick={() => setActiveTab('voice')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-orange ${activeTab === 'voice' ? 'bg-infamous-orange text-white' : 'bg-infamous-card text-gray-400 hover:text-white'}`}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-red ${activeTab === 'voice' ? 'bg-infamous-red text-[#F5E8E8]' : 'bg-infamous-card text-[#B88989] hover:text-[#F5E8E8]'}`}
           >
             <Mic size={14} aria-hidden="true" /> Voice
           </button>
@@ -311,13 +311,13 @@ const DispatchBoardPage: React.FC = () => {
       </div>
 
       {/* AI Banner */}
-      <div className="bg-gradient-to-r from-infamous-orange/10 to-purple-500/5 border border-infamous-orange/20 rounded-xl p-4 flex items-center gap-4">
-        <div className="w-10 h-10 rounded-xl bg-infamous-orange/20 flex items-center justify-center">
-          <Sparkles size={20} className="text-infamous-orange" />
+      <div className="bg-gradient-to-r from-infamous-red/10 to-infamous-ember/5 border border-infamous-red/20 rounded-xl p-4 flex items-center gap-4">
+        <div className="w-10 h-10 rounded-xl bg-infamous-red/20 flex items-center justify-center">
+          <Sparkles size={20} className="text-infamous-red-light" />
         </div>
         <div className="flex-1">
           <p className="text-sm font-semibold">Auto-Dispatch AI Ready</p>
-          <p className="text-xs text-gray-400">{pendingCount} {pendingCount === 1 ? 'load needs' : 'loads need'} carriers. Auto-Dispatch will rank verified carriers in seconds.</p>
+          <p className="text-xs text-[#B88989]">{pendingCount} {pendingCount === 1 ? 'load needs' : 'loads need'} carriers. Auto-Dispatch will rank verified carriers in seconds.</p>
         </div>
         <button onClick={runAutoDispatch} className="btn-primary flex items-center gap-2">
           <Zap size={16} /> Run Auto-Dispatch
@@ -336,7 +336,7 @@ const DispatchBoardPage: React.FC = () => {
                   <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border mb-3 ${cfg.bg}`}>
                     <span className={`${cfg.color}`}>{cfg.icon}</span>
                     <span className={`text-xs font-semibold ${cfg.color}`}>{cfg.label}</span>
-                    <span className="text-xs text-gray-600 ml-auto">{colLoads.length}</span>
+                    <span className="text-xs text-[#B88989]/60 ml-auto">{colLoads.length}</span>
                   </div>
                   <div className="space-y-3">
                     {colLoads.map((load) => {
@@ -345,24 +345,24 @@ const DispatchBoardPage: React.FC = () => {
                       const cardContent = (
                         <>
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xs font-mono text-gray-600">{load.ref}</span>
+                            <span className="text-xs font-mono text-[#B88989]/60">{load.ref}</span>
                             {isPending && (
                               <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-infamous-orange/15 text-infamous-orange border border-infamous-orange/30 font-semibold uppercase tracking-wider">
                                 Match
                               </span>
                             )}
-                            <span className="text-[10px] text-gray-600 ml-auto">{load.equipment}</span>
+                            <span className="text-[10px] text-[#B88989]/60 ml-auto">{load.equipment}</span>
                           </div>
                           <div className="flex items-center gap-1 text-sm mb-2">
                             <span className="font-medium truncate">{load.origin.split(',')[0]}</span>
-                            <ArrowRight size={10} className="text-gray-600 flex-shrink-0" />
+                            <ArrowRight size={10} className="text-[#B88989]/60 flex-shrink-0" />
                             <span className="font-medium truncate">{load.dest.split(',')[0]}</span>
                           </div>
                           {load.carrier && (
-                            <div className="text-xs text-gray-500 mb-1 truncate">{load.carrier}</div>
+                            <div className="text-xs text-[#B88989]/70 mb-1 truncate">{load.carrier}</div>
                           )}
                           {load.driver && (
-                            <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
+                            <div className="flex items-center gap-1 text-xs text-[#B88989]/70 mb-2">
                               <Users size={10} />
                               <span className="truncate">{load.driver}</span>
                             </div>
@@ -370,7 +370,7 @@ const DispatchBoardPage: React.FC = () => {
                           <div className="flex items-center justify-between pt-2 border-t border-infamous-border">
                             <span className="font-bold text-infamous-orange text-sm">${load.rate.toLocaleString()}</span>
                             {load.eta && (
-                              <span className="text-xs text-gray-500 flex items-center gap-1">
+                              <span className="text-xs text-[#B88989]/70 flex items-center gap-1">
                                 <Clock size={10} /> {load.eta}
                               </span>
                             )}
@@ -413,12 +413,12 @@ const DispatchBoardPage: React.FC = () => {
                 : 'bg-gradient-to-br from-infamous-orange to-infamous-orange-light hover:scale-105 shadow-xl shadow-infamous-orange/20'
             }`}
           >
-            <Mic size={32} className="text-white" />
+            <Mic size={32} className="text-[#F5E8E8]" />
           </button>
           <h2 className="text-xl font-semibold mb-2">
             {isListening ? 'Listening...' : 'Tap to Start Voice Booking'}
           </h2>
-          <p className="text-sm text-gray-500 mb-8">
+          <p className="text-sm text-[#B88989]/70 mb-8">
             {isListening ? 'Say something like "Find me a reefer load near Dallas"' : 'Press and hold the microphone button, then speak your load request'}
           </p>
 
@@ -439,7 +439,7 @@ const DispatchBoardPage: React.FC = () => {
           )}
 
           <div className="text-left space-y-2 max-w-sm mx-auto">
-            <p className="text-xs text-gray-600 uppercase tracking-wider mb-3">Try saying:</p>
+            <p className="text-xs text-[#B88989]/60 uppercase tracking-wider mb-3">Try saying:</p>
             {[
               '"Find me a dry van load from Chicago"',
               '"Book the highest paying reefer within 100 miles"',
@@ -449,7 +449,7 @@ const DispatchBoardPage: React.FC = () => {
               <button
                 key={example}
                 onClick={() => setIsListening(true)}
-                className="w-full text-left text-sm text-gray-400 hover:text-white bg-infamous-card border border-infamous-border hover:border-infamous-orange/30 rounded-lg px-4 py-2.5 transition-all"
+                className="w-full text-left text-sm text-[#B88989] hover:text-[#F5E8E8] bg-infamous-card border border-infamous-border hover:border-infamous-orange/30 rounded-lg px-4 py-2.5 transition-all"
               >
                 {example}
               </button>

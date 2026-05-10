@@ -12,12 +12,12 @@ const isExternalHref = (href: string) => href.startsWith('http://') || href.star
 const ctaClassName = (highlighted?: boolean) =>
   `inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 font-semibold transition ${
     highlighted
-      ? 'bg-infamous-orange text-white hover:opacity-90'
-      : 'border border-infamous-border bg-[#111] text-white hover:border-infamous-orange/50'
+      ? 'bg-infamous-orange text-[#F5E8E8] hover:opacity-90'
+      : 'border border-infamous-border bg-infamous-panel text-[#F5E8E8] hover:border-infamous-orange/50'
   }`;
 
 const secondaryCtaClassName =
-  'inline-flex w-full items-center justify-center gap-2 rounded-xl border border-infamous-border px-5 py-3 text-sm font-semibold text-gray-200 transition hover:border-infamous-orange/50 hover:text-white';
+  'inline-flex w-full items-center justify-center gap-2 rounded-xl border border-infamous-border px-5 py-3 text-sm font-semibold text-gray-200 transition hover:border-infamous-orange/50 hover:text-[#F5E8E8]';
 
 const PlanAction: React.FC<{ cta: StripeCatalogCta; highlighted?: boolean; secondary?: boolean }> = ({
   cta,
@@ -59,12 +59,12 @@ const PlanCard: React.FC<{ plan: StripeCatalogPlan }> = ({ plan }) => (
     </div>
     <div className="flex items-baseline gap-1">
       <span className="text-4xl font-black tracking-tight">{plan.price}</span>
-      {plan.cadence ? <span className="text-sm text-gray-500">{plan.cadence}</span> : null}
+      {plan.cadence ? <span className="text-sm text-[#B88989]/70">{plan.cadence}</span> : null}
     </div>
-    <p className="mt-3 text-sm leading-6 text-gray-400">{plan.tagline}</p>
+    <p className="mt-3 text-sm leading-6 text-[#B88989]">{plan.tagline}</p>
     <ul className="mt-5 space-y-3 text-sm">
       {plan.features.map((feature) => (
-        <li key={feature} className="flex gap-2 text-gray-300">
+        <li key={feature} className="flex gap-2 text-[#F5E8E8]/80">
           <Check size={16} className="mt-0.5 flex-shrink-0 text-infamous-orange" />
           <span>{feature}</span>
         </li>
@@ -79,9 +79,9 @@ const PlanCard: React.FC<{ plan: StripeCatalogPlan }> = ({ plan }) => (
 
 const PricingPage: React.FC = () => {
   return (
-    <main className="min-h-screen bg-[#090909] px-6 py-10 text-white">
+    <main className="min-h-screen bg-[#090909] px-6 py-10 text-[#F5E8E8]">
       <div className="mx-auto max-w-7xl">
-        <Link to="/home" className="mb-8 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white">
+        <Link to="/home" className="mb-8 inline-flex items-center gap-2 text-sm text-[#B88989] hover:text-[#F5E8E8]">
           <ArrowLeft size={16} /> Back to Infamous Freight
         </Link>
 
@@ -90,7 +90,7 @@ const PricingPage: React.FC = () => {
           <h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">
             Stripe-backed pricing for freight operators ready to move faster.
           </h1>
-          <p className="mt-4 text-lg leading-8 text-gray-300">
+          <p className="mt-4 text-lg leading-8 text-[#F5E8E8]/80">
             Choose the Infamous Freight plan that matches your operation, then add AI action, document, or voice packs
             when your team needs more automation capacity. Payments are processed securely through Stripe.
           </p>
@@ -102,7 +102,7 @@ const PricingPage: React.FC = () => {
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Platform plans</p>
               <h2 className="mt-2 text-2xl font-bold">Monthly or annual subscriptions.</h2>
             </div>
-            <p className="max-w-md text-sm text-gray-400">
+            <p className="max-w-md text-sm text-[#B88989]">
               Starter, Professional, and Enterprise use the live Stripe products and prices configured for Infamous Freight.
             </p>
           </div>
@@ -119,7 +119,7 @@ const PricingPage: React.FC = () => {
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">AI add-ons</p>
               <h2 className="mt-2 text-2xl font-bold">One-time capacity packs for heavier workflows.</h2>
             </div>
-            <p className="max-w-md text-sm text-gray-400">
+            <p className="max-w-md text-sm text-[#B88989]">
               Add more AI actions, document scans, or voice minutes without changing the customer’s base subscription.
             </p>
           </div>
@@ -135,14 +135,14 @@ const PricingPage: React.FC = () => {
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Need a custom invoice?</p>
               <h2 className="mt-2 text-2xl font-bold">Use Stripe Invoicing for B2B freight customers.</h2>
-              <p className="mt-3 max-w-2xl text-gray-400">
+              <p className="mt-3 max-w-2xl text-[#B88989]">
                 For contract lanes, implementation work, enterprise onboarding, or custom account terms, request a quote
                 and Infamous Freight can issue a Stripe invoice instead of sending a public payment link.
               </p>
             </div>
             <Link
               to="/request-quote"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-infamous-border bg-infamous-card px-5 py-3 font-semibold text-white transition hover:border-infamous-orange/50"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-infamous-border bg-infamous-card px-5 py-3 font-semibold text-[#F5E8E8] transition hover:border-infamous-orange/50"
             >
               Request invoice quote <ArrowRight size={16} />
             </Link>
@@ -153,7 +153,7 @@ const PricingPage: React.FC = () => {
           <div className="mb-6 max-w-2xl">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Carrier plans</p>
             <h2 className="mt-2 text-2xl font-bold">Free to run loads. Premium tools when you want them.</h2>
-            <p className="mt-3 text-sm text-gray-400">
+            <p className="mt-3 text-sm text-[#B88989]">
               Carriers can find, accept, and run Infamous loads without paying a platform fee. Premium tiers add load
               alerts, RPM tools, dispatch automation, and settlement dashboards for owner-operators and small fleets.
             </p>
@@ -216,12 +216,12 @@ const PricingPage: React.FC = () => {
                 <h3 className="text-lg font-bold">{plan.name}</h3>
                 <div className="mt-3 flex items-baseline gap-1">
                   <span className="text-4xl font-black tracking-tight">{plan.price}</span>
-                  <span className="text-sm text-gray-500">{plan.cadence}</span>
+                  <span className="text-sm text-[#B88989]/70">{plan.cadence}</span>
                 </div>
-                <p className="mt-3 text-sm leading-6 text-gray-400">{plan.tagline}</p>
+                <p className="mt-3 text-sm leading-6 text-[#B88989]">{plan.tagline}</p>
                 <ul className="mt-5 space-y-3 text-sm">
                   {plan.features.map((feature) => (
-                    <li key={feature} className="flex gap-2 text-gray-300">
+                    <li key={feature} className="flex gap-2 text-[#F5E8E8]/80">
                       <Check size={16} className="mt-0.5 flex-shrink-0 text-infamous-orange" />
                       <span>{feature}</span>
                     </li>
@@ -247,14 +247,14 @@ const PricingPage: React.FC = () => {
               ].map(([label, value]) => (
                 <li
                   key={label}
-                  className="flex items-center justify-between gap-4 rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-gray-200"
+                  className="flex items-center justify-between gap-4 rounded-xl border border-infamous-border bg-infamous-panel px-4 py-3 text-gray-200"
                 >
                   <span className="font-semibold">{label}</span>
-                  <span className="text-sm text-gray-300">{value}</span>
+                  <span className="text-sm text-[#F5E8E8]/80">{value}</span>
                 </li>
               ))}
             </ul>
-            <p className="mt-4 text-xs text-gray-500">
+            <p className="mt-4 text-xs text-[#B88989]/70">
               Final terms are confirmed at onboarding. Card processing fees follow Stripe&apos;s posted rates.
             </p>
           </div>
@@ -272,14 +272,14 @@ const PricingPage: React.FC = () => {
               ].map(([label, value]) => (
                 <li
                   key={label}
-                  className="flex items-center justify-between gap-4 rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-gray-200"
+                  className="flex items-center justify-between gap-4 rounded-xl border border-infamous-border bg-infamous-panel px-4 py-3 text-gray-200"
                 >
                   <span className="font-semibold">{label}</span>
-                  <span className="text-sm text-gray-300">{value}</span>
+                  <span className="text-sm text-[#F5E8E8]/80">{value}</span>
                 </li>
               ))}
             </ul>
-            <p className="mt-4 text-xs text-gray-500">
+            <p className="mt-4 text-xs text-[#B88989]/70">
               Need a custom package or fleet pricing? Use the contact form to scope it directly with operations.
             </p>
           </div>

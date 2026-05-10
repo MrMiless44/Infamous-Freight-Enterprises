@@ -54,12 +54,12 @@ const CompliancePage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Compliance</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Track document expiries, CSA scores, and renewal alerts · sample data</p>
+          <p className="text-sm text-[#B88989]/70 mt-0.5">Track document expiries, CSA scores, and renewal alerts · sample data</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2 bg-infamous-card border border-infamous-border rounded-xl px-3 py-2">
-            <Activity size={14} className="text-gray-500" />
-            <span className="text-xs text-gray-500">Demo data</span>
+            <Activity size={14} className="text-[#B88989]/70" />
+            <span className="text-xs text-[#B88989]/70">Demo data</span>
           </div>
           {expiredCount > 0 && (
             <div className="badge-red flex items-center gap-1">
@@ -81,7 +81,7 @@ const CompliancePage: React.FC = () => {
             <span className={stat.color}>{stat.icon}</span>
             <div>
               <p className="text-2xl font-bold">{stat.value}</p>
-              <p className="text-xs text-gray-500">{stat.label}</p>
+              <p className="text-xs text-[#B88989]/70">{stat.label}</p>
             </div>
           </div>
         ))}
@@ -94,12 +94,12 @@ const CompliancePage: React.FC = () => {
             key={t}
             onClick={() => setTab(t)}
             className={`px-4 py-3 text-sm font-medium capitalize border-b-2 transition-all ${
-              tab === t ? 'border-infamous-orange text-infamous-orange' : 'border-transparent text-gray-500 hover:text-white'
+              tab === t ? 'border-infamous-orange text-infamous-orange' : 'border-transparent text-[#B88989]/70 hover:text-[#F5E8E8]'
             }`}
           >
             {t === 'csa' ? 'CSA Scores' : t}
             {t === 'alerts' && criticalAlerts.length > 0 && (
-              <span className="ml-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{criticalAlerts.length}</span>
+              <span className="ml-2 bg-red-500 text-[#F5E8E8] text-[10px] font-bold px-1.5 py-0.5 rounded-full">{criticalAlerts.length}</span>
             )}
           </button>
         ))}
@@ -121,9 +121,9 @@ const CompliancePage: React.FC = () => {
             </thead>
             <tbody>
               {mockDocs.map((doc) => (
-                <tr key={doc.id} className="hover:bg-[#1a1a1a] transition-colors">
+                <tr key={doc.id} className="hover:bg-infamous-panel transition-colors">
                   <td className="table-cell font-medium">{doc.name}</td>
-                  <td className="table-cell text-xs text-gray-500 capitalize">{doc.type}</td>
+                  <td className="table-cell text-xs text-[#B88989]/70 capitalize">{doc.type}</td>
                   <td className="table-cell font-mono text-xs">{doc.number}</td>
                   <td className="table-cell text-xs">{doc.issuedBy}</td>
                   <td className="table-cell text-xs">{doc.expiryDate}</td>
@@ -180,7 +180,7 @@ const CompliancePage: React.FC = () => {
                 <span className="text-2xl font-bold text-green-400">S</span>
               </div>
               <p className="text-lg font-semibold">Satisfactory</p>
-              <p className="text-sm text-gray-500">Last updated: Apr 15, 2025</p>
+              <p className="text-sm text-[#B88989]/70">Last updated: Apr 15, 2025</p>
               <button className="mt-4 text-sm text-infamous-orange hover:underline flex items-center gap-1 mx-auto">
                 <ExternalLink size={12} /> View on FMCSA
               </button>
@@ -196,7 +196,7 @@ const CompliancePage: React.FC = () => {
               <AlertTriangle size={20} className="text-yellow-400 flex-shrink-0" />
               <div className="flex-1">
                 <p className="font-medium">{alert.name} expires in {alert.daysLeft} days</p>
-                <p className="text-sm text-gray-500">Policy: {alert.number} · Issued by: {alert.issuedBy}</p>
+                <p className="text-sm text-[#B88989]/70">Policy: {alert.number} · Issued by: {alert.issuedBy}</p>
               </div>
               <button className="btn-secondary text-sm">Renew Now</button>
             </div>
@@ -205,7 +205,7 @@ const CompliancePage: React.FC = () => {
             <div className="card text-center py-12">
               <FileCheck size={32} className="text-green-400 mx-auto mb-3" />
               <p className="text-lg font-semibold">All Clear</p>
-              <p className="text-sm text-gray-500">Every document is current.</p>
+              <p className="text-sm text-[#B88989]/70">Every document is current.</p>
             </div>
           )}
         </div>

@@ -50,6 +50,120 @@
   status = 200
   force = true
 
+# Accounts / Auth
+[[redirects]]
+  from = "/api/auth/*"
+  to = "/.netlify/functions/accounts"
+  status = 200
+  force = true
+
+# Loads
+[[redirects]]
+  from = "/api/loads/*"
+  to = "/.netlify/functions/loads"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/loads"
+  to = "/.netlify/functions/loads"
+  status = 200
+  force = true
+
+# Carriers
+[[redirects]]
+  from = "/api/carriers/*"
+  to = "/.netlify/functions/carriers"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/carriers"
+  to = "/.netlify/functions/carriers"
+  status = 200
+  force = true
+
+# Drivers
+[[redirects]]
+  from = "/api/drivers/*"
+  to = "/.netlify/functions/drivers"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/drivers"
+  to = "/.netlify/functions/drivers"
+  status = 200
+  force = true
+
+# ELD / HOS
+[[redirects]]
+  from = "/api/eld/*"
+  to = "/.netlify/functions/drivers"
+  status = 200
+  force = true
+
+# GPS Tracking
+[[redirects]]
+  from = "/api/tracking/*"
+  to = "/.netlify/functions/tracking"
+  status = 200
+  force = true
+
+# Quotes / Pricing
+[[redirects]]
+  from = "/api/quotes/*"
+  to = "/.netlify/functions/quotes"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/quotes"
+  to = "/.netlify/functions/quotes"
+  status = 200
+  force = true
+
+# Documents
+[[redirects]]
+  from = "/api/documents/*"
+  to = "/.netlify/functions/documents"
+  status = 200
+  force = true
+
+# Invoices
+[[redirects]]
+  from = "/api/invoices/*"
+  to = "/.netlify/functions/invoices"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/invoices"
+  to = "/.netlify/functions/invoices"
+  status = 200
+  force = true
+
+# Notifications
+[[redirects]]
+  from = "/api/notifications/*"
+  to = "/.netlify/functions/notifications-api"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/notifications"
+  to = "/.netlify/functions/notifications-api"
+  status = 200
+  force = true
+
+# Mobile App Backend
+[[redirects]]
+  from = "/api/mobile/*"
+  to = "/.netlify/functions/mobile"
+  status = 200
+  force = true
+
+# Fly.io fallback for remaining API routes
 [[redirects]]
   from = "/api/*"
   to = "https://infamous-freight.fly.dev/api/:splat"

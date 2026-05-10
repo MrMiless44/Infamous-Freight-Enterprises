@@ -11,7 +11,7 @@ interface Notification {
   type: 'load_update' | 'exception' | 'message' | 'system';
   title: string;
   message: string;
-  data?: any;
+  data?: Record<string, unknown>;
   timestamp: string;
   read: boolean;
 }

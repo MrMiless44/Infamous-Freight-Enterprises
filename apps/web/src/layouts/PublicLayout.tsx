@@ -1,51 +1,41 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
-import BrandMark from '@/components/ui/BrandMark';
+import { ArrowRight, Infinity } from 'lucide-react';
 import { BRAND } from '@/lib/brand';
 
 const navLinks = [
-  { label: 'Services', href: '/services' },
-  { label: 'Quote', href: '/request-quote' },
-  { label: 'Track', href: '/track-shipment' },
-  { label: 'Load Board', href: '/load-board' },
-  { label: 'Drivers', href: '/drive' },
+  { label: 'Home', href: '/' },
+  { label: 'Shippers', href: '/customer-portal' },
+  { label: 'Carriers', href: '/carrier-portal' },
+  { label: 'Tracking', href: '/track-shipment' },
   { label: 'Pricing', href: '/pricing' },
-  { label: 'Partners', href: '/partners' },
-  { label: 'About', href: '/about' },
-  { label: 'Contact', href: '/contact' },
 ];
 
 const footerGroups = [
   {
     title: 'Freight',
     links: [
-      { label: 'Request quote', href: '/request-quote' },
-      { label: 'Track shipment', href: '/track-shipment' },
-      { label: 'Load board', href: '/load-board' },
-      { label: 'Freight assistant', href: '/freight-assistant' },
+      { label: 'Get a Quote', href: '/request-quote' },
+      { label: 'Track Shipment', href: '/track-shipment' },
+      { label: 'Load Board', href: '/load-board' },
       { label: 'Pricing', href: '/pricing' },
     ],
   },
   {
     title: 'Services',
     links: [
-      { label: 'All services', href: '/services' },
-      { label: 'Box truck', href: '/services/box-truck' },
-      { label: 'Cargo van', href: '/services/cargo-van' },
-      { label: 'Sprinter van', href: '/services/sprinter-van' },
-      { label: 'Local freight', href: '/services/local-freight' },
-      { label: 'Regional freight', href: '/services/regional-freight' },
-      { label: 'Freight dispatch', href: '/services/freight-dispatch' },
+      { label: 'All Services', href: '/services' },
+      { label: 'Box Truck', href: '/services/box-truck' },
+      { label: 'Cargo Van', href: '/services/cargo-van' },
+      { label: 'Sprinter Van', href: '/services/sprinter-van' },
     ],
   },
   {
     title: 'Network',
     links: [
-      { label: 'Apply to drive', href: '/drive' },
+      { label: 'Shipper Portal', href: '/customer-portal' },
+      { label: 'Carrier Portal', href: '/carrier-portal' },
+      { label: 'Drive With Us', href: '/drive' },
       { label: 'Partners', href: '/partners' },
-      { label: 'Carrier portal', href: '/carrier-portal' },
-      { label: 'Customer portal', href: '/customer-portal' },
-      { label: 'Resources', href: '/resources' },
     ],
   },
   {
@@ -55,8 +45,6 @@ const footerGroups = [
       { label: 'Contact', href: '/contact' },
       { label: 'Terms', href: '/terms' },
       { label: 'Privacy', href: '/privacy' },
-      { label: 'Carrier agreement', href: '/carrier-agreement' },
-      { label: 'Shipper agreement', href: '/shipper-agreement' },
     ],
   },
 ];
@@ -65,28 +53,30 @@ const PublicLayout: React.FC = () => {
   const { pathname } = useLocation();
 
   return (
-    <div className="min-h-screen bg-infamous-dark text-white">
-      <header className="sticky top-0 z-50 border-b border-infamous-border bg-infamous-darker/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
+    <div className="min-h-screen bg-infamous-dark text-[#F5E8E8]">
+      <header className="sticky top-0 z-50 border-b border-infamous-border bg-infamous-darker/95 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5 lg:px-6">
           <Link to="/" className="flex items-center gap-3" aria-label="Infamous Freight home">
-            <BrandMark compact />
-            <span>
-              <span className="block font-display text-lg font-black leading-none">{BRAND.displayName}</span>
-              <span className="text-xs uppercase tracking-[0.18em] text-infamous-muted">{BRAND.tagline}</span>
+            <Infinity size={28} className="text-infamous-red-light" strokeWidth={2.5} style={{ filter: 'drop-shadow(0 0 8px rgba(255, 59, 48, 0.8))' }} />
+            <span className="hidden sm:block">
+              <span className="block font-display text-lg font-black leading-none text-[#F5E8E8]">{BRAND.displayName}</span>
+              <span className="text-[10px] uppercase tracking-[0.2em] text-infamous-muted">{BRAND.tagline}</span>
             </span>
           </Link>
 
-          <nav className="flex flex-wrap items-center gap-2 text-sm text-gray-300" aria-label="Public site navigation">
+          <nav className="hidden items-center gap-1 lg:flex" aria-label="Public site navigation">
             {navLinks.map((item) => {
-              const active = pathname === item.href || (item.href === '/services' && pathname.startsWith('/services/'));
+              const active = pathname === item.href
+                || (item.href === '/customer-portal' && pathname.startsWith('/customer'))
+                || (item.href === '/carrier-portal' && pathname.startsWith('/carrier'));
               return (
                 <Link
                   key={item.href}
                   to={item.href}
-                  className={`rounded-lg px-3 py-2 font-semibold transition ${
+                  className={`rounded-lg px-3.5 py-2 text-sm font-medium transition ${
                     active
-                      ? 'bg-infamous-orange/10 text-infamous-orange'
-                      : 'hover:bg-infamous-card hover:text-white'
+                      ? 'bg-infamous-red/10 text-infamous-red-light'
+                      : 'text-[#B88989] hover:bg-white/5 hover:text-[#F5E8E8]'
                   }`}
                 >
                   {item.label}
@@ -95,18 +85,19 @@ const PublicLayout: React.FC = () => {
             })}
           </nav>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <Link
-              to="/customer-portal"
-            className="rounded-lg border border-infamous-border bg-infamous-card px-4 py-2 text-sm font-semibold text-white transition hover:border-infamous-orange/50"
-            >
-              Portal
-            </Link>
+          <div className="flex items-center gap-3">
             <Link
               to="/login"
-              className="inline-flex items-center gap-2 rounded-lg bg-infamous-orange px-4 py-2 text-sm font-bold text-infamous-darker transition hover:bg-infamous-orange-light"
+              className="rounded-lg px-4 py-2 text-sm font-semibold text-[#B88989] transition hover:text-[#F5E8E8]"
             >
-              Login <ArrowRight size={15} />
+              Login
+            </Link>
+            <Link
+              to="/request-quote"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-infamous-red to-infamous-red-dark px-5 py-2 text-sm font-bold text-[#F5E8E8] border border-infamous-red-light/40 transition hover:shadow-[0_0_28px_rgba(255,26,26,0.6)]"
+              style={{ boxShadow: '0 0 18px rgba(255, 26, 26, 0.45)' }}
+            >
+              Get Started <ArrowRight size={15} />
             </Link>
           </div>
         </div>
@@ -116,26 +107,27 @@ const PublicLayout: React.FC = () => {
         <Outlet />
       </main>
 
-      <footer className="border-t border-infamous-border bg-infamous-darker px-6 py-10 text-sm text-slate-400">
-        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1.2fr_2fr]">
+      <footer className="border-t border-infamous-border bg-infamous-darker px-5 py-12 text-sm text-[#B88989] lg:px-6">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.2fr_2fr]">
           <div>
-            <Link to="/" className="flex items-center gap-3 text-white" aria-label="Infamous Freight home">
-              <BrandMark compact />
+            <Link to="/" className="flex items-center gap-3 text-[#F5E8E8]" aria-label="Infamous Freight home">
+              <Infinity size={32} className="text-infamous-red-light" strokeWidth={2.5} style={{ filter: 'drop-shadow(0 0 10px rgba(255, 59, 48, 0.8))' }} />
               <span className="font-display text-lg font-black">{BRAND.displayName}</span>
             </Link>
-            <p className="mt-4 max-w-md leading-6">
-              Built for verified freight operations: quote intake, dispatch, tracking, proof of delivery, driver onboarding, and partner workflows.
+            <p className="mt-2 font-display text-sm font-bold uppercase tracking-[0.2em] text-infamous-muted">{BRAND.tagline}</p>
+            <p className="mt-3 max-w-md leading-6">
+              Freight management platform with verified carriers, real-time tracking, and end-to-end shipment visibility.
             </p>
-            <p className="mt-4">© {new Date().getFullYear()} {BRAND.legalName}. All rights reserved.</p>
+            <p className="mt-6 text-xs text-infamous-muted">© {new Date().getFullYear()} {BRAND.legalName}. All rights reserved.</p>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {footerGroups.map((group) => (
               <div key={group.title}>
-                <h2 className="mb-3 text-sm font-bold uppercase tracking-[0.18em] text-gray-200">{group.title}</h2>
-                <div className="space-y-2">
+                <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-[#F5E8E8]/80">{group.title}</h2>
+                <div className="space-y-2.5">
                   {group.links.map((link) => (
-                    <Link key={link.href} to={link.href} className="block hover:text-infamous-orange">
+                    <Link key={link.href} to={link.href} className="block hover:text-infamous-red-light transition">
                       {link.label}
                     </Link>
                   ))}

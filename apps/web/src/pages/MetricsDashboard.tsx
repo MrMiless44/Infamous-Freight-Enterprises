@@ -112,7 +112,7 @@ const MetricsDashboard: React.FC = () => {
         target: 95,
         unit: '%',
         icon: <Target size={20} />,
-        color: 'text-emerald-400'
+        color: 'text-[#36D399]'
       }
     ]);
 
@@ -136,7 +136,7 @@ const MetricsDashboard: React.FC = () => {
   const getChangeIcon = (change: number) => {
     if (change > 0) return <ArrowUpRight size={14} className="text-green-400" />;
     if (change < 0) return <ArrowDownRight size={14} className="text-red-400" />;
-    return <Minus size={14} className="text-gray-400" />;
+    return <Minus size={14} className="text-[#B88989]" />;
   };
 
   const getChangeColor = (change: number, metric: string) => {
@@ -146,7 +146,7 @@ const MetricsDashboard: React.FC = () => {
     }
     if (change > 0) return 'text-green-400';
     if (change < 0) return 'text-red-400';
-    return 'text-gray-400';
+    return 'text-[#B88989]';
   };
 
   const progressPercent = (current: number, target: number) => {
@@ -154,28 +154,28 @@ const MetricsDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white p-6">
+    <div className="min-h-screen bg-infamous-dark text-[#F5E8E8] p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-1">Weekly Metrics</h1>
-            <p className="text-gray-400 text-sm">Track your fleet performance at a glance · sample data</p>
+            <h1 className="text-3xl font-bold text-[#F5E8E8] mb-1">Weekly Metrics</h1>
+            <p className="text-[#B88989] text-sm">Track your fleet performance at a glance · sample data</p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-[#1a1a1a] border border-[#222] rounded-lg px-3 py-2">
-              <Activity size={14} className="text-gray-500" />
-              <span className="text-xs text-gray-500">Demo data</span>
+            <div className="flex items-center gap-2 bg-infamous-panel border border-infamous-border rounded-lg px-3 py-2">
+              <Activity size={14} className="text-[#B88989]/70" />
+              <span className="text-xs text-[#B88989]/70">Demo data</span>
             </div>
-            <div className="flex gap-2 bg-[#1a1a1a] rounded-lg p-1">
+            <div className="flex gap-2 bg-infamous-panel rounded-lg p-1">
             {(['7d', '30d', '90d'] as const).map((range) => (
               <button
                 key={range}
                 onClick={() => setDateRange(range)}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                   dateRange === range
-                    ? 'bg-[#ff3d00] text-white'
-                    : 'text-gray-400 hover:text-white'
+                    ? 'bg-infamous-red text-[#F5E8E8]'
+                    : 'text-[#B88989] hover:text-[#F5E8E8]'
                 }`}
               >
                 {range === '7d' ? '7 Days' : range === '30d' ? '30 Days' : '90 Days'}
@@ -191,10 +191,10 @@ const MetricsDashboard: React.FC = () => {
           {metrics.map((metric, i) => (
             <div
               key={i}
-              className="bg-[#141414] border border-[#222] rounded-xl p-5 hover:border-[#333] transition-all"
+              className="bg-infamous-panel border border-infamous-border rounded-xl p-5 hover:border-infamous-border transition-all"
             >
               <div className="flex items-start justify-between mb-3">
-                <div className={`${metric.color} bg-[#1a1a1a] p-2.5 rounded-lg`}>
+                <div className={`${metric.color} bg-infamous-panel p-2.5 rounded-lg`}>
                   {metric.icon}
                 </div>
                 <div className="flex items-center gap-1">
@@ -206,7 +206,7 @@ const MetricsDashboard: React.FC = () => {
               </div>
 
               <div className="mb-2">
-                <p className="text-gray-400 text-sm">{metric.label}</p>
+                <p className="text-[#B88989] text-sm">{metric.label}</p>
                 <p className="text-2xl font-bold">
                   {metric.unit === '$' ? '$' : ''}
                   {metric.current.toLocaleString()}
@@ -217,14 +217,14 @@ const MetricsDashboard: React.FC = () => {
               {/* Progress bar */}
               <div className="mt-3">
                 <div className="flex justify-between text-xs mb-1">
-                  <span className="text-gray-500">Target: {metric.unit === '$' ? '$' : ''}{metric.target.toLocaleString()}</span>
-                  <span className="text-gray-500">{progressPercent(metric.current, metric.target)}%</span>
+                  <span className="text-[#B88989]/70">Target: {metric.unit === '$' ? '$' : ''}{metric.target.toLocaleString()}</span>
+                  <span className="text-[#B88989]/70">{progressPercent(metric.current, metric.target)}%</span>
                 </div>
-                <div className="h-1.5 bg-[#222] rounded-full overflow-hidden">
+                <div className="h-1.5 bg-infamous-border rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${
                       progressPercent(metric.current, metric.target) >= 100 ? 'bg-green-500' :
-                      progressPercent(metric.current, metric.target) >= 75 ? 'bg-[#ff3d00]' : 'bg-yellow-500'
+                      progressPercent(metric.current, metric.target) >= 75 ? 'bg-infamous-red' : 'bg-yellow-500'
                     }`}
                     style={{ width: `${progressPercent(metric.current, metric.target)}%` }}
                   />
@@ -238,19 +238,19 @@ const MetricsDashboard: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Top Lanes */}
           <WidgetErrorBoundary label="Top lanes">
-          <div className="bg-[#141414] border border-[#222] rounded-xl p-5">
+          <div className="bg-infamous-panel border border-infamous-border rounded-xl p-5">
             <div className="flex items-center gap-2 mb-4">
-              <Map size={18} className="text-[#ff3d00]" />
+              <Map size={18} className="text-infamous-red-light" />
               <h2 className="text-lg font-semibold">Top Lanes</h2>
             </div>
             <div className="space-y-3">
               {topLanes.map((lane, i) => (
-                <div key={i} className="flex items-center justify-between py-2 border-b border-[#222] last:border-0">
+                <div key={i} className="flex items-center justify-between py-2 border-b border-infamous-border last:border-0">
                   <div className="flex items-center gap-3">
-                    <span className="text-sm text-gray-500 w-5">{i + 1}</span>
+                    <span className="text-sm text-[#B88989]/70 w-5">{i + 1}</span>
                     <div>
                       <p className="text-sm font-medium">{lane.origin} → {lane.destination}</p>
-                      <p className="text-xs text-gray-500">{lane.loads} loads this week</p>
+                      <p className="text-xs text-[#B88989]/70">{lane.loads} loads this week</p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -267,31 +267,31 @@ const MetricsDashboard: React.FC = () => {
 
           {/* Driver Leaderboard */}
           <WidgetErrorBoundary label="Driver leaderboard">
-          <div className="bg-[#141414] border border-[#222] rounded-xl p-5">
+          <div className="bg-infamous-panel border border-infamous-border rounded-xl p-5">
             <div className="flex items-center gap-2 mb-4">
-              <Award size={18} className="text-[#ff3d00]" />
+              <Award size={18} className="text-infamous-red-light" />
               <h2 className="text-lg font-semibold">Driver Leaderboard</h2>
             </div>
             <div className="space-y-3">
               {driverLeaders.map((driver, i) => (
-                <div key={i} className="flex items-center justify-between py-2 border-b border-[#222] last:border-0">
+                <div key={i} className="flex items-center justify-between py-2 border-b border-infamous-border last:border-0">
                   <div className="flex items-center gap-3">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
                       i === 0 ? 'bg-yellow-500/20 text-yellow-400' :
-                      i === 1 ? 'bg-gray-400/20 text-gray-300' :
+                      i === 1 ? 'bg-gray-400/20 text-[#F5E8E8]/80' :
                       i === 2 ? 'bg-orange-600/20 text-orange-400' :
-                      'bg-[#222] text-gray-500'
+                      'bg-infamous-border text-[#B88989]/70'
                     }`}>
                       {i + 1}
                     </div>
                     <div>
                       <p className="text-sm font-medium">{driver.name}</p>
-                      <p className="text-xs text-gray-500">{driver.loads} loads • {driver.onTime}% on-time</p>
+                      <p className="text-xs text-[#B88989]/70">{driver.loads} loads • {driver.onTime}% on-time</p>
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-semibold">${driver.revenue.toLocaleString()}</p>
-                    <div className="flex items-center gap-1 text-xs text-[#ff3d00]">
+                    <div className="flex items-center gap-1 text-xs text-infamous-red-light">
                       <Zap size={10} />
                       <span>{driver.xp.toLocaleString()} XP</span>
                     </div>
@@ -304,27 +304,27 @@ const MetricsDashboard: React.FC = () => {
         </div>
 
         {/* Weekly Summary */}
-        <div className="mt-6 bg-gradient-to-r from-[#ff3d00]/10 to-transparent border border-[#ff3d00]/20 rounded-xl p-5">
+        <div className="mt-6 bg-gradient-to-r from-infamous-red/10 to-transparent border border-[#ff3d00]/20 rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
-            <BarChart3 size={18} className="text-[#ff3d00]" />
+            <BarChart3 size={18} className="text-infamous-red-light" />
             <h2 className="text-lg font-semibold">Week Summary</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <p className="text-2xl font-bold text-[#ff3d00]">47</p>
-              <p className="text-xs text-gray-400">Loads Dispatched</p>
+              <p className="text-2xl font-bold text-infamous-red-light">47</p>
+              <p className="text-xs text-[#B88989]">Loads Dispatched</p>
             </div>
             <div>
               <p className="text-2xl font-bold text-green-400">$28.4k</p>
-              <p className="text-xs text-gray-400">Revenue Generated</p>
+              <p className="text-xs text-[#B88989]">Revenue Generated</p>
             </div>
             <div>
               <p className="text-2xl font-bold text-cyan-400">4.2 min</p>
-              <p className="text-xs text-gray-400">Avg Dispatch Time</p>
+              <p className="text-xs text-[#B88989]">Avg Dispatch Time</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-emerald-400">94%</p>
-              <p className="text-xs text-gray-400">On-Time Delivery</p>
+              <p className="text-2xl font-bold text-[#36D399]">94%</p>
+              <p className="text-xs text-[#B88989]">On-Time Delivery</p>
             </div>
           </div>
         </div>

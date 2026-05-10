@@ -191,12 +191,12 @@ const QuoteRequestsPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Quote Requests</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Review, quote, and convert shipper requests to loads · sample data</p>
+          <p className="text-sm text-[#B88989]/70 mt-0.5">Review, quote, and convert shipper requests to loads · sample data</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 bg-infamous-card border border-infamous-border rounded-xl px-3 py-2">
-            <Activity size={14} className="text-gray-500" />
-            <span className="text-xs text-gray-500">Demo data</span>
+            <Activity size={14} className="text-[#B88989]/70" />
+            <span className="text-xs text-[#B88989]/70">Demo data</span>
           </div>
           <button className="btn-primary flex items-center gap-2">
             <Plus size={16} /> New Quote
@@ -216,7 +216,7 @@ const QuoteRequestsPage: React.FC = () => {
             <span className={stat.color}>{stat.icon}</span>
             <div>
               <p className="text-2xl font-bold">{stat.value}</p>
-              <p className="text-xs text-gray-500">{stat.label}</p>
+              <p className="text-xs text-[#B88989]/70">{stat.label}</p>
             </div>
           </div>
         ))}
@@ -229,7 +229,7 @@ const QuoteRequestsPage: React.FC = () => {
             key={tab.key}
             onClick={() => setFilter(tab.key)}
             className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
-              filter === tab.key ? 'bg-infamous-orange text-white' : 'bg-infamous-card text-gray-400 hover:text-white border border-infamous-border'
+              filter === tab.key ? 'bg-infamous-orange text-[#F5E8E8]' : 'bg-infamous-card text-[#B88989] hover:text-[#F5E8E8] border border-infamous-border'
             }`}
           >
             {tab.label}
@@ -259,7 +259,7 @@ const QuoteRequestsPage: React.FC = () => {
                 return (
                   <tr
                     key={quote.id}
-                    className="hover:bg-[#1a1a1a] transition-colors cursor-pointer"
+                    className="hover:bg-infamous-panel transition-colors cursor-pointer"
                     onClick={() => setSelectedQuote(quote)}
                   >
                     <td className="table-cell font-mono text-xs">{quote.quoteNumber}</td>
@@ -267,19 +267,19 @@ const QuoteRequestsPage: React.FC = () => {
                     <td className="table-cell">
                       <div className="flex items-center gap-1 text-xs">
                         <span className="truncate max-w-[80px]">{quote.pickupLocation.split(',')[0]}</span>
-                        <ArrowRight size={10} className="text-gray-600 flex-shrink-0" />
+                        <ArrowRight size={10} className="text-[#B88989]/60 flex-shrink-0" />
                         <span className="truncate max-w-[80px]">{quote.deliveryLocation.split(',')[0]}</span>
                       </div>
                     </td>
-                    <td className="table-cell text-xs text-gray-500">{quote.equipmentNeeded}</td>
-                    <td className="table-cell text-xs text-gray-500">{quote.pickupDate}</td>
+                    <td className="table-cell text-xs text-[#B88989]/70">{quote.equipmentNeeded}</td>
+                    <td className="table-cell text-xs text-[#B88989]/70">{quote.pickupDate}</td>
                     <td className="table-cell">
                       <span className={`badge ${cfg.badge} flex items-center gap-1 w-fit`}>
                         {cfg.icon} {cfg.label}
                       </span>
                     </td>
                     <td className="table-cell">
-                      <ChevronRight size={14} className="text-gray-500" />
+                      <ChevronRight size={14} className="text-[#B88989]/70" />
                     </td>
                   </tr>
                 );
@@ -301,73 +301,73 @@ const QuoteRequestsPage: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Quote Detail</h2>
-                <button onClick={() => setSelectedQuote(null)} className="text-gray-500 hover:text-white text-xs">Close</button>
+                <button onClick={() => setSelectedQuote(null)} className="text-[#B88989]/70 hover:text-[#F5E8E8] text-xs">Close</button>
               </div>
 
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-mono text-sm text-gray-500">{selectedQuote.quoteNumber}</span>
+                  <span className="font-mono text-sm text-[#B88989]/70">{selectedQuote.quoteNumber}</span>
                   <span className={`badge ${statusConfig[selectedQuote.status].badge} flex items-center gap-1`}>
                     {statusConfig[selectedQuote.status].icon}
                     {statusConfig[selectedQuote.status].label}
                   </span>
                 </div>
                 <p className="font-bold text-base">{selectedQuote.shipper}</p>
-                <p className="text-xs text-gray-500 mt-0.5">Submitted {selectedQuote.createdAt}</p>
+                <p className="text-xs text-[#B88989]/70 mt-0.5">Submitted {selectedQuote.createdAt}</p>
               </div>
 
               <div className="space-y-3 text-sm">
                 <div className="flex items-start gap-2">
-                  <MapPin size={14} className="text-gray-500 mt-0.5 flex-shrink-0" />
+                  <MapPin size={14} className="text-[#B88989]/70 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-xs text-gray-500">Pickup</p>
+                    <p className="text-xs text-[#B88989]/70">Pickup</p>
                     <p>{selectedQuote.pickupLocation}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
                   <MapPin size={14} className="text-infamous-orange mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-xs text-gray-500">Delivery</p>
+                    <p className="text-xs text-[#B88989]/70">Delivery</p>
                     <p>{selectedQuote.deliveryLocation}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Package size={14} className="text-gray-500" />
+                  <Package size={14} className="text-[#B88989]/70" />
                   <div>
-                    <span className="text-xs text-gray-500">Commodity: </span>
+                    <span className="text-xs text-[#B88989]/70">Commodity: </span>
                     <span>{selectedQuote.commodity} · {selectedQuote.weight}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Truck size={14} className="text-gray-500" />
+                  <Truck size={14} className="text-[#B88989]/70" />
                   <span>{selectedQuote.equipmentNeeded} · {selectedQuote.freightType}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Calendar size={14} className="text-gray-500" />
+                  <Calendar size={14} className="text-[#B88989]/70" />
                   <div className="text-xs">
-                    <span className="text-gray-500">Pickup: </span>{selectedQuote.pickupDate}
-                    <span className="text-gray-500 ml-2">Deadline: </span>{selectedQuote.deliveryDeadline}
+                    <span className="text-[#B88989]/70">Pickup: </span>{selectedQuote.pickupDate}
+                    <span className="text-[#B88989]/70 ml-2">Deadline: </span>{selectedQuote.deliveryDeadline}
                   </div>
                 </div>
               </div>
 
               {selectedQuote.quotedAmount && (
                 <div className="border-t border-infamous-border pt-4 space-y-2">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">Financials</p>
+                  <p className="text-xs text-[#B88989]/70 uppercase tracking-wider">Financials</p>
                   <div className="space-y-1.5">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">Quoted to Shipper</span>
+                      <span className="text-[#B88989]">Quoted to Shipper</span>
                       <span className="font-semibold">${selectedQuote.quotedAmount.toLocaleString()}</span>
                     </div>
                     {selectedQuote.estimatedCarrierCost && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-400">Est. Carrier Cost</span>
+                        <span className="text-[#B88989]">Est. Carrier Cost</span>
                         <span className="text-blue-400">${selectedQuote.estimatedCarrierCost.toLocaleString()}</span>
                       </div>
                     )}
                     {grossMargin !== null && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-400">Gross Margin</span>
+                        <span className="text-[#B88989]">Gross Margin</span>
                         <span className="text-green-400 font-semibold">
                           ${grossMargin.toLocaleString()}
                           {selectedQuote.targetMargin && <span className="text-xs ml-1">({selectedQuote.targetMargin}%)</span>}
@@ -425,8 +425,8 @@ const QuoteRequestsPage: React.FC = () => {
             </div>
           ) : (
             <div className="text-center py-10">
-              <ClipboardList size={32} className="text-gray-600 mx-auto mb-3" />
-              <p className="text-sm text-gray-500">Select a quote to view details</p>
+              <ClipboardList size={32} className="text-[#B88989]/60 mx-auto mb-3" />
+              <p className="text-sm text-[#B88989]/70">Select a quote to view details</p>
             </div>
           )}
         </div>

@@ -108,7 +108,7 @@ const GraphHopperPage: React.FC = () => {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <a
                 href="https://github.com/graphhopper/graphhopper/blob/11.x/docs/index.md"
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#243a22] px-5 py-3 font-bold text-white transition hover:bg-[#31502d]"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#243a22] px-5 py-3 font-bold text-[#F5E8E8] transition hover:bg-[#31502d]"
               >
                 Read documentation <ArrowRight size={17} />
               </a>
@@ -204,7 +204,7 @@ const GraphHopperPage: React.FC = () => {
         </div>
       </section>
 
-      <section className="bg-[#172417] px-6 py-14 text-white">
+      <section className="bg-[#172417] px-6 py-14 text-[#F5E8E8]">
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_1.2fr]">
           <div>
             <div className="inline-flex rounded-lg bg-[#b9e675]/15 p-3 text-[#d5f5a8]">

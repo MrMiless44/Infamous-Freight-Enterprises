@@ -60,7 +60,7 @@ const LegalPage: React.FC = () => {
   const page = legalContent[(pathname in legalContent ? pathname : '/terms') as LegalPath];
 
   return (
-    <main className="min-h-screen bg-[#090909] px-6 py-10 text-white">
+    <main className="min-h-screen bg-[#090909] px-6 py-10 text-[#F5E8E8]">
       <div className="mx-auto max-w-5xl">
         <header className="mb-10">
           <div className="mb-4 inline-flex rounded-xl bg-infamous-orange/10 p-3 text-infamous-orange">
@@ -68,8 +68,8 @@ const LegalPage: React.FC = () => {
           </div>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">{page.eyebrow}</p>
           <h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">{page.title}</h1>
-          <p className="mt-4 max-w-3xl text-lg leading-8 text-gray-300">{page.intro}</p>
-          <p className="mt-3 text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">
+          <p className="mt-4 max-w-3xl text-lg leading-8 text-[#F5E8E8]/80">{page.intro}</p>
+          <p className="mt-3 text-sm font-semibold uppercase tracking-[0.18em] text-[#B88989]/70">
             Legal business name: {BRAND.legalName}
           </p>
         </header>
@@ -79,17 +79,17 @@ const LegalPage: React.FC = () => {
             <article key={title} className="rounded-3xl border border-infamous-border bg-infamous-card p-6">
               <div className="mb-3 flex items-center gap-3 text-infamous-orange">
                 <ShieldCheck size={18} />
-                <h2 className="text-xl font-bold text-white">{title}</h2>
+                <h2 className="text-xl font-bold text-[#F5E8E8]">{title}</h2>
               </div>
-              <p className="text-sm leading-7 text-gray-400">{body}</p>
+              <p className="text-sm leading-7 text-[#B88989]">{body}</p>
             </article>
           ))}
         </section>
 
         <section className="mt-10 rounded-3xl border border-infamous-border bg-[#0f0f0f] p-6">
           <h2 className="text-xl font-bold">Need help?</h2>
-          <p className="mt-2 text-sm leading-6 text-gray-400">This page is an operational summary and should be reviewed with legal counsel before relying on it as a final contract.</p>
-          <Link to="/contact" className="mt-5 inline-flex items-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 font-semibold text-white">
+          <p className="mt-2 text-sm leading-6 text-[#B88989]">This page is an operational summary and should be reviewed with legal counsel before relying on it as a final contract.</p>
+          <Link to="/contact" className="mt-5 inline-flex items-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 font-semibold text-[#F5E8E8]">
             Contact Infamous Freight <ArrowRight size={17} />
           </Link>
         </section>

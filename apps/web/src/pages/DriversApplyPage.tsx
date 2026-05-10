@@ -56,9 +56,9 @@ const DriversApplyPage: React.FC = () => {
   };
 
   return (
-    <main className="min-h-screen bg-[#090909] px-6 py-10 text-white">
+    <main className="min-h-screen bg-[#090909] px-6 py-10 text-[#F5E8E8]">
       <div className="mx-auto max-w-6xl">
-        <Link to="/" className="mb-8 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white">
+        <Link to="/" className="mb-8 inline-flex items-center gap-2 text-sm text-[#B88989] hover:text-[#F5E8E8]">
           <ArrowLeft size={16} /> Back to Infamous Freight
         </Link>
 
@@ -68,7 +68,7 @@ const DriversApplyPage: React.FC = () => {
               <Truck size={16} /> Apply to drive
             </div>
             <h1 className="text-4xl font-black tracking-tight sm:text-5xl">Get verified and join the network.</h1>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-gray-300">
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-[#F5E8E8]/80">
               Submit your contact, location, and equipment details. Onboarding will follow up with verification next steps.
             </p>
 
@@ -76,7 +76,7 @@ const DriversApplyPage: React.FC = () => {
               {['Free to start', 'Verified operators first', 'Organized onboarding'].map((item) => (
                 <div key={item} className="rounded-2xl border border-infamous-border bg-infamous-card p-5">
                   <h2 className="font-bold">{item}</h2>
-                  <p className="mt-2 text-sm leading-6 text-gray-400">Built for cleaner freight handoffs and better communication.</p>
+                  <p className="mt-2 text-sm leading-6 text-[#B88989]">Built for cleaner freight handoffs and better communication.</p>
                 </div>
               ))}
             </div>
@@ -84,14 +84,14 @@ const DriversApplyPage: React.FC = () => {
 
           <aside className="rounded-3xl border border-infamous-border bg-infamous-card p-6 shadow-2xl">
             <h2 className="text-2xl font-bold">Application</h2>
-            <p className="mt-2 text-sm text-gray-400">Required fields help onboarding respond faster.</p>
+            <p className="mt-2 text-sm text-[#B88989]">Required fields help onboarding respond faster.</p>
 
             {submitted ? (
               <div className="mt-6 rounded-2xl border border-green-500/30 bg-green-500/10 p-6">
                 <CheckCircle2 className="mb-3 text-green-400" size={32} />
                 <h3 className="text-xl font-bold">Application received</h3>
-                <p className="mt-2 text-gray-300">Onboarding will review your details and follow up.</p>
-                <button type="button" onClick={() => { setSubmitted(false); setForm(initialForm); }} className="mt-5 rounded-xl bg-infamous-orange px-4 py-2 font-semibold text-white">
+                <p className="mt-2 text-[#F5E8E8]/80">Onboarding will review your details and follow up.</p>
+                <button type="button" onClick={() => { setSubmitted(false); setForm(initialForm); }} className="mt-5 rounded-xl bg-infamous-orange px-4 py-2 font-semibold text-[#F5E8E8]">
                   Submit another application
                 </button>
               </div>
@@ -104,7 +104,7 @@ const DriversApplyPage: React.FC = () => {
                 <p className="hidden"><label>Do not fill this out: <input name="bot-field" tabIndex={-1} autoComplete="off" /></label></p>
                 {(['fullName', 'email', 'phone', 'city', 'state'] as const).map((key) => (
                   <label key={key} className="block">
-                    <span className="mb-2 block text-sm font-medium text-gray-300">{fieldLabels[key]}</span>
+                    <span className="mb-2 block text-sm font-medium text-[#F5E8E8]/80">{fieldLabels[key]}</span>
                     <input
                       name={key}
                       type={key === 'email' ? 'email' : 'text'}
@@ -112,23 +112,23 @@ const DriversApplyPage: React.FC = () => {
                       maxLength={key === 'email' ? 160 : key === 'phone' || key === 'state' ? 40 : key === 'city' ? 100 : 120}
                       value={form[key]}
                       onChange={(event) => update(key, event.target.value)}
-                      className="w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange"
+                      className="w-full rounded-xl border border-infamous-border bg-infamous-panel px-4 py-3 text-[#F5E8E8] outline-none transition focus:border-infamous-orange"
                       required
                     />
                   </label>
                 ))}
                 <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-gray-300">Equipment</span>
-                  <select name="equipment" value={form.equipment} onChange={(event) => update('equipment', event.target.value)} className="w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange">
+                  <span className="mb-2 block text-sm font-medium text-[#F5E8E8]/80">Equipment</span>
+                  <select name="equipment" value={form.equipment} onChange={(event) => update('equipment', event.target.value)} className="w-full rounded-xl border border-infamous-border bg-infamous-panel px-4 py-3 text-[#F5E8E8] outline-none transition focus:border-infamous-orange">
                     {equipmentOptions.map((option) => <option key={option}>{option}</option>)}
                   </select>
                 </label>
                 <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-gray-300">Notes</span>
-                  <textarea name="notes" maxLength={2000} value={form.notes} onChange={(event) => update('notes', event.target.value)} className="min-h-28 w-full rounded-xl border border-infamous-border bg-[#111] px-4 py-3 text-white outline-none transition focus:border-infamous-orange" />
+                  <span className="mb-2 block text-sm font-medium text-[#F5E8E8]/80">Notes</span>
+                  <textarea name="notes" maxLength={2000} value={form.notes} onChange={(event) => update('notes', event.target.value)} className="min-h-28 w-full rounded-xl border border-infamous-border bg-infamous-panel px-4 py-3 text-[#F5E8E8] outline-none transition focus:border-infamous-orange" />
                 </label>
                 {error ? <p className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">{error}</p> : null}
-                <button type="submit" disabled={loading} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 font-semibold text-white transition hover:opacity-90 disabled:opacity-60">
+                <button type="submit" disabled={loading} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 font-semibold text-[#F5E8E8] transition hover:opacity-90 disabled:opacity-60">
                   {loading ? 'Submitting...' : 'Submit application'} <Send size={17} />
                 </button>
               </form>

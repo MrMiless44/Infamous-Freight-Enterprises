@@ -39,7 +39,7 @@ const statusConfig: Record<string, { color: string; label: string }> = {
 const levelColor: Record<string, string> = {
   Platinum: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
   Gold: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
-  Silver: 'text-gray-300 bg-gray-500/10 border-gray-500/20',
+  Silver: 'text-[#F5E8E8]/80 bg-gray-500/10 border-gray-500/20',
 };
 
 const DriversPage: React.FC = () => {
@@ -57,12 +57,12 @@ const DriversPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Drivers</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{mockDrivers.filter((d) => d.status === 'available').length} of {mockDrivers.length} drivers available · sample data</p>
+          <p className="text-sm text-[#B88989]/70 mt-0.5">{mockDrivers.filter((d) => d.status === 'available').length} of {mockDrivers.length} drivers available · sample data</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 bg-infamous-card border border-infamous-border rounded-xl px-3 py-2">
-            <Activity size={14} className="text-gray-500" />
-            <span className="text-xs text-gray-500">Demo data</span>
+            <Activity size={14} className="text-[#B88989]/70" />
+            <span className="text-xs text-[#B88989]/70">Demo data</span>
           </div>
           <button className="btn-primary">+ Add Driver</button>
         </div>
@@ -81,7 +81,7 @@ const DriversPage: React.FC = () => {
             <span className={stat.color}>{stat.icon}</span>
             <div>
               <p className="text-xl font-bold">{stat.value}</p>
-              <p className="text-xs text-gray-500">{stat.label}</p>
+              <p className="text-xs text-[#B88989]/70">{stat.label}</p>
             </div>
           </div>
         ))}
@@ -112,7 +112,7 @@ const DriversPage: React.FC = () => {
           return (
             <div key={driver.id} className="card hover:border-infamous-border-light transition-all">
               <div className="flex items-start gap-3 mb-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-infamous-orange to-infamous-orange-light flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-infamous-orange to-infamous-orange-light flex items-center justify-center text-[#F5E8E8] font-bold text-lg flex-shrink-0">
                   {driver.name[0]}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -124,8 +124,8 @@ const DriversPage: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className={`w-2 h-2 rounded-full ${status.color}`} />
-                    <span className="text-xs text-gray-400">{status.label}</span>
-                    <span className="text-xs text-gray-600 ml-2">{driver.truck} · {driver.equipment}</span>
+                    <span className="text-xs text-[#B88989]">{status.label}</span>
+                    <span className="text-xs text-[#B88989]/60 ml-2">{driver.truck} · {driver.equipment}</span>
                   </div>
                 </div>
                 <div className="text-right">
@@ -138,35 +138,35 @@ const DriversPage: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-2 mb-3">
                 <div className="bg-infamous-dark rounded-lg p-2.5">
-                  <p className="text-[10px] text-gray-500 uppercase">HOS Remaining</p>
+                  <p className="text-[10px] text-[#B88989]/70 uppercase">HOS Remaining</p>
                   <p className={`text-sm font-bold ${driver.hosRemaining < 3 ? 'text-red-400' : driver.hosRemaining < 5 ? 'text-yellow-400' : 'text-green-400'}`}>
                     {driver.hosRemaining}h
                   </p>
                 </div>
                 <div className="bg-infamous-dark rounded-lg p-2.5">
-                  <p className="text-[10px] text-gray-500 uppercase">Loads Today</p>
+                  <p className="text-[10px] text-[#B88989]/70 uppercase">Loads Today</p>
                   <p className="text-sm font-bold">{driver.loadsToday}</p>
                 </div>
                 <div className="bg-infamous-dark rounded-lg p-2.5">
-                  <p className="text-[10px] text-gray-500 uppercase">Week Revenue</p>
+                  <p className="text-[10px] text-[#B88989]/70 uppercase">Week Revenue</p>
                   <p className="text-sm font-bold text-infamous-orange">${driver.revenueWeek.toLocaleString()}</p>
                 </div>
                 <div className="bg-infamous-dark rounded-lg p-2.5">
-                  <p className="text-[10px] text-gray-500 uppercase">On-Time</p>
+                  <p className="text-[10px] text-[#B88989]/70 uppercase">On-Time</p>
                   <p className="text-sm font-bold text-green-400">{driver.onTimePercent}%</p>
                 </div>
               </div>
 
               <div className="flex items-center justify-between pt-3 border-t border-infamous-border">
-                <div className="flex items-center gap-1 text-xs text-gray-500">
+                <div className="flex items-center gap-1 text-xs text-[#B88989]/70">
                   <MapPin size={10} />
                   <span className="truncate max-w-[140px]">{driver.currentLocation}</span>
                 </div>
                 <div className="flex gap-1">
-                  <button className="p-1.5 rounded-lg hover:bg-infamous-border text-gray-500 hover:text-white transition-colors">
+                  <button className="p-1.5 rounded-lg hover:bg-infamous-border text-[#B88989]/70 hover:text-[#F5E8E8] transition-colors">
                     <Phone size={12} />
                   </button>
-                  <button className="p-1.5 rounded-lg bg-infamous-orange/10 text-infamous-orange hover:bg-infamous-orange hover:text-white transition-colors text-xs font-medium px-3">
+                  <button className="p-1.5 rounded-lg bg-infamous-orange/10 text-infamous-orange hover:bg-infamous-orange hover:text-[#F5E8E8] transition-colors text-xs font-medium px-3">
                     Assign Load
                   </button>
                 </div>

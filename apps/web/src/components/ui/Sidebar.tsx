@@ -1,12 +1,12 @@
 import { NavLink } from 'react-router-dom';
 import { useAppStore } from '@/store/app-store';
 import { canAccessLaunchValidation } from '@/lib/launchValidationAccess';
-import BrandMark from '@/components/ui/BrandMark';
 import {
   LayoutDashboard, Truck, Radio, Users, FileText, MessageSquare,
   TrendingUp, ShieldCheck, Settings, ChevronLeft, ChevronRight,
-  LogOut, ClipboardCheck, ClipboardList, DollarSign, type LucideIcon
+  LogOut, ClipboardCheck, ClipboardList, DollarSign, Infinity, type LucideIcon
 } from 'lucide-react';
+import { BRAND } from '@/lib/brand';
 
 type UserRole = 'owner' | 'admin' | 'dispatcher' | 'driver';
 
@@ -27,16 +27,16 @@ function meetsMinRole(userRole: string | undefined, minRole?: UserRole): boolean
 }
 
 const baseNavItems: NavItem[] = [
-  { path: '/ops', label: 'Ops Dashboard', icon: LayoutDashboard, end: true },
-  { path: '/quotes', label: 'Quotes', icon: ClipboardList, minRole: 'dispatcher' },
-  { path: '/loads', label: 'Loads', icon: Truck },
-  { path: '/dispatch', label: 'Dispatch Board', icon: Radio, minRole: 'dispatcher' },
+  { path: '/ops', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { path: '/loads', label: 'Shipments', icon: Truck },
   { path: '/carriers', label: 'Carriers', icon: Users, minRole: 'admin' },
   { path: '/drivers', label: 'Drivers', icon: Users, minRole: 'dispatcher' },
+  { path: '/dispatch', label: 'Dispatch', icon: Radio, minRole: 'dispatcher' },
   { path: '/accounting', label: 'Accounting', icon: DollarSign, minRole: 'admin' },
-  { path: '/invoices', label: 'Invoices', icon: FileText, minRole: 'dispatcher' },
-  { path: '/chat', label: 'Messages', icon: MessageSquare, badge: '3' },
   { path: '/analytics', label: 'Analytics', icon: TrendingUp, minRole: 'admin' },
+  { path: '/quotes', label: 'Quotes', icon: ClipboardList, minRole: 'dispatcher' },
+  { path: '/invoices', label: 'Invoices', icon: FileText, minRole: 'dispatcher' },
+  { path: '/messages', label: 'Messages', icon: MessageSquare, badge: '3' },
   { path: '/compliance', label: 'Compliance', icon: ShieldCheck, minRole: 'admin' },
 ];
 
@@ -58,17 +58,25 @@ const Sidebar: React.FC = () => {
   return (
     <aside
       aria-label="Primary navigation"
-      className={`fixed left-0 top-0 h-full bg-infamous-card border-r border-infamous-border z-50 flex flex-col transition-all duration-300 ${
+      className={`fixed left-0 top-0 h-full bg-infamous-navy border-r border-infamous-border z-50 flex flex-col transition-all duration-300 max-md:hidden ${
         sidebarOpen ? 'w-64' : 'w-16'
       }`}
     >
       <div className={`flex items-center h-16 border-b border-infamous-border px-4 ${!sidebarOpen && 'justify-center'}`}>
-        <BrandMark compact={!sidebarOpen} />
+        <div className="flex items-center gap-3">
+          <Infinity size={sidebarOpen ? 28 : 22} className="text-infamous-red-light flex-shrink-0" strokeWidth={2.5} style={{ filter: 'drop-shadow(0 0 10px rgba(255, 59, 48, 0.8))' }} />
+          {sidebarOpen && (
+            <div>
+              <span className="font-display text-sm font-extrabold leading-none text-[#F5E8E8]">{BRAND.shortName}</span>
+              <p className="text-[10px] text-infamous-muted leading-none">{BRAND.secondaryName}</p>
+            </div>
+          )}
+        </div>
         <button
           onClick={toggleSidebar}
           aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
           aria-expanded={sidebarOpen}
-          className={`ml-auto text-gray-500 hover:text-white transition-colors p-1 rounded-lg hover:bg-infamous-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-orange ${!sidebarOpen && 'hidden'}`}
+          className={`ml-auto text-[#B88989] hover:text-[#F5E8E8] transition-colors p-1 rounded-lg hover:bg-infamous-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-red ${!sidebarOpen && 'hidden'}`}
         >
           {sidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
         </button>
@@ -84,25 +92,25 @@ const Sidebar: React.FC = () => {
             aria-label={item.label}
             className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group relative ${
               isActive
-                ? 'bg-infamous-orange/10 text-infamous-orange border border-infamous-orange/20'
-                : 'text-gray-400 hover:text-white hover:bg-infamous-border'
+                ? 'bg-infamous-red/10 text-infamous-red-light border border-infamous-red/20'
+                : 'text-[#B88989] hover:text-[#F5E8E8] hover:bg-infamous-border/50'
             } ${!sidebarOpen ? 'justify-center' : ''}`}
           >
             {({ isActive }) => (
               <>
-                <item.icon size={20} className={isActive ? 'text-infamous-orange' : 'text-gray-500 group-hover:text-white'} />
+                <item.icon size={20} className={isActive ? 'text-infamous-red-light' : 'text-[#B88989]/70 group-hover:text-[#F5E8E8]'} />
                 {sidebarOpen && (
                   <>
                     <span aria-hidden="true" className="text-sm font-medium flex-1">{item.label}</span>
                     {item.badge && (
-                      <span aria-hidden="true" className="bg-infamous-orange text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                      <span aria-hidden="true" className="bg-infamous-red text-[#F5E8E8] text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
                         {item.badge}
                       </span>
                     )}
                   </>
                 )}
                 {!sidebarOpen && item.badge && (
-                  <span aria-hidden="true" className="absolute -top-1 -right-1 w-4 h-4 bg-infamous-orange rounded-full text-[9px] font-bold text-white flex items-center justify-center">
+                  <span aria-hidden="true" className="absolute -top-1 -right-1 w-4 h-4 bg-infamous-red rounded-full text-[9px] font-bold text-[#F5E8E8] flex items-center justify-center">
                     {item.badge}
                   </span>
                 )}
@@ -117,7 +125,7 @@ const Sidebar: React.FC = () => {
         <button
           onClick={logout}
           aria-label="Log out"
-          className={`flex items-center gap-3 px-3 py-2 rounded-xl text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-orange ${!sidebarOpen && 'justify-center'}`}
+          className={`flex items-center gap-3 px-3 py-2 rounded-xl text-[#B88989] hover:text-[#FF0033] hover:bg-[#FF0033]/10 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-red ${!sidebarOpen && 'justify-center'}`}
           title="Log Out"
         >
           <LogOut size={18} />

@@ -42,28 +42,28 @@ export function PayPerLoadPricing() {
         </span>
       </div>
 
-      <h3 className="text-2xl font-bold text-white mb-2">Pay Per Load</h3>
-      <p className="text-zinc-400 mb-6">
+      <h3 className="text-2xl font-bold text-[#F5E8E8] mb-2">Pay Per Load</h3>
+      <p className="text-[#B88989] mb-6">
         No monthly fees. Only pay when you haul. Perfect for owner-operators.
       </p>
 
       {/* Price Display */}
       <div className="flex items-baseline gap-2 mb-6">
-        <span className="text-5xl font-bold text-white">${payPerLoadRate}</span>
-        <span className="text-zinc-400">/load</span>
+        <span className="text-5xl font-bold text-[#F5E8E8]">${payPerLoadRate}</span>
+        <span className="text-[#B88989]">/load</span>
       </div>
 
       {/* Calculator */}
-      <div className="rounded-xl border border-zinc-800 bg-black/30 p-6 mb-6">
+      <div className="rounded-xl border border-infamous-border bg-black/30 p-6 mb-6">
         <div className="flex items-center gap-2 mb-4">
           <Calculator className="h-4 w-4 text-red-500" />
-          <span className="text-sm font-medium text-white">Cost Calculator</span>
+          <span className="text-sm font-medium text-[#F5E8E8]">Cost Calculator</span>
         </div>
 
         <div className="mb-4">
           <div className="flex justify-between text-sm mb-2">
-            <span className="text-zinc-400">Loads per month</span>
-            <span className="text-white font-medium">{loadsPerMonth} loads</span>
+            <span className="text-[#B88989]">Loads per month</span>
+            <span className="text-[#F5E8E8] font-medium">{loadsPerMonth} loads</span>
           </div>
           <Slider
             value={[loadsPerMonth]}
@@ -75,19 +75,19 @@ export function PayPerLoadPricing() {
           />
         </div>
 
-        <div className="space-y-2 pt-4 border-t border-zinc-800">
+        <div className="space-y-2 pt-4 border-t border-infamous-border">
           <div className="flex justify-between text-sm">
-            <span className="text-zinc-400">Your monthly cost</span>
-            <span className="text-white font-medium">${monthlyCost.toFixed(2)}</span>
+            <span className="text-[#B88989]">Your monthly cost</span>
+            <span className="text-[#F5E8E8] font-medium">${monthlyCost.toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-zinc-400">Starter plan cost</span>
-            <span className="text-zinc-500 line-through">${starterPlanCost}/mo</span>
+            <span className="text-[#B88989]">Starter plan cost</span>
+            <span className="text-[#B88989]/70 line-through">${starterPlanCost}/mo</span>
           </div>
           {isCheaper && (
             <div className="flex justify-between text-sm">
-              <span className="text-zinc-400">You save</span>
-              <span className="text-emerald-400 font-medium">${savings.toFixed(2)}/mo</span>
+              <span className="text-[#B88989]">You save</span>
+              <span className="text-[#36D399] font-medium">${savings.toFixed(2)}/mo</span>
             </div>
           )}
           {!isCheaper && loadsPerMonth > 16 && (
@@ -103,7 +103,7 @@ export function PayPerLoadPricing() {
         {features.map((feature, i) => (
           <li key={i} className="flex items-center gap-2 text-sm">
             <Check className="h-4 w-4 text-red-500 flex-shrink-0" />
-            <span className="text-zinc-300">{feature}</span>
+            <span className="text-[#F5E8E8]/80">{feature}</span>
           </li>
         ))}
       </ul>
@@ -114,7 +114,7 @@ export function PayPerLoadPricing() {
         Start Pay Per Load
       </Button>
 
-      <p className="text-xs text-zinc-500 text-center mt-3">
+      <p className="text-xs text-[#B88989]/70 text-center mt-3">
         Billed at the end of each month based on loads completed. No hidden fees.
       </p>
     </motion.div>

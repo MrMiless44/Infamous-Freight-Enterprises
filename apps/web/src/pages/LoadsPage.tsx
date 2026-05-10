@@ -49,7 +49,7 @@ const LoadsPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Load Board</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Sample loads from DAT, Truckstop, and 123Loadboard — searchable in one place.</p>
+          <p className="text-sm text-[#B88989]/70 mt-0.5">Sample loads from DAT, Truckstop, and 123Loadboard — searchable in one place.</p>
         </div>
         <button onClick={() => navigate('/rate-comparison')} className="btn-secondary flex items-center gap-2">
           <DollarSign size={16} /> Rate Tool
@@ -59,7 +59,7 @@ const LoadsPage: React.FC = () => {
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[240px]">
-          <Search size={16} aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" />
+          <Search size={16} aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-[#B88989]/60" />
           <label htmlFor="loads-search" className="sr-only">Search loads by origin, destination, or broker</label>
           <input
             id="loads-search"
@@ -86,8 +86,8 @@ const LoadsPage: React.FC = () => {
       </div>
 
       {/* Results count */}
-      <div className="flex items-center gap-2 text-sm text-gray-500">
-        <span className="text-white font-semibold">{filtered.length}</span> loads found
+      <div className="flex items-center gap-2 text-sm text-[#B88989]/70">
+        <span className="text-[#F5E8E8] font-semibold">{filtered.length}</span> loads found
         <span className="text-gray-700">|</span>
         <span className="text-green-400">{filtered.filter((l) => l.isHot).length} hot loads</span>
         <span className="text-gray-700">|</span>
@@ -112,7 +112,7 @@ const LoadsPage: React.FC = () => {
           <div key={load.id} className="card hover:border-infamous-orange/30 transition-all group">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono text-gray-600">{load.id}</span>
+                <span className="text-xs font-mono text-[#B88989]/60">{load.id}</span>
                 <span className={creditColor[load.credit]}>{load.credit}</span>
                 {load.isHot && <span className="badge-orange">🔥 Hot</span>}
               </div>
@@ -128,7 +128,7 @@ const LoadsPage: React.FC = () => {
                   aria-pressed={saved.has(load.id)}
                   className="p-1.5 rounded-lg hover:bg-infamous-border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-orange"
                 >
-                  <Bookmark size={14} aria-hidden="true" className={saved.has(load.id) ? 'text-infamous-orange fill-infamous-orange' : 'text-gray-600'} />
+                  <Bookmark size={14} aria-hidden="true" className={saved.has(load.id) ? 'text-infamous-orange fill-infamous-orange' : 'text-[#B88989]/60'} />
                 </button>
               </div>
             </div>
@@ -136,30 +136,30 @@ const LoadsPage: React.FC = () => {
             <div className="flex items-center gap-3 mb-3">
               <div className="flex-1">
                 <p className="text-sm font-semibold">{load.origin}</p>
-                <p className="text-xs text-gray-500">{load.pickup}</p>
+                <p className="text-xs text-[#B88989]/70">{load.pickup}</p>
               </div>
               <div className="flex flex-col items-center px-3">
-                <span className="text-xs text-gray-600">{load.distance} mi</span>
+                <span className="text-xs text-[#B88989]/60">{load.distance} mi</span>
                 <div className="w-12 h-px bg-infamous-border my-1 relative">
                   <div className="absolute right-0 -top-1 w-0 h-0 border-l-4 border-l-gray-600 border-y-4 border-y-transparent" />
                 </div>
-                <span className="text-[10px] text-gray-600">{load.equipment}</span>
+                <span className="text-[10px] text-[#B88989]/60">{load.equipment}</span>
               </div>
               <div className="flex-1 text-right">
                 <p className="text-sm font-semibold">{load.dest}</p>
-                <p className="text-xs text-gray-500">{load.weight.toLocaleString()} lbs</p>
+                <p className="text-xs text-[#B88989]/70">{load.weight.toLocaleString()} lbs</p>
               </div>
             </div>
 
             <div className="flex items-center justify-between pt-3 border-t border-infamous-border">
               <div>
                 <p className="text-xl font-bold text-infamous-orange">${load.rate.toLocaleString()}</p>
-                <p className="text-xs text-gray-500">${load.ratePerMile.toFixed(2)}/mi</p>
+                <p className="text-xs text-[#B88989]/70">${load.ratePerMile.toFixed(2)}/mi</p>
               </div>
               <div className="flex gap-2">
                 <button
                   aria-label={`Call broker ${load.broker} about load ${load.id}`}
-                  className="p-2 rounded-lg bg-infamous-border hover:bg-infamous-border-light text-gray-400 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-orange"
+                  className="p-2 rounded-lg bg-infamous-border hover:bg-infamous-border-light text-[#B88989] hover:text-[#F5E8E8] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-orange"
                 >
                   <Phone size={14} aria-hidden="true" />
                 </button>

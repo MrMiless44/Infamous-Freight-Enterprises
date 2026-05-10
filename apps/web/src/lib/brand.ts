@@ -4,11 +4,11 @@ export const BRAND = {
   displayName: 'Infamous Freight',
   shortName: 'INFAMOUS',
   secondaryName: 'FREIGHT',
-  tagline: 'Verified Freight Command',
+  tagline: 'WE MOVE. YOU WIN.',
   siteUrl: 'https://www.infamousfreight.com',
   supportEmail: 'support@infamousfreight.com',
   notificationIcon: '/favicon.svg',
-  ogImageAlt: 'Infamous Freight verified freight command center',
+  ogImageAlt: 'Infamous Freight — We Move. You Win.',
   description:
     'Infamous Freight is a verified freight command center for quote intake, dispatch coordination, carrier execution, shipment visibility, and proof workflows.',
 };

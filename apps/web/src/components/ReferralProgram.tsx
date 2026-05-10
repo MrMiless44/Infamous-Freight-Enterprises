@@ -70,15 +70,15 @@ export function ReferralProgram() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6"
+      className="rounded-2xl border border-infamous-border bg-infamous-card/50 p-6"
     >
       {/* Header */}
       <div className="text-center mb-6">
         <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-600/10 mb-3">
           <Gift className="h-6 w-6 text-red-500" />
         </div>
-        <h2 className="text-xl font-bold text-white">Refer & Earn</h2>
-        <p className="text-sm text-zinc-400 mt-1">
+        <h2 className="text-xl font-bold text-[#F5E8E8]">Refer & Earn</h2>
+        <p className="text-sm text-[#B88989] mt-1">
           Give $50, Get $50. Everyone wins.
         </p>
       </div>
@@ -89,38 +89,38 @@ export function ReferralProgram() {
           <div className="w-10 h-10 rounded-full bg-red-600/10 flex items-center justify-center mx-auto mb-2">
             <Share2 className="h-4 w-4 text-red-500" />
           </div>
-          <p className="text-xs text-zinc-400">Share your link</p>
+          <p className="text-xs text-[#B88989]">Share your link</p>
         </div>
         <div className="text-center">
           <div className="w-10 h-10 rounded-full bg-red-600/10 flex items-center justify-center mx-auto mb-2">
             <Users className="h-4 w-4 text-red-500" />
           </div>
-          <p className="text-xs text-zinc-400">Friend signs up</p>
+          <p className="text-xs text-[#B88989]">Friend signs up</p>
         </div>
         <div className="text-center">
           <div className="w-10 h-10 rounded-full bg-red-600/10 flex items-center justify-center mx-auto mb-2">
             <DollarSign className="h-4 w-4 text-red-500" />
           </div>
-          <p className="text-xs text-zinc-400">You both earn!</p>
+          <p className="text-xs text-[#B88989]">You both earn!</p>
         </div>
       </div>
 
       {/* Referral Link */}
-      <div className="rounded-xl border border-zinc-800 bg-black/30 p-4 mb-6">
-        <label className="text-xs text-zinc-400 mb-2 block">Your referral link</label>
+      <div className="rounded-xl border border-infamous-border bg-black/30 p-4 mb-6">
+        <label className="text-xs text-[#B88989] mb-2 block">Your referral link</label>
         <div className="flex gap-2">
           <input
             type="text"
             value={referralLink}
             readOnly
-            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-300 truncate"
+            className="flex-1 bg-infamous-panel border border-infamous-border rounded-lg px-3 py-2 text-sm text-[#F5E8E8]/80 truncate"
           />
           <Button
             onClick={handleCopy}
             variant="outline"
-            className="border-zinc-700 text-white hover:bg-zinc-800 px-3"
+            className="border-infamous-border text-[#F5E8E8] hover:bg-infamous-panel px-3"
           >
-            {copied ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+            {copied ? <Check className="h-4 w-4 text-[#36D399]" /> : <Copy className="h-4 w-4" />}
           </Button>
         </div>
       </div>
@@ -131,7 +131,7 @@ export function ReferralProgram() {
           <button
             key={option.name}
             onClick={option.action}
-            className="flex-1 flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm py-2 rounded-lg transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 bg-infamous-panel hover:bg-infamous-border text-[#F5E8E8] text-sm py-2 rounded-lg transition-colors"
           >
             {option.icon}
             {option.name}
@@ -140,18 +140,18 @@ export function ReferralProgram() {
       </div>
 
       {/* Progress */}
-      <div className="rounded-xl border border-zinc-800 bg-black/30 p-4">
+      <div className="rounded-xl border border-infamous-border bg-black/30 p-4">
         <div className="flex justify-between text-sm mb-2">
-          <span className="text-zinc-400">Referrals</span>
-          <span className="text-white font-medium">{stats.referralsMade} / {stats.maxReferrals}</span>
+          <span className="text-[#B88989]">Referrals</span>
+          <span className="text-[#F5E8E8] font-medium">{stats.referralsMade} / {stats.maxReferrals}</span>
         </div>
-        <div className="h-2 rounded-full bg-zinc-800 overflow-hidden">
+        <div className="h-2 rounded-full bg-infamous-panel overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-red-600 to-orange-500 rounded-full transition-all"
             style={{ width: `${(stats.referralsMade / stats.maxReferrals) * 100}%` }}
           />
         </div>
-        <p className="text-xs text-zinc-500 mt-2">
+        <p className="text-xs text-[#B88989]/70 mt-2">
           {stats.maxReferrals - stats.referralsMade} spots remaining. ${stats.creditsEarned} earned so far.
         </p>
       </div>
@@ -160,10 +160,10 @@ export function ReferralProgram() {
       {stats.friendsReferred.length > 0 && (
         <div className="mt-4 space-y-2">
           {stats.friendsReferred.map((friend, i) => (
-            <div key={i} className="flex items-center justify-between text-sm p-2 rounded-lg bg-zinc-800/50">
-              <span className="text-zinc-300">{friend.name}</span>
+            <div key={i} className="flex items-center justify-between text-sm p-2 rounded-lg bg-infamous-panel/50">
+              <span className="text-[#F5E8E8]/80">{friend.name}</span>
               <span className={`text-xs ${
-                friend.status === 'active' ? 'text-emerald-400' : 'text-yellow-400'
+                friend.status === 'active' ? 'text-[#36D399]' : 'text-yellow-400'
               }`}>
                 {friend.status === 'active' ? `$${friend.credit} credit earned` : 'Trial pending'}
               </span>

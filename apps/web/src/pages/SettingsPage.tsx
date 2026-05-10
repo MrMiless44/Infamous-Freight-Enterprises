@@ -30,7 +30,7 @@ const SettingsPage: React.FC = () => {
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-left ${
                 activeSection === section.id
                   ? 'bg-infamous-orange/10 text-infamous-orange border border-infamous-orange/20'
-                  : 'text-gray-400 hover:text-white hover:bg-infamous-card'
+                  : 'text-[#B88989] hover:text-[#F5E8E8] hover:bg-infamous-card'
               }`}
             >
               <section.icon size={16} />
@@ -46,31 +46,31 @@ const SettingsPage: React.FC = () => {
               <h2 className="text-lg font-semibold">Company Profile</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1">Company Name</label>
+                  <label className="block text-sm text-[#B88989] mb-1">Company Name</label>
                   <input type="text" className="input-field" defaultValue="Iron Route Logistics LLC" />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1">MC Number</label>
+                  <label className="block text-sm text-[#B88989] mb-1">MC Number</label>
                   <input type="text" className="input-field" defaultValue="MC-123456" />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1">DOT Number</label>
+                  <label className="block text-sm text-[#B88989] mb-1">DOT Number</label>
                   <input type="text" className="input-field" defaultValue="1234567" />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1">EIN</label>
+                  <label className="block text-sm text-[#B88989] mb-1">EIN</label>
                   <input type="text" className="input-field" defaultValue="12-3456789" />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-sm text-gray-400 mb-1">Address</label>
+                  <label className="block text-sm text-[#B88989] mb-1">Address</label>
                   <input type="text" className="input-field" defaultValue="123 Main St, Dallas, TX 75201" />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1">Contact Email</label>
+                  <label className="block text-sm text-[#B88989] mb-1">Contact Email</label>
                   <input type="email" className="input-field" defaultValue="dispatch@acmetrucking.com" />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1">Phone</label>
+                  <label className="block text-sm text-[#B88989] mb-1">Phone</label>
                   <input type="text" className="input-field" defaultValue="(214) 555-0100" />
                 </div>
               </div>
@@ -97,7 +97,7 @@ const SettingsPage: React.FC = () => {
                   {provider.status === 'connected' ? (
                     <div className="flex items-center gap-2">
                       <span className="badge-green text-[10px]">Connected</span>
-                      <button className="text-xs text-gray-500 hover:text-red-400">Disconnect</button>
+                      <button className="text-xs text-[#B88989]/70 hover:text-red-400">Disconnect</button>
                     </div>
                   ) : (
                     <button className="btn-secondary text-xs py-1.5 px-3">Connect</button>
@@ -125,11 +125,11 @@ const SettingsPage: React.FC = () => {
                     </div>
                     <div>
                       <p className="text-sm font-medium">{member.name}</p>
-                      <p className="text-xs text-gray-500">{member.email}</p>
+                      <p className="text-xs text-[#B88989]/70">{member.email}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-xs text-gray-400">{member.role}</span>
+                    <span className="text-xs text-[#B88989]">{member.role}</span>
                     <span className={`badge text-[10px] ${member.status === 'active' ? 'badge-green' : 'badge-yellow'}`}>
                       {member.status}
                     </span>
@@ -153,7 +153,7 @@ const SettingsPage: React.FC = () => {
                 <div key={pref.label} className="flex items-center justify-between py-2">
                   <div>
                     <p className="text-sm font-medium">{pref.label}</p>
-                    <p className="text-xs text-gray-500">{pref.desc}</p>
+                    <p className="text-xs text-[#B88989]/70">{pref.desc}</p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" defaultChecked={pref.default} className="sr-only peer" />
@@ -168,24 +168,24 @@ const SettingsPage: React.FC = () => {
             <div className="card space-y-6">
               <h2 className="text-lg font-semibold">Security Settings</h2>
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Current Password</label>
+                <label className="block text-sm text-[#B88989] mb-1">Current Password</label>
                 <input type="password" className="input-field" placeholder="••••••••" />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-1">New Password</label>
+                <label className="block text-sm text-[#B88989] mb-1">New Password</label>
                 <input type="password" className="input-field" placeholder="••••••••" />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Two-Factor Authentication</label>
+                <label className="block text-sm text-[#B88989] mb-1">Two-Factor Authentication</label>
                 <div className="flex items-center justify-between p-3 bg-infamous-dark rounded-xl">
                   <span className="text-sm">Authenticator App</span>
                   <button className="btn-secondary text-xs py-1.5 px-3">Enable</button>
                 </div>
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-1">API Keys</label>
+                <label className="block text-sm text-[#B88989] mb-1">API Keys</label>
                 <div className="flex items-center gap-2 p-3 bg-infamous-dark rounded-xl">
-                  <code className="text-xs text-gray-400 flex-1 font-mono truncate">if_live_51SI7HQJBKY4ohJDA...</code>
+                  <code className="text-xs text-[#B88989] flex-1 font-mono truncate">if_live_51SI7HQJBKY4ohJDA...</code>
                   <button className="text-xs text-infamous-orange hover:underline">Regenerate</button>
                 </div>
               </div>
@@ -204,7 +204,7 @@ const SettingsPage: React.FC = () => {
                 <div key={doc.name} className="flex items-center justify-between p-3 bg-infamous-dark rounded-xl">
                   <div>
                     <p className="text-sm font-medium">{doc.name}</p>
-                    <p className="text-xs text-gray-500">{doc.desc} · Last used: {doc.lastUsed}</p>
+                    <p className="text-xs text-[#B88989]/70">{doc.desc} · Last used: {doc.lastUsed}</p>
                   </div>
                   <button className="text-sm text-infamous-orange hover:underline">Edit</button>
                 </div>
@@ -224,10 +224,10 @@ const SettingsPage: React.FC = () => {
               ].map((integration) => (
                 <div key={integration.name} className="flex items-center justify-between p-3 bg-infamous-dark rounded-xl">
                   <div className="flex items-center gap-3">
-                    <Zap size={16} className="text-gray-500" />
+                    <Zap size={16} className="text-[#B88989]/70" />
                     <div>
                       <p className="text-sm font-medium">{integration.name}</p>
-                      <p className="text-xs text-gray-500">{integration.category}</p>
+                      <p className="text-xs text-[#B88989]/70">{integration.category}</p>
                     </div>
                   </div>
                   {integration.status === 'connected' ? (

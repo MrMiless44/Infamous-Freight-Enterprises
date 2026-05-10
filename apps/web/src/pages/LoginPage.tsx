@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAppStore } from '@/store/app-store';
 import { useSupabaseAuth } from '@/hooks/useSupabase';
@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { setUser } = useAppStore();
+  const user = useAppStore((s) => s.user);
   const { signIn, signUp } = useSupabaseAuth();
   const [isRegister, setIsRegister] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -17,6 +18,10 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [loading, setLoading] = useState(false);
+
+  if (user) {
+    return <Navigate to="/ops" replace />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,19 +77,19 @@ const LoginPage: React.FC = () => {
         <div className="text-center mb-8">
           <BrandMark className="justify-center mb-4 scale-125" />
           <h1 className="text-2xl font-extrabold">{BRAND.name}</h1>
-          <p className="text-gray-500 text-sm mt-1">{BRAND.tagline}</p>
+          <p className="text-[#B88989]/70 text-sm mt-1">{BRAND.tagline}</p>
         </div>
 
         {/* Card */}
         <div className="bg-infamous-card border border-infamous-border rounded-2xl p-6">
           <h2 className="text-lg font-semibold mb-1">{isRegister ? 'Create Account' : 'Sign In'}</h2>
-          <p className="text-sm text-gray-500 mb-6">
+          <p className="text-sm text-[#B88989]/70 mb-6">
             {isRegister ? 'Start your 14-day free trial' : 'Welcome back — sign in to dispatch'}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="login-email" className="block text-sm text-gray-400 mb-1">Email</label>
+              <label htmlFor="login-email" className="block text-sm text-[#B88989] mb-1">Email</label>
               <input
                 id="login-email"
                 type="email"
@@ -102,7 +107,7 @@ const LoginPage: React.FC = () => {
 
             {isRegister && (
               <div>
-                <label htmlFor="login-company" className="block text-sm text-gray-400 mb-1">Company Name</label>
+                <label htmlFor="login-company" className="block text-sm text-[#B88989] mb-1">Company Name</label>
                 <input
                   id="login-company"
                   type="text"
@@ -116,7 +121,7 @@ const LoginPage: React.FC = () => {
             )}
 
             <div>
-              <label htmlFor="login-password" className="block text-sm text-gray-400 mb-1">Password</label>
+              <label htmlFor="login-password" className="block text-sm text-[#B88989] mb-1">Password</label>
               <div className="relative">
                 <input
                   id="login-password"
@@ -133,7 +138,7 @@ const LoginPage: React.FC = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                   aria-pressed={showPassword}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-orange rounded"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#B88989]/60 hover:text-[#F5E8E8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-red rounded"
                 >
                   {showPassword ? <EyeOff size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
                 </button>
@@ -152,7 +157,7 @@ const LoginPage: React.FC = () => {
           <div className="mt-4 text-center">
             <button
               onClick={() => setIsRegister(!isRegister)}
-              className="text-sm text-gray-500 hover:text-infamous-orange transition-colors"
+              className="text-sm text-[#B88989]/70 hover:text-infamous-red-light transition-colors"
             >
               {isRegister ? 'Already have an account? Sign in' : "Don't have an account? Get started"}
             </button>
@@ -160,7 +165,7 @@ const LoginPage: React.FC = () => {
         </div>
 
         {/* Trust badges */}
-        <div className="flex items-center justify-center gap-4 mt-6 text-[10px] text-gray-600">
+        <div className="flex items-center justify-center gap-4 mt-6 text-[10px] text-[#B88989]/60">
           <span>🔒 Bank-level encryption</span>
           <span>•</span>
           <span>14-day free trial</span>

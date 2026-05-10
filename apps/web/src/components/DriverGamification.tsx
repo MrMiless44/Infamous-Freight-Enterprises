@@ -42,7 +42,7 @@ const DriverGamification: React.FC = () => {
             <Trophy size={24} className="text-infamous-orange" />
             Driver Leaderboard
           </h1>
-          <p className="text-sm text-gray-500 mt-0.5">Track loads, on-time rate, and weekly revenue. Earn XP and badges for top performance.</p>
+          <p className="text-sm text-[#B88989]/70 mt-0.5">Track loads, on-time rate, and weekly revenue. Earn XP and badges for top performance.</p>
         </div>
       </div>
 
@@ -50,12 +50,12 @@ const DriverGamification: React.FC = () => {
       <div className="flex items-end justify-center gap-4 pb-4">
         {[mockDrivers[1], mockDrivers[0], mockDrivers[2]].map((driver, i) => {
           const heights = ['h-32', 'h-44', 'h-36'];
-          const medals = [<Medal size={24} className="text-gray-300" />, <Trophy size={28} className="text-yellow-400" />, <Medal size={24} className="text-orange-400" />];
+          const medals = [<Medal size={24} className="text-[#F5E8E8]/80" />, <Trophy size={28} className="text-yellow-400" />, <Medal size={24} className="text-orange-400" />];
           const positions = [2, 1, 3];
           return (
             <div key={driver.id} className="flex flex-col items-center gap-2">
               <div className="relative">
-                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${levelColors[driver.level]} flex items-center justify-center text-white font-bold text-lg border-2`}>
+                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${levelColors[driver.level]} flex items-center justify-center text-[#F5E8E8] font-bold text-lg border-2`}>
                   {driver.avatar}
                 </div>
                 <div className="absolute -top-3 -right-3">
@@ -63,7 +63,7 @@ const DriverGamification: React.FC = () => {
                 </div>
               </div>
               <p className="text-sm font-semibold">{driver.name}</p>
-              <p className="text-xs text-gray-500">{driver.xp.toLocaleString()} XP</p>
+              <p className="text-xs text-[#B88989]/70">{driver.xp.toLocaleString()} XP</p>
               <div className={`w-24 ${heights[i]} rounded-t-xl bg-gradient-to-t from-infamous-card to-infamous-border border border-infamous-border flex items-end justify-center pb-2`}>
                 <span className="text-lg font-bold text-infamous-orange">#{positions[i]}</span>
               </div>
@@ -90,13 +90,13 @@ const DriverGamification: React.FC = () => {
           </thead>
           <tbody>
             {mockDrivers.map((d) => (
-              <tr key={d.id} className="hover:bg-[#1a1a1a] transition-colors">
+              <tr key={d.id} className="hover:bg-infamous-panel transition-colors">
                 <td className="table-cell">
-                  <span className={`font-bold ${d.rank <= 3 ? 'text-infamous-orange' : 'text-gray-500'}`}>#{d.rank}</span>
+                  <span className={`font-bold ${d.rank <= 3 ? 'text-infamous-orange' : 'text-[#B88989]/70'}`}>#{d.rank}</span>
                 </td>
                 <td className="table-cell">
                   <div className="flex items-center gap-2">
-                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${levelColors[d.level]} flex items-center justify-center text-white font-bold text-xs`}>
+                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${levelColors[d.level]} flex items-center justify-center text-[#F5E8E8] font-bold text-xs`}>
                       {d.avatar}
                     </div>
                     <span className="font-medium">{d.name}</span>
@@ -115,7 +115,7 @@ const DriverGamification: React.FC = () => {
                 </td>
                 <td className="table-cell text-center">
                   <div className="flex items-center justify-center gap-1">
-                    <Zap size={12} className={d.streak >= 7 ? 'text-infamous-orange' : 'text-gray-600'} />
+                    <Zap size={12} className={d.streak >= 7 ? 'text-infamous-orange' : 'text-[#B88989]/60'} />
                     <span className="text-sm">{d.streak}d</span>
                   </div>
                 </td>
@@ -134,7 +134,7 @@ const DriverGamification: React.FC = () => {
                       </span>
                     ))}
                     {d.achievements.length > 2 && (
-                      <span className="text-xs text-gray-600">+{d.achievements.length - 2}</span>
+                      <span className="text-xs text-[#B88989]/60">+{d.achievements.length - 2}</span>
                     )}
                   </div>
                 </td>
@@ -160,13 +160,13 @@ const DriverGamification: React.FC = () => {
             key={ach.name}
             className={`p-4 rounded-xl border transition-all ${
               ach.earned
-                ? 'bg-infamous-orange/5 border-infamous-orange/20 text-white'
+                ? 'bg-infamous-orange/5 border-infamous-orange/20 text-[#F5E8E8]'
                 : 'bg-infamous-card border-infamous-border opacity-50'
             }`}
           >
-            <div className={`mb-2 ${ach.earned ? 'text-infamous-orange' : 'text-gray-600'}`}>{ach.icon}</div>
+            <div className={`mb-2 ${ach.earned ? 'text-infamous-orange' : 'text-[#B88989]/60'}`}>{ach.icon}</div>
             <p className="text-sm font-medium">{ach.name}</p>
-            <p className="text-xs text-gray-500 mt-0.5">{ach.desc}</p>
+            <p className="text-xs text-[#B88989]/70 mt-0.5">{ach.desc}</p>
           </div>
         ))}
       </div>

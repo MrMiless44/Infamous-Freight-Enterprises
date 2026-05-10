@@ -158,7 +158,7 @@ const CarriersPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Carriers</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Manage carrier onboarding, approval, and compliance</p>
+          <p className="text-sm text-[#B88989]/70 mt-0.5">Manage carrier onboarding, approval, and compliance</p>
         </div>
         <button className="btn-primary flex items-center gap-2">
           <Plus size={16} /> Add Carrier
@@ -178,7 +178,7 @@ const CarriersPage: React.FC = () => {
             <span className={stat.color}>{stat.icon}</span>
             <div>
               <p className="text-2xl font-bold">{stat.value}</p>
-              <p className="text-xs text-gray-500">{stat.label}</p>
+              <p className="text-xs text-[#B88989]/70">{stat.label}</p>
             </div>
           </div>
         ))}
@@ -187,7 +187,7 @@ const CarriersPage: React.FC = () => {
       {/* Filters + Search */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <div className="relative flex-1 max-w-sm">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#B88989]/70" />
           <input
             className="input-field pl-9 py-2"
             placeholder="Search by name, MC#, or contact..."
@@ -201,7 +201,7 @@ const CarriersPage: React.FC = () => {
               key={tab.key}
               onClick={() => setFilter(tab.key)}
               className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
-                filter === tab.key ? 'bg-infamous-orange text-white' : 'bg-infamous-card text-gray-400 hover:text-white border border-infamous-border'
+                filter === tab.key ? 'bg-infamous-orange text-[#F5E8E8]' : 'bg-infamous-card text-[#B88989] hover:text-[#F5E8E8] border border-infamous-border'
               }`}
             >
               {tab.label}
@@ -233,19 +233,19 @@ const CarriersPage: React.FC = () => {
                 return (
                   <tr
                     key={carrier.id}
-                    className="hover:bg-[#1a1a1a] transition-colors cursor-pointer"
+                    className="hover:bg-infamous-panel transition-colors cursor-pointer"
                     onClick={() => setSelectedCarrier(carrier)}
                   >
                     <td className="table-cell">
                       <div>
-                        <p className="font-medium text-white">{carrier.companyName}</p>
-                        <p className="text-xs text-gray-500">{carrier.contactName}</p>
+                        <p className="font-medium text-[#F5E8E8]">{carrier.companyName}</p>
+                        <p className="text-xs text-[#B88989]/70">{carrier.contactName}</p>
                       </div>
                     </td>
                     <td className="table-cell">
                       <div className="text-xs">
                         <p className="font-mono">{carrier.mcNumber}</p>
-                        <p className="text-gray-500">{carrier.dotNumber}</p>
+                        <p className="text-[#B88989]/70">{carrier.dotNumber}</p>
                       </div>
                     </td>
                     <td className="table-cell text-xs">{carrier.equipmentType}</td>
@@ -261,7 +261,7 @@ const CarriersPage: React.FC = () => {
                       </span>
                     </td>
                     <td className="table-cell">
-                      <ChevronRight size={14} className="text-gray-500" />
+                      <ChevronRight size={14} className="text-[#B88989]/70" />
                     </td>
                   </tr>
                 );
@@ -287,7 +287,7 @@ const CarriersPage: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Carrier Detail</h2>
-                <button onClick={() => setSelectedCarrier(null)} className="text-gray-500 hover:text-white text-xs">Close</button>
+                <button onClick={() => setSelectedCarrier(null)} className="text-[#B88989]/70 hover:text-[#F5E8E8] text-xs">Close</button>
               </div>
 
               <div>
@@ -304,19 +304,19 @@ const CarriersPage: React.FC = () => {
               </div>
 
               <div className="space-y-2 text-sm">
-                <div className="flex items-center gap-2 text-gray-400">
+                <div className="flex items-center gap-2 text-[#B88989]">
                   <Phone size={14} /> {selectedCarrier.phone}
                 </div>
-                <div className="flex items-center gap-2 text-gray-400">
+                <div className="flex items-center gap-2 text-[#B88989]">
                   <Mail size={14} /> {selectedCarrier.email}
                 </div>
-                <div className="flex items-center gap-2 text-gray-400">
+                <div className="flex items-center gap-2 text-[#B88989]">
                   <Truck size={14} /> {selectedCarrier.equipmentType}
                 </div>
               </div>
 
               <div className="border-t border-infamous-border pt-4 space-y-2">
-                <p className="text-xs text-gray-500 uppercase tracking-wider">Documents</p>
+                <p className="text-xs text-[#B88989]/70 uppercase tracking-wider">Documents</p>
                 {[
                   { label: 'W-9', status: selectedCarrier.w9Status },
                   { label: 'Operating Agreement', status: selectedCarrier.agreementStatus },
@@ -347,8 +347,8 @@ const CarriersPage: React.FC = () => {
             </div>
           ) : (
             <div className="text-center py-10">
-              <Truck size={32} className="text-gray-600 mx-auto mb-3" />
-              <p className="text-sm text-gray-500">Select a carrier to view details</p>
+              <Truck size={32} className="text-[#B88989]/60 mx-auto mb-3" />
+              <p className="text-sm text-[#B88989]/70">Select a carrier to view details</p>
             </div>
           )}
         </div>

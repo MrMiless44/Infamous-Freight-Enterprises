@@ -167,7 +167,7 @@ const BillingSettingsPanel: React.FC = () => {
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="text-lg font-semibold">Billing & usage</h2>
-            <p className="mt-1 text-sm text-gray-400">
+            <p className="mt-1 text-sm text-[#B88989]">
               Pick a plan, manage your card and invoices, and review AI usage.
             </p>
           </div>
@@ -184,22 +184,22 @@ const BillingSettingsPanel: React.FC = () => {
         <div className="mt-5 grid gap-4 md:grid-cols-3">
           <div className="rounded-xl border border-infamous-border bg-infamous-dark p-4">
             <CreditCard className="mb-3 text-infamous-orange" size={20} />
-            <p className="text-xs uppercase tracking-wide text-gray-500">Stripe customer</p>
-            <p className="mt-2 truncate font-mono text-sm text-white">
+            <p className="text-xs uppercase tracking-wide text-[#B88989]/70">Stripe customer</p>
+            <p className="mt-2 truncate font-mono text-sm text-[#F5E8E8]">
               {billingStatus?.stripeCustomerId ?? 'Not linked yet'}
             </p>
           </div>
           <div className="rounded-xl border border-infamous-border bg-infamous-dark p-4">
             <ShieldCheck className="mb-3 text-infamous-orange" size={20} />
-            <p className="text-xs uppercase tracking-wide text-gray-500">Billing role</p>
-            <p className="mt-2 text-sm font-semibold text-white">
+            <p className="text-xs uppercase tracking-wide text-[#B88989]/70">Billing role</p>
+            <p className="mt-2 text-sm font-semibold text-[#F5E8E8]">
               {canManageBilling ? 'Owner/admin access' : 'Read only'}
             </p>
           </div>
           <div className="rounded-xl border border-infamous-border bg-infamous-dark p-4">
             <Sparkles className="mb-3 text-infamous-orange" size={20} />
-            <p className="text-xs uppercase tracking-wide text-gray-500">AI actions</p>
-            <p className="mt-2 text-sm font-semibold text-white">
+            <p className="text-xs uppercase tracking-wide text-[#B88989]/70">AI actions</p>
+            <p className="mt-2 text-sm font-semibold text-[#F5E8E8]">
               {usageSummary?.actionCount ?? 0} logged
             </p>
           </div>
@@ -215,7 +215,7 @@ const BillingSettingsPanel: React.FC = () => {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-lg font-semibold">{plan.name}</h3>
-                <p className="mt-2 min-h-[48px] text-sm text-gray-400">{plan.description}</p>
+                <p className="mt-2 min-h-[48px] text-sm text-[#B88989]">{plan.description}</p>
               </div>
               {plan.recommended && (
                 <span className="rounded-full bg-infamous-orange/10 px-2.5 py-1 text-xs font-semibold text-infamous-orange">
@@ -254,7 +254,7 @@ const BillingSettingsPanel: React.FC = () => {
             </div>
             <div>
               <h2 className="text-lg font-semibold">One-time AI add-on pack</h2>
-              <p className="mt-1 text-sm text-gray-400">
+              <p className="mt-1 text-sm text-[#B88989]">
                 Add extra AI capacity without changing your subscription. The webhook records the completed checkout.
               </p>
             </div>
@@ -288,8 +288,8 @@ const BillingSettingsPanel: React.FC = () => {
 function Metric({ label, value }: { label: string | number; value: string | number }) {
   return (
     <div className="rounded-xl border border-infamous-border bg-infamous-dark p-4">
-      <p className="text-xs uppercase tracking-wide text-gray-500">{label}</p>
-      <p className="mt-2 text-lg font-bold text-white">{value}</p>
+      <p className="text-xs uppercase tracking-wide text-[#B88989]/70">{label}</p>
+      <p className="mt-2 text-lg font-bold text-[#F5E8E8]">{value}</p>
     </div>
   );
 }
