@@ -44,7 +44,7 @@ function getCompletedIndex(status: string): number {
     'POD received': 7,
     'POD Uploaded': 7,
     'Invoiced': 8,
-    'Exception review': 4,
+    'Delayed': 4,
   };
   return map[status] ?? 1;
 }
@@ -60,8 +60,8 @@ const statusBadgeClass: Record<string, string> = {
   'POD received': 'badge-green',
   'POD Uploaded': 'badge-green',
   'Invoiced': 'badge-green',
+  'Paid': 'badge-green',
   'Delayed': 'badge-orange',
-  'Exception review': 'badge-red',
   'Quote Pending': 'badge-gray',
 };
 

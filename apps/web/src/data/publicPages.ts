@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { Boxes, MapPinned, Route, Send, Truck, Warehouse } from 'lucide-react';
+import { Boxes, Container, MapPinned, Route, Send, Snowflake, Truck, Warehouse, Zap } from 'lucide-react';
 
 export type ServicePage = {
   slug: string;
@@ -13,6 +13,94 @@ export type ServicePage = {
 };
 
 export const servicePages: ServicePage[] = [
+  {
+    slug: 'full-truckload',
+    title: 'Full Truckload (FTL)',
+    eyebrow: 'Dedicated capacity',
+    summary: 'Full truckload freight for shipments that fill an entire trailer — dry van, flatbed, or reefer.',
+    description:
+      'Full truckload is the right choice when your freight fills or nearly fills a 53-foot trailer. No shared space, no extra stops, direct pickup to direct delivery with verified carriers.',
+    Icon: Truck,
+    bullets: ['Dedicated trailer for your freight only', 'Direct pickup and delivery — no hub stops', 'Dry van, flatbed, and reefer options', 'Verified carriers with safety and insurance checks'],
+    bestFor: ['Large volume shipments', 'Time-sensitive full loads', 'High-value freight', 'Consistent lane commitments'],
+  },
+  {
+    slug: 'ltl-freight',
+    title: 'Less Than Truckload (LTL)',
+    eyebrow: 'Shared capacity',
+    summary: 'LTL freight for palletized shipments that don\'t need an entire trailer.',
+    description:
+      'Less than truckload lets you share trailer space with other shippers, reducing cost for smaller shipments while still getting the tracking and proof of delivery you need.',
+    Icon: Boxes,
+    bullets: ['Cost-effective for partial loads', 'Palletized freight coordination', 'Tracking and status updates included', 'Proof of delivery on every shipment'],
+    bestFor: ['1-10 pallet shipments', 'Budget-conscious freight', 'Retail distribution', 'Recurring partial loads'],
+  },
+  {
+    slug: 'flatbed',
+    title: 'Flatbed freight',
+    eyebrow: 'Open-deck trailers',
+    summary: 'Flatbed freight for oversized, heavy, or irregularly shaped loads that can\'t fit in enclosed trailers.',
+    description:
+      'Flatbed trailers provide open-deck capacity for construction materials, machinery, steel, lumber, and other freight that requires top or side loading. Tarping and securement coordinated.',
+    Icon: Container,
+    bullets: ['Open-deck and step-deck options', 'Oversize and heavy haul coordination', 'Tarping, chains, and securement included', 'Permit coordination for oversized loads'],
+    bestFor: ['Construction materials', 'Heavy machinery', 'Steel and lumber', 'Oversized equipment'],
+  },
+  {
+    slug: 'reefer',
+    title: 'Reefer freight',
+    eyebrow: 'Temperature-controlled',
+    summary: 'Temperature-controlled freight for perishable goods, pharmaceuticals, and anything requiring climate management.',
+    description:
+      'Reefer trailers maintain precise temperatures throughout transit. Continuous monitoring, temperature logs, and compliance documentation included on every load.',
+    Icon: Snowflake,
+    bullets: ['Precise temperature management', 'Continuous temp monitoring and logs', 'FSMA and food safety compliance', 'Cold chain documentation on delivery'],
+    bestFor: ['Perishable food products', 'Pharmaceutical shipments', 'Frozen goods', 'Temperature-sensitive materials'],
+  },
+  {
+    slug: 'expedited',
+    title: 'Expedited freight',
+    eyebrow: 'Time-critical',
+    summary: 'Expedited freight for urgent shipments that need same-day or next-day delivery with priority handling.',
+    description:
+      'When time matters more than cost, expedited freight gets your shipment moving immediately. Dedicated equipment, direct routes, and real-time tracking from pickup to delivery.',
+    Icon: Zap,
+    bullets: ['Same-day and next-day options', 'Dedicated driver and equipment', 'Direct routing — no stops', 'Priority dispatch and real-time tracking'],
+    bestFor: ['Production line shutdowns', 'Emergency parts delivery', 'Medical supplies', 'Time-critical documents'],
+  },
+  {
+    slug: 'dedicated-lanes',
+    title: 'Dedicated lanes',
+    eyebrow: 'Recurring freight',
+    summary: 'Dedicated lane freight for recurring routes with consistent volume, pricing, and carrier assignment.',
+    description:
+      'Dedicated lanes lock in pricing, carrier quality, and service consistency for routes you run regularly. Reduce rate volatility and build reliable carrier relationships.',
+    Icon: Route,
+    bullets: ['Locked-in rate agreements', 'Consistent carrier and driver assignment', 'Priority capacity on your lanes', 'Performance tracking and scorecards'],
+    bestFor: ['Weekly recurring freight', 'Distribution center lanes', 'Manufacturing supply chains', 'Retail replenishment routes'],
+  },
+  {
+    slug: 'freight-brokerage',
+    title: 'Freight brokerage',
+    eyebrow: 'Full-service',
+    summary: 'Full-service freight brokerage connecting shippers with verified carriers across all equipment types.',
+    description:
+      'Infamous Freight operates as a licensed freight broker, matching your shipments with vetted carriers. Rate negotiation, carrier vetting, load tracking, and payment handled end-to-end.',
+    Icon: Warehouse,
+    bullets: ['Licensed and bonded brokerage', 'Carrier vetting and compliance checks', 'Rate negotiation and market pricing', 'End-to-end shipment management'],
+    bestFor: ['Shippers without carrier relationships', 'Overflow capacity needs', 'New market or lane coverage', 'Seasonal freight surges'],
+  },
+  {
+    slug: 'final-mile',
+    title: 'Final mile delivery',
+    eyebrow: 'Last-mile logistics',
+    summary: 'Final mile delivery for the last leg of shipment from distribution center to end customer or retail location.',
+    description:
+      'Final mile delivery handles the most visible part of the supply chain — getting freight from a hub, warehouse, or distribution center to the final destination with scheduling and proof of delivery.',
+    Icon: MapPinned,
+    bullets: ['Delivery window scheduling', 'White glove and inside delivery options', 'Photo proof of delivery', 'Customer notification and ETA updates'],
+    bestFor: ['E-commerce deliveries', 'Retail store replenishment', 'Furniture and appliance delivery', 'B2B last-mile freight'],
+  },
   {
     slug: 'box-truck',
     title: 'Box truck freight',

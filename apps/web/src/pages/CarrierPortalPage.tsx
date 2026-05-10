@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
   ArrowRight,
+  BarChart3,
   CheckCircle2,
   CircleDashed,
   ClipboardCheck,
@@ -10,6 +11,7 @@ import {
   FileText,
   MapPin,
   ShieldCheck,
+  Star,
   Truck,
   UserCheck,
 } from 'lucide-react';
@@ -136,6 +138,89 @@ const CarrierPortalPage: React.FC = () => {
               <p className="mt-1 text-sm text-infamous-muted">{item.label}</p>
             </div>
           ))}
+        </section>
+
+        {/* Performance Score + Payment Status Row */}
+        <section className="mb-6 grid gap-4 lg:grid-cols-2">
+          {/* Performance Score */}
+          <div className="rounded-xl border border-infamous-border bg-infamous-card p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <BarChart3 size={18} className="text-infamous-red-light" /> Performance Score
+              </h2>
+              <div className="flex items-center gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={14} className={i < 4 ? 'text-infamous-red-light fill-infamous-red-light' : 'text-infamous-muted'} />
+                ))}
+              </div>
+            </div>
+            <div className="space-y-4">
+              {([
+                { label: 'On-Time Pickup', value: 94, color: 'from-infamous-green to-infamous-green-light' },
+                { label: 'On-Time Delivery', value: 91, color: 'from-infamous-green to-infamous-green-light' },
+                { label: 'Tender Acceptance', value: 88, color: 'from-infamous-red to-infamous-red-light' },
+                { label: 'Claims-Free Rate', value: 97, color: 'from-infamous-green to-infamous-green-light' },
+              ]).map((metric) => (
+                <div key={metric.label}>
+                  <div className="flex items-center justify-between text-sm mb-1.5">
+                    <span className="text-[#B88989]">{metric.label}</span>
+                    <span className="font-bold text-[#F5E8E8]">{metric.value}%</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-infamous-panel overflow-hidden">
+                    <div
+                      className={`h-full rounded-full bg-gradient-to-r ${metric.color}`}
+                      style={{ width: `${metric.value}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-5 pt-4 border-t border-infamous-border">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-infamous-muted">Overall Rating</span>
+                <span className="text-2xl font-black text-infamous-green-light">92.5</span>
+              </div>
+              <p className="mt-1 text-xs text-[#B88989]">Preferred carrier status above 90.0</p>
+            </div>
+          </div>
+
+          {/* Payment Status */}
+          <div className="rounded-xl border border-infamous-border bg-infamous-card p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <DollarSign size={18} className="text-[#36D399]" /> Payment Status
+              </h2>
+            </div>
+            <div className="space-y-3">
+              {([
+                { load: 'IF-20491', amount: '$3,200', status: 'Invoiced', statusClass: 'badge-blue', date: 'Due May 15, 2026' },
+                { load: 'IF-20488', amount: '$2,400', status: 'Paid', statusClass: 'badge-green', date: 'Paid May 5, 2026' },
+                { load: 'IF-20485', amount: '$1,850', status: 'Paid', statusClass: 'badge-green', date: 'Paid May 1, 2026' },
+                { load: 'IF-20482', amount: '$4,100', status: 'Paid', statusClass: 'badge-green', date: 'Paid Apr 28, 2026' },
+              ]).map((payment) => (
+                <div key={payment.load} className="flex items-center justify-between rounded-xl border border-infamous-border bg-infamous-panel p-4">
+                  <div>
+                    <p className="text-sm font-semibold text-[#F5E8E8]">{payment.load}</p>
+                    <p className="text-xs text-infamous-muted">{payment.date}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-[#F5E8E8]">{payment.amount}</p>
+                    <span className={payment.statusClass}>{payment.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-5 pt-4 border-t border-infamous-border grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs text-infamous-muted">Total Earned (MTD)</p>
+                <p className="text-xl font-black text-[#36D399]">$11,550</p>
+              </div>
+              <div>
+                <p className="text-xs text-infamous-muted">Loads Completed (MTD)</p>
+                <p className="text-xl font-black text-[#F5E8E8]">7</p>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* Available Loads */}
