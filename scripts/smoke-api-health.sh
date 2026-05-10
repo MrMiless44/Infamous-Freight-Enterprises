@@ -10,6 +10,7 @@ cleanup() {
 trap cleanup EXIT
 
 export PORT="${PORT:-3000}"
+SMOKE_TIMEOUT_SECONDS="${SMOKE_TIMEOUT_SECONDS:-20}"
 
 if [[ -z "${DATABASE_URL:-}" ]]; then
   echo "DATABASE_URL is not set; running smoke test in NODE_ENV=test fallback mode." >&2
@@ -19,14 +20,31 @@ fi
 node apps/api/dist/src/server.js >/tmp/if-api-smoke.log 2>&1 &
 API_PID=$!
 
-for _ in {1..20}; do
-  if curl -fsS "http://127.0.0.1:${PORT}/health" >/tmp/if-api-health.json 2>/dev/null; then
-    cat /tmp/if-api-health.json
+check_endpoint() {
+  local endpoint="$1"
+  local output_file="/tmp/if-api-health-$(echo "$endpoint" | tr '/' '_').json"
+
+  if ! curl -fsS "http://127.0.0.1:${PORT}${endpoint}" >"${output_file}" 2>/dev/null; then
+    return 1
+  fi
+
+  if ! node -e "const fs=require('fs');const p=process.argv[1];const d=JSON.parse(fs.readFileSync(p,'utf8'));if(!(d && d.status==='ok')) process.exit(1);" "${output_file}"; then
+    echo "Health response from ${endpoint} did not include status=ok" >&2
+    cat "${output_file}" >&2
+    return 1
+  fi
+
+  cat "${output_file}"
+  return 0
+}
+
+for _ in $(seq 1 "$SMOKE_TIMEOUT_SECONDS"); do
+  if check_endpoint "/health" || check_endpoint "/api/health"; then
     exit 0
   fi
-  sleep 0.5
+  sleep 1
 done
 
-echo "API health check failed on PORT=${PORT}. Logs:" >&2
+echo "API health check failed on PORT=${PORT} after ${SMOKE_TIMEOUT_SECONDS}s. Logs:" >&2
 cat /tmp/if-api-smoke.log >&2
 exit 1
