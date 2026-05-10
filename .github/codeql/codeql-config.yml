@@ -1,0 +1,11 @@
+name: "Infamous Freight CodeQL Config"
+
+paths:
+  - apps/api
+  - apps/web
+
+paths-ignore:
+  - node_modules
+  - dist
+  - coverage
+  - "**/*.test.ts"
