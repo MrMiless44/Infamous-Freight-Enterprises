@@ -70,12 +70,12 @@ export function AnnualBillingToggle() {
     <div className="w-full">
       {/* Billing Toggle */}
       <div className="flex items-center justify-center gap-4 mb-12">
-        <span className={`text-sm ${!isAnnual ? 'text-white' : 'text-zinc-500'}`}>
+        <span className={`text-sm ${!isAnnual ? 'text-[#F5E8E8]' : 'text-[#B88989]/70'}`}>
           Monthly
         </span>
         <button
           onClick={() => setIsAnnual(!isAnnual)}
-          className="relative w-14 h-7 rounded-full bg-zinc-800 transition-colors"
+          className="relative w-14 h-7 rounded-full bg-infamous-panel transition-colors"
         >
           <motion.div
             animate={{ x: isAnnual ? 28 : 2 }}
@@ -83,11 +83,11 @@ export function AnnualBillingToggle() {
             className="absolute top-1 left-0 w-5 h-5 rounded-full bg-red-600"
           />
         </button>
-        <span className={`text-sm ${isAnnual ? 'text-white' : 'text-zinc-500'}`}>
+        <span className={`text-sm ${isAnnual ? 'text-[#F5E8E8]' : 'text-[#B88989]/70'}`}>
           Annual
         </span>
         {isAnnual && (
-          <span className="flex items-center gap-1 text-xs text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full">
+          <span className="flex items-center gap-1 text-xs text-[#36D399] bg-[#36D399]/10 px-2 py-0.5 rounded-full">
             <Sparkles className="h-3 w-3" />
             2 months free
           </span>
@@ -103,34 +103,34 @@ export function AnnualBillingToggle() {
             className={`relative rounded-2xl border p-6 ${
               plan.popular
                 ? 'border-red-600/50 bg-red-600/5'
-                : 'border-zinc-800 bg-zinc-900/50'
+                : 'border-infamous-border bg-infamous-card/50'
             }`}
           >
             {plan.popular && (
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <span className="bg-red-600 text-white text-xs px-3 py-1 rounded-full font-medium">
+                <span className="bg-red-600 text-[#F5E8E8] text-xs px-3 py-1 rounded-full font-medium">
                   Most Popular
                 </span>
               </div>
             )}
 
-            <h3 className="text-xl font-semibold text-white">{plan.name}</h3>
-            <p className="text-sm text-zinc-400 mt-1">{plan.description}</p>
+            <h3 className="text-xl font-semibold text-[#F5E8E8]">{plan.name}</h3>
+            <p className="text-sm text-[#B88989] mt-1">{plan.description}</p>
 
             {/* Price */}
             <div className="mt-6 mb-6">
               <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-white">
+                <span className="text-4xl font-bold text-[#F5E8E8]">
                   ${isAnnual ? plan.monthlyEquiv : plan.monthlyPrice}
                 </span>
-                <span className="text-zinc-400">/month</span>
+                <span className="text-[#B88989]">/month</span>
               </div>
               {isAnnual && (
                 <div className="mt-1 space-y-1">
-                  <p className="text-sm text-zinc-500 line-through">
+                  <p className="text-sm text-[#B88989]/70 line-through">
                     ${plan.monthlyPrice}/month billed monthly
                   </p>
-                  <p className="text-sm text-emerald-400">
+                  <p className="text-sm text-[#36D399]">
                     ${plan.annualPrice}/year (save ${plan.save})
                   </p>
                 </div>
@@ -142,7 +142,7 @@ export function AnnualBillingToggle() {
               {plan.features.map((feature, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm">
                   <Check className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-                  <span className="text-zinc-300">{feature}</span>
+                  <span className="text-[#F5E8E8]/80">{feature}</span>
                 </li>
               ))}
             </ul>
@@ -152,7 +152,7 @@ export function AnnualBillingToggle() {
               className={`w-full ${
                 plan.popular
                   ? 'bg-red-600 hover:bg-red-700'
-                  : 'bg-zinc-800 hover:bg-zinc-700 text-white'
+                  : 'bg-infamous-panel hover:bg-infamous-border text-[#F5E8E8]'
               }`}
             >
               {plan.cta}
@@ -162,27 +162,27 @@ export function AnnualBillingToggle() {
       </div>
 
       {/* Usage-based add-ons */}
-      <div className="mt-12 rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">Usage-Based Add-ons</h3>
+      <div className="mt-12 rounded-xl border border-infamous-border bg-infamous-card/50 p-6">
+        <h3 className="text-lg font-semibold text-[#F5E8E8] mb-4">Usage-Based Add-ons</h3>
         <div className="grid md:grid-cols-3 gap-4">
-          <div className="flex items-center justify-between p-4 rounded-lg border border-zinc-800">
+          <div className="flex items-center justify-between p-4 rounded-lg border border-infamous-border">
             <div>
-              <p className="text-sm font-medium text-white">Extra Truck</p>
-              <p className="text-xs text-zinc-400">Above plan limit</p>
+              <p className="text-sm font-medium text-[#F5E8E8]">Extra Truck</p>
+              <p className="text-xs text-[#B88989]">Above plan limit</p>
             </div>
             <span className="text-red-400 font-medium">$5/mo</span>
           </div>
-          <div className="flex items-center justify-between p-4 rounded-lg border border-zinc-800">
+          <div className="flex items-center justify-between p-4 rounded-lg border border-infamous-border">
             <div>
-              <p className="text-sm font-medium text-white">Extra Load</p>
-              <p className="text-xs text-zinc-400">Above plan limit</p>
+              <p className="text-sm font-medium text-[#F5E8E8]">Extra Load</p>
+              <p className="text-xs text-[#B88989]">Above plan limit</p>
             </div>
             <span className="text-red-400 font-medium">$0.10</span>
           </div>
-          <div className="flex items-center justify-between p-4 rounded-lg border border-zinc-800">
+          <div className="flex items-center justify-between p-4 rounded-lg border border-infamous-border">
             <div>
-              <p className="text-sm font-medium text-white">SMS Alert</p>
-              <p className="text-xs text-zinc-400">Per notification</p>
+              <p className="text-sm font-medium text-[#F5E8E8]">SMS Alert</p>
+              <p className="text-xs text-[#B88989]">Per notification</p>
             </div>
             <span className="text-red-400 font-medium">$0.02</span>
           </div>

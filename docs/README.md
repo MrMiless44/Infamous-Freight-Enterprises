@@ -11,6 +11,7 @@ This directory contains operational, architectural, and launch-readiness documen
 
 - [platform-roadmap.md](./platform-roadmap.md) — Phased build direction for Infamous Freight.
 - [phase-1-branding-plan.md](./phase-1-branding-plan.md) — Phase 1 branding plan.
+- [INFAMOUS_FREIGHT_REQUIRED_SETUP.md](./INFAMOUS_FREIGHT_REQUIRED_SETUP.md) — Required GitHub, local, and deployment setup guardrails, including the Laravel TMS branch path and current Netlify monorepo distinction.
 - [local-setup.md](./local-setup.md) — Local development setup for the pnpm monorepo.
 - [customization-checklist.md](./customization-checklist.md) — Branding, env, and integration checklist.
 - [github-agent-build-brief.md](./github-agent-build-brief.md) — Build brief for the GitHub coding agent.
@@ -27,6 +28,7 @@ This directory contains operational, architectural, and launch-readiness documen
 
 ## 🚀 Launch & Readiness
 
+- [CAPABILITY_STATUS_MAP.md](./CAPABILITY_STATUS_MAP.md) — Live/beta/planned status for every platform capability.
 - [LAUNCH_READINESS_INDEX.md](./LAUNCH_READINESS_INDEX.md) — Index of launch-readiness artifacts.
 - [LAUNCH-READINESS-CHECKLIST.md](./LAUNCH-READINESS-CHECKLIST.md) — Pre-launch checklist.
 - [LAUNCH_EVIDENCE_LOG.md](./LAUNCH_EVIDENCE_LOG.md) — Evidence log for launch checks.
@@ -44,6 +46,7 @@ This directory contains operational, architectural, and launch-readiness documen
 - [PRODUCTION_DASHBOARD_REMAINING_WORK.md](./PRODUCTION_DASHBOARD_REMAINING_WORK.md) — Remaining production dashboard, secret-management, and Stripe billing verification work.
 - [PRODUCTION_READINESS_VERIFICATION.md](./PRODUCTION_READINESS_VERIFICATION.md) — Readiness verification.
 - [PRODUCTION_TEST_DATA_PLAN.md](./PRODUCTION_TEST_DATA_PLAN.md) — Production test-data plan.
+- [production-operations/LEGAL_BUSINESS_RECORD_UPDATE.md](./production-operations/LEGAL_BUSINESS_RECORD_UPDATE.md) — Official legal-name update checklist for Stripe, banking, DOT/FMCSA, insurance, accounting, and tax records.
 - [ROLLBACK_PLAN.md](./ROLLBACK_PLAN.md) — Rollback procedures.
 - [BACKUP_RESTORE_VERIFICATION.md](./BACKUP_RESTORE_VERIFICATION.md) — Backup/restore verification.
 - [ADMIN_RECOVERY_RUNBOOK.md](./ADMIN_RECOVERY_RUNBOOK.md) — Admin recovery runbook.
@@ -72,8 +75,10 @@ This directory contains operational, architectural, and launch-readiness documen
 
 ## ☁️ Infrastructure & Deployment
 
+- [ANALYTICS_DECISION.md](./ANALYTICS_DECISION.md) — Analytics provider decision (Netlify Analytics + custom events).
 - [CUSTOM-DOMAIN.md](./CUSTOM-DOMAIN.md) — Custom-domain setup.
 - [CURRENT_RECOMMENDATIONS_UPDATE.md](./CURRENT_RECOMMENDATIONS_UPDATE.md) — Current launch recommendations and documentation updates.
+- [digitalocean-lptms-deployment.md](./digitalocean-lptms-deployment.md) — DigitalOcean App Platform guidance for LPTMS demo and production deployments.
 - [NETLIFY-BUILDHOOKS.md](./NETLIFY-BUILDHOOKS.md) — Netlify build hooks.
 - [netlify-deploy-checklist.md](./netlify-deploy-checklist.md) — Netlify deploy checklist.
 - [MANUS-PRODUCTION-BUILD-PACKAGE.md](./MANUS-PRODUCTION-BUILD-PACKAGE.md) — Production build package notes.

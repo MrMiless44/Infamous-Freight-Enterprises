@@ -14,6 +14,7 @@ The remaining work is operational configuration and production verification. It 
 - [ ] Rotate any credential that may have been stored as a visible or non-secret value.
 - [ ] Re-add rotated credentials only through provider secret-management settings.
 - [ ] Configure the production Stripe webhook endpoint.
+- [ ] Store `STRIPE_ACCOUNT_ID` with the same deployment and automation configuration that uses Stripe billing secrets.
 - [ ] Add the Stripe webhook signing secret through secret-management settings.
 - [ ] Use a restricted live Stripe key for backend Stripe operations where supported.
 - [ ] Add public Stripe publishable keys for frontend usage.

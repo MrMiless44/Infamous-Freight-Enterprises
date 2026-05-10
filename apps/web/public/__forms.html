@@ -85,5 +85,47 @@
       <input type="text" name="topic" maxlength="120" />
       <textarea name="message" maxlength="2000"></textarea>
     </form>
+
+    <form
+      name="book-demo"
+      action="/thank-you/"
+      method="POST"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+      hidden
+    >
+      <input type="hidden" name="form-name" value="book-demo" />
+      <input type="text" name="bot-field" autocomplete="off" tabindex="-1" />
+      <input type="hidden" name="csrf-token" />
+      <input type="hidden" name="clientSubmittedAt" />
+      <input type="hidden" name="pageUrl" />
+      <input type="text" name="name" autocomplete="name" maxlength="120" />
+      <input type="email" name="email" autocomplete="email" maxlength="160" />
+      <input type="tel" name="phone" autocomplete="tel" maxlength="40" />
+      <input type="text" name="company" autocomplete="organization" maxlength="120" />
+      <input type="text" name="fleetSize" maxlength="20" />
+    </form>
+
+    <form
+      name="partner-application"
+      action="/thank-you/"
+      method="POST"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+      hidden
+    >
+      <input type="hidden" name="form-name" value="partner-application" />
+      <input type="text" name="bot-field" autocomplete="off" tabindex="-1" />
+      <input type="hidden" name="csrf-token" />
+      <input type="hidden" name="clientSubmittedAt" />
+      <input type="hidden" name="pageUrl" />
+      <input type="text" name="company" autocomplete="organization" maxlength="120" />
+      <input type="text" name="contact" autocomplete="name" maxlength="120" />
+      <input type="email" name="email" autocomplete="email" maxlength="160" />
+      <input type="tel" name="phone" autocomplete="tel" maxlength="40" />
+      <input type="text" name="category" maxlength="120" />
+      <input type="text" name="region" maxlength="120" />
+      <textarea name="notes" maxlength="2000"></textarea>
+    </form>
   </body>
 </html>

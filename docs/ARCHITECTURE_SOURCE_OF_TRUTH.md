@@ -4,13 +4,15 @@ Status: Canonical reference required before beta/public launch.
 
 ## Current Repository Reality
 
-The current API package is an Express + TypeScript service.
+The current repository is a Netlify-hosted React/Vite web app with an Express + TypeScript API deployed separately on Fly.io.
 
 Evidence in the repo:
 
+- `apps/web/package.json` depends on React, Vite, Tailwind tooling, Supabase, Stripe, and client-side routing packages.
 - `apps/api/package.json` depends on `express`, `cors`, `helmet`, Prisma, Sentry, and related TypeScript tooling.
 - `apps/api/src/server.ts` starts the app by importing `createApp()` and listening on `process.env.PORT`.
 - `apps/api/src/app.ts` registers Express middleware and API routes directly.
+- `netlify.toml` publishes `apps/web/dist`, routes public Netlify Function endpoints first, proxies `/api/health` and `/api/*`, and keeps the SPA fallback last.
 
 ## Documentation Drift to Resolve
 
@@ -35,11 +37,13 @@ Until changed by a deliberate architecture decision:
 | Health endpoint | `/health` and `/api/health` |
 | Database | PostgreSQL via Prisma |
 | Cache | Redis |
-| Web | React/Vite static frontend |
+| Web | React/Vite static frontend on Netlify |
+| Canonical public web host | `https://www.infamousfreight.com` |
+| Production browser API path | `/api` through the Netlify proxy |
 
 ## Required Before Public Launch
 
-- [ ] README tech stack matches actual implementation
+- [x] README tech stack matches actual implementation
 - [ ] API docs list actual implemented endpoints
 - [ ] Planned/deprecated routes are clearly separated from implemented routes
 - [ ] Docker, compose, Fly.io, Netlify, and smoke-test docs agree on ports and URLs

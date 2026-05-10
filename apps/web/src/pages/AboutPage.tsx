@@ -28,7 +28,7 @@ const values = [
 
 const AboutPage: React.FC = () => {
   return (
-    <main className="min-h-screen bg-[#090909] px-6 py-10 text-white">
+    <main className="min-h-screen bg-[#090909] px-6 py-10 text-[#F5E8E8]">
       <div className="mx-auto max-w-7xl">
         <section className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <div>
@@ -36,14 +36,14 @@ const AboutPage: React.FC = () => {
             <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-6xl">
               Freight should be easier to book, easier to track, and harder to fake.
             </h1>
-            <p className="mt-5 max-w-3xl text-lg leading-8 text-gray-300">
+            <p className="mt-5 max-w-3xl text-lg leading-8 text-[#F5E8E8]/80">
               Infamous Freight is building a verified freight operations platform for shippers, drivers, carriers, and dispatch teams. The goal is simple: move freight with less confusion, more proof, and cleaner handoffs.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link to="/request-quote" className="inline-flex items-center justify-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 font-semibold text-white transition hover:opacity-90">
+              <Link to="/request-quote" className="inline-flex items-center justify-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 font-semibold text-[#F5E8E8] transition hover:opacity-90">
                 Request a quote <ArrowRight size={17} />
               </Link>
-              <Link to="/drive" className="inline-flex items-center justify-center gap-2 rounded-xl border border-infamous-border bg-infamous-card px-5 py-3 font-semibold text-white transition hover:border-infamous-orange/50">
+              <Link to="/drive" className="inline-flex items-center justify-center gap-2 rounded-xl border border-infamous-border bg-infamous-card px-5 py-3 font-semibold text-[#F5E8E8] transition hover:border-infamous-orange/50">
                 Apply to drive
               </Link>
             </div>
@@ -58,9 +58,9 @@ const AboutPage: React.FC = () => {
                 ['Drivers and carriers', 'Verified operators looking for cleaner load opportunities and organized documentation.'],
                 ['Dispatch teams', 'Operations teams that need quote, load, tracking, POD, and invoice workflows in one place.'],
               ].map(([title, body]) => (
-                <div key={title} className="rounded-2xl border border-infamous-border bg-[#111] p-4">
-                  <h3 className="font-bold text-white">{title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-gray-400">{body}</p>
+                <div key={title} className="rounded-2xl border border-infamous-border bg-infamous-panel p-4">
+                  <h3 className="font-bold text-[#F5E8E8]">{title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-[#B88989]">{body}</p>
                 </div>
               ))}
             </div>
@@ -72,7 +72,7 @@ const AboutPage: React.FC = () => {
             <article key={value.title} className="rounded-3xl border border-infamous-border bg-infamous-card p-6">
               <div className="mb-4 inline-flex rounded-xl bg-infamous-orange/10 p-3 text-infamous-orange">{value.icon}</div>
               <h2 className="text-xl font-bold">{value.title}</h2>
-              <p className="mt-3 text-sm leading-6 text-gray-400">{value.description}</p>
+              <p className="mt-3 text-sm leading-6 text-[#B88989]">{value.description}</p>
             </article>
           ))}
         </section>
@@ -82,13 +82,13 @@ const AboutPage: React.FC = () => {
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Operating standards</p>
               <h2 className="mt-2 text-3xl font-bold">Built around verification and proof.</h2>
-              <p className="mt-3 text-gray-400">The platform is designed to reduce double-brokering risk, missed updates, and loose paperwork.</p>
+              <p className="mt-3 text-[#B88989]">The platform is designed to reduce double-brokering risk, missed updates, and loose paperwork.</p>
             </div>
             <div className="grid gap-3">
               {standards.map((standard) => (
                 <div key={standard} className="flex gap-3 rounded-2xl border border-infamous-border bg-infamous-card p-4">
                   <CheckCircle2 className="mt-0.5 flex-shrink-0 text-green-400" size={18} />
-                  <p className="text-sm leading-6 text-gray-300">{standard}</p>
+                  <p className="text-sm leading-6 text-[#F5E8E8]/80">{standard}</p>
                 </div>
               ))}
             </div>

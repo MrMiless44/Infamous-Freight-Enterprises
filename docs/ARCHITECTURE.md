@@ -6,7 +6,7 @@
 
 # Infamous Freight — Canonical Architecture Reference
 
-_Last updated: April 2026_
+_Last updated: May 2026_
 
 This document is the single source of truth for the Infamous Freight backend architecture.
 Update this file whenever the framework, entry point, ports, or route structure changes.
@@ -70,9 +70,17 @@ The API package uses Express as its only backend runtime. The server starts from
 | Database | PostgreSQL 16 | |
 | Cache | Redis 7 | |
 | Payments | Stripe | Checkout, Customer Portal, Webhooks |
-| Auth | Supabase Auth + JWT | Tenant ID passed via `x-tenant-id` header |
+| Auth | Supabase Auth + JWT-derived trusted claims | Production protected routes derive user, tenant, and role from verified bearer tokens |
 | Monitoring | Sentry (`@sentry/node`) | Opt-in via `SENTRY_DSN` |
 | Deployment | Fly.io (API), Netlify (Web) | |
+
+## Netlify Web Runtime
+
+Netlify builds only the React/Vite web app and publishes `apps/web/dist`.
+
+The production browser API path is `/api`, not a hardcoded direct API origin. Netlify handles exact public function routes first, proxies `/api/health` and broader `/api/*` traffic to the Fly.io API, and serves the SPA fallback after those API rules.
+
+The canonical public web host is `https://www.infamousfreight.com`. The apex domain and default Netlify hostname redirect to that host.
 
 ---
 

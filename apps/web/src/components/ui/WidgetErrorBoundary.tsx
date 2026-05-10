@@ -20,7 +20,7 @@ class WidgetErrorBoundary extends Component<Props, State> {
       return (
         <div
           role="alert"
-          className="card flex flex-col items-center justify-center gap-2 py-8 text-center text-sm text-gray-500"
+          className="card flex flex-col items-center justify-center gap-2 py-8 text-center text-sm text-[#B88989]/70"
         >
           <AlertTriangle size={20} className="text-yellow-500" />
           <p>{this.props.label ? `${this.props.label} failed to load` : 'This section failed to load'}</p>

@@ -131,10 +131,16 @@ for key in \
   fi
 done
 
+if [[ -n "${STRIPE_ACCOUNT_ID:-}" && ! "${STRIPE_ACCOUNT_ID}" =~ ^acct_[A-Za-z0-9]+$ ]]; then
+  echo "ERROR: STRIPE_ACCOUNT_ID does not look like a Stripe account ID." >&2
+  exit 1
+fi
+
 # GitHub Actions secrets
 need_cmd gh
 set_github_secret FLY_API_TOKEN
 set_github_secret DATABASE_URL
+set_github_secret STRIPE_ACCOUNT_ID
 
 # Fly.io runtime secrets
 need_cmd flyctl
@@ -148,6 +154,7 @@ add_fly_secret SUPABASE_URL
 add_fly_secret SUPABASE_SERVICE_KEY
 add_fly_secret SUPABASE_SERVICE_ROLE_KEY
 add_fly_secret SUPABASE_JWT_SECRET
+add_fly_secret STRIPE_ACCOUNT_ID
 add_fly_secret STRIPE_SECRET_KEY
 add_fly_secret STRIPE_WEBHOOK_SECRET
 add_fly_secret STRIPE_CHECKOUT_SUCCESS_URL

@@ -26,6 +26,11 @@ echo ""
 echo "✅ GitHub CLI authenticated"
 echo ""
 
+if [[ -n "${STRIPE_ACCOUNT_ID:-}" && ! "${STRIPE_ACCOUNT_ID}" =~ ^acct_[A-Za-z0-9]+$ ]]; then
+    echo "❌ STRIPE_ACCOUNT_ID does not look like a Stripe account ID."
+    exit 1
+fi
+
 # Function to set secret
 set_secret() {
     local name=$1
@@ -50,6 +55,7 @@ set_secret "NETLIFY_AUTH_TOKEN" "$NETLIFY_AUTH_TOKEN"
 set_secret "NETLIFY_SITE_ID" "$NETLIFY_SITE_ID"
 
 # Stripe
+set_secret "STRIPE_ACCOUNT_ID" "$STRIPE_ACCOUNT_ID"
 set_secret "STRIPE_SECRET_KEY" "$STRIPE_SECRET_KEY"
 set_secret "STRIPE_WEBHOOK_SECRET" "$STRIPE_WEBHOOK_SECRET"
 

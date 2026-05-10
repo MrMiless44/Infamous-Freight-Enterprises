@@ -1,54 +1,57 @@
-import { Bell, Search, Command, CircleDot } from 'lucide-react';
+import { Bell, CircleDot, MapPin, Calendar } from 'lucide-react';
 import { useAppStore } from '@/store/app-store';
 
 const TopBar: React.FC = () => {
   const { user, sidebarOpen, unreadCount } = useAppStore();
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <header role="banner" className={`h-16 bg-infamous-card/80 backdrop-blur-xl border-b border-infamous-border flex items-center justify-between px-6 transition-all duration-300 ${sidebarOpen ? '' : ''}`}>
-      {/* Search */}
-      <div role="search" aria-label="Global" className="flex items-center gap-3 flex-1 max-w-xl">
-        <div className="relative flex-1">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" />
-          <label htmlFor="global-search" className="sr-only">Search loads, drivers, brokers</label>
-          <input
-            id="global-search"
-            type="text"
-            placeholder="Search loads, drivers, brokers..."
-            className="w-full bg-infamous-panel border border-infamous-border rounded-lg pl-10 pr-4 py-2 text-sm text-white placeholder-slate-500 focus:border-infamous-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-orange transition-colors"
-          />
-          <div aria-hidden="true" className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-gray-600">
-            <Command size={12} />
-            <span className="text-[10px]">K</span>
-          </div>
+    <header role="banner" className={`h-16 bg-infamous-navy/80 backdrop-blur-xl border-b border-infamous-border flex items-center justify-between px-6 transition-all duration-300 ${sidebarOpen ? '' : ''}`}>
+      {/* Command Center Title */}
+      <div className="flex items-center gap-4">
+        <div>
+          <h1 className="font-display text-base font-bold uppercase tracking-wide text-[#F5E8E8]">Command Center</h1>
+          <p className="text-[11px] text-infamous-muted">Real-time operations overview</p>
+        </div>
+        <div className="hidden md:flex items-center gap-1.5 rounded-full border border-infamous-red/20 bg-infamous-red/10 px-3 py-1">
+          <CircleDot size={8} className="text-infamous-red-light animate-pulse" />
+          <span className="text-[10px] text-infamous-red-light font-medium">Live</span>
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-3">
+      {/* Right Actions */}
+      <div className="flex items-center gap-4">
+        {/* Location */}
+        <div className="hidden lg:flex items-center gap-1.5 text-infamous-muted">
+          <MapPin size={12} />
+          <span className="text-xs">Atlanta, GA</span>
+        </div>
+
+        {/* Date/Time */}
+        <div className="hidden md:flex items-center gap-1.5 text-infamous-muted">
+          <Calendar size={12} />
+          <span className="text-xs font-mono">{dateStr} · {timeStr}</span>
+        </div>
+
         {/* Notifications */}
-        <button aria-label={`Open notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`} className="relative p-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-infamous-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-orange transition-all">
+        <button aria-label={`Open notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`} className="relative p-2 rounded-xl text-[#B88989] hover:text-[#F5E8E8] hover:bg-infamous-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infamous-red transition-all">
           <Bell size={18} />
           {unreadCount > 0 && (
-            <span aria-hidden="true" className="absolute top-1.5 right-1.5 w-4 h-4 bg-infamous-orange rounded-full text-[9px] font-bold text-white flex items-center justify-center">
+            <span aria-hidden="true" className="absolute top-1 right-1 w-4 h-4 bg-infamous-red rounded-full text-[9px] font-bold text-[#F5E8E8] flex items-center justify-center">
               {unreadCount}
             </span>
           )}
         </button>
 
-        {/* Live indicator */}
-        <div className="flex items-center gap-1.5 rounded-full border border-infamous-steel/20 bg-infamous-steel/10 px-3 py-1.5">
-          <CircleDot size={10} className="text-infamous-steel animate-pulse" />
-          <span className="text-xs text-infamous-steel font-medium">Live</span>
-        </div>
-
         {/* User */}
         <div className="flex items-center gap-3 pl-3 border-l border-infamous-border">
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-medium text-white">{user?.name || 'User'}</p>
-            <p className="text-xs text-gray-500">{user?.role || 'Owner'}</p>
+            <p className="text-sm font-medium text-[#F5E8E8]">{user?.name || 'User'}</p>
+            <p className="text-[10px] text-[#B88989]">{user?.role || 'Owner'}</p>
           </div>
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-infamous-orange via-infamous-amber to-infamous-steel flex items-center justify-center text-infamous-darker font-bold text-sm">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-infamous-red via-infamous-ember to-infamous-red-dark flex items-center justify-center text-[#F5E8E8] font-bold text-sm shadow-[0_0_12px_rgba(255,26,26,0.4)]">
             {user?.name?.[0] || 'U'}
           </div>
         </div>

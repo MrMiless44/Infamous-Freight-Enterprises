@@ -144,7 +144,22 @@ jobs:
         uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1  # master (2026-04-08)
 
       - name: Deploy to Fly.io
-        run: flyctl deploy --remote-only --wait-timeout 10m --strategy rolling --app infamous-freight
+        run: |
+          set -euo pipefail
+          max_attempts=3
+          attempt=1
+          until [ "$attempt" -gt "$max_attempts" ]; do
+            echo "Fly deploy attempt $attempt/$max_attempts"
+            if flyctl deploy --remote-only --wait-timeout 10m --strategy rolling --app infamous-freight; then
+              break
+            fi
+            if [ "$attempt" -eq "$max_attempts" ]; then
+              echo "::error::Fly deploy failed after $max_attempts attempts."
+              exit 1
+            fi
+            sleep $((attempt * 30))
+            attempt=$((attempt + 1))
+          done
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/store/app-store';
 import { getSupabase } from '@/hooks/useSupabase';
 import { isPublicPath } from '@/lib/routes';
@@ -12,6 +12,7 @@ import Sidebar from '@/components/ui/Sidebar';
 import TopBar from '@/components/ui/TopBar';
 import { BRAND } from '@/lib/brand';
 import { Toaster } from 'react-hot-toast';
+import { LayoutDashboard, MessageSquare, Truck, User } from 'lucide-react';
 
 const AppLayout: React.FC = () => {
   const { sidebarOpen, isLoading, user, setUser, setLoading, logout } = useAppStore();
@@ -111,8 +112,8 @@ const AppLayout: React.FC = () => {
     return (
       <div className="h-screen w-screen flex items-center justify-center bg-infamous-dark">
         <div className="text-center">
-          <div className="w-12 h-12 border-3 border-infamous-orange border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-300 text-sm">Loading {BRAND.displayName}...</p>
+          <div className="w-12 h-12 border-3 border-infamous-red border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-[#B88989] text-sm">Loading {BRAND.displayName}...</p>
         </div>
       </div>
     );
@@ -139,7 +140,7 @@ const AppLayout: React.FC = () => {
           position="top-right"
           toastOptions={{
             duration: 6000,
-            style: { background: '#1a1a1a', color: '#fff', border: '1px solid #333' },
+            style: { background: '#241013', color: '#F5E8E8', border: '1px solid #3A0D12' },
           }}
         />
       </>
@@ -149,25 +150,47 @@ const AppLayout: React.FC = () => {
   return (
     <div className="flex h-screen w-screen bg-infamous-dark overflow-hidden">
       <Sidebar />
-      <div className={`flex flex-col flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
+      <div className={`flex flex-col flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'} max-md:!ml-0`}>
         {offlineBanner}
         <TopBar />
-        <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto p-6">
+        <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto p-6 pb-20 md:pb-6">
           <Outlet />
         </main>
       </div>
+      {/* Mobile Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-infamous-border bg-infamous-navy md:hidden" aria-label="Mobile navigation">
+        <div className="flex items-center justify-around py-2">
+          {[
+            { to: '/ops', icon: LayoutDashboard, label: 'Dashboard' },
+            { to: '/loads', icon: Truck, label: 'Loads' },
+            { to: '/messages', icon: MessageSquare, label: 'Messages' },
+            { to: '/settings', icon: User, label: 'Account' },
+          ].map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) =>
+                `flex flex-col items-center gap-0.5 px-3 py-1 ${isActive ? 'text-infamous-red-light' : 'text-[#B88989]/70'}`
+              }
+            >
+              <item.icon size={20} />
+              <span className="text-[10px] font-medium">{item.label}</span>
+            </NavLink>
+          ))}
+        </div>
+      </nav>
       <Toaster
         position="top-right"
         toastOptions={{
           duration: 6000,
           style: {
-            background: '#1a1a1a',
-            color: '#fff',
-            border: '1px solid #333',
+            background: '#241013',
+            color: '#F5E8E8',
+            border: '1px solid #3A0D12',
             fontSize: '13px',
           },
-          success: { iconTheme: { primary: '#4caf50', secondary: '#1a1a1a' } },
-          error: { iconTheme: { primary: '#ef4444', secondary: '#1a1a1a' } },
+          success: { iconTheme: { primary: '#36D399', secondary: '#241013' } },
+          error: { iconTheme: { primary: '#FF0033', secondary: '#241013' } },
         }}
       />
     </div>

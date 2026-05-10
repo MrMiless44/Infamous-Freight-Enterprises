@@ -28,7 +28,7 @@ const ServiceDetailPage: React.FC = () => {
     .filter(Boolean);
 
   return (
-    <main className="min-h-screen bg-[#090909] px-6 py-10 text-white">
+    <main className="min-h-screen bg-[#090909] px-6 py-10 text-[#F5E8E8]">
       <div className="mx-auto max-w-7xl">
         <Breadcrumb items={[{ label: 'Services', href: '/services' }, { label: service.title }]} />
         <section className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
@@ -36,10 +36,10 @@ const ServiceDetailPage: React.FC = () => {
             <div className="mb-5 inline-flex rounded-xl bg-infamous-orange/10 p-3 text-infamous-orange"><ServiceIcon size={24} /></div>
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">{service.eyebrow}</p>
             <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-6xl">{service.title}</h1>
-            <p className="mt-5 max-w-3xl text-lg leading-8 text-gray-300">{service.description}</p>
+            <p className="mt-5 max-w-3xl text-lg leading-8 text-[#F5E8E8]/80">{service.description}</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link to="/request-quote" className="inline-flex items-center justify-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 font-semibold text-white transition hover:opacity-90">Request a quote <ArrowRight size={17} /></Link>
-              <Link to="/contact" className="inline-flex items-center justify-center gap-2 rounded-xl border border-infamous-border bg-infamous-card px-5 py-3 font-semibold text-white transition hover:border-infamous-orange/50">Ask a question</Link>
+              <Link to="/request-quote" className="inline-flex items-center justify-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 font-semibold text-[#F5E8E8] transition hover:opacity-90">Request a quote <ArrowRight size={17} /></Link>
+              <Link to="/contact" className="inline-flex items-center justify-center gap-2 rounded-xl border border-infamous-border bg-infamous-card px-5 py-3 font-semibold text-[#F5E8E8] transition hover:border-infamous-orange/50">Ask a question</Link>
             </div>
           </div>
 
@@ -47,7 +47,7 @@ const ServiceDetailPage: React.FC = () => {
             <h2 className="text-2xl font-bold">What is included</h2>
             <div className="mt-5 space-y-3">
               {service.bullets.map((bullet) => (
-                <div key={bullet} className="flex gap-3 rounded-2xl border border-infamous-border bg-[#111] p-4"><CheckCircle2 className="mt-0.5 flex-shrink-0 text-green-400" size={18} /><p className="text-sm leading-6 text-gray-300">{bullet}</p></div>
+                <div key={bullet} className="flex gap-3 rounded-2xl border border-infamous-border bg-infamous-panel p-4"><CheckCircle2 className="mt-0.5 flex-shrink-0 text-green-400" size={18} /><p className="text-sm leading-6 text-[#F5E8E8]/80">{bullet}</p></div>
               ))}
             </div>
           </aside>
@@ -70,8 +70,8 @@ const ServiceDetailPage: React.FC = () => {
               {relatedGuides.map((guide) => guide && (
                 <Link key={guide.slug} to={`/resources/${guide.slug}`} className="group rounded-2xl border border-infamous-border bg-infamous-card p-5 transition hover:border-infamous-orange/50">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-infamous-orange">{guide.category}</p>
-                  <h3 className="mt-2 font-bold text-white group-hover:text-infamous-orange transition">{guide.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-gray-400">{guide.description}</p>
+                  <h3 className="mt-2 font-bold text-[#F5E8E8] group-hover:text-infamous-orange transition">{guide.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-[#B88989]">{guide.description}</p>
                   <p className="mt-3 flex items-center gap-2 text-sm font-semibold text-infamous-orange">Read guide <ArrowRight size={14} /></p>
                 </Link>
               ))}
@@ -83,7 +83,7 @@ const ServiceDetailPage: React.FC = () => {
           <h2 className="mb-5 text-2xl font-bold">Other services</h2>
           <div className="grid gap-4 md:grid-cols-3">
             {servicePages.filter((item) => item.slug !== service.slug).slice(0, 3).map((item) => (
-              <Link key={item.slug} to={`/services/${item.slug}`} className="rounded-2xl border border-infamous-border bg-infamous-card p-5 transition hover:border-infamous-orange/50"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-infamous-orange">{item.eyebrow}</p><h3 className="mt-2 font-bold text-white">{item.title}</h3><p className="mt-2 text-sm leading-6 text-gray-400">{item.summary}</p></Link>
+              <Link key={item.slug} to={`/services/${item.slug}`} className="rounded-2xl border border-infamous-border bg-infamous-card p-5 transition hover:border-infamous-orange/50"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-infamous-orange">{item.eyebrow}</p><h3 className="mt-2 font-bold text-[#F5E8E8]">{item.title}</h3><p className="mt-2 text-sm leading-6 text-[#B88989]">{item.summary}</p></Link>
             ))}
           </div>
         </section>

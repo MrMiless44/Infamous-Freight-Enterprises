@@ -9,7 +9,7 @@ const DefaultFallback = (): ReactElement => (
     <h1 className="text-2xl font-semibold text-gray-900 mb-2">
       This page didn't load.
     </h1>
-    <p className="text-gray-600 max-w-md mb-6">
+    <p className="text-[#B88989]/60 max-w-md mb-6">
       We've alerted the team. Try reloading or head back to the dashboard —
       and double-check any recent unsaved changes.
     </p>
@@ -17,7 +17,7 @@ const DefaultFallback = (): ReactElement => (
       <button
         type="button"
         onClick={() => window.location.reload()}
-        className="px-4 py-2 rounded-md bg-infamous-orange text-white font-medium hover:opacity-90"
+        className="px-4 py-2 rounded-md bg-infamous-orange text-[#F5E8E8] font-medium hover:opacity-90"
       >
         Reload
       </button>

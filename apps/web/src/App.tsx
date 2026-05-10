@@ -4,6 +4,7 @@ import AppLayout from '@/layouts/AppLayout';
 import PublicLayout from '@/layouts/PublicLayout';
 import SeoManager from '@/components/SeoManager';
 import { AppErrorBoundary } from '@/components/SentryErrorBoundary';
+import RouteGuard from '@/components/RouteGuard';
 import { BRAND } from '@/lib/brand';
 
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
@@ -48,31 +49,35 @@ const ServiceDetailPage = lazy(() => import('@/pages/ServiceDetailPage'));
 const LegalPage = lazy(() => import('@/pages/LegalPage'));
 const ResourcesPage = lazy(() => import('@/pages/ResourcesPage'));
 const ResourceArticlePage = lazy(() => import('@/pages/ResourceArticlePage'));
+const GraphHopperPage = lazy(() => import('@/pages/GraphHopperPage'));
 const ThankYouPage = lazy(() => import('@/pages/ThankYouPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
+const DriverAppPage = lazy(() => import('@/pages/DriverAppPage'));
+const MessagesPage = lazy(() => import('@/pages/MessagesPage'));
+const ShipmentDetailPage = lazy(() => import('@/pages/ShipmentDetailPage'));
 
 const RouteFallback = () => (
   <main
-    className="min-h-screen w-full flex items-center justify-center p-6 bg-infamous-dark text-slate-100"
+    className="min-h-screen w-full flex items-center justify-center p-6 bg-infamous-dark text-[#F5E8E8]"
     style={{
       background:
-        'radial-gradient(circle at top left, rgba(249, 115, 22, 0.22), transparent 32rem), radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.12), transparent 28rem), #0b0f14',
+        'radial-gradient(circle at top, rgba(255, 26, 26, 0.22), transparent 35%), linear-gradient(180deg, #160608 0%, #080204 100%)',
     }}
     aria-live="polite"
     aria-busy="true"
   >
     <section className="max-w-xl text-center">
-      <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-infamous-orange">
+      <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-infamous-red-light">
         {BRAND.displayName}
       </p>
       <h1 className="font-display mt-3 mb-4 text-4xl sm:text-5xl font-bold leading-tight">
         Loading freight command center...
       </h1>
-      <p className="text-base leading-relaxed text-slate-300">
+      <p className="text-base leading-relaxed text-[#B88989]">
         Dispatch, visibility, rate tools, and carrier operations are loading.
       </p>
       <div
-        className="mx-auto mt-6 w-8 h-8 border-2 border-infamous-orange border-t-transparent rounded-full animate-spin"
+        className="mx-auto mt-6 w-8 h-8 border-2 border-infamous-red border-t-transparent rounded-full animate-spin"
         role="status"
         aria-label="Loading"
       />
@@ -97,6 +102,7 @@ function App() {
             <Route path="/request-quote" element={<PublicQuoteRequestPage />} />
             <Route path="/track-shipment" element={<ShipmentTrackingPage />} />
             <Route path="/customer-portal" element={<CustomerPortalPage />} />
+            <Route path="/shipment/:trackingId" element={<ShipmentDetailPage />} />
             <Route path="/carrier-portal" element={<CarrierPortalPage />} />
             <Route path="/load-board" element={<PublicLoadBoardPage />} />
             <Route path="/freight-assistant" element={<FreightAssistantPage />} />
@@ -109,6 +115,7 @@ function App() {
             <Route path="/shipper-agreement" element={<LegalPage />} />
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/resources/:articleSlug" element={<ResourceArticlePage />} />
+            <Route path="/graphhopper" element={<GraphHopperPage />} />
             <Route path="/case-studies" element={<CaseStudies />} />
             <Route path="/product-hunt" element={<ProductHunt />} />
             <Route path="/gdpr" element={<GDPR />} />
@@ -121,20 +128,22 @@ function App() {
           <Route element={<AppLayout />}>
             <Route path="/ops" element={<DashboardPage />} />
             <Route path="/loads" element={<LoadsPage />} />
-            <Route path="/dispatch" element={<DispatchBoardPage />} />
-            <Route path="/drivers" element={<DriversPage />} />
-            <Route path="/invoices" element={<InvoicesPage />} />
-            <Route path="/analytics" element={<MetricsDashboard />} />
-            <Route path="/compliance" element={<CompliancePage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/billing" element={<BillingRequiredPage />} />
+            <Route path="/dispatch" element={<RouteGuard minRole="dispatcher"><DispatchBoardPage /></RouteGuard>} />
+            <Route path="/drivers" element={<RouteGuard minRole="dispatcher"><DriversPage /></RouteGuard>} />
+            <Route path="/invoices" element={<RouteGuard minRole="dispatcher"><InvoicesPage /></RouteGuard>} />
+            <Route path="/analytics" element={<RouteGuard minRole="admin"><MetricsDashboard /></RouteGuard>} />
+            <Route path="/compliance" element={<RouteGuard minRole="admin"><CompliancePage /></RouteGuard>} />
+            <Route path="/settings" element={<RouteGuard minRole="admin"><SettingsPage /></RouteGuard>} />
+            <Route path="/billing" element={<RouteGuard minRole="owner"><BillingRequiredPage /></RouteGuard>} />
             <Route path="/rate-comparison" element={<RateComparisonTool />} />
-            <Route path="/pay-per-load" element={<PayPerLoadPricing />} />
+            <Route path="/pay-per-load" element={<RouteGuard minRole="owner"><PayPerLoadPricing /></RouteGuard>} />
             <Route path="/referrals" element={<ReferralProgram />} />
-            <Route path="/launch-validation" element={<LaunchValidationPage />} />
-            <Route path="/carriers" element={<CarriersPage />} />
-            <Route path="/accounting" element={<AccountingDashboardPage />} />
-            <Route path="/quotes" element={<QuoteRequestsPage />} />
+            <Route path="/launch-validation" element={<RouteGuard minRole="admin"><LaunchValidationPage /></RouteGuard>} />
+            <Route path="/carriers" element={<RouteGuard minRole="admin"><CarriersPage /></RouteGuard>} />
+            <Route path="/accounting" element={<RouteGuard minRole="admin"><AccountingDashboardPage /></RouteGuard>} />
+            <Route path="/quotes" element={<RouteGuard minRole="dispatcher"><QuoteRequestsPage /></RouteGuard>} />
+            <Route path="/messages" element={<MessagesPage />} />
+            <Route path="/driver-app" element={<DriverAppPage />} />
           </Route>
 
           <Route path="*" element={<NotFoundPage />} />

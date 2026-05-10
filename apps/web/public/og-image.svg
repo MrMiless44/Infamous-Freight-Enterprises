@@ -1,18 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Infamous Freight preview">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#06080c"/>
-      <stop offset="56%" stop-color="#0b0f14"/>
-      <stop offset="100%" stop-color="#18212d"/>
+      <stop offset="0%" stop-color="#160608"/>
+      <stop offset="56%" stop-color="#080204"/>
+      <stop offset="100%" stop-color="#241013"/>
     </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.4" r="0.5">
+      <stop offset="0%" stop-color="#FF1A1A" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#080204" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="neon">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
-  <rect x="80" y="80" width="1040" height="470" rx="18" fill="#121821" stroke="#263241"/>
-  <path d="M145 170h170v38H145zm0 58h112v38H145zm0 58h145v38H145z" fill="#f97316"/>
-  <path d="M278 228h45v38h-45zm-90 112h135v14H188z" fill="#38bdf8"/>
-  <circle cx="170" cy="354" r="13" fill="#facc15"/>
-  <circle cx="308" cy="354" r="13" fill="#facc15"/>
-  <text x="385" y="238" fill="#f97316" font-size="56" font-family="Sora, IBM Plex Sans, sans-serif" font-weight="800">Infamous Freight</text>
-  <text x="385" y="310" fill="#ffffff" font-size="44" font-family="Sora, IBM Plex Sans, sans-serif" font-weight="700">Verified Freight Command</text>
-  <text x="385" y="380" fill="#94a3b8" font-size="30" font-family="IBM Plex Sans, sans-serif">Quote intake | Dispatch | Tracking | POD workflows</text>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <!-- Infinity Symbol -->
+  <path d="M540 260c0-35 32-60 70-42 13 6 20 18 26 27 5 9 13 21 26 27 38 18 70-7 70-42s-32-60-70-42c-13 6-20 18-26 27-5 9-13 21-26 27-38 18-70-7-70-42z" fill="none" stroke="#FF1A1A" stroke-width="8" stroke-linecap="round" filter="url(#neon)"/>
+  <path d="M540 260c0-35 32-60 70-42 13 6 20 18 26 27 5 9 13 21 26 27 38 18 70-7 70-42s-32-60-70-42c-13 6-20 18-26 27-5 9-13 21-26 27-38 18-70-7-70-42z" fill="none" stroke="#FF3B30" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+  <text x="600" y="360" text-anchor="middle" fill="#FF1A1A" font-size="72" font-family="Space Grotesk, Inter, sans-serif" font-weight="900" letter-spacing="4">INFAMOUS FREIGHT</text>
+  <text x="600" y="420" text-anchor="middle" fill="#F5E8E8" font-size="36" font-family="Space Grotesk, Inter, sans-serif" font-weight="700" letter-spacing="12">WE MOVE. YOU WIN.</text>
+  <text x="600" y="470" text-anchor="middle" fill="#B88989" font-size="22" font-family="Inter, sans-serif">Real-time freight command center</text>
 </svg>

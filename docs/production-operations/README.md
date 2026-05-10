@@ -15,6 +15,7 @@ It contains operations, compliance, dispatch, carrier, sales, launch readiness, 
 - [Operating Model](OPERATING_MODEL.md)
 - [Launch Checklist](LAUNCH_CHECKLIST.md)
 - [Compliance Checklist](COMPLIANCE_CHECKLIST.md)
+- [Legal Business Record Update](LEGAL_BUSINESS_RECORD_UPDATE.md)
 - [Carrier Vetting SOP](CARRIER_VETTING_SOP.md)
 - [Dispatch Workflow](DISPATCH_WORKFLOW.md)
 - [Daily Operations SOP](DAILY_OPERATIONS_SOP.md)

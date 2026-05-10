@@ -1,12 +1,14 @@
 import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
+  ArrowRight,
   CheckCircle2,
   CircleDashed,
   ClipboardCheck,
   DollarSign,
   FileCheck2,
   FileText,
+  MapPin,
   ShieldCheck,
   Truck,
   UserCheck,
@@ -30,9 +32,6 @@ const onboardingStages: OnboardingStage[] = [
   { id: 'approved',    label: 'Approved',    detail: 'Cleared to book Infamous loads', icon: <UserCheck size={16} /> },
 ];
 
-// In production this is hydrated from the carrier's onboarding record; the
-// demo carrier sits at the compliance step so the state machine shows both
-// completed and pending rails on screen.
 const currentStageId = 'compliance' as OnboardingStageId;
 
 const CarrierPortalPage: React.FC = () => {
@@ -42,53 +41,46 @@ const CarrierPortalPage: React.FC = () => {
   const isApproved = currentStageId === 'approved';
 
   return (
-    <main className="min-h-screen bg-[#090909] px-6 py-8 text-white">
+    <div className="min-h-screen bg-infamous-dark px-5 py-8 text-[#F5E8E8] lg:px-6">
       <div className="mx-auto max-w-7xl">
-        <Link to="/home" className="mb-8 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white">
-          <ArrowLeft size={16} /> Back to Infamous Freight
+        <Link to="/" className="mb-6 inline-flex items-center gap-2 text-sm text-[#B88989] hover:text-[#F5E8E8]">
+          <ArrowLeft size={16} /> Back
         </Link>
 
         <header className="mb-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Carrier workspace</p>
-          <h1 className="mt-2 text-3xl font-bold">Available loads, assigned work, documents, and pay status</h1>
-          <p className="mt-2 max-w-2xl text-gray-400">See available loads, your assigned work, document needs, and pay status — without chasing dispatch by phone.</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-green-light">Carrier Portal</p>
+          <h1 className="mt-2 text-3xl font-black">Move Freight With Infamous</h1>
+          <p className="mt-2 max-w-2xl text-[#B88989]">Browse available loads, manage assignments, upload documents, and track payments — all from one dashboard.</p>
         </header>
 
+        {/* Onboarding */}
         <section
           aria-label="Carrier onboarding status"
-          className="mb-6 rounded-3xl border border-infamous-border bg-infamous-card p-6"
+          className="mb-6 rounded-xl border border-infamous-border bg-infamous-card p-6"
         >
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-infamous-orange">Onboarding status</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-infamous-green-light">Onboarding Status</p>
               <h2 className="mt-1 text-lg font-bold">
                 {isApproved
-                  ? 'Approved — cleared to book Infamous loads'
+                  ? 'Approved — cleared to book loads'
                   : `Step ${currentIdx + 1} of ${onboardingStages.length}: ${onboardingStages[currentIdx]?.label}`}
               </h2>
-              <p className="mt-1 text-sm text-gray-400">
-                {isApproved
-                  ? 'Your file is current. New loads matching your lanes will appear below.'
-                  : 'Finish the highlighted step to unlock load booking and QuickPay.'}
-              </p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="text-right">
-                <p className="text-xs uppercase tracking-wider text-gray-500">Progress</p>
-                <p className="text-lg font-bold text-infamous-orange">{progressPct}%</p>
-              </div>
+              <span className="text-lg font-black text-infamous-green-light">{progressPct}%</span>
               <Link
                 to="/onboarding"
-                className="rounded-xl border border-infamous-orange/40 bg-infamous-orange/10 px-4 py-2 text-sm font-semibold text-infamous-orange hover:bg-infamous-orange/20"
+                className="inline-flex items-center gap-2 rounded-lg bg-infamous-green/10 border border-infamous-green/20 px-4 py-2 text-sm font-semibold text-infamous-green-light hover:bg-infamous-green/20 transition"
               >
-                {isApproved ? 'Update file' : 'Continue setup'}
+                {isApproved ? 'Update File' : 'Continue Setup'} <ArrowRight size={14} />
               </Link>
             </div>
           </div>
 
-          <div className="mb-5 h-2 overflow-hidden rounded-full bg-[#1a1a1a]">
+          <div className="mb-5 h-2 overflow-hidden rounded-full bg-infamous-panel">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-infamous-orange to-[#ff6d00] transition-all duration-500"
+              className="h-full rounded-full bg-gradient-to-r from-infamous-green to-infamous-green-light transition-all duration-500"
               style={{ width: `${progressPct}%` }}
             />
           </div>
@@ -104,88 +96,91 @@ const CarrierPortalPage: React.FC = () => {
                     : 'pending';
               const stateClasses =
                 state === 'complete'
-                  ? 'border-green-500/30 bg-green-500/5 text-green-300'
+                  ? 'border-[#36D399]/20 bg-[#36D399]/5 text-[#36D399]'
                   : state === 'current'
-                    ? 'border-infamous-orange bg-infamous-orange/10 text-infamous-orange'
-                    : 'border-infamous-border bg-[#111] text-gray-500';
-              const statusLabel = state === 'complete' ? 'Complete' : state === 'current' ? 'In review' : 'Pending';
+                    ? 'border-infamous-red/30 bg-infamous-red/10 text-infamous-red-light'
+                    : 'border-infamous-border bg-infamous-panel text-[#B88989]/70';
+              const statusLabel = state === 'complete' ? 'Complete' : state === 'current' ? 'In Review' : 'Pending';
               return (
                 <li
                   key={stage.id}
                   aria-current={state === 'current' ? 'step' : undefined}
-                  className={`rounded-2xl border p-4 transition-all ${stateClasses}`}
+                  className={`rounded-xl border p-4 transition-all ${stateClasses}`}
                 >
                   <div className="mb-2 flex items-center gap-2">
-                    {state === 'complete' ? <CheckCircle2 size={16} /> : <CircleDashed size={16} />}
+                    {state === 'complete' ? <CheckCircle2 size={14} /> : <CircleDashed size={14} />}
                     <span className="text-[10px] font-semibold uppercase tracking-wider opacity-80">{statusLabel}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span aria-hidden="true">{stage.icon}</span>
-                    <p className="text-sm font-semibold text-white">{stage.label}</p>
+                    <span>{stage.icon}</span>
+                    <p className="text-sm font-semibold text-[#F5E8E8]">{stage.label}</p>
                   </div>
-                  <p className="mt-1 text-xs text-gray-400">{stage.detail}</p>
+                  <p className="mt-1 text-xs text-[#B88989]">{stage.detail}</p>
                 </li>
               );
             })}
           </ol>
         </section>
 
-        <section className="mb-6 grid gap-4 md:grid-cols-4">
-          {[
-            ['Available loads', demoCarrierLoads.length, <Truck size={20} />],
-            ['Assigned loads', 4, <ClipboardCheck size={20} />],
-            ['Documents needed', 2, <FileCheck2 size={20} />],
-            ['Payments pending', '$8,450', <DollarSign size={20} />],
-          ].map(([label, value, icon]) => (
-            <div key={String(label)} className="rounded-2xl border border-infamous-border bg-infamous-card p-5">
-              <div className="mb-3 text-infamous-orange">{icon}</div>
-              <p className="text-2xl font-bold">{value}</p>
-              <p className="mt-1 text-sm text-gray-500">{label}</p>
+        {/* Metrics */}
+        <section className="mb-6 grid gap-4 grid-cols-2 lg:grid-cols-4">
+          {([
+            { label: 'Available Loads', value: demoCarrierLoads.length, icon: Truck, color: 'text-infamous-red-light' },
+            { label: 'Assigned Loads', value: 4, icon: ClipboardCheck, color: 'text-infamous-green-light' },
+            { label: 'Documents Needed', value: 2, icon: FileCheck2, color: 'text-infamous-orange' },
+            { label: 'Payments Pending', value: '$8,450', icon: DollarSign, color: 'text-[#36D399]' },
+          ] as const).map((item) => (
+            <div key={item.label} className="metric-card">
+              <item.icon size={20} className={item.color} />
+              <p className="mt-3 text-2xl font-black">{item.value}</p>
+              <p className="mt-1 text-sm text-infamous-muted">{item.label}</p>
             </div>
           ))}
         </section>
 
-        <section className="rounded-3xl border border-infamous-border bg-infamous-card p-6">
+        {/* Available Loads */}
+        <section className="rounded-xl border border-infamous-border bg-infamous-card p-6">
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-xl font-bold">Available loads</h2>
+            <h2 className="text-xl font-bold">Available Loads</h2>
             <div className="flex flex-wrap items-center gap-2">
               <Link
                 to="/load-board"
-                className="rounded-full border border-infamous-orange/40 bg-infamous-orange/10 px-3 py-1 text-xs font-semibold text-infamous-orange hover:bg-infamous-orange/20"
+                className="inline-flex items-center gap-2 rounded-lg bg-infamous-red/10 border border-infamous-red/20 px-4 py-2 text-xs font-semibold text-infamous-red-light hover:bg-infamous-red/20 transition"
               >
-                Open full load board
+                Full Load Board <ArrowRight size={12} />
               </Link>
               {isApproved ? (
-                <span className="rounded-full bg-green-500/10 px-3 py-1 text-xs font-semibold text-green-400">Capacity open</span>
+                <span className="badge-green">Capacity Open</span>
               ) : (
-                <span className="rounded-full bg-yellow-500/10 px-3 py-1 text-xs font-semibold text-yellow-300">
-                  Booking unlocks at approval
-                </span>
+                <span className="badge-orange">Booking unlocks at approval</span>
               )}
             </div>
           </div>
           <div className="grid gap-4 lg:grid-cols-3">
             {demoCarrierLoads.map((load) => (
-              <article key={load.id} className="rounded-2xl border border-infamous-border bg-[#111] p-5">
-                <div className="mb-4 flex items-center justify-between">
-                  <p className="font-mono text-xs text-gray-500">{load.id}</p>
-                  <span className="rounded-full bg-infamous-orange/10 px-3 py-1 text-xs text-infamous-orange">{load.equipment}</span>
+              <article key={load.id} className="rounded-xl border border-infamous-border bg-infamous-panel p-5 transition hover:border-infamous-red/20">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="font-mono text-xs text-infamous-muted">{load.id}</p>
+                  <span className="badge-blue">{load.equipment}</span>
                 </div>
-                <h3 className="text-lg font-bold">{load.lane}</h3>
-                <div className="mt-4 space-y-2 text-sm text-gray-400">
+                <h3 className="text-base font-bold flex items-center gap-2">
+                  <MapPin size={14} className="text-infamous-red-light shrink-0" />
+                  {load.lane}
+                </h3>
+                <div className="mt-3 space-y-1.5 text-sm text-[#B88989]">
                   <p>Pickup: {load.pickup}</p>
                   <p>Delivery: {load.delivery}</p>
-                  <p>Miles: {load.miles}</p>
+                  <p>{load.miles} miles</p>
                 </div>
-                <div className="mt-5 flex items-center justify-between border-t border-infamous-border pt-4">
-                  <p className="text-xl font-bold text-white">{load.pay}</p>
+                <div className="mt-4 flex items-center justify-between border-t border-infamous-border pt-4">
+                  <p className="text-xl font-black text-[#F5E8E8]">{load.pay}</p>
                   <button
                     type="button"
                     disabled={!isApproved}
                     title={isApproved ? undefined : 'Finish onboarding to request loads'}
-                    className="rounded-xl bg-infamous-orange px-4 py-2 text-sm font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
+                    className="btn-primary text-sm disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    Request load
+                    Request Load
                   </button>
                 </div>
               </article>
@@ -193,7 +188,7 @@ const CarrierPortalPage: React.FC = () => {
           </div>
         </section>
       </div>
-    </main>
+    </div>
   );
 };
 

@@ -51,7 +51,7 @@ const StripeCustomerPortal: React.FC = () => {
             <CreditCard size={24} className="text-infamous-orange" />
             Billing & Subscription
           </h1>
-          <p className="text-sm text-gray-500 mt-0.5">Manage your Infamous Freight plan</p>
+          <p className="text-sm text-[#B88989]/70 mt-0.5">Manage your Infamous Freight plan</p>
         </div>
       </div>
 
@@ -68,23 +68,23 @@ const StripeCustomerPortal: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-2xl font-bold">{subscription.plan}</p>
-              <p className="text-sm text-gray-400 flex items-center gap-2 mt-1">
+              <p className="text-sm text-[#B88989] flex items-center gap-2 mt-1">
                 <Calendar size={14} /> Renews {subscription.currentPeriodEnd}
               </p>
             </div>
             <div className="text-right">
               <p className="text-3xl font-bold text-infamous-orange">
-                ${subscription.price}<span className="text-sm text-gray-500">/{subscription.interval}</span>
+                ${subscription.price}<span className="text-sm text-[#B88989]/70">/{subscription.interval}</span>
               </p>
               {subscription.interval === 'month' && (
-                <p className="text-xs text-gray-500">$1,188/year — Upgrade to annual for 20% off</p>
+                <p className="text-xs text-[#B88989]/70">$1,188/year — Upgrade to annual for 20% off</p>
               )}
             </div>
           </div>
 
           <ul className="mt-4 space-y-2">
             {subscription.features.map((f) => (
-              <li key={f} className="flex items-center gap-2 text-sm text-gray-300">
+              <li key={f} className="flex items-center gap-2 text-sm text-[#F5E8E8]/80">
                 <CheckCircle size={14} className="text-green-400" /> {f}
               </li>
             ))}
@@ -104,11 +104,11 @@ const StripeCustomerPortal: React.FC = () => {
           <div className="flex items-center justify-between p-4 bg-infamous-dark rounded-xl">
             <div className="flex items-center gap-3">
               <div className="w-12 h-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-md flex items-center justify-center">
-                <span className="text-white text-xs font-bold italic">VISA</span>
+                <span className="text-[#F5E8E8] text-xs font-bold italic">VISA</span>
               </div>
               <div>
                 <p className="text-sm font-medium">•••• {paymentMethod.last4}</p>
-                <p className="text-xs text-gray-500">Expires {paymentMethod.expiry}</p>
+                <p className="text-xs text-[#B88989]/70">Expires {paymentMethod.expiry}</p>
               </div>
             </div>
             <button className="text-sm text-infamous-orange hover:underline">Update</button>
@@ -125,13 +125,13 @@ const StripeCustomerPortal: React.FC = () => {
               { label: 'AI Matches', value: 38, limit: 'Unlimited', percent: 0, icon: <Zap size={14} /> },
             ].map((item) => (
               <div key={item.label} className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-gray-400">
+                <div className="flex items-center gap-2 text-sm text-[#B88989]">
                   {item.icon}
                   <span>{item.label}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">{item.value}</span>
-                  <span className="text-xs text-gray-600">/ {item.limit}</span>
+                  <span className="text-xs text-[#B88989]/60">/ {item.limit}</span>
                 </div>
               </div>
             ))}
@@ -145,12 +145,12 @@ const StripeCustomerPortal: React.FC = () => {
           <AlertTriangle size={18} className="text-red-400" />
           Cancel Subscription
         </h2>
-        <p className="text-sm text-gray-500 mb-4">
+        <p className="text-sm text-[#B88989]/70 mb-4">
           Your data will be preserved for 30 days. You can reactivate anytime.
         </p>
         {showCancelConfirm ? (
           <div className="flex gap-3">
-            <button className="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-xl transition-all text-sm">
+            <button className="bg-red-500 hover:bg-red-600 text-[#F5E8E8] font-medium py-2 px-4 rounded-xl transition-all text-sm">
               Confirm Cancellation
             </button>
             <button onClick={() => setShowCancelConfirm(false)} className="btn-secondary text-sm">

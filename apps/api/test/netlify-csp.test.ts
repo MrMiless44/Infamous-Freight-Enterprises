@@ -30,3 +30,74 @@ describe('Netlify CSP policy', () => {
     expect(rootContent).toContain("worker-src 'self'");
   });
 });
+
+describe('Netlify production routing', () => {
+  const repoRoot = path.resolve(__dirname, '../../..');
+  const rootNetlify = path.join(repoRoot, 'netlify.toml');
+  const publicRedirects = path.join(repoRoot, 'apps/web/public/_redirects');
+
+  function indexOf(content: string, pattern: string): number {
+    const index = content.indexOf(pattern);
+    expect(index).toBeGreaterThanOrEqual(0);
+    return index;
+  }
+
+  it('keeps the browser-critical API proxy ahead of the SPA fallback in netlify.toml', () => {
+    const rootContent = read(rootNetlify);
+
+    const healthProxy = indexOf(rootContent, 'from = "/api/health"');
+    const loadRequestsProxy = indexOf(rootContent, 'from = "/api/load-requests"');
+    const quoteRequestsProxy = indexOf(rootContent, 'from = "/api/public/quote-requests"');
+    const shipmentLookupProxy = indexOf(rootContent, 'from = "/api/public/shipments/:trackingNumber"');
+    const apiProxy = indexOf(rootContent, 'from = "/api/*"');
+    const socketProxy = indexOf(rootContent, 'from = "/socket.io/*"');
+    const spaFallback = indexOf(rootContent, 'from = "/*"');
+
+    expect(healthProxy).toBeLessThan(apiProxy);
+    expect(loadRequestsProxy).toBeLessThan(apiProxy);
+    expect(quoteRequestsProxy).toBeLessThan(apiProxy);
+    expect(shipmentLookupProxy).toBeLessThan(apiProxy);
+    expect(apiProxy).toBeLessThan(spaFallback);
+    expect(socketProxy).toBeLessThan(spaFallback);
+    expect(rootContent).toContain('to = "https://infamous-freight.fly.dev/api/health"');
+    expect(rootContent).toContain('to = "/.netlify/functions/load-requests"');
+    expect(rootContent).toContain('to = "/.netlify/functions/public-freight"');
+    expect(rootContent).toContain('to = "/.netlify/functions/public-freight?trackingNumber=:trackingNumber"');
+    expect(rootContent).toContain('to = "https://infamous-freight.fly.dev/api/:splat"');
+    expect(rootContent).toContain('to = "https://infamous-freight.fly.dev/socket.io/:splat"');
+    expect(rootContent).toContain('from = "/api/*"\n  to = "https://infamous-freight.fly.dev/api/:splat"\n  status = 200\n  force = true');
+    expect(rootContent).toContain('from = "/socket.io/*"\n  to = "https://infamous-freight.fly.dev/socket.io/:splat"\n  status = 200\n  force = true');
+  });
+
+  it('publishes the Netlify functions directory on normal Git deploys', () => {
+    const rootContent = read(rootNetlify);
+
+    expect(rootContent).toContain('[build]');
+    expect(rootContent).toContain('functions = "netlify/functions"');
+  });
+
+  it('keeps generated public redirect rules aligned with the Netlify API proxies', () => {
+    const redirectContent = read(publicRedirects);
+
+    const healthProxy = indexOf(redirectContent, '/api/health https://infamous-freight.fly.dev/api/health 200!');
+    const loadRequestsProxy = indexOf(redirectContent, '/api/load-requests /.netlify/functions/load-requests 200!');
+    const quoteRequestsProxy = indexOf(redirectContent, '/api/public/quote-requests /.netlify/functions/public-freight 200!');
+    const shipmentLookupProxy = indexOf(redirectContent, '/api/public/shipments/:trackingNumber /.netlify/functions/public-freight?trackingNumber=:trackingNumber 200!');
+    const apiProxy = indexOf(redirectContent, '/api/* https://infamous-freight.fly.dev/api/:splat 200!');
+    const socketProxy = indexOf(redirectContent, '/socket.io/* https://infamous-freight.fly.dev/socket.io/:splat 200!');
+    const spaFallback = indexOf(redirectContent, '/*    /index.html   200');
+
+    expect(healthProxy).toBeLessThan(apiProxy);
+    expect(loadRequestsProxy).toBeLessThan(apiProxy);
+    expect(quoteRequestsProxy).toBeLessThan(apiProxy);
+    expect(shipmentLookupProxy).toBeLessThan(apiProxy);
+    expect(apiProxy).toBeLessThan(spaFallback);
+    expect(socketProxy).toBeLessThan(spaFallback);
+  });
+
+  it('keeps CLI production deploys paired with Netlify functions', () => {
+    const script = read(path.join(repoRoot, 'scripts/netlify-production-readiness.sh'));
+
+    expect(script).toContain('netlify-cli deploy --prod --dir apps/web/dist --functions netlify/functions');
+  });
+});

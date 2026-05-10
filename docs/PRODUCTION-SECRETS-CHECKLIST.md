@@ -60,6 +60,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
 SENTRY_DSN=<backend sentry dsn>
 VITE_SENTRY_DSN=<frontend sentry dsn>
 NEXT_PUBLIC_SENTRY_DSN=<frontend sentry dsn>
+STRIPE_ACCOUNT_ID=<stripe account id>
 STRIPE_SECRET_KEY=<stripe secret key>
 STRIPE_WEBHOOK_SECRET=<stripe webhook signing secret>
 STRIPE_PUBLISHABLE_KEY=<stripe publishable key>
@@ -104,6 +105,7 @@ SUPABASE_SERVICE_ROLE_KEY
 SUPABASE_JWT_SECRET
 LAUNCHDARKLY_SHARED_SECRET
 LAUNCHDARKLY_SDK_KEY
+STRIPE_ACCOUNT_ID
 STRIPE_SECRET_KEY
 STRIPE_WEBHOOK_SECRET
 DATABASE_URL
@@ -133,6 +135,7 @@ Optional, depending on enabled integrations:
 
 ```text
 SENTRY_DSN=<api sentry dsn>
+STRIPE_ACCOUNT_ID=<stripe account id>
 STRIPE_SECRET_KEY=<stripe secret key>
 STRIPE_WEBHOOK_SECRET=<stripe webhook signing secret>
 SUPABASE_URL=<supabase project url>

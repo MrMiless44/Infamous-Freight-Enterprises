@@ -68,15 +68,15 @@ export default function CaseStudies() {
       <div className="mx-auto max-w-6xl">
         {/* Header */}
         <Link to="/" aria-label="Back to homepage">
-          <Button variant="ghost" className="mb-6 text-zinc-400 hover:text-white">
+          <Button variant="ghost" className="mb-6 text-[#B88989] hover:text-[#F5E8E8]">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
           </Button>
         </Link>
 
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-white">Customer Success Stories</h1>
-          <p className="mt-4 text-lg text-zinc-400 max-w-2xl mx-auto">
+          <h1 className="text-4xl md:text-5xl font-bold text-[#F5E8E8]">Customer Success Stories</h1>
+          <p className="mt-4 text-lg text-[#B88989] max-w-2xl mx-auto">
             See how fleets of all sizes use Infamous Freight to grow revenue, reduce costs, and keep drivers happy.
           </p>
         </div>
@@ -94,10 +94,10 @@ export default function CaseStudies() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 text-center"
+              className="rounded-xl border border-infamous-border bg-infamous-card/50 p-6 text-center"
             >
               <div className="text-3xl font-bold text-red-500">{stat.value}</div>
-              <div className="text-sm text-zinc-400 mt-1">{stat.label}</div>
+              <div className="text-sm text-[#B88989] mt-1">{stat.label}</div>
             </motion.div>
           ))}
         </div>
@@ -110,7 +110,7 @@ export default function CaseStudies() {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="rounded-2xl border border-zinc-800 bg-zinc-900/50 overflow-hidden"
+              className="rounded-2xl border border-infamous-border bg-infamous-card/50 overflow-hidden"
             >
               <div className="grid md:grid-cols-2 gap-8 p-8">
                 {/* Left: Company Info */}
@@ -119,18 +119,18 @@ export default function CaseStudies() {
                     <span className="text-xs font-medium text-red-400 bg-red-600/10 px-2 py-0.5 rounded-full">
                       {study.fleetSize} Trucks
                     </span>
-                    <span className="text-xs text-zinc-500">{study.industry}</span>
+                    <span className="text-xs text-[#B88989]/70">{study.industry}</span>
                   </div>
 
-                  <h2 className="text-2xl font-bold text-white mb-2">{study.company}</h2>
-                  <p className="text-sm text-zinc-400 mb-6">{study.location}</p>
+                  <h2 className="text-2xl font-bold text-[#F5E8E8] mb-2">{study.company}</h2>
+                  <p className="text-sm text-[#B88989] mb-6">{study.location}</p>
 
                   {/* Quote */}
                   <blockquote className="border-l-2 border-red-600 pl-4 mb-6">
-                    <p className="text-zinc-300 italic">"{study.quote}"</p>
+                    <p className="text-[#F5E8E8]/80 italic">"{study.quote}"</p>
                     <footer className="mt-3">
-                      <p className="text-sm text-white font-medium">{study.author}</p>
-                      <p className="text-xs text-zinc-500">{study.role}</p>
+                      <p className="text-sm text-[#F5E8E8] font-medium">{study.author}</p>
+                      <p className="text-xs text-[#B88989]/70">{study.role}</p>
                     </footer>
                   </blockquote>
 
@@ -146,12 +146,12 @@ export default function CaseStudies() {
                   {study.metrics.map((metric, i) => (
                     <div
                       key={i}
-                      className="rounded-xl border border-zinc-800 bg-black/30 p-4"
+                      className="rounded-xl border border-infamous-border bg-black/30 p-4"
                     >
                       <metric.icon className="h-5 w-5 text-red-500 mb-2" />
-                      <p className="text-2xl font-bold text-white">{metric.value}</p>
-                      <p className="text-xs text-emerald-400 mt-1">{metric.improvement}</p>
-                      <p className="text-xs text-zinc-500 mt-0.5">{metric.label}</p>
+                      <p className="text-2xl font-bold text-[#F5E8E8]">{metric.value}</p>
+                      <p className="text-xs text-[#36D399] mt-1">{metric.improvement}</p>
+                      <p className="text-xs text-[#B88989]/70 mt-0.5">{metric.label}</p>
                     </div>
                   ))}
                 </div>
@@ -162,13 +162,13 @@ export default function CaseStudies() {
 
         {/* CTA */}
         <div className="text-center mt-16">
-          <h2 className="text-2xl font-bold text-white mb-4">
+          <h2 className="text-2xl font-bold text-[#F5E8E8] mb-4">
             Ready to transform your fleet?
           </h2>
           <div className="flex justify-center gap-4">
             <BookDemoButton />
             <Link to="/pricing">
-              <Button variant="outline" className="border-zinc-700 text-white hover:bg-zinc-800">
+              <Button variant="outline" className="border-infamous-border text-[#F5E8E8] hover:bg-infamous-panel">
                 View Pricing
               </Button>
             </Link>

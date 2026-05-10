@@ -27,7 +27,7 @@ on:
 env:
   AZURE_FUNCTIONAPP_NAME: 'your-app-name'   # set this to your function app name on Azure
   AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'       # set this to the path to your function app project, defaults to the repository root
-  NODE_VERSION: '20.x'                      # set this to the node version to use (e.g. '8.x', '10.x', '12.x')
+  NODE_VERSION: '22.x'                      # set this to the node version to use
 
 jobs:
   build-and-deploy:
@@ -35,7 +35,7 @@ jobs:
     environment: dev
     steps:
     - name: 'Checkout GitHub Action'
-      uses: actions/checkout@v4
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     # If you want to use Azure RBAC instead of Publish Profile, then uncomment the task below
     # - name: 'Login via Azure CLI'
@@ -48,13 +48,18 @@ jobs:
       with:
         node-version: ${{ env.NODE_VERSION }}
 
-    - name: 'Resolve Project Dependencies Using Npm'
+    - name: Setup pnpm
+      uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d # v4.1.0
+      with:
+        version: 10
+
+    - name: 'Resolve Project Dependencies Using pnpm'
       shell: pwsh # For Linux, use bash
       run: |
         pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-        npm install
-        npm run build --if-present
-        npm run test --if-present
+        pnpm install --frozen-lockfile
+        pnpm run build --if-present
+        pnpm run test --if-present
         popd
 
     - name: 'Run Azure Functions Action'
