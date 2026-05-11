@@ -54,8 +54,11 @@ jobs:
           bash -n scripts/fly-post-deploy-check.sh
           bash -n scripts/fly-preflight.sh
 
-      - name: Test
+      - name: Test API workspace
         run: pnpm -C apps/api run test -- --runInBand
+
+      - name: Test web workspace
+        run: pnpm -C apps/web run test
 
       - name: Write test summary
         if: always()
@@ -69,6 +72,7 @@ jobs:
             echo "- pnpm -C apps/api exec tsc -p tsconfig.json --noEmit"
             echo "- pnpm -C apps/web exec tsc -p tsconfig.json --noEmit"
             echo "- pnpm -C apps/api run test -- --runInBand"
+            echo "- pnpm -C apps/web run test"
           } >> "$GITHUB_STEP_SUMMARY"
 
   # ===== BUILD API =====

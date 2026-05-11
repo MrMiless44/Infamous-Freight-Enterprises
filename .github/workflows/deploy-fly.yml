@@ -2,15 +2,6 @@ name: Deploy Fly API
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - "apps/api/**"
-      - "Dockerfile"
-      - "fly.toml"
-      - "pnpm-lock.yaml"
-      - "package.json"
-      - ".github/workflows/deploy-fly.yml"
 
 concurrency:
   group: deploy-fly-${{ github.ref }}

@@ -39,8 +39,8 @@ load_dotenv_file() {
   done < "$file_path"
 }
 
-load_dotenv_file ".env"
 load_dotenv_file ".env.local"
+load_dotenv_file ".env"
 
 required_vars=(
   NODE_ENV

@@ -9,7 +9,7 @@
   },
   "type": "commonjs",
   "scripts": {
-    "build": "pnpm run prisma:generate && tsc -p tsconfig.json",
+    "build": "pnpm run prisma:generate && tsc -p tsconfig.build.json",
     "start:dev": "tsx watch src/server.ts",
     "start:prod": "pnpm run prisma:generate && node dist/src/server.js",
     "test": "pnpm run prisma:generate && node scripts/run-jest.cjs",
