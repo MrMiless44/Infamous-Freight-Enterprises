@@ -6,8 +6,8 @@ Quickstart for running the Infamous Freight monorepo on a developer workstation.
 
 ## Prerequisites
 
-- **Node.js** `>=22.0.0 <23.0.0` (see root [`package.json`](../package.json) `engines`). The repo includes [`.nvmrc`](../.nvmrc) — `nvm use` will pick the right version.
-- **pnpm** `>=10`. Install with `corepack enable` (recommended) or `npm install -g pnpm`.
+- **Node.js** `>=22.0.0 <23.0.0` (see root [`package.json`](../package.json) `engines`). The repo includes [`.nvmrc`](../.nvmrc) and [`.node-version`](../.node-version), both set to `22` (latest Node 22.x).
+- **pnpm** `>=10.0.0 <11.0.0` (see root [`package.json`](../package.json) `packageManager` and `engines`). Install with `corepack enable` (recommended) or `npm install -g pnpm@10`.
 - **PostgreSQL** running locally (or via Docker / Supabase). Default local URL in [`.env.example`](../.env.example) is `postgresql://infamous:changeme@localhost:5432/infamous_freight`.
 - **Redis** for rate limiting / queues (default `localhost:6379` per `.env.example`).
 - Optional: **Docker** for spinning up Postgres + Redis via [`docker-compose.yml`](../docker-compose.yml).
