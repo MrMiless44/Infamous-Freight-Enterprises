@@ -29,7 +29,7 @@ Detailed plan: [`phase-1-branding-plan.md`](./phase-1-branding-plan.md). Brand a
 
 - [ ] Custom domain configured per [`CUSTOM-DOMAIN.md`](./CUSTOM-DOMAIN.md).
 - [ ] [`netlify.toml`](../netlify.toml) keeps the 301 redirects from `infamousfreight.com/*` and `infamous-freight.netlify.app/*` to `https://www.infamousfreight.com/:splat` (smoke tests assert this).
-- [ ] [`fly.toml`](../fly.toml) keeps `PORT=8080` and `http_service.internal_port=8080` aligned for the `infamous-freight` app.
+- [ ] [`fly.toml`](../fly.toml) keeps `PORT=3000` and `http_service.internal_port=3000` aligned for the `infamous-freight-api` app.
 - [ ] Netlify build hooks reviewed: [`NETLIFY-BUILDHOOKS.md`](./NETLIFY-BUILDHOOKS.md).
 
 ## Database & Prisma
