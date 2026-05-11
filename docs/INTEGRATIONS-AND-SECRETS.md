@@ -123,14 +123,14 @@ is provided.
 3. **No machines / capacity error:** Log in to the Fly.io dashboard and check
    the `infamous-freight` app health. Scale or restart:
    ```bash
-   fly status --app infamous-freight
-   fly machines restart --app infamous-freight
+   fly status --app infamous-freight-api
+   fly machines restart --app infamous-freight-api
    ```
    If a single machine needs a targeted runtime update, first list machines and
    then update by machine ID:
    ```bash
-   fly machines list --app infamous-freight
-   fly machine update <machine_id> --app infamous-freight --vm-size shared-cpu-1x
+   fly machines list --app infamous-freight-api
+   fly machine update <machine_id> --app infamous-freight-api --vm-size shared-cpu-1x
    ```
    Use machine-level updates for controlled incident remediation; prefer full
    app deploys for routine releases. After any machine-level update, verify the
@@ -145,13 +145,13 @@ is provided.
 5. **Manual deploy:**
    ```bash
    fly auth login
-   flyctl deploy --remote-only --app infamous-freight
+   flyctl deploy --remote-only --app infamous-freight-api
    ```
 
 6. **Rollback to last good release:**
    ```bash
-   fly releases --app infamous-freight   # find the last good version
-   fly deploy --image <previous-image-tag> --app infamous-freight
+   fly releases --app infamous-freight-api   # find the last good version
+   fly deploy --image <previous-image-tag> --app infamous-freight-api
    ```
 
 ---
@@ -239,7 +239,7 @@ netlify env:set VARIABLE_NAME "value"
 1. Check status at https://status.fly.io.
 2. If a regional outage, consider scaling to a different region:
    ```bash
-   fly regions add iad --app infamous-freight   # e.g. us-east
+   fly regions add iad --app infamous-freight-api   # e.g. us-east
    ```
 3. Until restored, update the web app to show a maintenance banner or redirect
    to a static status page.
