@@ -10,6 +10,7 @@ https://carrier.infamousfreight.com/* https://www.infamousfreight.com/ 301!
 
 # Redirect apex to canonical www
 https://infamousfreight.com/* https://www.infamousfreight.com/:splat 301!
+https://infamous-freight.netlify.app/* https://www.infamousfreight.com/:splat 301!
 
 # Redirect old domain paths
 /old-page /new-page 301!
@@ -23,6 +24,26 @@ https://infamousfreight.com/* https://www.infamousfreight.com/:splat 301!
 /api/load-requests/* /.netlify/functions/load-requests/:splat 200!
 /api/public/quote-requests /.netlify/functions/public-freight 200!
 /api/public/shipments/:trackingNumber /.netlify/functions/public-freight?trackingNumber=:trackingNumber 200!
+/api/auth/* /.netlify/functions/accounts 200!
+/api/loads /.netlify/functions/loads 200!
+/api/loads/* /.netlify/functions/loads 200!
+/api/carriers /.netlify/functions/carriers 200!
+/api/carriers/* /.netlify/functions/carriers 200!
+/api/drivers /.netlify/functions/drivers 200!
+/api/drivers/* /.netlify/functions/drivers 200!
+/api/eld/* /.netlify/functions/drivers 200!
+/api/tracking/* /.netlify/functions/tracking 200!
+/api/quotes /.netlify/functions/quotes 200!
+/api/quotes/* /.netlify/functions/quotes 200!
+/api/documents/* /.netlify/functions/documents 200!
+/api/invoices /.netlify/functions/invoices 200!
+/api/invoices/* /.netlify/functions/invoices 200!
+/api/notifications /.netlify/functions/notifications-api 200!
+/api/notifications/* /.netlify/functions/notifications-api 200!
+/api/mobile/* /.netlify/functions/mobile 200!
+
+# Do not expose source maps from production deploys
+/*.map /404 404!
 
 # Production API proxy
 /api/* https://infamous-freight.fly.dev/api/:splat 200!

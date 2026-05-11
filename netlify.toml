@@ -226,11 +226,13 @@
   for = "/"
   [headers.values]
     Cache-Control = "no-store, no-cache, must-revalidate"
+    Netlify-CDN-Cache-Control = "public, max-age=0, stale-while-revalidate=86400"
 
 [[headers]]
   for = "/*.html"
   [headers.values]
     Cache-Control = "no-store, no-cache, must-revalidate"
+    Netlify-CDN-Cache-Control = "public, max-age=0, stale-while-revalidate=86400"
 
 [[headers]]
   for = "/**/*.js"
@@ -283,7 +285,17 @@
     Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
+  for = "/**/*.jpeg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
   for = "/**/*.webp"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/**/*.avif"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 

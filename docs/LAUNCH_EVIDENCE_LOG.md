@@ -795,3 +795,49 @@ REPOSITORY MITIGATION COMPLETE; PRODUCTION REDEPLOY STILL REQUIRED
 
 ## Follow-Up
 Trigger a fresh production deploy that includes `netlify/functions`, then re-run the public function route checks from `docs/netlify-deploy-checklist.md`. If either route still returns Netlify HTML after that deploy, inspect the Netlify deploy summary to confirm both `load-requests` and `public-freight` were detected and uploaded as functions.
+
+---
+
+## Test
+Netlify Speed And Route Recommendation Follow-Up
+
+## Date/Time
+2026-05-11 11:28 UTC
+
+## Owner
+Netlify agent
+
+## Command or Action
+Applied the remaining safe repository recommendations from the Netlify speed and production-routing follow-up, then re-ran focused production smoke checks and the existing routing regression test.
+
+```bash
+curl -sS -D - -o /tmp/if_www.html https://www.infamousfreight.com/
+curl -sS -D - -o /tmp/if_apex.html https://infamousfreight.com/
+curl --max-time 15 -sS -D - https://www.infamousfreight.com/api/health -o /tmp/if_health2.txt
+curl -sS -D - -X OPTIONS https://www.infamousfreight.com/api/public/quote-requests -o /tmp/if_quote_options.txt
+curl --max-time 15 -sS -D - https://www.infamousfreight.com/api/public/shipments/invalid-tracking -o /tmp/if_ship.txt
+pnpm -C apps/api exec jest test/netlify-csp.test.ts --runInBand
+```
+
+## Expected Result
+- HTML responses keep browser revalidation conservative while allowing Netlify CDN stale revalidation.
+- `https://www.infamousfreight.com/` returns HTTP 200 with configured security headers.
+- `https://infamousfreight.com/` redirects to `https://www.infamousfreight.com/`.
+- `https://www.infamousfreight.com/api/health` returns HTTP 200 JSON.
+- Public Netlify API route smoke checks return JSON or the expected empty 204 preflight response instead of Netlify HTML.
+
+## Actual Result
+- **Repository speed configuration**: root HTML and `/*.html` now use `Netlify-CDN-Cache-Control: public, max-age=0, stale-while-revalidate=86400`, while browser `Cache-Control` remains `no-store, no-cache, must-revalidate`.
+- **Repository route mitigation**: the published `_redirects` file now mirrors the default Netlify hostname redirect, critical Netlify Function routes, source-map block, and local function API routes already configured in `netlify.toml`.
+- **Canonical frontend (`https://www.infamousfreight.com/`)**: HTTP/2 200 from Netlify. Security headers were present, including `content-security-policy`, `strict-transport-security`, `x-frame-options`, `x-content-type-options`, `permissions-policy`, and `referrer-policy`. Netlify request ID observed: `01KRBCMV7RBCSPFV77BG7P76V9`.
+- **Apex redirect (`https://infamousfreight.com/`)**: HTTP/2 301 to `https://www.infamousfreight.com/`. Netlify request ID observed: `01KRBCMV73E63MXB40TCYN6YK0`.
+- **Proxied API health (`https://www.infamousfreight.com/api/health`)**: returned HTTP 504 from Netlify on one request and timed out after 15 seconds on a second request.
+- **Public quote preflight (`OPTIONS /api/public/quote-requests`)**: HTTP 404 with Netlify HTML page. Netlify request ID observed: `01KRBCMV7RSW577XK0MF358DM0`.
+- **Invalid public shipment lookup (`GET /api/public/shipments/invalid-tracking`)**: HTTP 404 with Netlify HTML page. Netlify request ID observed: `01KRBCNH17QR7A7Z2H0QH8YFGZ`.
+- **Regression test**: `test/netlify-csp.test.ts` passed with 6 tests.
+
+## Status
+REPOSITORY MITIGATION COMPLETE; PRODUCTION API/FUNCTION RETEST STILL REQUIRED
+
+## Follow-Up
+Trigger a fresh production deploy so the updated CDN cache header and `_redirects` safeguards are published. After deploy, re-run the checks in `docs/netlify-deploy-checklist.md`, with special attention to `/api/health` reliability and public Netlify Function route packaging.
