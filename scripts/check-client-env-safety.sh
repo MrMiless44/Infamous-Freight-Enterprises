@@ -33,17 +33,19 @@ while IFS= read -r env_file; do
 
   # 1) Explicit deny-list of backend secrets.
   for key in "${DISALLOWED_KEYS[@]}"; do
-    if rg -n "^${key}=" "$env_file" >/dev/null; then
+    if grep -Eq "^${key}=" "$env_file"; then
       violations+=("${env_file}: disallowed key ${key}")
     fi
   done
 
   # 2) Allow only VITE_* and known build-time keys.
-  while IFS= read -r line; do
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    [[ "$line" =~ ^[[:space:]]*# ]] && continue
+    [[ "$line" =~ ^[[:space:]]*$ ]] && continue
+    [[ "$line" =~ ^[A-Za-z_][A-Za-z0-9_]*= ]] || continue
+
     key="${line%%=*}"
     [[ -z "$key" ]] && continue
-    [[ "$key" =~ ^[[:space:]]*# ]] && continue
-    [[ "$key" =~ ^[[:space:]]*$ ]] && continue
 
     key="$(echo "$key" | xargs)"
 
@@ -62,7 +64,7 @@ while IFS= read -r env_file; do
     if [[ "$allowed" == false ]]; then
       violations+=("${env_file}: non-public key ${key} must be VITE_* or explicitly allowlisted")
     fi
-  done < <(rg "^[A-Za-z_][A-Za-z0-9_]*=" "$env_file" -or '$0')
+  done < "$env_file"
 done < <(find apps/web -maxdepth 1 -type f -name '.env*' | sort)
 
 if (( ${#violations[@]} > 0 )); then
