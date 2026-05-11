@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_NAME="${APP_NAME:-infamous-freight}"
+APP_NAME="${APP_NAME:-infamous-freight-api}"
 KEEP_IMAGE="${KEEP_IMAGE:-}"
 PRUNE_OLD_IMAGES="${PRUNE_OLD_IMAGES:-false}"
 PRUNE_MAX_COUNT="${PRUNE_MAX_COUNT:-3}"

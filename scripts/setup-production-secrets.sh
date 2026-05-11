@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="${1:-${ROOT_DIR}/.env.production.secrets}"
 REPO="${GITHUB_REPOSITORY_OVERRIDE:-Infaemous-Freight/Infamous-freight}"
-FLY_APP="${FLY_APP:-infamous-freight}"
+FLY_APP="${FLY_APP:-infamous-freight-api}"
 NETLIFY_SITE_ID="${NETLIFY_SITE_ID:-}"
 DRY_RUN="${DRY_RUN:-false}"
 

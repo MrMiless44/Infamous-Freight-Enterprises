@@ -1,4 +1,4 @@
-app = "infamous-freight"
+app = "infamous-freight-api"
 primary_region = "dfw"
 
 [build]
@@ -14,13 +14,13 @@ app = "node apps/api/dist/src/server.js"
 [env]
 HOST = "0.0.0.0"
 NODE_ENV = "production"
-PORT = "3000"
+PORT = "8080"
 
 [http_service]
 auto_start_machines = true
 auto_stop_machines = false
 force_https = true
-internal_port = 3000
+internal_port = 8080
 min_machines_running = 1
 processes = [ "app" ]
 

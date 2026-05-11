@@ -59,14 +59,14 @@ describe('Netlify production routing', () => {
     expect(shipmentLookupProxy).toBeLessThan(apiProxy);
     expect(apiProxy).toBeLessThan(spaFallback);
     expect(socketProxy).toBeLessThan(spaFallback);
-    expect(rootContent).toContain('to = "https://infamous-freight.fly.dev/api/health"');
+    expect(rootContent).toContain('to = "https://infamous-freight-api.fly.dev/api/health"');
     expect(rootContent).toContain('to = "/.netlify/functions/load-requests"');
     expect(rootContent).toContain('to = "/.netlify/functions/public-freight"');
     expect(rootContent).toContain('to = "/.netlify/functions/public-freight?trackingNumber=:trackingNumber"');
-    expect(rootContent).toContain('to = "https://infamous-freight.fly.dev/api/:splat"');
-    expect(rootContent).toContain('to = "https://infamous-freight.fly.dev/socket.io/:splat"');
-    expect(rootContent).toContain('from = "/api/*"\n  to = "https://infamous-freight.fly.dev/api/:splat"\n  status = 200\n  force = true');
-    expect(rootContent).toContain('from = "/socket.io/*"\n  to = "https://infamous-freight.fly.dev/socket.io/:splat"\n  status = 200\n  force = true');
+    expect(rootContent).toContain('to = "https://infamous-freight-api.fly.dev/api/:splat"');
+    expect(rootContent).toContain('to = "https://infamous-freight-api.fly.dev/socket.io/:splat"');
+    expect(rootContent).toContain('from = "/api/*"\n  to = "https://infamous-freight-api.fly.dev/api/:splat"\n  status = 200\n  force = true');
+    expect(rootContent).toContain('from = "/socket.io/*"\n  to = "https://infamous-freight-api.fly.dev/socket.io/:splat"\n  status = 200\n  force = true');
   });
 
   it('publishes the Netlify functions directory on normal Git deploys', () => {
@@ -89,12 +89,12 @@ describe('Netlify production routing', () => {
   it('keeps generated public redirect rules aligned with the Netlify API proxies', () => {
     const redirectContent = read(publicRedirects);
 
-    const healthProxy = indexOf(redirectContent, '/api/health https://infamous-freight.fly.dev/api/health 200!');
+    const healthProxy = indexOf(redirectContent, '/api/health https://infamous-freight-api.fly.dev/api/health 200!');
     const loadRequestsProxy = indexOf(redirectContent, '/api/load-requests /.netlify/functions/load-requests 200!');
     const quoteRequestsProxy = indexOf(redirectContent, '/api/public/quote-requests /.netlify/functions/public-freight 200!');
     const shipmentLookupProxy = indexOf(redirectContent, '/api/public/shipments/:trackingNumber /.netlify/functions/public-freight?trackingNumber=:trackingNumber 200!');
-    const apiProxy = indexOf(redirectContent, '/api/* https://infamous-freight.fly.dev/api/:splat 200!');
-    const socketProxy = indexOf(redirectContent, '/socket.io/* https://infamous-freight.fly.dev/socket.io/:splat 200!');
+    const apiProxy = indexOf(redirectContent, '/api/* https://infamous-freight-api.fly.dev/api/:splat 200!');
+    const socketProxy = indexOf(redirectContent, '/socket.io/* https://infamous-freight-api.fly.dev/socket.io/:splat 200!');
     const spaFallback = indexOf(redirectContent, '/*    /index.html   200');
 
     expect(healthProxy).toBeLessThan(apiProxy);

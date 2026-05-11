@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_NAME="${APP_NAME:-infamous-freight}"
+APP_NAME="${APP_NAME:-infamous-freight-api}"
 PRIMARY_REGION="${PRIMARY_REGION:-dfw}"
 POSTGRES_APP_NAME="${POSTGRES_APP_NAME:-}"
 MPG_CLUSTER_ID="${MPG_CLUSTER_ID:-}"
