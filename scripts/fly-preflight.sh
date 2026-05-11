@@ -5,6 +5,17 @@ APP_NAME="${1:-infamous-freight}"
 APP_URL="${2:-https://infamous-freight.fly.dev}"
 API_URL="${3:-https://api.infamousfreight.com}"
 
+if command -v fly >/dev/null 2>&1; then
+  :
+elif command -v flyctl >/dev/null 2>&1; then
+  fly() {
+    flyctl "$@"
+  }
+else
+  echo "Error: neither 'flyctl' nor 'fly' is installed." >&2
+  exit 1
+fi
+
 fly auth whoami
 fly status --app "${APP_NAME}"
 

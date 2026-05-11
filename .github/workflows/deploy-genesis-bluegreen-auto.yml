@@ -1,0 +1,166 @@
+name: Deploy Genesis AI (Blue/Green Auto)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/genesis-ai/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
+
+concurrency:
+  group: deploy-genesis-bluegreen-auto
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      PROD_DOMAIN: genesis.infamousfreight.com
+      BLUE_CNAME: genesis-blue.infamousfreight.com
+      GREEN_CNAME: genesis-green.infamousfreight.com
+      BLUE_HEALTH: https://genesis-blue.infamousfreight.com/health
+      GREEN_HEALTH: https://genesis-green.infamousfreight.com/health
+      PROD_HEALTH: https://genesis.infamousfreight.com/health
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d  # v4.1.0
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter genesis-ai build
+
+      - name: Detect active color from Cloudflare
+        id: active
+        run: |
+          resp=$(curl -sS -X GET \
+            "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/dns_records/${{ secrets.CLOUDFLARE_RECORD_ID_GENESIS }}" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json")
+
+          content=$(echo "$resp" | jq -r '.result.content')
+          if [ "$content" = "$BLUE_CNAME" ]; then
+            echo "active=blue" >> $GITHUB_OUTPUT
+            echo "target=green" >> $GITHUB_OUTPUT
+          elif [ "$content" = "$GREEN_CNAME" ]; then
+            echo "active=green" >> $GITHUB_OUTPUT
+            echo "target=blue" >> $GITHUB_OUTPUT
+          else
+            echo "Unknown prod CNAME content: $content"
+            exit 1
+          fi
+
+      - name: Setup flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1  # master (2026-04-08)
+
+      - name: Deploy to target color (Fly rolling)
+        run: |
+          flyctl deploy \
+            --config apps/genesis-ai/fly.toml \
+            --remote-only \
+            --strategy rolling
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Wait for target health
+        run: |
+          url="$GREEN_HEALTH"
+          if [ "${{ steps.active.outputs.target }}" = "blue" ]; then url="$BLUE_HEALTH"; fi
+          for i in {1..40}; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$url" || true)
+            if [ "$code" = "200" ]; then exit 0; fi
+            sleep 5
+          done
+          exit 1
+
+      - name: Run smoke tests against target
+        run: |
+          cname="$GREEN_CNAME"
+          if [ "${{ steps.active.outputs.target }}" = "blue" ]; then cname="$BLUE_CNAME"; fi
+          url="https://$cname/"
+          for i in {1..10}; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$url" || true)
+            if [ "$code" = "200" ]; then exit 0; fi
+            sleep 5
+          done
+          exit 1
+
+      - name: Flip production DNS to target
+        run: |
+          cname="$GREEN_CNAME"
+          if [ "${{ steps.active.outputs.target }}" = "blue" ]; then cname="$BLUE_CNAME"; fi
+          curl -sS -X PUT \
+            "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/dns_records/${{ secrets.CLOUDFLARE_RECORD_ID_GENESIS }}" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            --data "{\"type\":\"CNAME\",\"name\":\"$PROD_DOMAIN\",\"content\":\"$cname\",\"ttl\":60,\"proxied\":true}" \
+            | jq -e '.success==true' >/dev/null && echo "Flipped prod to $cname ✅"
+
+      - name: Verify production health after flip
+        run: |
+          for i in {1..30}; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$PROD_HEALTH" || true)
+            if [ "$code" = "200" ]; then exit 0; fi
+            sleep 5
+          done
+          exit 1
+
+      - name: Revert DNS back to active color (if needed)
+        if: failure()
+        run: |
+          cname="$GREEN_CNAME"
+          if [ "${{ steps.active.outputs.active }}" = "blue" ]; then cname="$BLUE_CNAME"; fi
+
+          echo "Attempting to revert Cloudflare DNS for $PROD_DOMAIN back to $cname"
+
+          success=0
+          for attempt in 1 2 3; do
+            echo "Cloudflare DNS revert attempt $attempt..."
+            response=$(curl -sS -X PUT \
+              "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/dns_records/${{ secrets.CLOUDFLARE_RECORD_ID_GENESIS }}" \
+              -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              --data "{\"type\":\"CNAME\",\"name\":\"$PROD_DOMAIN\",\"content\":\"$cname\",\"ttl\":60,\"proxied\":true}")
+
+            echo "Cloudflare API response (revert attempt $attempt):"
+            echo "$response"
+
+            if echo "$response" | jq -e '.success==true' >/dev/null 2>&1; then
+              echo "DNS revert succeeded on attempt $attempt."
+              success=1
+              break
+            else
+              echo "DNS revert attempt $attempt failed; Cloudflare API indicated unsuccessful operation."
+              sleep 5
+            fi
+          done
+
+          if [ "$success" -ne 1 ]; then
+            echo "ERROR: Failed to revert Cloudflare DNS for $PROD_DOMAIN back to $cname after multiple attempts." >&2
+            exit 1
+          fi
+
+      - name: Slack notify (success)
+        if: success() && env.SLACK_WEBHOOK_URL != ''
+        run: |
+          payload=$(jq -n --arg text "✅ Genesis AI Blue/Green deploy successful. Active is now '${{ steps.active.outputs.target }}' (commit ${{ github.sha }})" '{text:$text}')
+          curl -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
+
+      - name: Slack notify (failure)
+        if: failure() && env.SLACK_WEBHOOK_URL != ''
+        run: |
+          payload=$(jq -n --arg text "❌ Genesis AI Blue/Green deploy failed. DNS reverted to '${{ steps.active.outputs.active }}' (commit ${{ github.sha }})" '{text:$text}')
+          curl -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"

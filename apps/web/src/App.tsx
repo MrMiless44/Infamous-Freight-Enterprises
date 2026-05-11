@@ -6,6 +6,7 @@ import SeoManager from '@/components/SeoManager';
 import { AppErrorBoundary } from '@/components/SentryErrorBoundary';
 import RouteGuard from '@/components/RouteGuard';
 import { BRAND } from '@/lib/brand';
+import { AiChatWidget } from '@/components/AiChatWidget';
 
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
 const LoadsPage = lazy(() => import('@/pages/LoadsPage'));
@@ -135,19 +136,20 @@ function App() {
             <Route path="/compliance" element={<RouteGuard minRole="admin"><CompliancePage /></RouteGuard>} />
             <Route path="/settings" element={<RouteGuard minRole="admin"><SettingsPage /></RouteGuard>} />
             <Route path="/billing" element={<RouteGuard minRole="owner"><BillingRequiredPage /></RouteGuard>} />
-            <Route path="/rate-comparison" element={<RateComparisonTool />} />
+            <Route path="/rate-comparison" element={<RouteGuard minRole="dispatcher"><RateComparisonTool /></RouteGuard>} />
             <Route path="/pay-per-load" element={<RouteGuard minRole="owner"><PayPerLoadPricing /></RouteGuard>} />
-            <Route path="/referrals" element={<ReferralProgram />} />
+            <Route path="/referrals" element={<RouteGuard minRole="dispatcher"><ReferralProgram /></RouteGuard>} />
             <Route path="/launch-validation" element={<RouteGuard minRole="admin"><LaunchValidationPage /></RouteGuard>} />
             <Route path="/carriers" element={<RouteGuard minRole="admin"><CarriersPage /></RouteGuard>} />
             <Route path="/accounting" element={<RouteGuard minRole="admin"><AccountingDashboardPage /></RouteGuard>} />
             <Route path="/quotes" element={<RouteGuard minRole="dispatcher"><QuoteRequestsPage /></RouteGuard>} />
-            <Route path="/messages" element={<MessagesPage />} />
-            <Route path="/driver-app" element={<DriverAppPage />} />
+            <Route path="/messages" element={<RouteGuard minRole="driver"><MessagesPage /></RouteGuard>} />
+            <Route path="/driver-app" element={<RouteGuard minRole="driver"><DriverAppPage /></RouteGuard>} />
           </Route>
 
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
+        <AiChatWidget />
       </Suspense>
     </AppErrorBoundary>
   );

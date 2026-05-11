@@ -30,8 +30,9 @@ import { createStripeWebhookEventStore } from './stripe-webhook-events';
 import { createStripeOneTimePaymentStore } from './stripe-one-time-payments';
 import { createFreightWorkflowRouter } from './freight-workflow-routes';
 import { createAuditLogger, AuditLogger } from './audit-logger';
+import type { UserRole } from './rbac/rbac-rules';
 
-type Role = 'owner' | 'admin' | 'dispatcher';
+type Role = Extract<UserRole, 'owner' | 'admin' | 'dispatcher'>;
 type SubscriptionStatus = 'active' | 'trialing' | 'trial' | 'past_due' | 'unpaid' | 'canceled' | 'incomplete' | 'none';
 type AuthMode = 'header' | 'trusted';
 
@@ -79,7 +80,7 @@ type HealthResponse = {
   };
 };
 
-const ALLOWED_ROLES: Role[] = ['owner', 'admin', 'dispatcher'];
+const AUTHORIZED_API_ROLES: Role[] = ['owner', 'admin', 'dispatcher'];
 const BILLING_ROLES: Role[] = ['owner', 'admin'];
 const BILLING_PLANS: BillingPlan[] = ['starter', 'professional', 'enterprise'];
 const BILLING_INTERVALS: BillingInterval[] = ['month', 'year'];
@@ -173,7 +174,7 @@ function getStringClaim(...values: unknown[]): string | null {
 function getRoleClaim(...values: unknown[]): Role | null {
   const role = getStringClaim(...values);
 
-  return role && ALLOWED_ROLES.includes(role as Role) ? (role as Role) : null;
+  return role && AUTHORIZED_API_ROLES.includes(role as Role) ? (role as Role) : null;
 }
 
 function audienceMatches(claims: JwtClaims): boolean {
@@ -287,7 +288,7 @@ function getTrustedAuthContext(req: Request): TrustedAuthContext | null {
     userId.trim().length === 0 ||
     typeof tenantId !== 'string' ||
     tenantId.trim().length === 0 ||
-    !ALLOWED_ROLES.includes(role)
+    !AUTHORIZED_API_ROLES.includes(role)
   ) {
     return null;
   }
@@ -352,7 +353,7 @@ function requireRole(req: Request, res: Response, next: NextFunction) {
 
   const role = req.header('x-user-role');
 
-  if (!role || !ALLOWED_ROLES.includes(role as Role)) {
+  if (!role || !AUTHORIZED_API_ROLES.includes(role as Role)) {
     return res.status(403).json({
       error: 'forbidden',
       message: 'A valid x-user-role is required for this endpoint.',
@@ -379,6 +380,7 @@ function requireBillingRole(req: Request, res: Response, next: NextFunction) {
 function getAuditUser(req: Request): { userId: string; userName: string } {
   const auth = getTrustedAuthContext(req);
   if (auth) return { userId: auth.userId, userName: auth.role };
+  if (getAuthMode() !== 'header') return { userId: 'unknown', userName: 'unknown' };
   const headerRole = req.header('x-user-role') ?? 'unknown';
   const headerTenant = req.header('x-tenant-id') ?? 'unknown';
   return { userId: headerTenant, userName: headerRole };
@@ -711,7 +713,7 @@ async function createReadinessResponse(dataStore: DataStore): Promise<{ statusCo
   };
 }
 
-function registerWebhookRoute(app: express.Express, dataStore: DataStore) {
+function registerWebhookRoute(app: express.Express, dataStore: DataStore, auditLogger: AuditLogger) {
   const webhookEvents = createStripeWebhookEventStore();
   const oneTimePayments = createStripeOneTimePaymentStore();
 
@@ -729,6 +731,12 @@ function registerWebhookRoute(app: express.Express, dataStore: DataStore) {
     const oneTimePayment = getStripeOneTimePaymentFromStripeEvent(event);
     const carrierId = getCarrierIdFromBillingSync(billingSync) ?? oneTimePayment?.carrierId ?? null;
 
+    const existing = await webhookEvents.findByEventId(event.id);
+    if (existing && (existing.status === 'processed' || existing.status === 'ignored')) {
+      res.status(200).json({ received: true, duplicate: true });
+      return;
+    }
+
     await webhookEvents.upsert({
       eventId: event.id,
       eventType: event.type,
@@ -743,13 +751,25 @@ function registerWebhookRoute(app: express.Express, dataStore: DataStore) {
 
       if (billingSync) {
         const synced = await dataStore.syncCarrierBilling(billingSync);
+        const status = synced ? 'processed' : 'ignored';
         await webhookEvents.upsert({
           eventId: event.id,
           eventType: event.type,
           carrierId,
-          status: synced ? 'processed' : 'ignored',
+          status,
           processedAt: new Date(),
         });
+        if (synced) {
+          void auditLogger.log({
+            entityType: 'billing',
+            entityId: carrierId ?? event.id,
+            action: `webhook_${event.type}`,
+            userId: 'stripe',
+            userName: 'webhook',
+            details: `status=${billingSync.status ?? 'unknown'} plan=${billingSync.subscriptionTier ?? 'unchanged'}`,
+            requestId: req.requestId,
+          });
+        }
       } else if (oneTimePayment) {
         await webhookEvents.upsert({
           eventId: event.id,
@@ -757,6 +777,15 @@ function registerWebhookRoute(app: express.Express, dataStore: DataStore) {
           carrierId,
           status: 'processed',
           processedAt: new Date(),
+        });
+        void auditLogger.log({
+          entityType: 'billing',
+          entityId: carrierId ?? event.id,
+          action: 'webhook_one_time_payment',
+          userId: 'stripe',
+          userName: 'webhook',
+          details: `type=${oneTimePayment.purchaseType} amount=${oneTimePayment.amountTotal}`,
+          requestId: req.requestId,
         });
       } else {
         await webhookEvents.upsert({
@@ -768,14 +797,24 @@ function registerWebhookRoute(app: express.Express, dataStore: DataStore) {
         });
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown webhook processing error';
       await webhookEvents.upsert({
         eventId: event.id,
         eventType: event.type,
         carrierId,
         status: 'failed',
-        errorMessage: error instanceof Error ? error.message : 'Unknown webhook processing error',
+        errorMessage,
         processedAt: new Date(),
       });
+      console.error(JSON.stringify({
+        level: 'error',
+        event: 'webhook_processing_failed',
+        eventId: event.id,
+        eventType: event.type,
+        carrierId,
+        error: errorMessage,
+        requestId: req.requestId,
+      }));
       throw error;
     }
 
@@ -893,7 +932,7 @@ function registerRoutes(app: express.Express, dataStore: DataStore, auditLogger:
     });
 
     const user = getAuditUser(req);
-    void auditLogger.log({ entityType: 'billing', entityId: carrierId, action: 'checkout_session_created', ...user, details: `plan=${getCheckoutPlan(req)}` });
+    void auditLogger.log({ entityType: 'billing', entityId: carrierId, action: 'checkout_session_created', ...user, details: `plan=${getCheckoutPlan(req)}`, requestId: req.requestId });
     res.status(200).json({ data: { url } });
   }));
 
@@ -916,6 +955,8 @@ function registerRoutes(app: express.Express, dataStore: DataStore, auditLogger:
       purchaseType,
     });
 
+    const user = getAuditUser(req);
+    void auditLogger.log({ entityType: 'billing', entityId: carrierId, action: 'one_time_checkout_created', ...user, details: `type=${purchaseType}`, requestId: req.requestId });
     res.status(200).json({ data: { url } });
   }));
 
@@ -967,7 +1008,7 @@ function registerRoutes(app: express.Express, dataStore: DataStore, auditLogger:
     }
     const data = await dataStore.createLoad(tenantId, req.body);
     const user = getAuditUser(req);
-    void auditLogger.log({ entityType: 'load', entityId: String(data.id), action: 'create', ...user });
+    void auditLogger.log({ entityType: 'load', entityId: String(data.id), action: 'create', ...user, requestId: req.requestId });
     res.status(201).json({ data });
   }));
 
@@ -984,7 +1025,7 @@ function registerRoutes(app: express.Express, dataStore: DataStore, auditLogger:
     }
     const data = await dataStore.createDriver(tenantId, req.body);
     const user = getAuditUser(req);
-    void auditLogger.log({ entityType: 'driver', entityId: String(data.id), action: 'create', ...user });
+    void auditLogger.log({ entityType: 'driver', entityId: String(data.id), action: 'create', ...user, requestId: req.requestId });
     res.status(201).json({ data });
   }));
 
@@ -1001,7 +1042,7 @@ function registerRoutes(app: express.Express, dataStore: DataStore, auditLogger:
     }
     const data = await dataStore.createShipment(tenantId, req.body);
     const user = getAuditUser(req);
-    void auditLogger.log({ entityType: 'shipment', entityId: String(data.id), action: 'create', ...user });
+    void auditLogger.log({ entityType: 'shipment', entityId: String(data.id), action: 'create', ...user, requestId: req.requestId });
     res.status(201).json({ data });
   }));
 
@@ -1016,7 +1057,7 @@ function registerRoutes(app: express.Express, dataStore: DataStore, auditLogger:
     const tenantId = getRequiredTenantId(req);
     const data = await dataStore.createFreightOperation(resource, tenantId, req.body);
     const user = getAuditUser(req);
-    void auditLogger.log({ entityType: resource, entityId: String(data.id), action: 'create', ...user });
+    void auditLogger.log({ entityType: resource, entityId: String(data.id), action: 'create', ...user, requestId: req.requestId });
     res.status(201).json({ data });
   }));
 
@@ -1030,7 +1071,7 @@ function registerRoutes(app: express.Express, dataStore: DataStore, auditLogger:
       req.body,
     );
     const user = getAuditUser(req);
-    void auditLogger.log({ entityType: resource, entityId: id, action: 'update', ...user });
+    void auditLogger.log({ entityType: resource, entityId: id, action: 'update', ...user, requestId: req.requestId });
     res.status(200).json({ data });
   }));
 
@@ -1102,14 +1143,14 @@ export function createApp() {
           ? allowedOrigins
           : allowedOrigins.length
             ? allowedOrigins
-            : true,
+            : /^https?:\/\/localhost(:\d+)?$/, // HTTP is intentional: Vite and most dev servers use plain HTTP on localhost
       credentials: true,
     }),
   );
   app.use(csrfProtectionMiddleware(allowedOrigins));
 
   app.use('/api', createRateLimitMiddleware('api'));
-  registerWebhookRoute(app, dataStore);
+  registerWebhookRoute(app, dataStore, auditLogger);
   app.use(express.json());
   app.use(authenticateBearerToken);
 

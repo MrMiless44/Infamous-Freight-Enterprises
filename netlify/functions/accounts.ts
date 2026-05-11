@@ -24,6 +24,8 @@ type ProfileUpdate = {
   avatar_url?: unknown;
 };
 
+const ALLOWED_ROLES = new Set(['admin', 'owner', 'dispatcher', 'driver', 'carrier', 'accounting', 'viewer']);
+
 async function register(req: Request) {
   let body: RegisterInput;
   try {
@@ -47,6 +49,7 @@ async function register(req: Request) {
   if (!/[A-Z]/.test(password)) return json(400, { error: 'password_weak', message: 'Password must contain at least one uppercase letter.' });
   if (!/[a-z]/.test(password)) return json(400, { error: 'password_weak', message: 'Password must contain at least one lowercase letter.' });
   if (!/\d/.test(password)) return json(400, { error: 'password_weak', message: 'Password must contain at least one number.' });
+  if (!ALLOWED_ROLES.has(role)) return json(400, { error: 'invalid_role' });
 
   const db = getDatabase();
   const existing = await db.sql`SELECT id FROM users WHERE email = ${email} LIMIT 1`;

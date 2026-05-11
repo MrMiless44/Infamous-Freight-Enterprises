@@ -106,6 +106,7 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "| Check | Expected | Actual | Final URL | Result |" >> "$GITHUB_STEP_SUMMARY"
           echo "|---|---:|---:|---|---|" >> "$GITHUB_STEP_SUMMARY"
+          echo "Running production smoke checks against ${target}"
 
           failed=0
           for check in "${checks[@]}"; do
@@ -121,8 +122,14 @@ jobs:
               result="FAIL"
               failed=1
             fi
-            echo "| ${name} | ${expected} | ${actual} | \`${final_url}\` | ${result} |" >> "$GITHUB_STEP_SUMMARY"
+            row="| ${name} | ${expected} | ${actual} | \`${final_url}\` | ${result} |"
+            echo "$row" >> "$GITHUB_STEP_SUMMARY"
+            echo "$row"
           done
+
+          if [[ "$failed" -ne 0 ]]; then
+            echo "::error::Production smoke monitor failed. See table above and step summary for details."
+          fi
 
           exit "$failed"
 

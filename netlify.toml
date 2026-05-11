@@ -8,9 +8,6 @@
   NETLIFY_NEXT_PLUGIN_SKIP = "true"
   SENTRY_DISABLE_UPLOAD = "true"
 
-[[plugins]]
-  package = "netlify-build-plugin-pagewatch"
-
 [[redirects]]
   from = "https://infamousfreight.com/*"
   to = "https://www.infamousfreight.com/:splat"
@@ -50,6 +47,12 @@
 [[redirects]]
   from = "/api/public/shipments/:trackingNumber"
   to = "/.netlify/functions/public-freight?trackingNumber=:trackingNumber"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/chat"
+  to = "/.netlify/functions/chat"
   status = 200
   force = true
 

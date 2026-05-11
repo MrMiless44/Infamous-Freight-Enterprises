@@ -58,6 +58,9 @@ jobs:
       - name: Verify required environment variables
         run: pnpm run codex:env-check:strict
 
+      - name: Verify frontend env safety
+        run: bash scripts/check-client-env-safety.sh
+
       - name: Generate Prisma client
         run: pnpm run prisma:generate
 

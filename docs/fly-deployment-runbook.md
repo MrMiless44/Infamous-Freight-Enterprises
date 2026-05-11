@@ -123,6 +123,71 @@ scripts/fly-post-deploy-check.sh infamous-freight https://infamous-freight.fly.d
 ```
 
 
+## Reconcile machines to a single image
+
+When a Fly app has machines running different image versions (for example after a partially-completed rolling deploy), use the reconcile script to inspect the distribution and optionally prune stale-image machines.
+
+**Required environment:**
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `FLY_API_TOKEN` | — | Must be set; the script validates this before making API calls. |
+| `APP_NAME` | `infamous-freight` | Target Fly app. |
+| `KEEP_IMAGE` | _(newest image)_ | Override the image to keep. |
+| `PRUNE_OLD_IMAGES` | `false` | Set to `true` to destroy machines not on the target image. |
+| `PRUNE_MAX_COUNT` | `3` | Safety ceiling: refuses to destroy more than this many machines in one run. |
+| `FORCE_PRUNE` | `false` | Set to `true` to bypass `PRUNE_MAX_COUNT` after manual review. |
+
+**Inspect image distribution (dry run — no changes):**
+
+```bash
+APP_NAME=infamous-freight bash scripts/fly-reconcile-single-image.sh
+```
+
+The script prints the number of machines per image and exits with status 1 (no changes) if multiple images are found, including the exact command needed to enable pruning.
+
+
+**If Fly warns that your app is running multiple images:**
+
+When you see:
+
+```
+Your app is currently running multiple images.
+```
+
+run a dry run first, then prune to the newest image only:
+
+```bash
+APP_NAME=infamous-freight bash scripts/fly-reconcile-single-image.sh
+PRUNE_OLD_IMAGES=true APP_NAME=infamous-freight KEEP_IMAGE=<newest-image-from-dry-run> bash scripts/fly-reconcile-single-image.sh
+```
+
+For the sample distribution below, keep `infamous-freight:deployment-01KRA9YB5HK4TFJH0XXNAFPRZB` because it has the newest deployment id and already runs 2 machines; prune the two older one-machine images and the older two-machine image only after verifying traffic and health checks.
+
+
+**Prune machines on old images:**
+
+```bash
+PRUNE_OLD_IMAGES=true APP_NAME=infamous-freight KEEP_IMAGE=<target-image> bash scripts/fly-reconcile-single-image.sh
+```
+
+Replace `<target-image>` with the image digest printed by the dry-run step. The script destroys each stale-image machine with `flyctl machine destroy --force`.
+
+**Override the prune safety ceiling (use with care):**
+
+```bash
+PRUNE_OLD_IMAGES=true FORCE_PRUNE=true APP_NAME=infamous-freight KEEP_IMAGE=<target-image> bash scripts/fly-reconcile-single-image.sh
+```
+
+Only use `FORCE_PRUNE=true` after verifying the machine/image mapping manually. The default ceiling of 3 exists to prevent mass destruction during operator error.
+
+**Safety controls summary:**
+
+- `PRUNE_OLD_IMAGES` must be explicitly set to `true`; no changes are made otherwise.
+- Refuses to destroy more than `PRUNE_MAX_COUNT` (default 3) machines per run.
+- Validates `FLY_API_TOKEN` is set before any API call.
+- Prints the exact remediation command when prune is not enabled.
+
 ## If deploy times out waiting for health checks
 
 A timeout such as `timeout reached waiting for health checks to pass` means Fly started the Machine, but it never became healthy before deploy timeout.

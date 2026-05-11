@@ -48,6 +48,9 @@ jobs:
       - name: Test API workspace
         run: pnpm -C apps/api run test -- --runInBand
 
+      - name: Test web workspace
+        run: pnpm -C apps/web run test
+
       - name: Environment diagnostics (non-strict)
         run: pnpm run codex:env-check
 
@@ -63,6 +66,7 @@ jobs:
             echo "- pnpm run check:prisma-versions"
             echo "- pnpm run build"
             echo "- pnpm -C apps/api run test -- --runInBand"
+            echo "- pnpm -C apps/web run test"
             echo "- pnpm run codex:env-check"
             echo ""
             echo "Ref: ${{ github.ref }}"

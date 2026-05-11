@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+      - 'chore/**'
+      - 'fix/**'
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '22'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: infamous
+          POSTGRES_PASSWORD: infamous
+          POSTGRES_DB: infamous_freight_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U infamous -d infamous_freight_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://infamous:infamous@localhost:5432/infamous_freight_test?schema=public
+      DB_USER: infamous
+      DB_PASSWORD: infamous
+      DB_NAME: infamous_freight_test
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ''
+      REDIS_DB: 0
+      JWT_SECRET: test-secret
+      NODE_ENV: test
+      PORT: 3001
+      API_RATE_LIMIT_ENABLED: false
+      VITE_API_URL: http://localhost:3001
+      VITE_STRIPE_PUBLIC_KEY: pk_test_placeholder
+      VITE_SOCKET_URL: ws://localhost:3001
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d  # v4.1.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm run prisma:generate
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Type check
+        run: |
+          pnpm -C apps/api exec tsc -p tsconfig.json --noEmit
+          pnpm -C apps/web exec tsc -p tsconfig.json --noEmit
+
+      - name: Run tests
+        run: pnpm run test
+
+      - name: Build
+        run: pnpm run build

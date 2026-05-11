@@ -23,6 +23,8 @@ if (sentryConfig.hasSentryCredentials && sentryConfig.hasLikelyPlaceholderCreden
 const uploadSourcemaps =
   sentryConfig.enableSentryUpload || process.env.SENTRY_SOURCEMAPS === '1';
 
+const requestedMinifier = process.env.VITE_MINIFIER === 'esbuild' ? 'esbuild' : 'terser';
+
 export default defineConfig({
   define: {
     __APP_BUILD_SHA__: JSON.stringify(buildGitSha),
@@ -65,11 +67,16 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    minify: 'terser',
+    // Keep terser as the default minifier for conservative output compatibility,
+    // but allow faster CI builds with VITE_MINIFIER=esbuild when needed.
+    minify: requestedMinifier,
     terserOptions: {
       format: {
         comments: false,
       },
+    },
+    esbuild: {
+      legalComments: 'none',
     },
     sourcemap: uploadSourcemaps ? 'hidden' : false,
     chunkSizeWarningLimit: 500,

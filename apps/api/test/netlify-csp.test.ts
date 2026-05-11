@@ -76,6 +76,16 @@ describe('Netlify production routing', () => {
     expect(rootContent).toContain('functions = "netlify/functions"');
   });
 
+  it('keeps public Netlify function entrypoints present for deploy packaging', () => {
+    const loadRequestsContent = read(path.join(repoRoot, 'netlify/functions/load-requests.ts'));
+    const publicFreightContent = read(path.join(repoRoot, 'netlify/functions/public-freight.ts'));
+
+    expect(fs.existsSync(path.join(repoRoot, 'netlify/functions/public-freight.ts'))).toBe(true);
+    expect(fs.existsSync(path.join(repoRoot, 'netlify/functions/load-requests.ts'))).toBe(true);
+    expect(loadRequestsContent).toContain("path: ['/api/load-requests', '/api/load-requests/:id']");
+    expect(publicFreightContent).toContain("path: ['/api/public/quote-requests', '/api/public/shipments/:trackingNumber']");
+  });
+
   it('keeps generated public redirect rules aligned with the Netlify API proxies', () => {
     const redirectContent = read(publicRedirects);
 
