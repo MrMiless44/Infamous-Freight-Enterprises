@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_NAME="${1:-infamous-freight}"
+APP_NAME="${1:-infamous-freight-api}"
 MACHINE_ID="${2:-}"
 
 if [[ -z "${MACHINE_ID}" ]]; then
   echo "Usage: $0 <app-name> <machine-id>"
-  echo "Example: $0 infamous-freight 0803666c2ed6d8"
+  echo "Example: $0 infamous-freight-api 0803666c2ed6d8"
   exit 1
 fi
 

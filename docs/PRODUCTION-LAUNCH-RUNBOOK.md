@@ -45,10 +45,10 @@ https://infamousfreight.com -> https://www.infamousfreight.com
 ## Current production architecture
 
 - Frontend: Netlify, `https://www.infamousfreight.com`
-- API app: Fly.io, `infamous-freight`
-- Fly API URL: `https://infamous-freight.fly.dev`
+- API app: Fly.io, `infamous-freight-api`
+- Fly API URL: `https://infamous-freight-api.fly.dev`
 - Frontend API base URL: `/api`
-- Netlify API proxy target: `https://infamous-freight.fly.dev/api/:splat`
+- Netlify API proxy target: `https://infamous-freight-api.fly.dev/api/:splat`
 
 ## Required production environment values
 
@@ -92,8 +92,8 @@ flyctl secrets set \
   PUBLIC_SITE_URL="https://www.infamousfreight.com" \
   FRONTEND_URL="https://www.infamousfreight.com" \
   CORS_ORIGIN="https://www.infamousfreight.com" \
-  API_PUBLIC_URL="https://infamous-freight.fly.dev" \
-  --app infamous-freight
+  API_PUBLIC_URL="https://infamous-freight-api.fly.dev" \
+  --app infamous-freight-api
 ```
 
 Or run the repo helper after cloning:
@@ -160,10 +160,10 @@ Go to:
 GitHub repository -> Actions -> Deploy Fly API -> Run workflow
 ```
 
-The workflow deploys the API to Fly app `infamous-freight` and checks:
+The workflow deploys the API to Fly app `infamous-freight-api` and checks:
 
 ```text
-https://infamous-freight.fly.dev/api/health
+https://infamous-freight-api.fly.dev/api/health
 ```
 
 ## Redeploy frontend
@@ -203,8 +203,8 @@ Or run the raw curl checks:
 ```bash
 curl -i https://www.infamousfreight.com
 curl -i https://infamousfreight.com
-curl -i https://infamous-freight.fly.dev/health
-curl -i https://infamous-freight.fly.dev/api/health
+curl -i https://infamous-freight-api.fly.dev/health
+curl -i https://infamous-freight-api.fly.dev/api/health
 curl -i https://www.infamousfreight.com/api/health
 ```
 
@@ -246,8 +246,8 @@ Do not mark production ready until all of these pass:
 
 - `https://www.infamousfreight.com` returns HTTP 200.
 - `https://infamousfreight.com` redirects to `https://www.infamousfreight.com`.
-- `https://infamous-freight.fly.dev/health` returns HTTP 200.
-- `https://infamous-freight.fly.dev/api/health` returns HTTP 200.
+- `https://infamous-freight-api.fly.dev/health` returns HTTP 200.
+- `https://infamous-freight-api.fly.dev/api/health` returns HTTP 200.
 - `https://www.infamousfreight.com/api/health` returns HTTP 200.
 
 ## Rollback
@@ -258,9 +258,9 @@ If API deployment fails:
 2. Check Fly app logs from a trusted shell:
 
 ```bash
-flyctl logs --app infamous-freight
-flyctl status --app infamous-freight
-flyctl machines list --app infamous-freight
+flyctl logs --app infamous-freight-api
+flyctl status --app infamous-freight-api
+flyctl machines list --app infamous-freight-api
 ```
 
 3. Confirm required runtime env vars exist in Fly, especially `DATABASE_URL`.
