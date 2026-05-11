@@ -56,7 +56,10 @@ export async function verifyPassword(password: string, stored: string): Promise<
 }
 
 async function getSigningKey(): Promise<CryptoKey> {
-  const secret = process.env.JWT_SECRET || 'dev-secret-change-in-production';
+  const secret = process.env.JWT_SECRET?.trim();
+  if (!secret) {
+    throw new Error('JWT_SECRET is required for Netlify Function authentication.');
+  }
   return crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, [
     'sign',
     'verify',

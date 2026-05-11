@@ -40,7 +40,7 @@ Use this file during production readiness verification. Do not mark the launch r
 | B-002 | Medium | Infrastructure | Bare domain infamousfreight.com not resolving — DNS connection refused | MrMiless44 | Apex redirected to https://www.infamousfreight.com/ on 2026-05-08; rerun the full smoke test after Netlify redeploy and close if stable | Needs retest |
 | B-003 | Medium | Tooling | `flyctl` CLI not installed in local dev environment; preflight check fails | MrMiless44 | CI/CD deploys via GitHub Actions which has flyctl configured | Open |
 | B-004 | Unknown | Billing | Stripe mode not confirmed as Live — must verify before accepting real payments | MrMiless44 | Do not accept payments until confirmed Live mode | Open |
-| B-005 | Unknown | Database | Database migration version not confirmed | MrMiless44 | Confirm with `prisma migrate status` before launch | Open |
+| B-005 | Unknown | Database | Netlify Database migration application not confirmed for `20260508162000_create_public_freight_intake` and `20260510120000_create_platform_tables` | MrMiless44 | Confirm with Netlify Database migration status after deploy; keep pending files unapplied until reviewed | Open |
 | B-006 | Critical | Infrastructure | Production redirect loop: `https://www.infamousfreight.com/` 301→`https://infamousfreight.com/` 301→`https://www.infamousfreight.com/` (observed 2026-05-03 09:00 UTC). `curl --max-redirs 10` exhausted without reaching HTML (final HTTP 301, body 43 bytes). | MrMiless44 | Canonical web and apex redirect checks passed on 2026-05-08; rerun the full smoke test after Netlify redeploy and close if stable | Needs retest |
 | B-007 | High | Infrastructure | Production `https://www.infamousfreight.com/api/health` returns the web app HTML shell instead of API health JSON. The browser-critical API path is not currently proving the Fly API proxy. | MrMiless44 | Direct Fly API `https://infamous-freight.fly.dev/api/health` returned healthy JSON on 2026-05-08. The repository now includes exact forced `/api/health` routing plus forced API proxy rules; deploy and rerun the proxied check. | Open |
 
@@ -240,7 +240,7 @@ All owners and deployment identifiers are recorded before testing starts.
 - API URL: https://infamous-freight.fly.dev / proxied at https://www.infamousfreight.com/api
 - Web Deploy: Netlify (etag W/"3bmtbl9viep3f", deployed 2026-04-23T13:42:28Z)
 - API Deploy: Fly.io (infamous-freight.fly.dev)
-- Database Migration Version: Pending confirmation — run `npm --prefix apps/api exec prisma migrate status` to verify
+- Database Migration Version: Pending confirmation — verify Netlify Database migrations after deploy, including `20260508162000_create_public_freight_intake` and `20260510120000_create_platform_tables`
 - Stripe Mode: Pending confirmation — verify via Stripe Dashboard before accepting payments
 - Evidence log location: docs/LAUNCH_EVIDENCE_LOG.md
 
@@ -795,3 +795,108 @@ REPOSITORY MITIGATION COMPLETE; PRODUCTION REDEPLOY STILL REQUIRED
 
 ## Follow-Up
 Trigger a fresh production deploy that includes `netlify/functions`, then re-run the public function route checks from `docs/netlify-deploy-checklist.md`. If either route still returns Netlify HTML after that deploy, inspect the Netlify deploy summary to confirm both `load-requests` and `public-freight` were detected and uploaded as functions.
+
+---
+
+## Test
+Netlify Production Recommendation Re-check
+
+## Date/Time
+2026-05-11 10:53 UTC
+
+## Owner
+Netlify agent
+
+## Command or Action
+Re-ran the recommended production checks for the canonical web host, apex redirect, proxied API health, direct Fly API health, public Netlify function routes, and direct public function URL. Sensitive values were not recorded.
+
+```bash
+curl --silent --show-error --location --head --max-time 20 --retry 2 --retry-delay 2 https://www.infamousfreight.com
+curl --silent --show-error --location --max-time 20 --retry 2 --retry-delay 2 https://www.infamousfreight.com/api/health
+curl --silent --location --head --max-time 20 --retry 2 --retry-delay 2 --output /dev/null --write-out 'FINAL_URL=%{url_effective}\nHTTP_STATUS=%{http_code}\n' https://infamousfreight.com
+curl --silent --show-error --location --max-time 20 --retry 2 --retry-delay 2 --request OPTIONS https://www.infamousfreight.com/api/public/quote-requests
+curl --silent --show-error --location --max-time 20 --retry 2 --retry-delay 2 --write-out '\nHTTP_STATUS=%{http_code}\nCONTENT_TYPE=%{content_type}\n' https://www.infamousfreight.com/api/public/shipments/invalid-tracking
+curl --silent --show-error --location --max-time 15 --retry 1 --request OPTIONS https://www.infamousfreight.com/.netlify/functions/public-freight
+curl --silent --show-error --max-time 12 https://infamous-freight.fly.dev/api/health
+pnpm -C apps/api exec jest test/netlify-csp.test.ts --runInBand
+```
+
+## Expected Result
+- `https://www.infamousfreight.com/` returns HTTP 200 with configured security headers.
+- `https://infamousfreight.com/` redirects to `https://www.infamousfreight.com/`.
+- `https://www.infamousfreight.com/api/health` returns API health JSON.
+- Public Netlify function route smoke checks return the expected empty 204 preflight response or JSON validation response.
+- Direct public function URL is available, proving the function was packaged in the active production deploy.
+- Direct Fly API health returns API health JSON as an origin diagnostic.
+- Netlify routing regression tests pass.
+
+## Actual Result
+- **Canonical frontend (`https://www.infamousfreight.com/`)**: HTTP/2 200 from Netlify with configured security headers. Netlify request ID observed: `01KRBAQAQS6R7HNFQJ6WP7F4N9`.
+- **Apex redirect (`https://infamousfreight.com/`)**: followed to `https://www.infamousfreight.com/` with final HTTP 200.
+- **Proxied API health (`https://www.infamousfreight.com/api/health`)**: timed out after repeated 20 second attempts with no response body.
+- **Direct Fly API health (`https://infamous-freight.fly.dev/api/health`)**: timed out after 12 seconds with no response body.
+- **Public quote preflight (`OPTIONS /api/public/quote-requests`)**: HTTP 404 with Netlify HTML response.
+- **Invalid public shipment lookup (`GET /api/public/shipments/invalid-tracking`)**: HTTP 404 with `text/html; charset=utf-8`.
+- **Direct public function URL (`OPTIONS /.netlify/functions/public-freight`)**: HTTP 404 with `text/plain; charset=utf-8`, confirming the function is not exposed in the current production deploy.
+- **Repository mitigation**: routing regression coverage now asserts that `netlify/functions/public-freight.ts` and `netlify/functions/load-requests.ts` are present in the configured functions directory so packaging entrypoints cannot be removed unnoticed.
+- **Regression test**: `test/netlify-csp.test.ts` passed with 7 tests.
+
+## Status
+FAIL
+
+## Severity
+High
+
+## Follow-Up
+B-007 remains open for production API reachability because both the browser-critical proxied health path and direct Fly origin timed out during this check. Public Netlify functions also remain blocked until a fresh production deploy exposes `netlify/functions/public-freight.ts`; inspect the Netlify deploy summary after deploy to confirm the function was detected and uploaded.
+
+---
+
+## Test
+Netlify Production Recommendation Re-check
+
+## Date/Time
+2026-05-11 11:07 UTC
+
+## Owner
+Netlify agent
+
+## Command or Action
+Re-ran the recommended production checks for the canonical web host, apex redirect, proxied API health, public Netlify function routes, and direct public function URL. Sensitive values were not recorded.
+
+```bash
+curl --silent --show-error --location --max-time 20 --retry 2 --retry-delay 2 https://www.infamousfreight.com/
+curl --silent --show-error --head --max-time 15 https://infamousfreight.com/
+curl --silent --show-error --location --max-time 20 --retry 2 --retry-delay 2 https://www.infamousfreight.com/api/health
+curl --silent --show-error --location --max-time 15 --retry 1 --request OPTIONS https://www.infamousfreight.com/api/public/quote-requests
+curl --silent --show-error --location --max-time 15 --retry 1 https://www.infamousfreight.com/api/public/shipments/invalid-tracking
+curl --silent --show-error --max-time 15 --retry 1 --request OPTIONS https://www.infamousfreight.com/.netlify/functions/public-freight
+pnpm -C apps/api exec jest test/netlify-csp.test.ts --runInBand
+```
+
+## Expected Result
+- `https://www.infamousfreight.com/` returns HTTP 200 with the web app shell.
+- `https://infamousfreight.com/` redirects to `https://www.infamousfreight.com/`.
+- `https://www.infamousfreight.com/api/health` returns API health JSON.
+- Public Netlify function route smoke checks return the expected empty 204 preflight response or JSON validation response.
+- Direct public function URL is available, proving the function was packaged in the active production deploy.
+- Netlify routing regression tests pass.
+
+## Actual Result
+- **Canonical frontend (`https://www.infamousfreight.com/`)**: HTTP 200 from Netlify with the web app shell.
+- **Apex redirect (`https://infamousfreight.com/`)**: HTTP 301 to `https://www.infamousfreight.com/`.
+- **Proxied API health (`https://www.infamousfreight.com/api/health`)**: timed out after repeated 20 second attempts with no response body.
+- **Public quote preflight (`OPTIONS /api/public/quote-requests`)**: returned a Netlify 404 response.
+- **Invalid public shipment lookup (`GET /api/public/shipments/invalid-tracking`)**: returned a Netlify 404 response.
+- **Direct public function URL (`OPTIONS /.netlify/functions/public-freight`)**: HTTP 404 with `text/plain; charset=utf-8`, confirming the function is not exposed in the current production deploy.
+- **Repository mitigation**: `netlify/functions/load-requests.ts` now declares in-code Netlify path metadata for `/api/load-requests` and `/api/load-requests/:id`, matching the other API functions.
+- **Regression test**: `test/netlify-csp.test.ts` passed with 7 tests.
+
+## Status
+FAIL
+
+## Severity
+High
+
+## Follow-Up
+B-007 remains open for production API reachability because the browser-critical proxied health path timed out during this check. Public Netlify functions also remain blocked until a fresh production deploy exposes `netlify/functions/public-freight.ts`; inspect the Netlify deploy summary after deploy to confirm the function was detected and uploaded.
