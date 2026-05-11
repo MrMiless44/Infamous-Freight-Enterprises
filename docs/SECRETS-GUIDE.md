@@ -177,7 +177,7 @@ netlify deploy --prod --dir=apps/web/dist --functions netlify/functions
 | 🔴 Critical | `FLY_API_TOKEN` | API deployment |
 | 🔴 Critical | `NETLIFY_AUTH_TOKEN` | Web deployment |
 | 🔴 Critical | `NETLIFY_SITE_ID` | Web deployment |
-| 🔴 Critical | `STRIPE_ACCOUNT_ID` | Stripe account guard |
+| 🟡 High (Recommended) | `STRIPE_ACCOUNT_ID` | Stripe account guard for provisioning safety |
 | 🔴 Critical | `STRIPE_SECRET_KEY` | Payments |
 | 🔴 Critical | `SUPABASE_URL` | Auth + database |
 | 🟡 High | `STRIPE_WEBHOOK_SECRET` | Stripe webhooks |

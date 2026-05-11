@@ -79,6 +79,7 @@ optional_vars=(
 missing_required=0
 missing_optional=0
 placeholder_values=0
+invalid_format_values=0
 
 placeholder_patterns=(
   "placeholder"
@@ -200,7 +201,7 @@ check_one_of "false" STRIPE_PUBLISHABLE_KEY VITE_STRIPE_PUBLIC_KEY
 
 if [[ -n "${STRIPE_ACCOUNT_ID:-}" && ! "${STRIPE_ACCOUNT_ID}" =~ ^acct_[A-Za-z0-9]+$ ]]; then
   echo "❌ STRIPE_ACCOUNT_ID does not look like a Stripe account ID"
-  placeholder_values=$((placeholder_values + 1))
+  invalid_format_values=$((invalid_format_values + 1))
 fi
 
 printf '\nSafe environment inventory — names only, no values:\n'
@@ -210,6 +211,7 @@ printf '\nSummary:\n'
 echo "Required missing: ${missing_required}"
 echo "Optional missing: ${missing_optional}"
 echo "Placeholder-looking values: ${placeholder_values}"
+echo "Invalid-format values: ${invalid_format_values}"
 
 if [[ "${missing_required}" -gt 0 ]]; then
   echo "Required variables are missing. Add them to Codex Environment variables, save the environment, then rerun this check."
@@ -220,6 +222,13 @@ fi
 
 if [[ "${placeholder_values}" -gt 0 ]]; then
   echo "One or more configured values still look like placeholders. Replace them with real production values."
+  if [[ "${strict}" == "1" ]]; then
+    exit 1
+  fi
+fi
+
+if [[ "${invalid_format_values}" -gt 0 ]]; then
+  echo "One or more configured values failed format validation. Fix malformed values and rerun this check."
   if [[ "${strict}" == "1" ]]; then
     exit 1
   fi
