@@ -8,9 +8,8 @@ type SeoConfig = {
 };
 
 const SITE_URL = (import.meta.env.VITE_SITE_URL ?? BRAND.siteUrl).replace(/\/$/, '');
-// Source asset is /public/og-image.svg; rendered as PNG via Netlify Image CDN
-// so social platforms that don't support SVG previews still get a 1200x630 image.
-const OG_IMAGE = `${SITE_URL}/.netlify/images?url=/og-image.svg&w=1200&h=630&fit=cover&fm=png`;
+const OG_IMAGE = `${SITE_URL}/og-image.png`;
+const OG_IMAGE_ALT = `${BRAND.displayName} AI Freight Command Center`;
 
 const DEFAULT_SEO: SeoConfig = {
   title: `${BRAND.displayName} — AI Freight Command Center`,
@@ -308,14 +307,14 @@ const SeoManager = () => {
       <meta property="og:image:type" content="image/png" />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
-      <meta property="og:image:alt" content={BRAND.ogImageAlt} />
+      <meta property="og:image:alt" content={OG_IMAGE_ALT} />
       {isArticle && <meta property="article:published_time" content="2026-05-08T00:00:00Z" />}
       {isArticle && <meta property="article:author" content={BRAND.displayName} />}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={seo.title} />
       <meta name="twitter:description" content={seo.description} />
       <meta name="twitter:image" content={OG_IMAGE} />
-      <meta name="twitter:image:alt" content={BRAND.ogImageAlt} />
+      <meta name="twitter:image:alt" content={OG_IMAGE_ALT} />
       <script type="application/ld+json">{ORGANIZATION_JSONLD}</script>
       {isHome && <script type="application/ld+json">{FAQ_JSONLD}</script>}
       {breadcrumbJsonLd && <script type="application/ld+json">{breadcrumbJsonLd}</script>}

@@ -60,7 +60,7 @@ const PublicLayout: React.FC = () => {
       <header className="sticky top-0 z-50 border-b border-infamous-border bg-infamous-darker/95 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5 lg:px-6">
           <Link to="/" className="flex items-center gap-3" aria-label="Infamous Freight home">
-            <Infinity size={28} className="text-infamous-red-light" strokeWidth={2.5} style={{ filter: 'drop-shadow(0 0 8px rgba(255, 59, 48, 0.8))' }} />
+            <Infinity aria-hidden="true" size={28} className="text-infamous-red-light" strokeWidth={2.5} style={{ filter: 'drop-shadow(0 0 8px rgba(255, 59, 48, 0.8))' }} />
             <span className="hidden sm:block">
               <span className="block font-display text-lg font-black leading-none text-[#F5E8E8]">{BRAND.displayName}</span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-infamous-muted">{BRAND.tagline}</span>
@@ -82,6 +82,7 @@ const PublicLayout: React.FC = () => {
                       ? 'bg-infamous-red/10 text-infamous-red-light'
                       : 'text-[#B88989] hover:bg-white/5 hover:text-[#F5E8E8]'
                   }`}
+                  aria-current={active ? 'page' : undefined}
                 >
                   {item.label}
                 </Link>
@@ -106,15 +107,17 @@ const PublicLayout: React.FC = () => {
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="lg:hidden p-2 rounded-lg text-[#B88989] hover:text-[#F5E8E8] hover:bg-white/5 transition"
-              aria-label="Toggle menu"
+              aria-controls="public-mobile-navigation"
+              aria-expanded={mobileMenuOpen}
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             >
-              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+              {mobileMenuOpen ? <X aria-hidden="true" size={22} /> : <Menu aria-hidden="true" size={22} />}
             </button>
           </div>
         </div>
 
         {mobileMenuOpen && (
-          <nav className="lg:hidden border-t border-infamous-border bg-infamous-darker px-5 py-4 space-y-1" aria-label="Mobile navigation">
+          <nav id="public-mobile-navigation" className="lg:hidden border-t border-infamous-border bg-infamous-darker px-5 py-4 space-y-1" aria-label="Mobile navigation">
             {navLinks.map((item) => (
               <Link
                 key={item.href}
@@ -144,7 +147,7 @@ const PublicLayout: React.FC = () => {
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.2fr_2fr]">
           <div>
             <Link to="/" className="flex items-center gap-3 text-[#F5E8E8]" aria-label="Infamous Freight home">
-              <Infinity size={32} className="text-infamous-red-light" strokeWidth={2.5} style={{ filter: 'drop-shadow(0 0 10px rgba(255, 59, 48, 0.8))' }} />
+              <Infinity aria-hidden="true" size={32} className="text-infamous-red-light" strokeWidth={2.5} style={{ filter: 'drop-shadow(0 0 10px rgba(255, 59, 48, 0.8))' }} />
               <span className="font-display text-lg font-black">{BRAND.displayName}</span>
             </Link>
             <p className="mt-2 font-display text-sm font-bold uppercase tracking-[0.2em] text-infamous-muted">{BRAND.tagline}</p>

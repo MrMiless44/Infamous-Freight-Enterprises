@@ -107,9 +107,10 @@ const MessagesPage: React.FC = () => {
         <header className="flex items-center gap-3 border-b border-infamous-border bg-infamous-card px-4 py-3">
           <button
             onClick={() => setActiveThread(null)}
+            aria-label="Back to message list"
             className="rounded-lg p-1.5 text-infamous-muted transition hover:bg-infamous-panel hover:text-[#F5E8E8]"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft aria-hidden="true" size={20} />
           </button>
           <div className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-[#F5E8E8] ${
             activeThread.role === 'Dispatcher' ? 'bg-infamous-red' :
@@ -138,7 +139,7 @@ const MessagesPage: React.FC = () => {
                 <p className="text-sm leading-relaxed">{msg.text}</p>
                 {msg.attachment && (
                   <div className="mt-2 flex items-center gap-2 rounded-lg bg-black/20 px-3 py-1.5 text-xs">
-                    <Paperclip size={12} />
+                    <Paperclip aria-hidden="true" size={12} />
                     {msg.attachment}
                   </div>
                 )}
@@ -146,7 +147,7 @@ const MessagesPage: React.FC = () => {
                   msg.from === 'me' ? 'justify-end text-blue-200' : 'text-infamous-muted'
                 }`}>
                   <span>{msg.time}</span>
-                  {msg.from === 'me' && (msg.read ? <CheckCheck size={12} /> : <Check size={12} />)}
+                  {msg.from === 'me' && (msg.read ? <CheckCheck aria-hidden="true" size={12} /> : <Check aria-hidden="true" size={12} />)}
                 </div>
               </div>
             </div>
@@ -156,10 +157,12 @@ const MessagesPage: React.FC = () => {
         {/* Input */}
         <div className="border-t border-infamous-border bg-infamous-card p-3">
           <div className="flex items-center gap-2">
-            <button className="rounded-lg p-2 text-infamous-muted transition hover:bg-infamous-panel hover:text-[#F5E8E8]">
-              <Paperclip size={18} />
+            <button type="button" aria-label="Attach file" className="rounded-lg p-2 text-infamous-muted transition hover:bg-infamous-panel hover:text-[#F5E8E8]">
+              <Paperclip aria-hidden="true" size={18} />
             </button>
+            <label htmlFor="message-composer" className="sr-only">Message</label>
             <input
+              id="message-composer"
               type="text"
               placeholder="Type a message..."
               value={messageInput}
@@ -168,11 +171,13 @@ const MessagesPage: React.FC = () => {
               className="flex-1 rounded-xl border border-infamous-border bg-infamous-panel px-4 py-2.5 text-sm text-[#F5E8E8] placeholder-[#B88989]/60 focus:outline-none focus:ring-1 focus:ring-infamous-red/30"
             />
             <button
+              type="button"
               onClick={handleSend}
               disabled={!messageInput.trim()}
+              aria-label="Send message"
               className="rounded-xl bg-infamous-red p-2.5 text-[#F5E8E8] transition hover:bg-infamous-red-light disabled:opacity-40"
             >
-              <Send size={18} />
+              <Send aria-hidden="true" size={18} />
             </button>
           </div>
         </div>
@@ -187,7 +192,7 @@ const MessagesPage: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-black flex items-center gap-2">
-              <MessageSquare size={22} className="text-infamous-red-light" />
+              <MessageSquare aria-hidden="true" size={22} className="text-infamous-red-light" />
               Messages
             </h1>
             {totalUnread > 0 && (
@@ -198,8 +203,10 @@ const MessagesPage: React.FC = () => {
           </div>
         </div>
         <div className="mt-3 flex items-center gap-2 rounded-xl border border-infamous-border bg-infamous-panel px-3 py-2">
-          <Search size={16} className="text-infamous-muted" />
+          <Search aria-hidden="true" size={16} className="text-infamous-muted" />
+          <label htmlFor="messages-search" className="sr-only">Search messages or load numbers</label>
           <input
+            id="messages-search"
             type="text"
             placeholder="Search messages or load numbers..."
             value={searchQuery}
@@ -221,6 +228,7 @@ const MessagesPage: React.FC = () => {
           <button
             key={thread.id}
             onClick={() => setActiveThread(thread)}
+            aria-label={`Open conversation with ${thread.name}${thread.loadRef ? ` for load ${thread.loadRef}` : ''}`}
             className="flex w-full items-center gap-3 px-5 py-4 text-left transition hover:bg-infamous-card/50"
           >
             <div className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold text-[#F5E8E8] ${
@@ -244,7 +252,7 @@ const MessagesPage: React.FC = () => {
               <div className="flex items-center gap-2 mt-0.5">
                 {thread.loadRef && (
                   <span className="flex items-center gap-1 text-[10px] text-infamous-red-light">
-                    <Truck size={10} /> {thread.loadRef}
+                    <Truck aria-hidden="true" size={10} /> {thread.loadRef}
                   </span>
                 )}
                 <span className="text-xs text-infamous-muted">{thread.role}</span>
