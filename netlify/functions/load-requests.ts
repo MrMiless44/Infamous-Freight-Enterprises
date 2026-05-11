@@ -1,4 +1,5 @@
 import { getDatabase } from '@netlify/database';
+import type { Config } from '@netlify/functions';
 
 const MAX_LIST = 50;
 
@@ -196,4 +197,8 @@ export default async (req: Request) => {
   `;
 
   return json(201, { request: { ...record, createdAt: saved.created_at } });
+};
+
+export const config: Config = {
+  path: ['/api/load-requests', '/api/load-requests/:id'],
 };
