@@ -55,7 +55,8 @@
     "netlify:production:readiness": "bash scripts/netlify-production-readiness.sh",
     "production:secrets:setup": "bash scripts/setup-production-secrets.sh",
     "production:secrets:dry-run": "DRY_RUN=true bash scripts/setup-production-secrets.sh",
-    "check:prisma-versions": "node scripts/check-prisma-version-alignment.js"
+    "check:prisma-versions": "node scripts/check-prisma-version-alignment.js",
+    "env:check:frontend": "bash scripts/check-client-env-safety.sh"
   },
   "devDependencies": {
     "@netlify/edge-functions": "^3.0.6",
