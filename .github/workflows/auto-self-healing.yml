@@ -50,7 +50,7 @@ jobs:
         id: probe
         shell: bash
         run: |
-          set -uo pipefail
+          set -euo pipefail
 
           APP_URL="https://infamous-freight.fly.dev"
           API_URL="https://api.infamousfreight.com"
@@ -139,7 +139,7 @@ jobs:
       - name: Verify health after repair
         shell: bash
         run: |
-          set -uo pipefail
+          set -euo pipefail
 
           APP_URL="https://infamous-freight.fly.dev"
           FAILED=0
