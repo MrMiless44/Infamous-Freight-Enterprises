@@ -131,6 +131,29 @@ install_docker() {
   return 1
 }
 
+install_shellcheck() {
+  if command -v shellcheck >/dev/null 2>&1 || [[ -x "${TOOLS_DIR}/shellcheck" ]]; then
+    echo "shellcheck already installed"
+    return
+  fi
+
+  if [[ "$(id -u)" -eq 0 ]]; then
+    apt-get update
+    apt-get install -y shellcheck
+    return
+  fi
+
+  if command -v sudo >/dev/null 2>&1; then
+    sudo apt-get update
+    sudo apt-get install -y shellcheck
+    return
+  fi
+
+  echo "shellcheck requires root privileges to install. Re-run with sudo or as root:" >&2
+  echo "  sudo apt-get update && sudo apt-get install -y shellcheck" >&2
+  return 1
+}
+
 
 install_flyctl
 install_supabase
@@ -139,6 +162,7 @@ install_github_cli
 install_netlify
 install_jq
 install_docker
+install_shellcheck
 
 echo "Required CLIs are available in ${TOOLS_DIR}."
 echo "Add to PATH: export PATH=\"${TOOLS_DIR}:\$PATH\""

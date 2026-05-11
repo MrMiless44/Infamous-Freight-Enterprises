@@ -9,6 +9,7 @@ strategy = "rolling"
 wait_timeout = "10m0s"
 
 [processes]
+api = "node apps/api/dist/src/server.js"
 app = "node apps/api/dist/src/server.js"
 web = "node apps/api/dist/src/server.js"
 
@@ -23,7 +24,7 @@ auto_stop_machines = false
 force_https = true
 internal_port = 3000
 min_machines_running = 1
-processes = [ "web" ]
+processes = [ "api", "web" ]
 
   [[http_service.checks]]
   grace_period = "1m30s"
