@@ -95,6 +95,7 @@
     }
   },
   "dependencies": {
-    "@netlify/database": "^1.0.0"
+    "@netlify/database": "^1.0.0",
+    "openai": "^6.37.0"
   }
 }
