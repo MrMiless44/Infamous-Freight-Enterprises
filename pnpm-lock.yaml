@@ -4,13 +4,16 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@hono/node-server': 1.19.13
+
 importers:
 
   .:
     dependencies:
       '@netlify/database':
         specifier: ^1.0.0
-        version: 1.0.0(@electric-sql/pglite@0.4.1)(mysql2@3.15.3)(postgres@3.4.7)
+        version: 1.0.0(mysql2@3.15.3)(postgres@3.4.7)
       netlify-build-plugin-pagewatch:
         specifier: ^1.0.2
         version: 1.0.2
@@ -809,8 +812,8 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.9.0
 
-  '@hono/node-server@1.19.11':
-    resolution: {integrity: sha512-dr8/3zEaB+p0D2n/IUrlPF1HZm586qgJNXK1a9fhg/PzdtkK7Ksd5l312tJX2yBuALqDYBlG20QEbayqPyxn+g==}
+  '@hono/node-server@1.19.13':
+    resolution: {integrity: sha512-TsQLe4i2gvoTtrHje625ngThGBySOgSK3Xo2XRYOdqGN1teR8+I7vchQC46uLJi8OF62YTYA3AhSpumtkhsaKQ==}
     engines: {node: '>=18.14.1'}
     peerDependencies:
       hono: ^4
@@ -4959,7 +4962,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@hono/node-server@1.19.11(hono@4.12.18)':
+  '@hono/node-server@1.19.13(hono@4.12.18)':
     dependencies:
       hono: 4.12.18
 
@@ -5257,12 +5260,12 @@ snapshots:
 
   '@neondatabase/serverless@1.1.0': {}
 
-  '@netlify/database@1.0.0(@electric-sql/pglite@0.4.1)(mysql2@3.15.3)(postgres@3.4.7)':
+  '@netlify/database@1.0.0(mysql2@3.15.3)(postgres@3.4.7)':
     dependencies:
       '@neondatabase/serverless': 1.1.0
       '@netlify/runtime-utils': 2.3.0
       pg: 8.20.0
-      waddler: 0.1.1(@electric-sql/pglite@0.4.1)(@neondatabase/serverless@1.1.0)(mysql2@3.15.3)(pg@8.20.0)(postgres@3.4.7)
+      waddler: 0.1.1(@neondatabase/serverless@1.1.0)(mysql2@3.15.3)(pg@8.20.0)(postgres@3.4.7)
       ws: 8.20.0
     transitivePeerDependencies:
       - '@clickhouse/client'
@@ -5569,7 +5572,7 @@ snapshots:
       '@electric-sql/pglite': 0.4.1
       '@electric-sql/pglite-socket': 0.1.1(@electric-sql/pglite@0.4.1)
       '@electric-sql/pglite-tools': 0.3.1(@electric-sql/pglite@0.4.1)
-      '@hono/node-server': 1.19.11(hono@4.12.18)
+      '@hono/node-server': 1.19.13(hono@4.12.18)
       '@prisma/get-platform': 7.2.0
       '@prisma/query-plan-executor': 7.2.0
       '@prisma/streams-local': 0.1.2
@@ -8827,9 +8830,8 @@ snapshots:
     dependencies:
       xml-name-validator: 5.0.0
 
-  waddler@0.1.1(@electric-sql/pglite@0.4.1)(@neondatabase/serverless@1.1.0)(mysql2@3.15.3)(pg@8.20.0)(postgres@3.4.7):
+  waddler@0.1.1(@neondatabase/serverless@1.1.0)(mysql2@3.15.3)(pg@8.20.0)(postgres@3.4.7):
     optionalDependencies:
-      '@electric-sql/pglite': 0.4.1
       '@neondatabase/serverless': 1.1.0
       mysql2: 3.15.3
       pg: 8.20.0

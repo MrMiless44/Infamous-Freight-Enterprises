@@ -2,7 +2,7 @@
   "name": "infamous-freight",
   "version": "1.0.0",
   "private": true,
-  "description": "Infamous Freight \u2014 The freight dispatch platform built by truckers, for truckers",
+  "description": "Infamous Freight — The freight dispatch platform built by truckers, for truckers",
   "packageManager": "pnpm@10.0.0",
   "repository": {
     "type": "git",
@@ -87,7 +87,10 @@
       "@sentry/cli",
       "esbuild",
       "prisma"
-    ]
+    ],
+    "overrides": {
+      "@hono/node-server": "1.19.13"
+    }
   },
   "dependencies": {
     "@netlify/database": "^1.0.0",
