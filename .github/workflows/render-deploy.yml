@@ -1,0 +1,93 @@
+name: Deploy API (Render)
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-api-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-secrets:
+    name: Check Render configuration
+    runs-on: ubuntu-latest
+    outputs:
+      has-deploy-hook: ${{ steps.check.outputs.has-deploy-hook }}
+    steps:
+      - name: Check secrets
+        id: check
+        run: |
+          if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ]; then
+            echo "has-deploy-hook=true" >> $GITHUB_OUTPUT
+          else
+            echo "has-deploy-hook=false" >> $GITHUB_OUTPUT
+            echo "⚠️ RENDER_DEPLOY_HOOK_URL not configured, skipping deployment"
+          fi
+
+  deploy:
+    name: Deploy API to Render
+    needs: check-secrets
+    if: needs.check-secrets.outputs.has-deploy-hook == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: production-render
+      url: https://infamous-freight-api.render.com
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Trigger Render deploy hook
+        id: deploy
+        run: |
+          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ]; then
+            echo "❌ RENDER_DEPLOY_HOOK_URL secret not configured"
+            exit 1
+          fi
+          curl -sS -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+          echo "deployment=success" >> $GITHUB_OUTPUT
+
+      - name: Wait for deployment
+        run: sleep 30
+
+      - name: Health check
+        id: health
+        run: |
+          MAX_RETRIES=10
+          RETRY_COUNT=0
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://infamous-freight-api.render.com/api/health)
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "✅ API is healthy (HTTP $HTTP_CODE)"
+              echo "health=ok" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            echo "⏳ Attempt $RETRY_COUNT/$MAX_RETRIES - HTTP $HTTP_CODE"
+            sleep 5
+          done
+          echo "⚠️  Health check failed after $MAX_RETRIES attempts"
+          echo "health=timeout" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Publish deployment summary
+        if: always()
+        run: |
+          DEPLOY_STATUS="${{ job.status }}"
+          HEALTH="${{ steps.health.outputs.health }}"
+          DEPLOY_EMOJI="✅"
+          if [ "$DEPLOY_STATUS" != "success" ]; then
+            DEPLOY_EMOJI="❌"
+          fi
+          {
+            echo "## 🚀 Deployment Summary"
+            echo ""
+            echo "| Item | Status |"
+            echo "|------|--------|"
+            echo "| **Deployment** | ${DEPLOY_EMOJI} ${DEPLOY_STATUS} |"
+            echo "| **Health Check** | ${HEALTH:-n/a} |"
+            echo "| **API URL** | https://infamous-freight-api.render.com |"
+            echo ""
+            echo "[View Render Dashboard](https://dashboard.render.com)"
+          } >> $GITHUB_STEP_SUMMARY
