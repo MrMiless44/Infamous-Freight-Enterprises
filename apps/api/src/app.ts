@@ -30,8 +30,9 @@ import { createStripeWebhookEventStore } from './stripe-webhook-events';
 import { createStripeOneTimePaymentStore } from './stripe-one-time-payments';
 import { createFreightWorkflowRouter } from './freight-workflow-routes';
 import { createAuditLogger, AuditLogger } from './audit-logger';
+import type { UserRole } from './rbac/rbac-rules';
 
-type Role = 'owner' | 'admin' | 'dispatcher';
+type Role = Extract<UserRole, 'owner' | 'admin' | 'dispatcher'>;
 type SubscriptionStatus = 'active' | 'trialing' | 'trial' | 'past_due' | 'unpaid' | 'canceled' | 'incomplete' | 'none';
 type AuthMode = 'header' | 'trusted';
 
@@ -79,7 +80,7 @@ type HealthResponse = {
   };
 };
 
-const ALLOWED_ROLES: Role[] = ['owner', 'admin', 'dispatcher'];
+const AUTHORIZED_API_ROLES: Role[] = ['owner', 'admin', 'dispatcher'];
 const BILLING_ROLES: Role[] = ['owner', 'admin'];
 const BILLING_PLANS: BillingPlan[] = ['starter', 'professional', 'enterprise'];
 const BILLING_INTERVALS: BillingInterval[] = ['month', 'year'];
@@ -173,7 +174,7 @@ function getStringClaim(...values: unknown[]): string | null {
 function getRoleClaim(...values: unknown[]): Role | null {
   const role = getStringClaim(...values);
 
-  return role && ALLOWED_ROLES.includes(role as Role) ? (role as Role) : null;
+  return role && AUTHORIZED_API_ROLES.includes(role as Role) ? (role as Role) : null;
 }
 
 function audienceMatches(claims: JwtClaims): boolean {
@@ -287,7 +288,7 @@ function getTrustedAuthContext(req: Request): TrustedAuthContext | null {
     userId.trim().length === 0 ||
     typeof tenantId !== 'string' ||
     tenantId.trim().length === 0 ||
-    !ALLOWED_ROLES.includes(role)
+    !AUTHORIZED_API_ROLES.includes(role)
   ) {
     return null;
   }
@@ -352,7 +353,7 @@ function requireRole(req: Request, res: Response, next: NextFunction) {
 
   const role = req.header('x-user-role');
 
-  if (!role || !ALLOWED_ROLES.includes(role as Role)) {
+  if (!role || !AUTHORIZED_API_ROLES.includes(role as Role)) {
     return res.status(403).json({
       error: 'forbidden',
       message: 'A valid x-user-role is required for this endpoint.',
