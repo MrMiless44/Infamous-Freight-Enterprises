@@ -45,4 +45,4 @@ processes = ["app"]
   cpu_kind = "performance"
   cpus = 1
   memory = "2gb"
-  size = "performance-cpu-1x"
+  size = "performance-1x"
