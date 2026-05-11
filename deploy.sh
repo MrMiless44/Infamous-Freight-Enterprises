@@ -217,7 +217,7 @@ deploy_fly() {
 
   local app_name
   if [[ "$env" == "production" ]]; then
-    app_name="infamous-freight"
+    app_name="infamous-freight-api"
   else
     app_name="infamous-freight-api-${env}"
   fi
