@@ -93,7 +93,6 @@
     }
   },
   "dependencies": {
-    "@netlify/database": "^1.0.0",
-    "netlify-build-plugin-pagewatch": "^1.0.2"
+    "@netlify/database": "^1.0.0"
   }
 }
