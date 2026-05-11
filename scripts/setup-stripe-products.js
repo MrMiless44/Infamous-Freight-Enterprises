@@ -16,6 +16,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 });
 
 const expectedStripeAccountId = process.env.STRIPE_ACCOUNT_ID?.trim();
+const stripeAccountIdPattern = /^acct_[A-Za-z0-9]+$/;
 
 const PRODUCTS = {
   starter: {
@@ -162,7 +163,7 @@ async function setupWebhook() {
   console.log('  ℹ️  Manual step required in Stripe Dashboard:');
   console.log('     https://dashboard.stripe.com/webhooks');
   console.log('');
-  console.log('  Add endpoint: https://api.infamousfreight.com/stripe/webhook');
+  console.log('  Add endpoint: https://api.infamousfreight.com/api/billing/webhook');
   console.log('  Select events:');
   console.log('    - checkout.session.completed');
   console.log('    - invoice.paid');
@@ -188,10 +189,16 @@ async function setupCustomerPortal() {
 
 async function main() {
   try {
+    if (expectedStripeAccountId && !stripeAccountIdPattern.test(expectedStripeAccountId)) {
+      throw new Error(`STRIPE_ACCOUNT_ID is malformed: ${expectedStripeAccountId}`);
+    }
+
     // Verify Stripe key
     const account = await stripe.accounts.retrieve();
     if (expectedStripeAccountId && account.id !== expectedStripeAccountId) {
-      throw new Error('STRIPE_SECRET_KEY is connected to a different Stripe account than STRIPE_ACCOUNT_ID');
+      throw new Error(
+        `Stripe account mismatch: STRIPE_SECRET_KEY resolved to ${account.id}, but STRIPE_ACCOUNT_ID is ${expectedStripeAccountId}`,
+      );
     }
 
     const accountLabel = account.settings?.dashboard?.display_name || account.id;
