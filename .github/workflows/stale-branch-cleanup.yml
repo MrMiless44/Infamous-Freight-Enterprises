@@ -15,7 +15,7 @@ env:
   # Cleanup trigger: 2026-04-30T00:00:00Z
   # Delete only automation-generated branches. Keep product/human branches such as
   # main, develop, feat/*, fix/*, docs/*, chore/*, billing/*, update-toolchain, etc.
-  STALE_BRANCH_REGEX: '^(codex/|copilot/|agent-|claude/|coderabbitai/|github-advanced-security/|conflict_)'
+  STALE_BRANCH_REGEX: '^(codex/|copilot/|agent-|claude/|chatgpt/|coderabbitai/|github-advanced-security/|conflict_)'
 
 jobs:
   cleanup:
@@ -58,7 +58,7 @@ jobs:
             branch="${remote_ref#origin/}"
 
             case "$branch" in
-              main|develop|release/*|feat/*|fix/*|docs/*|chore/*|billing/*|update-toolchain|local-infra-smoke|infamous-reliability-agents|vercel/*)
+              main|develop|release/*|feat/*|fix/*|docs/*|chore/*|billing/*|update-toolchain|local-infra-smoke|infamous-reliability-agents|vercel/*|production|production-launch|preview|phase1b|dependabot/*)
                 echo "skip protected/human branch: $branch"
                 skipped=$((skipped + 1))
                 continue
