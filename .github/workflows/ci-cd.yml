@@ -161,6 +161,10 @@ jobs:
               echo "::error::Fly deploy failed after $max_attempts attempts."
               exit 1
             fi
+            echo "Deploy attempt $attempt failed. Releasing stale machine leases before retry..."
+            flyctl machines list --app infamous-freight --json 2>/dev/null \
+              | jq -r '.[].id' \
+              | xargs -I{} sh -c 'flyctl machine release-lease {} --app infamous-freight 2>/dev/null || true'
             sleep $((attempt * 30))
             attempt=$((attempt + 1))
           done
