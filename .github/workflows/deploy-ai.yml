@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: deploy-ai-${{ github.workflow }}-${{ github.ref }}
+  group: deploy-ai-${{ github.ref }}
   cancel-in-progress: true
 
 env:
