@@ -19,13 +19,13 @@ app = "node apps/api/dist/src/server.js"
 [env]
 HOST = "0.0.0.0"
 NODE_ENV = "production"
-PORT = "8080"
+PORT = "3000"
 
 [http_service]
 auto_start_machines = true
 auto_stop_machines = false
 force_https = true
-internal_port = 8080
+internal_port = 3_000
 min_machines_running = 1
 processes = [ "app" ]
 
@@ -42,8 +42,8 @@ processes = [ "app" ]
   type = "requests"
 
 [[vm]]
-  cpu_kind = 'performance'
+  cpu_kind = "performance"
   cpus = 1
-  memory_mb = 2048
-  memory = '2gb'
-  size = 'performance-cpu-1x'
+  memory = "2gb"
+  memory_mb = 2_048
+  size = "performance-cpu-1x"
