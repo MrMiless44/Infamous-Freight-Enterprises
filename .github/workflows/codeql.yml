@@ -15,6 +15,7 @@
 #   "CodeQL analyses from advanced configurations cannot be processed when
 #    the default setup is enabled."
 # To fix: Settings → Code security → Code scanning → Default setup → Disable.
+# See: https://docs.github.com/en/code-security/code-scanning/troubleshooting-code-scanning/advanced-setup-is-blocked
 #
 name: "CodeQL Advanced"
 

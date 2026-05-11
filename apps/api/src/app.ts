@@ -1143,7 +1143,7 @@ export function createApp() {
           ? allowedOrigins
           : allowedOrigins.length
             ? allowedOrigins
-            : /^https?:\/\/localhost(:\d+)?$/,
+            : /^https?:\/\/localhost(:\d+)?$/, // HTTP is intentional: Vite and most dev servers use plain HTTP on localhost
       credentials: true,
     }),
   );
