@@ -146,6 +146,25 @@ APP_NAME=infamous-freight bash scripts/fly-reconcile-single-image.sh
 
 The script prints the number of machines per image and exits with status 1 (no changes) if multiple images are found, including the exact command needed to enable pruning.
 
+
+**If Fly warns that your app is running multiple images:**
+
+When you see:
+
+```
+Your app is currently running multiple images.
+```
+
+run a dry run first, then prune to the newest image only:
+
+```bash
+APP_NAME=infamous-freight bash scripts/fly-reconcile-single-image.sh
+PRUNE_OLD_IMAGES=true APP_NAME=infamous-freight KEEP_IMAGE=<newest-image-from-dry-run> bash scripts/fly-reconcile-single-image.sh
+```
+
+For the sample distribution below, keep `infamous-freight:deployment-01KRA9YB5HK4TFJH0XXNAFPRZB` because it has the newest deployment id and already runs 2 machines; prune the two older one-machine images and the older two-machine image only after verifying traffic and health checks.
+
+
 **Prune machines on old images:**
 
 ```bash
