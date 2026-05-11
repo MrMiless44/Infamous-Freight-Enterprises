@@ -1,7 +1,7 @@
 import type { Context, Config } from '@netlify/edge-functions';
 
 const SITE_URL = 'https://www.infamousfreight.com';
-const OG_IMAGE = `${SITE_URL}/.netlify/images?url=/og-image.svg&w=1200&h=630&fit=cover&fm=png`;
+const OG_IMAGE = `${SITE_URL}/og-image.png`;
 const BRAND_NAME = 'Infamous Freight';
 const OG_IMAGE_ALT = 'Infamous Freight AI Freight Command Center';
 
@@ -238,6 +238,12 @@ function escapeHtml(str: string): string {
     .replace(/>/g, '&gt;');
 }
 
+function stripSeoMeta(html: string): string {
+  return html
+    .replace(/\s*<meta\s+property="og:[^"]+"\s+content="[^"]*"\s*\/?>/g, '')
+    .replace(/\s*<meta\s+name="twitter:[^"]+"\s+content="[^"]*"\s*\/?>/g, '');
+}
+
 function buildBreadcrumb(pathname: string): object {
   const items: { name: string; url: string }[] = [
     { name: 'Home', url: SITE_URL + '/' },
@@ -447,6 +453,8 @@ export default async (req: Request, context: Context) => {
   );
 
   const ogType = pathname.startsWith('/resources/') && pathname !== '/resources' ? 'article' : 'website';
+
+  html = stripSeoMeta(html);
 
   const injected = `
     <meta property="og:type" content="${ogType}" />
