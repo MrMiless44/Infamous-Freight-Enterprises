@@ -46,6 +46,9 @@ async function register(req: Request) {
   }
   if (!isEmail(email)) return json(400, { error: 'invalid_email' });
   if (password.length < 8) return json(400, { error: 'password_too_short', message: 'Password must be at least 8 characters.' });
+  if (!/[A-Z]/.test(password)) return json(400, { error: 'password_weak', message: 'Password must contain at least one uppercase letter.' });
+  if (!/[a-z]/.test(password)) return json(400, { error: 'password_weak', message: 'Password must contain at least one lowercase letter.' });
+  if (!/\d/.test(password)) return json(400, { error: 'password_weak', message: 'Password must contain at least one number.' });
   if (!ALLOWED_ROLES.has(role)) return json(400, { error: 'invalid_role' });
 
   const db = getDatabase();

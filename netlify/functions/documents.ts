@@ -88,11 +88,12 @@ async function downloadDocument(docId: string) {
     const data = await store.get(doc.blob_key as string, { type: 'arrayBuffer' });
     if (!data) return json(404, { error: 'file_not_found', message: 'File data no longer available.' });
 
+    const safeName = (doc.file_name as string).replace(/["\\\r\n]/g, '_');
     return new Response(data, {
       status: 200,
       headers: {
         'content-type': (doc.mime_type as string) || 'application/octet-stream',
-        'content-disposition': `attachment; filename="${doc.file_name}"`,
+        'content-disposition': `attachment; filename="${safeName}"`,
         'cache-control': 'private, max-age=3600',
       },
     });
