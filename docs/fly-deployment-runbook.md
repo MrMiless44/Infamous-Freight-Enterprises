@@ -12,7 +12,7 @@ fly status
 Optional preflight (recommended before `fly deploy`):
 
 ```bash
-scripts/fly-preflight.sh infamous-freight https://infamous-freight.fly.dev https://api.infamousfreight.com
+scripts/fly-preflight.sh infamous-freight-api https://infamous-freight-api.fly.dev https://api.infamousfreight.com
 ```
 
 ## CI / GitHub Actions token setup
@@ -37,15 +37,15 @@ Add the token to GitHub repository secrets as:
 
 ```bash
 fly auth whoami
-fly status --app infamous-freight
-curl -fsS https://infamous-freight.fly.dev/api/health
+fly status --app infamous-freight-api
+curl -fsS https://infamous-freight-api.fly.dev/api/health
 curl -fsS https://api.infamousfreight.com/api/health
 ```
 
 CI uses the same sequence via:
 
 ```bash
-scripts/fly-post-deploy-check.sh infamous-freight https://infamous-freight.fly.dev https://api.infamousfreight.com
+scripts/fly-post-deploy-check.sh infamous-freight-api https://infamous-freight-api.fly.dev https://api.infamousfreight.com
 ```
 
 Do **not** share `FLY_API_TOKEN` in logs or chat.
@@ -57,15 +57,15 @@ Use Fly’s MPG commands from your local terminal while authenticated:
 ```bash
 fly mpg connect
 fly mpg proxy
-fly mpg attach kyzl60xmlk6opj9g --app infamous-freight
+fly mpg attach kyzl60xmlk6opj9g --app infamous-freight-api
 ```
 
 After attach, verify runtime config and release status:
 
 ```bash
-fly secrets list --app infamous-freight
-fly status --app infamous-freight
-fly checks list --app infamous-freight
+fly secrets list --app infamous-freight-api
+fly status --app infamous-freight-api
+fly checks list --app infamous-freight-api
 ```
 
 ### Database credential safety
@@ -113,13 +113,13 @@ fly tokens list
 fly tokens revoke <TOKEN_ID>
 
 # 3) create replacement deploy token (example: 30 days)
-fly tokens create deploy -a infamous-freight -x 720h
+fly tokens create deploy -a infamous-freight-api -x 720h
 
 # 4) rotate app secret (paste new value interactively or via CI secret manager)
-fly secrets set DATABASE_URL='<new_database_url>' --app infamous-freight
+fly secrets set DATABASE_URL='<new_database_url>' --app infamous-freight-api
 
 # 5) verify release health
-scripts/fly-post-deploy-check.sh infamous-freight https://infamous-freight.fly.dev https://api.infamousfreight.com
+scripts/fly-post-deploy-check.sh infamous-freight-api https://infamous-freight-api.fly.dev https://api.infamousfreight.com
 ```
 
 
@@ -132,7 +132,7 @@ When a Fly app has machines running different image versions (for example after 
 | Variable | Default | Purpose |
 |---|---|---|
 | `FLY_API_TOKEN` | — | Must be set; the script validates this before making API calls. |
-| `APP_NAME` | `infamous-freight` | Target Fly app. |
+| `APP_NAME` | `infamous-freight-api` | Target Fly app. |
 | `KEEP_IMAGE` | _(newest image)_ | Override the image to keep. |
 | `PRUNE_OLD_IMAGES` | `false` | Set to `true` to destroy machines not on the target image. |
 | `PRUNE_MAX_COUNT` | `3` | Safety ceiling: refuses to destroy more than this many machines in one run. |
@@ -141,7 +141,7 @@ When a Fly app has machines running different image versions (for example after 
 **Inspect image distribution (dry run — no changes):**
 
 ```bash
-APP_NAME=infamous-freight bash scripts/fly-reconcile-single-image.sh
+APP_NAME=infamous-freight-api bash scripts/fly-reconcile-single-image.sh
 ```
 
 The script prints the number of machines per image and exits with status 1 (no changes) if multiple images are found, including the exact command needed to enable pruning.
@@ -158,17 +158,17 @@ Your app is currently running multiple images.
 run a dry run first, then prune to the newest image only:
 
 ```bash
-APP_NAME=infamous-freight bash scripts/fly-reconcile-single-image.sh
-PRUNE_OLD_IMAGES=true APP_NAME=infamous-freight KEEP_IMAGE=<newest-image-from-dry-run> bash scripts/fly-reconcile-single-image.sh
+APP_NAME=infamous-freight-api bash scripts/fly-reconcile-single-image.sh
+PRUNE_OLD_IMAGES=true APP_NAME=infamous-freight-api KEEP_IMAGE=<newest-image-from-dry-run> bash scripts/fly-reconcile-single-image.sh
 ```
 
-For the sample distribution below, keep `infamous-freight:deployment-01KRA9YB5HK4TFJH0XXNAFPRZB` because it has the newest deployment id and already runs 2 machines; prune the two older one-machine images and the older two-machine image only after verifying traffic and health checks.
+For a sample distribution, keep the newest `infamous-freight-api:<deployment-id>` image that already has healthy machines; prune older images only after verifying traffic and health checks.
 
 
 **Prune machines on old images:**
 
 ```bash
-PRUNE_OLD_IMAGES=true APP_NAME=infamous-freight KEEP_IMAGE=<target-image> bash scripts/fly-reconcile-single-image.sh
+PRUNE_OLD_IMAGES=true APP_NAME=infamous-freight-api KEEP_IMAGE=<target-image> bash scripts/fly-reconcile-single-image.sh
 ```
 
 Replace `<target-image>` with the image digest printed by the dry-run step. The script destroys each stale-image machine with `flyctl machine destroy --force`.
@@ -176,7 +176,7 @@ Replace `<target-image>` with the image digest printed by the dry-run step. The 
 **Override the prune safety ceiling (use with care):**
 
 ```bash
-PRUNE_OLD_IMAGES=true FORCE_PRUNE=true APP_NAME=infamous-freight KEEP_IMAGE=<target-image> bash scripts/fly-reconcile-single-image.sh
+PRUNE_OLD_IMAGES=true FORCE_PRUNE=true APP_NAME=infamous-freight-api KEEP_IMAGE=<target-image> bash scripts/fly-reconcile-single-image.sh
 ```
 
 Only use `FORCE_PRUNE=true` after verifying the machine/image mapping manually. The default ceiling of 3 exists to prevent mass destruction during operator error.
@@ -195,13 +195,13 @@ A timeout such as `timeout reached waiting for health checks to pass` means Fly 
 Run these commands from repo root and keep the app explicit:
 
 ```bash
-fly status -a infamous-freight --all
-fly checks list -a infamous-freight
-fly machine status <machine-id> -a infamous-freight
-fly logs -a infamous-freight --machine <machine-id> --no-tail
+fly status -a infamous-freight-api --all
+fly checks list -a infamous-freight-api
+fly machine status <machine-id> -a infamous-freight-api
+fly logs -a infamous-freight-api --machine <machine-id> --no-tail
 
 # one-shot helper:
-scripts/fly-diagnose-health-timeout.sh infamous-freight <machine-id>
+scripts/fly-diagnose-health-timeout.sh infamous-freight-api <machine-id>
 ```
 
 Common root causes:
@@ -213,12 +213,12 @@ Common root causes:
 Secrets rollout (deterministic sequence):
 
 ```bash
-scripts/fly-secrets-rollout.sh infamous-freight
+scripts/fly-secrets-rollout.sh infamous-freight-api
 
 # Equivalent manual steps:
-# fly config save -a infamous-freight --yes
-# fly secrets sync -a infamous-freight --stage
-# fly secrets deploy -a infamous-freight
+# fly config save -a infamous-freight-api --yes
+# fly secrets sync -a infamous-freight-api --stage
+# fly secrets deploy -a infamous-freight-api
 ```
 
 Notes:
