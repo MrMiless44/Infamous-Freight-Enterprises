@@ -1,0 +1,80 @@
+name: Uptime Check
+
+on:
+  schedule:
+    # Run every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: uptime-check-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  uptime:
+    name: Check production uptime
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Check production endpoints
+        shell: bash
+        run: |
+          set -uo pipefail
+
+          TIMESTAMP="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          failed=0
+
+          declare -a checks=(
+            "Frontend (www)|https://www.infamousfreight.com|200"
+            "Bare-domain → www redirect|https://infamousfreight.com|200"
+            "API live (direct)|https://infamous-freight.fly.dev/api/health/live|200"
+            "API ready (direct)|https://infamous-freight.fly.dev/api/health/ready|200"
+            "API live (proxied via Netlify)|https://www.infamousfreight.com/api/health/live|200"
+          )
+          # Note: --location is used, so redirect checks verify the final 200 response.
+
+          {
+            echo "## Uptime Check — ${TIMESTAMP}"
+            echo ""
+            echo "| Check | URL | Expected | Actual | Final URL | Result |"
+            echo "|---|---|---:|---:|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          for check in "${checks[@]}"; do
+            IFS='|' read -r name url expected <<< "$check"
+            output=$(curl --silent --location --retry 3 --retry-delay 3 --retry-connrefused \
+              --max-time 10 --max-redirs 5 \
+              --output /dev/null \
+              --write-out '%{http_code}|%{url_effective}' \
+              "$url" 2>/dev/null || true)
+            actual="${output%%|*}"
+            final_url="${output#*|}"
+            actual="${actual:-000}"
+            final_url="${final_url:-n/a}"
+
+            if [[ "$actual" == "$expected" ]]; then
+              result="✅ PASS"
+            else
+              result="❌ FAIL"
+              failed=1
+              echo "::error::Uptime check failed for ${name}: expected HTTP ${expected}, got ${actual} (${url})"
+            fi
+
+            row="| ${name} | \`${url}\` | ${expected} | ${actual} | \`${final_url}\` | ${result} |"
+            echo "$row" >> "$GITHUB_STEP_SUMMARY"
+            echo "$row"
+          done
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [[ "$failed" -eq 0 ]]; then
+            echo "**Overall: ✅ PASS**" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "**Overall: ❌ FAIL** — one or more production endpoints are unreachable or returning unexpected status codes." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          exit "$failed"

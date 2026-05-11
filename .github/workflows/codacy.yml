@@ -22,6 +22,10 @@ on:
   schedule:
     - cron: '33 15 * * 3'
 
+concurrency:
+  group: codacy-security-scan-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
