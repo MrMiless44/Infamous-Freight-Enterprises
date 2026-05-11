@@ -91,8 +91,8 @@ const InvoicesPage: React.FC = () => {
           <h1 className="text-2xl font-bold">Invoices</h1>
           <p className="text-sm text-[#B88989]/70 mt-0.5">Manage billing and track payments</p>
         </div>
-        <button className="btn-primary flex items-center gap-2">
-          <FileText size={16} /> Create Invoice
+        <button type="button" className="btn-primary flex items-center gap-2">
+          <FileText aria-hidden="true" size={16} /> Create Invoice
         </button>
       </div>
 
@@ -105,7 +105,7 @@ const InvoicesPage: React.FC = () => {
           { label: 'Avg Days to Pay', value: '18 days', icon: <TrendingUp size={18} />, color: 'text-blue-400' },
         ].map((stat, i) => (
           <div key={i} className="card flex items-center gap-3">
-            <span className={stat.color}>{stat.icon}</span>
+            <span className={stat.color} aria-hidden="true">{stat.icon}</span>
             <div>
               <p className="text-lg font-bold">{stat.value}</p>
               <p className="text-xs text-[#B88989]/70">{stat.label}</p>
@@ -123,7 +123,7 @@ const InvoicesPage: React.FC = () => {
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-infamous-orange/15 text-infamous-orange">
-                <FileCheck2 size={20} />
+                <FileCheck2 aria-hidden="true" size={20} />
               </span>
               <div>
                 <h2 className="text-base font-bold">PODs ready to invoice</h2>
@@ -133,7 +133,7 @@ const InvoicesPage: React.FC = () => {
               </div>
             </div>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-infamous-orange/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-infamous-orange">
-              <Sparkles size={12} /> OCR verified
+              <Sparkles aria-hidden="true" size={12} /> OCR verified
             </span>
           </div>
           <ul className="space-y-2">
@@ -169,8 +169,10 @@ const InvoicesPage: React.FC = () => {
       <div className="flex gap-2">
         {['all', 'draft', 'sent', 'overdue', 'paid'].map((f) => (
           <button
+            type="button"
             key={f}
             onClick={() => setFilter(f)}
+            aria-pressed={filter === f}
             className={`px-4 py-2 rounded-xl text-sm font-medium capitalize transition-all ${
               filter === f ? 'bg-infamous-orange text-[#F5E8E8]' : 'bg-infamous-card text-[#B88989] hover:text-[#F5E8E8] border border-infamous-border'
             }`}
@@ -220,12 +222,12 @@ const InvoicesPage: React.FC = () => {
                   </td>
                   <td className="table-cell">
                     <div className="flex gap-1">
-                      <button className="p-1.5 rounded-lg hover:bg-infamous-border text-[#B88989]/70 hover:text-[#F5E8E8] transition-colors">
-                        <Download size={14} />
+                      <button type="button" aria-label={`Download invoice ${inv.number}`} className="p-1.5 rounded-lg hover:bg-infamous-border text-[#B88989]/70 hover:text-[#F5E8E8] transition-colors">
+                        <Download aria-hidden="true" size={14} />
                       </button>
                       {inv.status === 'draft' && (
-                        <button className="p-1.5 rounded-lg hover:bg-infamous-border text-[#B88989]/70 hover:text-infamous-orange transition-colors">
-                          <Send size={14} />
+                        <button type="button" aria-label={`Send invoice ${inv.number}`} className="p-1.5 rounded-lg hover:bg-infamous-border text-[#B88989]/70 hover:text-infamous-orange transition-colors">
+                          <Send aria-hidden="true" size={14} />
                         </button>
                       )}
                     </div>

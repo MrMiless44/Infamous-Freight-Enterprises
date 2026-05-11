@@ -85,13 +85,13 @@ const LoadAuction: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Gavel size={24} className="text-infamous-orange" />
+            <Gavel aria-hidden="true" size={24} className="text-infamous-orange" />
             Load Auctions
           </h1>
           <p className="text-sm text-[#B88989]/70 mt-0.5">Carriers underbid the broker rate — lowest bid takes the load and pockets the difference.</p>
         </div>
         <div className="badge-orange flex items-center gap-1">
-          <Shield size={12} /> {auctions.length} Active Auctions
+          <Shield aria-hidden="true" size={12} /> {auctions.length} Active Auctions
         </div>
       </div>
 
@@ -107,7 +107,7 @@ const LoadAuction: React.FC = () => {
                   <span className="badge-blue text-[10px]">{auction.equipment}</span>
                 </div>
                 <div className={`flex items-center gap-1 ${auction.timeLeft < 300 ? 'text-red-400' : 'text-[#B88989]'}`}>
-                  <Clock size={12} />
+                  <Clock aria-hidden="true" size={12} />
                   <span className="text-xs font-mono">{formatTime(auction.timeLeft)}</span>
                 </div>
               </div>
@@ -118,7 +118,7 @@ const LoadAuction: React.FC = () => {
                   <p className="text-lg font-semibold">{auction.origin}</p>
                   <p className="text-xs text-[#B88989]/70">{auction.distance} mi · {auction.weight.toLocaleString()} lbs</p>
                 </div>
-                <ArrowUp size={16} className="text-[#B88989]/60 rotate-90" />
+                <ArrowUp aria-hidden="true" size={16} className="text-[#B88989]/60 rotate-90" />
                 <div className="flex-1 text-right">
                   <p className="text-lg font-semibold">{auction.dest}</p>
                 </div>
@@ -143,7 +143,7 @@ const LoadAuction: React.FC = () => {
               {/* Bid History */}
               <div>
                 <p className="text-xs text-[#B88989]/70 mb-2 flex items-center gap-1">
-                  <Users size={10} /> {auction.bidCount} bids
+                  <Users aria-hidden="true" size={10} /> {auction.bidCount} bids
                 </p>
                 <div className="space-y-1 max-h-28 overflow-y-auto">
                   {auction.bids.map((bid) => (
@@ -162,21 +162,23 @@ const LoadAuction: React.FC = () => {
               {selectedAuction === auction.id ? (
                 <div className="flex gap-2">
                   <input
+                    id={`bid-amount-${auction.id}`}
                     type="number"
                     className="input-field flex-1"
                     placeholder={`Enter bid (max $${auction.brokerRate})`}
+                    aria-label={`Bid amount for auction ${auction.id}`}
                     value={bidAmount}
                     onChange={(e) => setBidAmount(e.target.value)}
                     autoFocus
                   />
-                  <button onClick={() => placeBid(auction.id)} className="btn-primary">
-                    <DollarSign size={14} /> Bid
+                  <button type="button" onClick={() => placeBid(auction.id)} className="btn-primary">
+                    <DollarSign aria-hidden="true" size={14} /> Bid
                   </button>
-                  <button onClick={() => setSelectedAuction(null)} className="btn-secondary">Cancel</button>
+                  <button type="button" onClick={() => setSelectedAuction(null)} className="btn-secondary">Cancel</button>
                 </div>
               ) : (
-                <button onClick={() => setSelectedAuction(auction.id)} className="w-full btn-primary flex items-center justify-center gap-2">
-                  <Gavel size={14} /> Place Bid
+                <button type="button" onClick={() => setSelectedAuction(auction.id)} className="w-full btn-primary flex items-center justify-center gap-2">
+                  <Gavel aria-hidden="true" size={14} /> Place Bid
                 </button>
               )}
             </div>
