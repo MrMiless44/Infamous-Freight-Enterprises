@@ -48,8 +48,8 @@ Expected result: the canonical `www` site returns HTTP 200, the apex domain redi
 Optional direct API origin checks:
 
 ```bash
-curl -i https://infamous-freight.fly.dev/health
-curl -i https://infamous-freight.fly.dev/api/health
+curl -i https://infamous-freight-api.fly.dev/health
+curl -i https://infamous-freight-api.fly.dev/api/health
 curl -i https://api.infamousfreight.com/health
 curl -i https://api.infamousfreight.com/api/health
 ```

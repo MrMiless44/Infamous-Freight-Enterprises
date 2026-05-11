@@ -29,7 +29,7 @@ Add these DNS records at your domain registrar:
 
 | Type | Name | Value | TTL |
 |------|------|-------|-----|
-| CNAME | `api` | `infamous-freight.fly.dev` | Auto |
+| CNAME | `api` | `infamous-freight-api.fly.dev` | Auto |
 
 This gives you:
 - **Web:** `https://www.infamousfreight.com`
@@ -66,7 +66,7 @@ Set `www.infamousfreight.com` as the primary domain so everything funnels to one
 
 Or via CLI:
 ```bash
-fly certs create api.infamousfreight.com --app infamous-freight
+fly certs create api.infamousfreight.com --app infamous-freight-api
 ```
 
 ---
@@ -177,5 +177,5 @@ Rule 2: www.infamousfreight.com/api/*
 - Add `http://localhost:5173` for local development
 
 ### "API 404 on custom domain"
-- Verify Fly.io cert is active: `fly certs show api.infamousfreight.com --app infamous-freight`
+- Verify Fly.io cert is active: `fly certs show api.infamousfreight.com --app infamous-freight-api`
 - Check DNS CNAME resolves: `dig api.infamousfreight.com +short`
