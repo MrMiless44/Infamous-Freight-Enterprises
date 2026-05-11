@@ -1,0 +1,205 @@
+name: Auto Self-Healing
+
+on:
+  schedule:
+    # Run every 6 hours to detect and repair production issues automatically.
+    - cron: '0 */6 * * *'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/auto-self-healing.yml'
+      - 'scripts/fly-runtime-repair.sh'
+  workflow_dispatch:
+    inputs:
+      force_repair:
+        description: 'Force a repair run even if health checks pass'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+      primary_region:
+        description: 'Fly.io region to keep one warm machine running'
+        required: false
+        default: 'dfw'
+        type: string
+      cors_origins:
+        description: 'Allowed production CORS origins'
+        required: false
+        default: 'https://www.infamousfreight.com,https://infamousfreight.com'
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: auto-self-healing
+  cancel-in-progress: true
+
+jobs:
+  # ===== HEALTH CHECK =====
+  health-check:
+    name: Probe production health
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      healthy: ${{ steps.probe.outputs.healthy }}
+    steps:
+      - name: Probe production endpoints
+        id: probe
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          APP_URL="https://infamous-freight.fly.dev"
+          API_URL="https://api.infamousfreight.com"
+          FAILED=0
+          TIMESTAMP="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+
+          check_endpoint() {
+            local name="$1" url="$2" expected="$3"
+            local output actual final_url result="PASS"
+
+            output=$(curl --silent --location \
+              --retry 3 --retry-delay 5 --retry-connrefused \
+              --max-time 20 --output /dev/null \
+              --write-out '%{http_code}|%{url_effective}' \
+              "$url" 2>/dev/null || echo "000|${url}")
+            actual="${output%%|*}"
+            final_url="${output#*|}"
+
+            if [[ "$actual" != "$expected" ]]; then
+              result="FAIL (got ${actual})"
+              FAILED=1
+            fi
+
+            echo "| ${name} | ${expected} | ${actual} | \`${final_url}\` | ${result} |" >> "${SUMMARY_FILE}"
+            echo "[health] ${name}: url=${url} expected=${expected} actual=${actual} result=${result}"
+          }
+
+          SUMMARY_FILE="${RUNNER_TEMP}/health-summary.md"
+          {
+            echo "## Auto Self-Healing — Health Check"
+            echo ""
+            echo "- Timestamp: ${TIMESTAMP}"
+            echo "- Triggered by: ${{ github.event_name }}"
+            echo ""
+            echo "| Check | Expected | Actual | Final URL | Result |"
+            echo "|---|---:|---:|---|---|"
+          } > "${SUMMARY_FILE}"
+
+          check_endpoint "Fly root health"   "${APP_URL}/health"           "200"
+          check_endpoint "Fly API health"    "${APP_URL}/api/health"       "200"
+          check_endpoint "Fly API live"      "${APP_URL}/api/health/live"  "200"
+          check_endpoint "Proxied API live"  "https://www.infamousfreight.com/api/health/live"  "200"
+
+          {
+            echo ""
+            if [[ "$FAILED" -eq 0 ]]; then
+              echo "**Overall: PASS ✅** — production is healthy."
+            else
+              echo "**Overall: FAIL ❌** — one or more endpoints are unhealthy. Repair job will run."
+            fi
+          } >> "${SUMMARY_FILE}"
+
+          cat "${SUMMARY_FILE}" >> "${GITHUB_STEP_SUMMARY}"
+
+          if [[ "$FAILED" -ne 0 ]]; then
+            echo "::warning::Production health check failed — queuing repair."
+          fi
+
+          echo "healthy=$([[ $FAILED -eq 0 ]] && echo true || echo false)" >> "${GITHUB_OUTPUT}"
+
+  # ===== REPAIR =====
+  repair:
+    name: Repair Fly runtime
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: health-check
+    if: >-
+      needs.health-check.outputs.healthy != 'true' ||
+      github.event.inputs.force_repair == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1 # master (2026-04-08)
+
+      - name: Run self-healing repair
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          APP_NAME: infamous-freight
+          PRIMARY_REGION: ${{ inputs.primary_region || 'dfw' }}
+          CORS_ORIGINS: ${{ inputs.cors_origins || 'https://www.infamousfreight.com,https://infamousfreight.com' }}
+        run: bash scripts/fly-runtime-repair.sh
+
+      - name: Verify health after repair
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          APP_URL="https://infamous-freight.fly.dev"
+          FAILED=0
+
+          for endpoint in "/health" "/api/health" "/api/health/live"; do
+            status=$(curl --silent --location --retry 5 --retry-delay 10 \
+              --max-time 30 --output /dev/null \
+              --write-out '%{http_code}' \
+              "${APP_URL}${endpoint}" 2>/dev/null || echo "000")
+            if [[ "$status" != "200" ]]; then
+              echo "::error::Post-repair health check failed for ${endpoint}: got ${status}"
+              FAILED=1
+            else
+              echo "[post-repair] ${endpoint}: ${status} ✅"
+            fi
+          done
+
+          {
+            echo ""
+            echo "## Auto Self-Healing — Post-Repair Verification"
+            echo ""
+            if [[ "$FAILED" -eq 0 ]]; then
+              echo "**Result: PASS ✅** — production is healthy after repair."
+            else
+              echo "**Result: FAIL ❌** — production is still unhealthy after repair. Manual intervention required."
+              echo ""
+              echo "See [fly-runtime-repair](https://github.com/${{ github.repository }}/actions/workflows/fly-runtime-repair.yml) and [ADMIN_RECOVERY_RUNBOOK](https://github.com/${{ github.repository }}/blob/main/docs/ADMIN_RECOVERY_RUNBOOK.md)."
+            fi
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+          exit "${FAILED}"
+
+  # ===== REPORT =====
+  report:
+    name: Report healing status
+    runs-on: ubuntu-latest
+    needs: [health-check, repair]
+    if: always()
+    steps:
+      - name: Summarize outcome
+        shell: bash
+        run: |
+          healthy="${{ needs.health-check.outputs.healthy }}"
+          repair_result="${{ needs.repair.result }}"
+
+          echo "## Auto Self-Healing — Final Status" >> "${GITHUB_STEP_SUMMARY}"
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+
+          if [[ "$healthy" == "true" && "$repair_result" == "skipped" ]]; then
+            echo "**Status: HEALTHY ✅** — no repair needed." >> "${GITHUB_STEP_SUMMARY}"
+            echo "::notice::Production is healthy. No repair required."
+          elif [[ "$repair_result" == "success" ]]; then
+            echo "**Status: HEALED ✅** — production was unhealthy and has been repaired." >> "${GITHUB_STEP_SUMMARY}"
+            echo "::notice::Production has been self-healed successfully."
+          elif [[ "$repair_result" == "failure" ]]; then
+            echo "**Status: REPAIR FAILED ❌** — automatic repair could not restore production health." >> "${GITHUB_STEP_SUMMARY}"
+            echo "::error::Auto self-healing failed. Manual intervention required. See ADMIN_RECOVERY_RUNBOOK.md."
+          elif [[ "$healthy" != "true" && "$repair_result" == "skipped" ]]; then
+            echo "**Status: UNHEALTHY ⚠️** — health check failed but repair was not triggered (check workflow conditions)." >> "${GITHUB_STEP_SUMMARY}"
+            echo "::warning::Health check failed but repair job was skipped."
+          else
+            echo "**Status: UNKNOWN** — check individual job results above." >> "${GITHUB_STEP_SUMMARY}"
+          fi

@@ -9,6 +9,14 @@
 # the `language` matrix defined below to confirm you have the correct set of
 # supported CodeQL languages.
 #
+# ******** PREREQUISITE ********
+# This advanced setup requires that GitHub's "Default setup" code scanning is
+# DISABLED for this repository. If both are enabled you will see:
+#   "CodeQL analyses from advanced configurations cannot be processed when
+#    the default setup is enabled."
+# To fix: Settings → Code security → Code scanning → Default setup → Disable.
+# See: https://docs.github.com/en/code-security/code-scanning/troubleshooting-code-scanning/advanced-setup-is-blocked
+#
 name: "CodeQL Advanced"
 
 on:
