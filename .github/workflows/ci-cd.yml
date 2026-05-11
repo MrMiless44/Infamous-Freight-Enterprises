@@ -164,7 +164,13 @@ jobs:
             echo "Deploy attempt $attempt failed. Releasing stale machine leases before retry..."
             flyctl machines list --app infamous-freight --json 2>/dev/null \
               | jq -r '.[].id' \
-              | xargs -I{} sh -c 'flyctl machine release-lease {} --app infamous-freight 2>/dev/null || true'
+              | while read -r machine_id; do
+                  if flyctl machine release-lease "$machine_id" --app infamous-freight 2>&1; then
+                    echo "Released lease for machine $machine_id"
+                  else
+                    echo "Could not release lease for machine $machine_id (may already be free)"
+                  fi
+                done
             sleep $((attempt * 30))
             attempt=$((attempt + 1))
           done
