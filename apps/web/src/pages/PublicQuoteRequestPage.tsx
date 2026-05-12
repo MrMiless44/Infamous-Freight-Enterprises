@@ -69,6 +69,7 @@ const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024;
 const ALLOWED_ATTACHMENT_EXTENSIONS = new Set(['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'txt']);
 const SUBMISSION_TIMEOUT_MS = 12_000;
 const GENERIC_SUBMISSION_ERROR = 'We could not submit the form. Please try again or contact dispatch directly.';
+const PRIMARY_TIMEOUT_ERROR = 'Dispatch intake timed out. Your details were not saved to tracking.';
 type SubmissionOutcome =
   | { channel: 'primary'; success: true; trackingNumber: string }
   | { channel: 'netlify'; success: true }
@@ -303,18 +304,26 @@ const PublicQuoteRequestPage: React.FC = () => {
           : undefined,
       };
 
-      const primarySubmission = withTimeout(
-        createPublicQuoteRequest(quotePayload),
-        SUBMISSION_TIMEOUT_MS,
-        'Dispatch intake timed out. Your details were not saved to tracking.'
-      )
+      const primaryAbortController = new AbortController();
+      const primaryTimeoutHandle = window.setTimeout(() => {
+        primaryAbortController.abort();
+      }, SUBMISSION_TIMEOUT_MS);
+
+      const primarySubmission = createPublicQuoteRequest(quotePayload, { signal: primaryAbortController.signal })
         .then(({ quote }) => {
           const outcome: SubmissionOutcome = { channel: 'primary', success: true, trackingNumber: quote.trackingNumber };
           return outcome;
         })
         .catch((error) => {
-          const outcome: SubmissionOutcome = { channel: 'primary', success: false, error };
+          const normalizedError =
+            error instanceof DOMException && error.name === 'AbortError'
+              ? new Error(PRIMARY_TIMEOUT_ERROR)
+              : error;
+          const outcome: SubmissionOutcome = { channel: 'primary', success: false, error: normalizedError };
           return outcome;
+        })
+        .finally(() => {
+          window.clearTimeout(primaryTimeoutHandle);
         });
 
       const netlifySubmission = withTimeout(
@@ -345,8 +354,10 @@ const PublicQuoteRequestPage: React.FC = () => {
       if (firstFinished.channel === 'netlify') netlifyResult = firstFinished;
 
       if (!firstFinished.success) {
-        if (!primaryResult) primaryResult = await primarySubmission;
-        if (!netlifyResult) netlifyResult = await netlifySubmission;
+        [primaryResult, netlifyResult] = await Promise.all([
+          primaryResult ?? primarySubmission,
+          netlifyResult ?? netlifySubmission,
+        ]);
 
         if (!primaryResult.success && !netlifyResult.success) {
           throw netlifyResult.error ?? primaryResult.error ?? new Error(GENERIC_SUBMISSION_ERROR);
@@ -365,8 +376,8 @@ const PublicQuoteRequestPage: React.FC = () => {
         estimateMid: estimate?.mid,
         estimateConfidence: estimate?.confidence,
         trackingNumber: quoteTrackingNumber,
-        savedToPrimaryApi: primaryResult?.success,
-        savedToNetlifyForms: netlifyResult?.success,
+        savedToPrimaryApi: primaryResult?.success ?? false,
+        savedToNetlifyForms: netlifyResult?.success ?? false,
       });
       setSubmitted(true);
     } catch (err) {

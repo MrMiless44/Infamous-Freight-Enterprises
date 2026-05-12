@@ -46,11 +46,15 @@ export type PublicShipment = {
   updatedAt: string;
 };
 
-export async function createPublicQuoteRequest(payload: PublicQuotePayload): Promise<PublicQuoteResponse> {
+export async function createPublicQuoteRequest(
+  payload: PublicQuotePayload,
+  options?: { signal?: AbortSignal }
+): Promise<PublicQuoteResponse> {
   const response = await fetch('/api/public/quote-requests', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
+    signal: options?.signal,
   });
 
   if (!response.ok) {
