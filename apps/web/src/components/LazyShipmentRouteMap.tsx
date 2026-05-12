@@ -1,9 +1,13 @@
 import { Suspense, lazy } from 'react';
 
-const ShipmentRouteMap = lazy(async () => {
+const loadShipmentRouteMap = async () => {
   const mod = await import('./ShipmentRouteMap');
   return { default: mod.ShipmentRouteMap };
-});
+};
+
+const ShipmentRouteMap = lazy(loadShipmentRouteMap);
+
+export const preloadShipmentRouteMap = () => void loadShipmentRouteMap();
 
 type LazyShipmentRouteMapProps = {
   origin: string;

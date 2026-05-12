@@ -16,7 +16,7 @@ import {
 import { demoShipments } from '@/data/mvpFreightData';
 import { trackPublicEvent } from '@/lib/analytics';
 import { getPublicShipment, PublicShipment } from '@/lib/publicFreightApi';
-import { LazyShipmentRouteMap } from '@/components/LazyShipmentRouteMap';
+import { LazyShipmentRouteMap, preloadShipmentRouteMap } from '@/components/LazyShipmentRouteMap';
 
 const TIMELINE_STEPS = [
   { key: 'quote_created', label: 'Quote Created' },
@@ -100,6 +100,10 @@ const ShipmentTrackingPage: React.FC = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    preloadShipmentRouteMap();
+  }, []);
 
   useEffect(() => {
     if (searchParams.get('tracking')) {

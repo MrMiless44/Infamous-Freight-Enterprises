@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Truck, AlertTriangle, Activity, ChevronRight, Package,
@@ -8,7 +8,7 @@ import {
   AlertCircle, Bell, Plus, DollarSign,
 } from 'lucide-react';
 import WidgetErrorBoundary from '@/components/ui/WidgetErrorBoundary';
-import { LazyShipmentRouteMap } from '@/components/LazyShipmentRouteMap';
+import { LazyShipmentRouteMap, preloadShipmentRouteMap } from '@/components/LazyShipmentRouteMap';
 
 interface ActiveLoad {
   ref: string;
@@ -99,6 +99,10 @@ const DashboardPage: React.FC = () => {
   const [selectedLoad, setSelectedLoad] = useState<ActiveLoad>(mockActiveLoads[0]);
   const [searchQuery, setSearchQuery] = useState('');
   const [alertFilter, setAlertFilter] = useState<string>('all');
+
+  useEffect(() => {
+    preloadShipmentRouteMap();
+  }, []);
 
   const filteredLoads = mockActiveLoads.filter((load) => {
     if (!searchQuery) return true;
