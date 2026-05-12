@@ -99,6 +99,7 @@
   },
   "dependencies": {
     "@netlify/database": "^1.0.0",
+    "@supabase/supabase-js": "^2.105.4",
     "openai": "^6.37.0"
   }
 }
