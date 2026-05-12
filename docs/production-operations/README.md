@@ -19,6 +19,7 @@ It contains operations, compliance, dispatch, carrier, sales, launch readiness, 
 - [Carrier Vetting SOP](CARRIER_VETTING_SOP.md)
 - [Dispatch Workflow](DISPATCH_WORKFLOW.md)
 - [Daily Operations SOP](DAILY_OPERATIONS_SOP.md)
+- [GENESIS Command Mode](GENESIS_COMMAND_MODE.md)
 - [Shipper Sales Script](SHIPPER_SALES_SCRIPT.md)
 - [GitHub Execution Backlog](GITHUB_EXECUTION_BACKLOG.md)
 - [GitHub-Native MVP Build Plan](GITHUB_NATIVE_MVP_BUILD_PLAN.md)
