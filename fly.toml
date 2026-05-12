@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for infamous-freight-api on 2026-05-11T23:51:06Z
+# fly.toml app configuration file generated for infamous-freight-api on 2026-05-12T02:49:30Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -42,8 +42,8 @@ processes = [ "app" ]
 app = "node apps/api/dist/src/server.js"
 
 [[vm]]
-cpu_kind = "shared"
-cpus = 1
-memory = "512mb"
-memory_mb = 512
-size = "shared-cpu-1x"
+  cpu_kind = 'shared'
+  cpus = 1
+  memory = '512mb'
+  memory_mb = 512
+  size = 'shared-cpu-1x'
