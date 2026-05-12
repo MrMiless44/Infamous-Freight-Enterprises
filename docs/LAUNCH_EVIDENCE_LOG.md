@@ -955,3 +955,56 @@ High
 
 ## Follow-Up
 B-007 is partially resolved because the browser-critical proxied API health path and direct Fly API origin are healthy. Public Netlify functions remain blocked until a fresh production deploy exposes `netlify/functions/public-freight.ts`; inspect the Netlify deploy summary after deploy to confirm the function was detected and uploaded.
+
+---
+
+## Test
+Netlify Production Recommendation Re-check
+
+## Date/Time
+2026-05-12 10:47 UTC
+
+## Owner
+Netlify agent
+
+## Command or Action
+Re-ran the recommended production checks for the canonical web host, apex redirect, proxied API health, public API paths, and direct Fly public API origin behavior. Sensitive values were not recorded.
+
+```bash
+curl --silent --show-error --location --head --max-time 20 https://www.infamousfreight.com
+curl --silent --show-error --location --max-time 20 https://www.infamousfreight.com/api/health
+curl --silent --show-error --location --head --max-time 20 https://infamousfreight.com
+curl --silent --show-error --location --max-time 20 --request OPTIONS https://www.infamousfreight.com/api/public/quote-requests
+curl --silent --show-error --location --max-time 20 https://www.infamousfreight.com/api/public/shipments/invalid-tracking
+curl --silent --show-error --location --max-time 20 --request OPTIONS https://infamous-freight-api.fly.dev/api/public/quote-requests
+curl --silent --show-error --location --max-time 20 https://infamous-freight-api.fly.dev/api/public/shipments/invalid-tracking
+pnpm --filter @infamous-freight/api test -- --runInBand apps/api/test/quote-intake.test.ts apps/api/test/netlify-csp.test.ts
+```
+
+## Expected Result
+- `https://www.infamousfreight.com/` returns HTTP 200 with configured security headers.
+- `https://infamousfreight.com/` resolves to the canonical `https://www.infamousfreight.com/` host.
+- `https://www.infamousfreight.com/api/health` returns API health JSON.
+- Public quote preflight returns HTTP 204.
+- Invalid public shipment lookup returns HTTP 400 JSON with `invalid_tracking_number`.
+- Regression tests for public routing and quote intake pass.
+
+## Actual Result
+- **Canonical frontend (`https://www.infamousfreight.com/`)**: HTTP 200 from Netlify with the configured CSP, HSTS, frame, content-type, referrer, permissions, and cross-origin policy headers.
+- **Apex redirect (`https://infamousfreight.com/`)**: resolved to `https://www.infamousfreight.com/`.
+- **Proxied API health (`https://www.infamousfreight.com/api/health`)**: HTTP 200 JSON with status `ok` and database service `connected`.
+- **Public quote preflight (`OPTIONS /api/public/quote-requests`)**: HTTP 404 with Netlify HTML response on the deployed site.
+- **Invalid public shipment lookup (`GET /api/public/shipments/invalid-tracking`)**: HTTP 404 with Netlify HTML response on the deployed site.
+- **Direct Fly public quote preflight**: HTTP 204.
+- **Direct Fly invalid shipment lookup**: HTTP 404 before this repository change because the Express API did not expose the public tracking validation route.
+- **Repository mitigation**: the Express API now exposes `GET /api/public/shipments/:trackingNumber` and returns `invalid_tracking_number` for malformed public tracking references without requiring authentication. Documentation was also updated to match the current Netlify-to-Fly proxy architecture and disabled-functions deployment setting.
+- **Regression tests**: `apps/api/test/quote-intake.test.ts` and `apps/api/test/netlify-csp.test.ts` passed with 19 tests.
+
+## Status
+FAIL
+
+## Severity
+High
+
+## Follow-Up
+B-007 remains open for the two deployed public API paths because production still returns Netlify 404 responses. Trigger a fresh production deploy from the updated repository, then re-run the public route checks. The previous direct-function packaging recommendation has been superseded because normal Netlify deploys intentionally disable repo-owned functions and rely on the Fly API proxy.
