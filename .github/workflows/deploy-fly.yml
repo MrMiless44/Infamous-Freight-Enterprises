@@ -1,6 +1,7 @@
 name: Deploy Fly API
 
 on:
+  workflow_call:
   workflow_dispatch:
 
 concurrency:
