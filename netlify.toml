@@ -98,7 +98,7 @@
 
 # ELD / HOS
 [[redirects]]
-  from = "/api/eld/*"
+  from = "/api/eld/drivers/:driverId/hos"
   to = "/.netlify/functions/drivers"
   status = 200
   force = true
