@@ -283,29 +283,25 @@ const PublicQuoteRequestPage: React.FC = () => {
           : undefined,
       };
 
-      let quoteTrackingNumber = '';
-      let primaryError: unknown;
-      let netlifyError: unknown;
+      // Fire both submissions concurrently so a hung primary API cannot block the
+      // Netlify fallback lead capture. The tracking number is not available at
+      // submission time (it comes from the primary API response), so it is omitted
+      // from the Netlify payload; the full lead data is still captured.
+      const [primaryResult, netlifyResult] = await Promise.allSettled([
+        createPublicQuoteRequest(quotePayload),
+        submitNetlifyForm('quote-request', {
+          ...form,
+          estimateLow: estimate?.low,
+          estimateMid: estimate?.mid,
+          estimateHigh: estimate?.high,
+          ...(attachment ? { attachment } : {}),
+        }),
+      ]);
 
-      try {
-        const { quote } = await createPublicQuoteRequest(quotePayload);
-        quoteTrackingNumber = quote.trackingNumber;
-      } catch (err) {
-        primaryError = err;
-      }
-
-      try {
-        await submitNetlifyForm('quote-request', {
-        ...form,
-        trackingNumber: quoteTrackingNumber,
-        estimateLow: estimate?.low,
-        estimateMid: estimate?.mid,
-        estimateHigh: estimate?.high,
-        ...(attachment ? { attachment } : {}),
-        });
-      } catch (err) {
-        netlifyError = err;
-      }
+      const primaryError = primaryResult.status === 'rejected' ? primaryResult.reason : undefined;
+      const netlifyError = netlifyResult.status === 'rejected' ? netlifyResult.reason : undefined;
+      const quoteTrackingNumber =
+        primaryResult.status === 'fulfilled' ? primaryResult.value.quote.trackingNumber : '';
 
       if (primaryError && netlifyError) {
         throw netlifyError instanceof Error
