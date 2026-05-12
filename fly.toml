@@ -30,7 +30,7 @@ min_machines_running = 1
 processes = ["app"]
 
   [[http_service.checks]]
-  grace_period = "1m30s"
+  grace_period = "1m"
   interval = "30s"
   method = "GET"
   path = "/api/health/live"
