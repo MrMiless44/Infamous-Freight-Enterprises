@@ -44,7 +44,7 @@ elif [[ -n "$POSTGRES_APP_NAME" ]]; then
   echo "==> Attaching legacy Postgres app '$POSTGRES_APP_NAME' to '$APP_NAME'"
   # postgres attach is idempotent enough for this repair flow; if DATABASE_URL
   # already exists, continue so CORS/scale/restart/health verification still run.
-  flyctl postgres attach "$POSTGRES_APP_NAME" -a "$APP_NAME" --yes || true
+  flyctl postgres attach "$POSTGRES_APP_NAME" --app "$APP_NAME" --variable-name DATABASE_URL --yes || true
 else
   echo "==> DATABASE_URL, MPG_CLUSTER_ID, and POSTGRES_APP_NAME not set; skipping database secret repair."
   echo "    Preferred: add DATABASE_URL as a GitHub Secret, or run with a Fly Managed Postgres cluster:"
@@ -71,9 +71,12 @@ done
 
 echo "==> Waiting for API health"
 for attempt in {1..30}; do
-  if curl --fail --silent --show-error "https://$APP_NAME.fly.dev/api/health" >/tmp/fly-health.json; then
-    echo "Health check passed:"
-    cat /tmp/fly-health.json
+  if curl --fail --silent --show-error "https://$APP_NAME.fly.dev/api/health/live" >/tmp/fly-health-live.json \
+    && curl --fail --silent --show-error "https://$APP_NAME.fly.dev/api/health/ready" >/tmp/fly-health-ready.json; then
+    echo "Health checks passed:"
+    cat /tmp/fly-health-live.json
+    echo
+    cat /tmp/fly-health-ready.json
     echo
     break
   fi

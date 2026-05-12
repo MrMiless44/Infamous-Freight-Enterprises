@@ -48,12 +48,12 @@ fly checks list --app "$APP"
 fly releases --app "$APP" --image
 fly logs --app "$APP" --no-tail
 curl -i https://infamous-freight-api.fly.dev/api/health/live
-curl -i https://infamous-freight-api.fly.dev/api/health
+curl -i https://infamous-freight-api.fly.dev/api/health/ready
 ```
 
 Expected:
 - `/api/health/live` returns HTTP 200 when process liveness is healthy.
-- `/api/health` returns HTTP 200 only when app dependencies (for example database) are healthy.
+- `/api/health/ready` returns HTTP 200 only when app dependencies (for example database) are healthy.
 
 If Fly cannot pull the digest from GHCR (private image/auth required), mirror into Fly registry:
 
@@ -98,15 +98,17 @@ Add the token to GitHub repository secrets as:
 
 - API binds on `PORT=3000`.
 - Fly internal port routes to `3000`.
-- Health endpoint returns 200 on `/api/health`.
+- Health endpoints return 200 on `/api/health/live` and `/api/health/ready`.
 
 ## Safety checks after deploy
 
 ```bash
 fly auth whoami
 fly status --app infamous-freight-api
-curl -fsS https://infamous-freight-api.fly.dev/api/health
-curl -fsS https://api.infamousfreight.com/api/health
+curl -fsS https://infamous-freight-api.fly.dev/api/health/live
+curl -fsS https://infamous-freight-api.fly.dev/api/health/ready
+curl -fsS https://api.infamousfreight.com/api/health/live
+curl -fsS https://api.infamousfreight.com/api/health/ready
 ```
 
 CI uses the same sequence via:
@@ -122,9 +124,13 @@ Do **not** share `FLY_API_TOKEN` in logs or chat.
 Use Fly’s MPG commands from your local terminal while authenticated:
 
 ```bash
-fly mpg connect
-fly mpg proxy
-fly mpg attach kyzl60xmlk6opj9g --app infamous-freight-api
+fly auth login
+fly postgres list
+fly postgres attach <POSTGRES_APP_NAME> --app infamous-freight-api --variable-name DATABASE_URL
+fly secrets list --app infamous-freight-api
+fly deploy --app infamous-freight-api
+curl -fsS https://infamous-freight-api.fly.dev/api/health/live
+curl -fsS https://infamous-freight-api.fly.dev/api/health/ready
 ```
 
 After attach, verify runtime config and release status:
@@ -133,6 +139,13 @@ After attach, verify runtime config and release status:
 fly secrets list --app infamous-freight-api
 fly status --app infamous-freight-api
 fly checks list --app infamous-freight-api
+```
+
+If `fly postgres attach` fails, use the Fly dashboard Connect tab and set `DATABASE_URL` manually, then deploy:
+
+```bash
+fly secrets set DATABASE_URL='<DATABASE_URL_FROM_FLY_CONNECT_TAB>' --app infamous-freight-api
+fly deploy --app infamous-freight-api
 ```
 
 ### Database credential safety
