@@ -67,6 +67,14 @@ type FieldErrors = Partial<Record<keyof typeof initialForm | 'attachment', strin
 
 const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024;
 const ALLOWED_ATTACHMENT_EXTENSIONS = new Set(['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'txt']);
+const SUBMISSION_TIMEOUT_MS = 12_000;
+const GENERIC_SUBMISSION_ERROR = 'We could not submit the form. Please try again or contact dispatch directly.';
+const PRIMARY_TIMEOUT_ERROR = 'Dispatch intake timed out. Your details were not saved to tracking.';
+const NETLIFY_TIMEOUT_ERROR = 'Netlify lead capture timed out. Please try again or contact dispatch directly.';
+type SubmissionOutcome =
+  | { channel: 'primary'; success: true; trackingNumber: string }
+  | { channel: 'netlify'; success: true }
+  | { channel: 'primary' | 'netlify'; success: false; error: unknown };
 
 const formatCurrency = (value: number) =>
   value.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
@@ -283,31 +291,76 @@ const PublicQuoteRequestPage: React.FC = () => {
           : undefined,
       };
 
-      // Fire both submissions concurrently so a hung primary API cannot block the
-      // Netlify fallback lead capture. The tracking number is not available at
-      // submission time (it comes from the primary API response), so it is omitted
-      // from the Netlify payload; the full lead data is still captured.
-      const [primaryResult, netlifyResult] = await Promise.allSettled([
-        createPublicQuoteRequest(quotePayload),
-        submitNetlifyForm('quote-request', {
+      const primaryAbortController = new AbortController();
+      const primaryTimeoutHandle = window.setTimeout(() => {
+        primaryAbortController.abort();
+      }, SUBMISSION_TIMEOUT_MS);
+
+      const primarySubmission = createPublicQuoteRequest(quotePayload, { signal: primaryAbortController.signal })
+        .then(({ quote }) => {
+          const outcome: SubmissionOutcome = { channel: 'primary', success: true, trackingNumber: quote.trackingNumber };
+          return outcome;
+        })
+        .catch((error) => {
+          const normalizedError =
+            error instanceof DOMException && error.name === 'AbortError'
+              ? new Error(PRIMARY_TIMEOUT_ERROR)
+              : error;
+          const outcome: SubmissionOutcome = { channel: 'primary', success: false, error: normalizedError };
+          return outcome;
+        })
+        .finally(() => {
+          window.clearTimeout(primaryTimeoutHandle);
+        });
+
+      const netlifyAbortController = new AbortController();
+      const netlifyTimeoutHandle = window.setTimeout(() => {
+        netlifyAbortController.abort();
+      }, SUBMISSION_TIMEOUT_MS);
+
+      const netlifySubmission = submitNetlifyForm('quote-request', {
           ...form,
           estimateLow: estimate?.low,
           estimateMid: estimate?.mid,
           estimateHigh: estimate?.high,
           ...(attachment ? { attachment } : {}),
-        }),
-      ]);
+        }, { signal: netlifyAbortController.signal })
+        .then(() => {
+          const outcome: SubmissionOutcome = { channel: 'netlify', success: true };
+          return outcome;
+        })
+        .catch((error) => {
+          const normalizedError =
+            error instanceof DOMException && error.name === 'AbortError'
+              ? new Error(NETLIFY_TIMEOUT_ERROR)
+              : error;
+          const outcome: SubmissionOutcome = { channel: 'netlify', success: false, error: normalizedError };
+          return outcome;
+        })
+        .finally(() => {
+          window.clearTimeout(netlifyTimeoutHandle);
+        });
 
-      const primaryError = primaryResult.status === 'rejected' ? primaryResult.reason : undefined;
-      const netlifyError = netlifyResult.status === 'rejected' ? netlifyResult.reason : undefined;
-      const quoteTrackingNumber =
-        primaryResult.status === 'fulfilled' ? primaryResult.value.quote.trackingNumber : '';
+      const firstFinished = await Promise.race([primarySubmission, netlifySubmission]);
+      let primaryResult: SubmissionOutcome | undefined;
+      let netlifyResult: SubmissionOutcome | undefined;
 
-      if (primaryError && netlifyError) {
-        throw netlifyError instanceof Error
-          ? netlifyError
-          : new Error('We could not submit the form. Please try again or contact dispatch directly.');
+      if (firstFinished.channel === 'primary') primaryResult = firstFinished;
+      if (firstFinished.channel === 'netlify') netlifyResult = firstFinished;
+
+      if (!firstFinished.success) {
+        [primaryResult, netlifyResult] = await Promise.all([
+          primaryResult ?? primarySubmission,
+          netlifyResult ?? netlifySubmission,
+        ]);
+
+        if (!primaryResult.success && !netlifyResult.success) {
+          throw primaryResult.error ?? netlifyResult.error ?? new Error(GENERIC_SUBMISSION_ERROR);
+        }
       }
+
+      const quoteTrackingNumber =
+        primaryResult?.success && primaryResult.channel === 'primary' ? primaryResult.trackingNumber : '';
 
       setTrackingNumber(quoteTrackingNumber);
       trackFunnelEvent('funnel_quote_request', { equipment: form.equipment });
@@ -318,8 +371,8 @@ const PublicQuoteRequestPage: React.FC = () => {
         estimateMid: estimate?.mid,
         estimateConfidence: estimate?.confidence,
         trackingNumber: quoteTrackingNumber,
-        savedToPrimaryApi: !primaryError,
-        savedToNetlifyForms: !netlifyError,
+        savedToPrimaryApi: primaryResult?.success,
+        savedToNetlifyForms: netlifyResult?.success,
       });
       setSubmitted(true);
     } catch (err) {

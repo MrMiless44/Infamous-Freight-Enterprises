@@ -107,7 +107,8 @@ export const encodeNetlifyForm = (data: NetlifyFormPayload): string => {
 
 export const submitNetlifyForm = async (
   formName: string,
-  data: NetlifyFormPayload
+  data: NetlifyFormPayload,
+  options?: { signal?: AbortSignal }
 ): Promise<void> => {
   validatePayload(data);
   const submissionSignature = getSubmissionSignature(formName, data);
@@ -138,6 +139,7 @@ export const submitNetlifyForm = async (
     const response = await fetch('/__forms.html', {
       method: 'POST',
       body: formData,
+      signal: options?.signal,
     });
 
     if (!response.ok) {
@@ -152,6 +154,7 @@ export const submitNetlifyForm = async (
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: encodeNetlifyForm(payload),
+    signal: options?.signal,
   });
 
   if (!response.ok) {
