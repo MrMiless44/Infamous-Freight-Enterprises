@@ -34,7 +34,7 @@ jobs:
             -f status=completed \
             -f conclusion=failure \
             -F per_page=20 \
-            --jq '.workflow_runs[] | select(.event != "schedule") | "- [" + .name + "](" + .html_url + ") on `" + .head_branch + "` at " + .updated_at' \
+            --jq '.workflow_runs[] | select(.event != "schedule") | "- [" + .name + "](" + .html_url + ") on branch " + .head_branch + " at " + .updated_at' \
             | head -n 10 > "${report_file}" || true
 
           failure_count=$(grep -c '^-' "${report_file}" || true)
