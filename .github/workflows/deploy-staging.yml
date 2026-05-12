@@ -1,0 +1,181 @@
+name: Deploy via Docker Compose (Staging)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [develop]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write   # required for OIDC keyless cosign signing
+
+concurrency:
+  group: deploy-docker-compose-staging
+  cancel-in-progress: false  # never cancel an in-progress deploy
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  # ===== BUILD, PUSH & SIGN =====
+  build-and-sign:
+    name: Build, Push & Sign Images (Staging)
+    runs-on: ubuntu-latest
+    outputs:
+      api-digest: ${{ steps.api-push.outputs.digest }}
+      web-digest: ${{ steps.web-push.outputs.digest }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac  # v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121  # v4.1.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push API image
+        id: api-push
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8  # v6
+        with:
+          context: .
+          file: Dockerfile.api
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/infamous-freight-enterprises-api:staging
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/infamous-freight-enterprises-api:staging-${{ github.sha }}
+
+      - name: Build and push Web image
+        id: web-push
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8  # v6
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/infamous-freight-enterprises-web:staging
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/infamous-freight-enterprises-web:staging-${{ github.sha }}
+
+      - name: Sign API image
+        run: |
+          cosign sign --yes \
+            "${{ env.REGISTRY }}/${{ github.repository_owner }}/infamous-freight-enterprises-api@${{ steps.api-push.outputs.digest }}"
+
+      - name: Sign Web image
+        run: |
+          cosign sign --yes \
+            "${{ env.REGISTRY }}/${{ github.repository_owner }}/infamous-freight-enterprises-web@${{ steps.web-push.outputs.digest }}"
+
+      - name: Generate CycloneDX SBOM for API image
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610  # v0
+        with:
+          image: "${{ env.REGISTRY }}/${{ github.repository_owner }}/infamous-freight-enterprises-api@${{ steps.api-push.outputs.digest }}"
+          format: cyclonedx-json
+          output-file: api-sbom.json
+
+      - name: Attach API SBOM attestation
+        run: |
+          cosign attest --yes --type cyclonedx --predicate api-sbom.json \
+            "${{ env.REGISTRY }}/${{ github.repository_owner }}/infamous-freight-enterprises-api@${{ steps.api-push.outputs.digest }}"
+
+      - name: Generate CycloneDX SBOM for Web image
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610  # v0
+        with:
+          image: "${{ env.REGISTRY }}/${{ github.repository_owner }}/infamous-freight-enterprises-web@${{ steps.web-push.outputs.digest }}"
+          format: cyclonedx-json
+          output-file: web-sbom.json
+
+      - name: Attach Web SBOM attestation
+        run: |
+          cosign attest --yes --type cyclonedx --predicate web-sbom.json \
+            "${{ env.REGISTRY }}/${{ github.repository_owner }}/infamous-freight-enterprises-web@${{ steps.web-push.outputs.digest }}"
+
+  # ===== DEPLOY =====
+  deploy:
+    name: Deploy (Staging)
+    runs-on: ubuntu-latest
+    needs: build-and-sign
+    environment: staging
+    # Map secrets to env so they can be referenced in if: conditions
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+    steps:
+      - name: Deploy over SSH (staging)
+        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262  # v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST_STAGING }}
+          username: ${{ secrets.SSH_USER_STAGING }}
+          key: ${{ secrets.SSH_KEY_STAGING }}
+          port: ${{ secrets.SSH_PORT_STAGING || 22 }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            OWNER='${{ github.repository_owner }}'
+            DIGEST_API='${{ needs.build-and-sign.outputs.api-digest }}'
+            DIGEST_WEB='${{ needs.build-and-sign.outputs.web-digest }}'
+
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+
+            export GHCR_OWNER="$OWNER"
+            cat > docker-compose.override.yml <<EOF
+            services:
+              api:
+                image: ghcr.io/${OWNER}/infamous-freight-enterprises-api@${DIGEST_API}
+              web:
+                image: ghcr.io/${OWNER}/infamous-freight-enterprises-web@${DIGEST_WEB}
+            EOF
+
+            docker compose -f docker-compose.prod.yml -f docker-compose.override.yml pull
+            docker compose -f docker-compose.prod.yml -f docker-compose.override.yml up -d
+
+      - name: Write deploy digests
+        run: |
+          jq -n \
+            --arg apiDigest "${{ needs.build-and-sign.outputs.api-digest }}" \
+            --arg webDigest "${{ needs.build-and-sign.outputs.web-digest }}" \
+            --arg owner "${{ github.repository_owner }}" \
+            '{apiDigest: $apiDigest, webDigest: $webDigest, owner: $owner}' > digests.json
+
+      - name: Upload deploy digests artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: deploy-digests-staging
+          path: digests.json
+          retention-days: 90
+
+      - name: Notify Slack (success)
+        if: ${{ success() && env.SLACK_WEBHOOK_URL != '' }}
+        run: |
+          payload=$(jq -n \
+            --arg text "✅ Deploy (staging) succeeded\nAPI: ghcr.io/${{ github.repository_owner }}/infamous-freight-enterprises-api@${{ needs.build-and-sign.outputs.api-digest }}\nWEB: ghcr.io/${{ github.repository_owner }}/infamous-freight-enterprises-web@${{ needs.build-and-sign.outputs.web-digest }}" \
+            '{text: $text}')
+          curl -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
+
+      - name: Notify Slack (failure)
+        if: ${{ failure() && env.SLACK_WEBHOOK_URL != '' }}
+        run: |
+          payload=$(jq -n \
+            --arg text "❌ Deploy (staging) FAILED. See run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            '{text: $text}')
+          curl -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
+
+      - name: Notify Teams (success)
+        if: ${{ success() && env.TEAMS_WEBHOOK_URL != '' }}
+        run: |
+          text="✅ Deploy (staging) succeeded%0AAPI: ghcr.io/${{ github.repository_owner }}/infamous-freight-enterprises-api@${{ needs.build-and-sign.outputs.api-digest }}%0AWEB: ghcr.io/${{ github.repository_owner }}/infamous-freight-enterprises-web@${{ needs.build-and-sign.outputs.web-digest }}"
+          curl -H 'Content-Type: application/json' -d "{\"text\": \"$text\"}" "$TEAMS_WEBHOOK_URL"
+
+      - name: Notify Teams (failure)
+        if: ${{ failure() && env.TEAMS_WEBHOOK_URL != '' }}
+        run: |
+          text="❌ Deploy (staging) FAILED. See run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          curl -H 'Content-Type: application/json' -d "{\"text\": \"$text\"}" "$TEAMS_WEBHOOK_URL"

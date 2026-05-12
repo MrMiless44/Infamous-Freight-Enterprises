@@ -16,6 +16,7 @@ permissions:
   contents: read
   packages: read
   id-token: write
+  actions: read
 
 jobs:
   fetch-artifact:
@@ -38,7 +39,7 @@ jobs:
           fi
 
       - name: Download latest deploy artifact
-        uses: dawidd6/action-download-artifact@v6
+        uses: dawidd6/action-download-artifact@bf251b5aa9c2f7eeb574a96ee720e24f801b7c11  # v6
         with:
           workflow: ${{ env.WF }}
           workflow_conclusion: success
@@ -67,7 +68,7 @@ jobs:
       TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
     steps:
       - name: Deploy over SSH (production)
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262  # v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
@@ -81,16 +82,19 @@ jobs:
             DIGEST_WEB='${{ needs.fetch-artifact.outputs.web }}'
 
             if ! command -v cosign >/dev/null 2>&1; then
-              curl -fsSL -o /usr/local/bin/cosign https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64
+              COSIGN_VERSION="v2.4.1"
+              curl -fsSL -o /usr/local/bin/cosign \
+                "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64"
               chmod +x /usr/local/bin/cosign
             fi
 
             echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
 
             ISSUER="https://token.actions.githubusercontent.com"
-            IDENTITY="https://github.com/${{ github.repository }}/.github/workflows/docker-ghcr.yml@refs/heads/main"
+            IDENTITY="https://github.com/${{ github.repository }}/.github/workflows/deploy-docker-compose.yml@refs/heads/main"
             for svc in api web; do
-              IMG_REF="ghcr.io/${OWNER}/infamous-freight-enterprises-${svc}@$(eval echo \$DIGEST_${svc^^})"
+              varname="DIGEST_${svc^^}"
+              IMG_REF="ghcr.io/${OWNER}/infamous-freight-enterprises-${svc}@${!varname}"
               COSIGN_EXPERIMENTAL=true cosign verify --certificate-oidc-issuer "$ISSUER" --certificate-identity "$IDENTITY" "$IMG_REF"
               COSIGN_EXPERIMENTAL=true cosign verify-attestation --type cyclonedx --certificate-oidc-issuer "$ISSUER" --certificate-identity "$IDENTITY" "$IMG_REF"
             done
@@ -142,7 +146,7 @@ jobs:
       TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
     steps:
       - name: Deploy over SSH (staging)
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262  # v1.0.3
         with:
           host: ${{ secrets.SSH_HOST_STAGING }}
           username: ${{ secrets.SSH_USER_STAGING }}
@@ -156,16 +160,19 @@ jobs:
             DIGEST_WEB='${{ needs.fetch-artifact.outputs.web }}'
 
             if ! command -v cosign >/dev/null 2>&1; then
-              curl -fsSL -o /usr/local/bin/cosign https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64
+              COSIGN_VERSION="v2.4.1"
+              curl -fsSL -o /usr/local/bin/cosign \
+                "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64"
               chmod +x /usr/local/bin/cosign
             fi
 
             echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
 
             ISSUER="https://token.actions.githubusercontent.com"
-            IDENTITY="https://github.com/${{ github.repository }}/.github/workflows/docker-ghcr.yml@refs/heads/main"
+            IDENTITY="https://github.com/${{ github.repository }}/.github/workflows/deploy-staging.yml@refs/heads/main"
             for svc in api web; do
-              IMG_REF="ghcr.io/${OWNER}/infamous-freight-enterprises-${svc}@$(eval echo \$DIGEST_${svc^^})"
+              varname="DIGEST_${svc^^}"
+              IMG_REF="ghcr.io/${OWNER}/infamous-freight-enterprises-${svc}@${!varname}"
               COSIGN_EXPERIMENTAL=true cosign verify --certificate-oidc-issuer "$ISSUER" --certificate-identity "$IDENTITY" "$IMG_REF"
               COSIGN_EXPERIMENTAL=true cosign verify-attestation --type cyclonedx --certificate-oidc-issuer "$ISSUER" --certificate-identity "$IDENTITY" "$IMG_REF"
             done
