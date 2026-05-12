@@ -67,6 +67,25 @@ type FieldErrors = Partial<Record<keyof typeof initialForm | 'attachment', strin
 
 const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024;
 const ALLOWED_ATTACHMENT_EXTENSIONS = new Set(['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'txt']);
+const SUBMISSION_TIMEOUT_MS = 12_000;
+type SubmissionOutcome =
+  | { channel: 'primary'; success: true; trackingNumber: string }
+  | { channel: 'netlify'; success: true }
+  | { channel: 'primary' | 'netlify'; success: false; error: unknown };
+
+const withTimeout = <T,>(promise: Promise<T>, timeoutMs: number, message: string): Promise<T> =>
+  new Promise<T>((resolve, reject) => {
+    const timeoutHandle = window.setTimeout(() => reject(new Error(message)), timeoutMs);
+    promise
+      .then((result) => {
+        window.clearTimeout(timeoutHandle);
+        resolve(result);
+      })
+      .catch((error) => {
+        window.clearTimeout(timeoutHandle);
+        reject(error);
+      });
+  });
 
 const formatCurrency = (value: number) =>
   value.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
@@ -283,12 +302,21 @@ const PublicQuoteRequestPage: React.FC = () => {
           : undefined,
       };
 
-      // Fire both submissions concurrently so a hung primary API cannot block the
-      // Netlify fallback lead capture. The tracking number is not available at
-      // submission time (it comes from the primary API response), so it is omitted
-      // from the Netlify payload; the full lead data is still captured.
-      const [primaryResult, netlifyResult] = await Promise.allSettled([
+      const primarySubmission = withTimeout(
         createPublicQuoteRequest(quotePayload),
+        SUBMISSION_TIMEOUT_MS,
+        'Dispatch intake timed out. Your details were not saved to tracking.'
+      )
+        .then(({ quote }) => {
+          const outcome: SubmissionOutcome = { channel: 'primary', success: true, trackingNumber: quote.trackingNumber };
+          return outcome;
+        })
+        .catch((error) => {
+          const outcome: SubmissionOutcome = { channel: 'primary', success: false, error };
+          return outcome;
+        });
+
+      const netlifySubmission = withTimeout(
         submitNetlifyForm('quote-request', {
           ...form,
           estimateLow: estimate?.low,
@@ -296,18 +324,35 @@ const PublicQuoteRequestPage: React.FC = () => {
           estimateHigh: estimate?.high,
           ...(attachment ? { attachment } : {}),
         }),
-      ]);
+        SUBMISSION_TIMEOUT_MS,
+        'We could not submit the form. Please try again or contact dispatch directly.'
+      )
+        .then(() => {
+          const outcome: SubmissionOutcome = { channel: 'netlify', success: true };
+          return outcome;
+        })
+        .catch((error) => {
+          const outcome: SubmissionOutcome = { channel: 'netlify', success: false, error };
+          return outcome;
+        });
 
-      const primaryError = primaryResult.status === 'rejected' ? primaryResult.reason : undefined;
-      const netlifyError = netlifyResult.status === 'rejected' ? netlifyResult.reason : undefined;
-      const quoteTrackingNumber =
-        primaryResult.status === 'fulfilled' ? primaryResult.value.quote.trackingNumber : '';
+      const firstFinished = await Promise.race([primarySubmission, netlifySubmission]);
+      let primaryResult: SubmissionOutcome | undefined =
+        firstFinished.channel === 'primary' ? firstFinished : undefined;
+      let netlifyResult: SubmissionOutcome | undefined =
+        firstFinished.channel === 'netlify' ? firstFinished : undefined;
 
-      if (primaryError && netlifyError) {
-        throw netlifyError instanceof Error
-          ? netlifyError
-          : new Error('We could not submit the form. Please try again or contact dispatch directly.');
+      if (!firstFinished.success) {
+        if (!primaryResult) primaryResult = await primarySubmission;
+        if (!netlifyResult) netlifyResult = await netlifySubmission;
+
+        if (!primaryResult.success && !netlifyResult.success) {
+          throw netlifyResult.error ?? primaryResult.error ?? new Error('We could not submit the form. Please try again or contact dispatch directly.');
+        }
       }
+
+      const quoteTrackingNumber =
+        primaryResult?.channel === 'primary' && primaryResult.success ? primaryResult.trackingNumber : '';
 
       setTrackingNumber(quoteTrackingNumber);
       trackFunnelEvent('funnel_quote_request', { equipment: form.equipment });
@@ -318,8 +363,10 @@ const PublicQuoteRequestPage: React.FC = () => {
         estimateMid: estimate?.mid,
         estimateConfidence: estimate?.confidence,
         trackingNumber: quoteTrackingNumber,
-        savedToPrimaryApi: !primaryError,
-        savedToNetlifyForms: !netlifyError,
+        savedToPrimaryApi:
+          primaryResult?.channel === 'primary' ? primaryResult.success : undefined,
+        savedToNetlifyForms:
+          netlifyResult?.channel === 'netlify' ? netlifyResult.success : undefined,
       });
       setSubmitted(true);
     } catch (err) {
