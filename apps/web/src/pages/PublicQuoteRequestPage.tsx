@@ -63,6 +63,11 @@ type Estimate = {
   reason: string;
 };
 
+type FieldErrors = Partial<Record<keyof typeof initialForm | 'attachment', string>>;
+
+const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024;
+const ALLOWED_ATTACHMENT_EXTENSIONS = new Set(['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'txt']);
+
 const formatCurrency = (value: number) =>
   value.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 
@@ -133,12 +138,14 @@ const InputField: React.FC<{
   required?: boolean;
   autoComplete?: string;
   inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
-}> = ({ label, name, type = 'text', value, onChange, placeholder, required, autoComplete, inputMode }) => (
+  error?: string;
+}> = ({ label, name, type = 'text', value, onChange, placeholder, required, autoComplete, inputMode, error }) => (
   <label className="block">
-    <span className="mb-2 block text-sm font-medium text-[#F5E8E8]/80">
+    <span id={`${name}-label`} className="mb-2 block text-sm font-medium text-[#F5E8E8]/80">
       {label} {required && <span className="text-infamous-orange">*</span>}
     </span>
     <input
+      id={name}
       name={name}
       type={type}
       value={value}
@@ -147,10 +154,72 @@ const InputField: React.FC<{
       required={required}
       autoComplete={autoComplete}
       inputMode={inputMode}
+      aria-invalid={Boolean(error)}
+      aria-describedby={error ? `${name}-error` : undefined}
       className="input-field"
     />
+    {error && (
+      <span id={`${name}-error`} className="mt-2 block text-sm text-red-200">
+        {error}
+      </span>
+    )}
   </label>
 );
+
+const getQuoteValidationErrors = (form: typeof initialForm, attachment: File | null): FieldErrors => {
+  const errors: FieldErrors = {};
+
+  if (!form.origin.trim()) errors.origin = 'Enter the pickup city and state.';
+  if (!form.pickupDate) errors.pickupDate = 'Choose a pickup date.';
+  if (!form.destination.trim()) errors.destination = 'Enter the delivery city and state.';
+  if (!form.freightType.trim()) errors.freightType = 'Enter the freight type.';
+  if (!form.weight.trim()) errors.weight = 'Enter the freight weight.';
+  if (!form.company.trim()) errors.company = 'Enter the company name.';
+  if (!form.contact.trim()) errors.contact = 'Enter the contact name.';
+
+  if (!form.email.trim()) {
+    errors.email = 'Enter an email address.';
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+    errors.email = 'Enter a valid email address.';
+  }
+
+  if (form.phone.trim() && !/^[+()\-\s.\d]{7,40}$/.test(form.phone.trim())) {
+    errors.phone = 'Enter a valid phone number.';
+  }
+
+  const weight = Number(form.weight);
+  if (form.weight.trim() && (!Number.isFinite(weight) || weight < 0)) {
+    errors.weight = 'Weight must be zero or greater.';
+  }
+
+  const miles = Number(form.miles);
+  if (form.miles.trim() && (!Number.isFinite(miles) || miles < 0)) {
+    errors.miles = 'Miles must be zero or greater.';
+  }
+
+  if (form.pickupDate && form.deliveryDate && new Date(form.deliveryDate).getTime() < new Date(form.pickupDate).getTime()) {
+    errors.deliveryDate = 'Delivery date must be on or after the pickup date.';
+  }
+
+  if (attachment) {
+    const extension = attachment.name.split('.').pop()?.toLowerCase() ?? '';
+    if (attachment.size > MAX_ATTACHMENT_BYTES) {
+      errors.attachment = 'Attachments must be 8 MB or smaller.';
+    } else if (!ALLOWED_ATTACHMENT_EXTENSIONS.has(extension)) {
+      errors.attachment = 'Use a PDF, image, document, spreadsheet, CSV, or text attachment.';
+    }
+  }
+
+  return errors;
+};
+
+const getFirstErrorStep = (errors: FieldErrors) => {
+  if (errors.origin || errors.pickupDate || errors.company || errors.contact || errors.email || errors.phone) return 0;
+  if (errors.destination || errors.deliveryDate || errors.miles) return 1;
+  if (errors.freightType || errors.weight) return 2;
+  if (errors.attachment) return 3;
+  return 4;
+};
 
 const PublicQuoteRequestPage: React.FC = () => {
   const [form, setForm] = useState(initialForm);
@@ -159,12 +228,19 @@ const PublicQuoteRequestPage: React.FC = () => {
   const [trackingNumber, setTrackingNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [attachment, setAttachment] = useState<File | null>(null);
 
   const estimate = useMemo(() => computeEstimate(form), [form]);
 
   const updateField = (key: keyof typeof initialForm, value: string) => {
     setForm((current) => ({ ...current, [key]: value }));
+    setFieldErrors((current) => {
+      if (!current[key]) return current;
+      const next = { ...current };
+      delete next[key];
+      return next;
+    });
   };
 
   const canProceed = (s: number): boolean => {
@@ -190,8 +266,16 @@ const PublicQuoteRequestPage: React.FC = () => {
     event.preventDefault();
     setLoading(true);
     setError('');
+    setFieldErrors({});
 
     try {
+      const validationErrors = getQuoteValidationErrors(form, attachment);
+      if (Object.keys(validationErrors).length > 0) {
+        setFieldErrors(validationErrors);
+        setStep(getFirstErrorStep(validationErrors));
+        throw new Error('Review the highlighted fields before submitting.');
+      }
+
       const quotePayload = {
         ...form,
         estimate: estimate
@@ -199,18 +283,37 @@ const PublicQuoteRequestPage: React.FC = () => {
           : undefined,
       };
 
-      const { quote } = await createPublicQuoteRequest(quotePayload);
+      let quoteTrackingNumber = '';
+      let primaryError: unknown;
+      let netlifyError: unknown;
 
-      await submitNetlifyForm('quote-request', {
+      try {
+        const { quote } = await createPublicQuoteRequest(quotePayload);
+        quoteTrackingNumber = quote.trackingNumber;
+      } catch (err) {
+        primaryError = err;
+      }
+
+      try {
+        await submitNetlifyForm('quote-request', {
         ...form,
-        trackingNumber: quote.trackingNumber,
+        trackingNumber: quoteTrackingNumber,
         estimateLow: estimate?.low,
         estimateMid: estimate?.mid,
         estimateHigh: estimate?.high,
         ...(attachment ? { attachment } : {}),
-      });
+        });
+      } catch (err) {
+        netlifyError = err;
+      }
 
-      setTrackingNumber(quote.trackingNumber);
+      if (primaryError && netlifyError) {
+        throw netlifyError instanceof Error
+          ? netlifyError
+          : new Error('We could not submit the form. Please try again or contact dispatch directly.');
+      }
+
+      setTrackingNumber(quoteTrackingNumber);
       trackFunnelEvent('funnel_quote_request', { equipment: form.equipment });
       trackPublicEvent('form_submit_success', {
         form: 'quote-request',
@@ -218,7 +321,9 @@ const PublicQuoteRequestPage: React.FC = () => {
         equipment: form.equipment,
         estimateMid: estimate?.mid,
         estimateConfidence: estimate?.confidence,
-        trackingNumber: quote.trackingNumber,
+        trackingNumber: quoteTrackingNumber,
+        savedToPrimaryApi: !primaryError,
+        savedToNetlifyForms: !netlifyError,
       });
       setSubmitted(true);
     } catch (err) {
@@ -237,15 +342,15 @@ const PublicQuoteRequestPage: React.FC = () => {
             <h2 className="text-xl font-bold">Pickup Details</h2>
             <p className="text-sm text-[#B88989]">Where is the freight being picked up?</p>
             <div className="grid gap-4 sm:grid-cols-2">
-              <InputField label="Origin City / State" name="origin" value={form.origin} onChange={(v) => updateField('origin', v)} required />
-              <InputField label="Pickup Date" name="pickupDate" type="date" value={form.pickupDate} onChange={(v) => updateField('pickupDate', v)} required />
+              <InputField label="Origin City / State" name="origin" value={form.origin} onChange={(v) => updateField('origin', v)} required error={fieldErrors.origin} />
+              <InputField label="Pickup Date" name="pickupDate" type="date" value={form.pickupDate} onChange={(v) => updateField('pickupDate', v)} required error={fieldErrors.pickupDate} />
             </div>
-            <InputField label="Company Name" name="company" value={form.company} onChange={(v) => updateField('company', v)} required />
+            <InputField label="Company Name" name="company" value={form.company} onChange={(v) => updateField('company', v)} required error={fieldErrors.company} />
             <div className="grid gap-4 sm:grid-cols-2">
-              <InputField label="Contact Name" name="contact" value={form.contact} onChange={(v) => updateField('contact', v)} required />
-              <InputField label="Phone" name="phone" type="tel" value={form.phone} onChange={(v) => updateField('phone', v)} autoComplete="tel" inputMode="tel" />
+              <InputField label="Contact Name" name="contact" value={form.contact} onChange={(v) => updateField('contact', v)} required error={fieldErrors.contact} />
+              <InputField label="Phone" name="phone" type="tel" value={form.phone} onChange={(v) => updateField('phone', v)} autoComplete="tel" inputMode="tel" error={fieldErrors.phone} />
             </div>
-            <InputField label="Email" name="email" type="email" value={form.email} onChange={(v) => updateField('email', v)} required autoComplete="email" />
+            <InputField label="Email" name="email" type="email" value={form.email} onChange={(v) => updateField('email', v)} required autoComplete="email" error={fieldErrors.email} />
           </div>
         );
       case 1:
@@ -254,10 +359,10 @@ const PublicQuoteRequestPage: React.FC = () => {
             <h2 className="text-xl font-bold">Delivery Details</h2>
             <p className="text-sm text-[#B88989]">Where is the freight going?</p>
             <div className="grid gap-4 sm:grid-cols-2">
-              <InputField label="Destination City / State" name="destination" value={form.destination} onChange={(v) => updateField('destination', v)} required />
-              <InputField label="Delivery Date (optional)" name="deliveryDate" type="date" value={form.deliveryDate} onChange={(v) => updateField('deliveryDate', v)} />
+              <InputField label="Destination City / State" name="destination" value={form.destination} onChange={(v) => updateField('destination', v)} required error={fieldErrors.destination} />
+              <InputField label="Delivery Date (optional)" name="deliveryDate" type="date" value={form.deliveryDate} onChange={(v) => updateField('deliveryDate', v)} error={fieldErrors.deliveryDate} />
             </div>
-            <InputField label="Lane Miles (optional)" name="miles" type="number" value={form.miles} onChange={(v) => updateField('miles', v)} inputMode="numeric" />
+            <InputField label="Lane Miles (optional)" name="miles" type="number" value={form.miles} onChange={(v) => updateField('miles', v)} inputMode="numeric" error={fieldErrors.miles} />
           </div>
         );
       case 2:
@@ -265,9 +370,9 @@ const PublicQuoteRequestPage: React.FC = () => {
           <div className="space-y-5">
             <h2 className="text-xl font-bold">Freight Details</h2>
             <p className="text-sm text-[#B88989]">Tell us about the load.</p>
-            <InputField label="Freight Type" name="freightType" value={form.freightType} onChange={(v) => updateField('freightType', v)} required placeholder="e.g. Palletized goods, machinery, retail" />
+            <InputField label="Freight Type" name="freightType" value={form.freightType} onChange={(v) => updateField('freightType', v)} required placeholder="e.g. Palletized goods, machinery, retail" error={fieldErrors.freightType} />
             <div className="grid gap-4 sm:grid-cols-2">
-              <InputField label="Weight (lbs)" name="weight" type="number" value={form.weight} onChange={(v) => updateField('weight', v)} required inputMode="numeric" />
+              <InputField label="Weight (lbs)" name="weight" type="number" value={form.weight} onChange={(v) => updateField('weight', v)} required inputMode="numeric" error={fieldErrors.weight} />
               <InputField label="Dimensions / Pallet Count" name="dimensions" value={form.dimensions} onChange={(v) => updateField('dimensions', v)} placeholder="e.g. 4 pallets, 48x40x60" />
             </div>
             <label className="block">
@@ -316,10 +421,25 @@ const PublicQuoteRequestPage: React.FC = () => {
                 name="attachment"
                 type="file"
                 accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv,.txt"
-                onChange={(e) => setAttachment(e.target.files?.[0] ?? null)}
+                onChange={(e) => {
+                  setAttachment(e.target.files?.[0] ?? null);
+                  setFieldErrors((current) => {
+                    if (!current.attachment) return current;
+                    const next = { ...current };
+                    delete next.attachment;
+                    return next;
+                  });
+                }}
+                aria-invalid={Boolean(fieldErrors.attachment)}
+                aria-describedby={fieldErrors.attachment ? 'attachment-error' : undefined}
                 className="mt-3 block w-full text-sm text-[#F5E8E8]/80 file:mr-4 file:rounded-lg file:border-0 file:bg-infamous-red file:px-4 file:py-2 file:font-semibold file:text-[#F5E8E8]"
               />
               {attachment && <span className="mt-2 block text-xs text-[#B88989]/70">{attachment.name}</span>}
+              {fieldErrors.attachment && (
+                <span id="attachment-error" className="mt-2 block text-sm text-red-200">
+                  {fieldErrors.attachment}
+                </span>
+              )}
             </label>
           </div>
         );
@@ -468,7 +588,11 @@ const PublicQuoteRequestPage: React.FC = () => {
 
               {renderStepContent()}
 
-              {error && <p className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">{error}</p>}
+              {error && (
+                <p className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200" role="alert">
+                  {error}
+                </p>
+              )}
 
               <div className="mt-8 flex items-center justify-between">
                 {step > 0 ? (
