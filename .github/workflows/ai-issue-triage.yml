@@ -42,6 +42,7 @@ jobs:
               (r"deploy|netlify|fly|docker|runner|workflow|ci|cd", "infrastructure"),
               (r"stripe|billing|invoice|checkout|payment", "billing"),
               (r"driver|dispatch|load|shipment|carrier|freight", "freight-ops"),
+              (r"quote|reliability|rate[\s\-]?confirm", "quote-ops"),
               (r"ai|openai|agent|automation|triage", "ai"),
           ]
 
