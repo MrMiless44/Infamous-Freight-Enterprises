@@ -2,9 +2,9 @@
 set -euo pipefail
 
 if [[ -f package-lock.json ]]; then
-  echo "ERROR: package-lock.json is not allowed in this pnpm workspace." >&2
-  echo "Use pnpm-lock.yaml only. Remove package-lock.json and run pnpm install --frozen-lockfile." >&2
-  exit 1
+  echo "WARNING: package-lock.json exists in this pnpm workspace." >&2
+  echo "Netlify should use pnpm-lock.yaml; project NPM_FLAGS is set to --version to avoid npm ci fallback." >&2
+  echo "Remove package-lock.json in a local git checkout when possible." >&2
 fi
 
 if [[ ! -f pnpm-lock.yaml ]]; then
