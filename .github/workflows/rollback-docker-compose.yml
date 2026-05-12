@@ -1,0 +1,207 @@
+name: Rollback via Docker Compose (Remote)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to rollback"
+        required: true
+        default: production
+        type: choice
+        options:
+          - production
+          - staging
+
+permissions:
+  contents: read
+  packages: read
+  id-token: write
+
+jobs:
+  fetch-artifact:
+    name: Fetch last deploy digests
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.parse.outputs.api }}
+      web: ${{ steps.parse.outputs.web }}
+      owner: ${{ steps.parse.outputs.owner }}
+    steps:
+      - name: Compute artifact params
+        id: params
+        run: |
+          if [ "${{ inputs.environment }}" = "production" ]; then
+            echo "WF=deploy-docker-compose.yml" >> $GITHUB_ENV
+            echo "ART=deploy-digests-production" >> $GITHUB_ENV
+          else
+            echo "WF=deploy-staging.yml" >> $GITHUB_ENV
+            echo "ART=deploy-digests-staging" >> $GITHUB_ENV
+          fi
+
+      - name: Download latest deploy artifact
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: ${{ env.WF }}
+          workflow_conclusion: success
+          name: ${{ env.ART }}
+          path: artifact
+
+      - name: Parse digests
+        id: parse
+        run: |
+          cat artifact/digests.json
+          API=$(jq -r '.apiDigest' artifact/digests.json)
+          WEB=$(jq -r '.webDigest' artifact/digests.json)
+          OWNER=$(jq -r '.owner' artifact/digests.json)
+          echo "api=$API" >> $GITHUB_OUTPUT
+          echo "web=$WEB" >> $GITHUB_OUTPUT
+          echo "owner=$OWNER" >> $GITHUB_OUTPUT
+
+  deploy-prod:
+    if: ${{ inputs.environment == 'production' }}
+    needs: fetch-artifact
+    runs-on: ubuntu-latest
+    environment: production
+    # Map secrets to env so they can be referenced in if: conditions
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+    steps:
+      - name: Deploy over SSH (production)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            OWNER='${{ needs.fetch-artifact.outputs.owner }}'
+            DIGEST_API='${{ needs.fetch-artifact.outputs.api }}'
+            DIGEST_WEB='${{ needs.fetch-artifact.outputs.web }}'
+
+            if ! command -v cosign >/dev/null 2>&1; then
+              curl -fsSL -o /usr/local/bin/cosign https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64
+              chmod +x /usr/local/bin/cosign
+            fi
+
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+
+            ISSUER="https://token.actions.githubusercontent.com"
+            IDENTITY="https://github.com/${{ github.repository }}/.github/workflows/docker-ghcr.yml@refs/heads/main"
+            for svc in api web; do
+              IMG_REF="ghcr.io/${OWNER}/infamous-freight-enterprises-${svc}@$(eval echo \$DIGEST_${svc^^})"
+              COSIGN_EXPERIMENTAL=true cosign verify --certificate-oidc-issuer "$ISSUER" --certificate-identity "$IDENTITY" "$IMG_REF"
+              COSIGN_EXPERIMENTAL=true cosign verify-attestation --type cyclonedx --certificate-oidc-issuer "$ISSUER" --certificate-identity "$IDENTITY" "$IMG_REF"
+            done
+
+            export GHCR_OWNER="$OWNER"
+            cat > docker-compose.override.yml <<EOF
+            services:
+              api:
+                image: ghcr.io/${OWNER}/infamous-freight-enterprises-api@${DIGEST_API}
+              web:
+                image: ghcr.io/${OWNER}/infamous-freight-enterprises-web@${DIGEST_WEB}
+            EOF
+
+            docker compose -f docker-compose.prod.yml -f docker-compose.override.yml pull
+            docker compose -f docker-compose.prod.yml -f docker-compose.override.yml up -d
+
+      - name: Notify Slack (success)
+        if: ${{ success() && env.SLACK_WEBHOOK_URL != '' }}
+        run: |
+          payload=$(jq -n --arg text "✅ Rollback (production) succeeded\nAPI: ghcr.io/${{ needs.fetch-artifact.outputs.owner }}/infamous-freight-enterprises-api@${{ needs.fetch-artifact.outputs.api }}\nWEB: ghcr.io/${{ needs.fetch-artifact.outputs.owner }}/infamous-freight-enterprises-web@${{ needs.fetch-artifact.outputs.web }}" '{text: $text}')
+          curl -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
+
+      - name: Notify Slack (failure)
+        if: ${{ failure() && env.SLACK_WEBHOOK_URL != '' }}
+        run: |
+          payload=$(jq -n --arg text "❌ Rollback (production) FAILED. See run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" '{text: $text}')
+          curl -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
+
+      - name: Notify Teams (success)
+        if: ${{ success() && env.TEAMS_WEBHOOK_URL != '' }}
+        run: |
+          text="✅ Rollback (production) succeeded%0AAPI: ghcr.io/${{ needs.fetch-artifact.outputs.owner }}/infamous-freight-enterprises-api@${{ needs.fetch-artifact.outputs.api }}%0AWEB: ghcr.io/${{ needs.fetch-artifact.outputs.owner }}/infamous-freight-enterprises-web@${{ needs.fetch-artifact.outputs.web }}"
+          curl -H 'Content-Type: application/json' -d "{\"text\": \"$text\"}" "$TEAMS_WEBHOOK_URL"
+
+      - name: Notify Teams (failure)
+        if: ${{ failure() && env.TEAMS_WEBHOOK_URL != '' }}
+        run: |
+          text="❌ Rollback (production) FAILED. See run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          curl -H 'Content-Type: application/json' -d "{\"text\": \"$text\"}" "$TEAMS_WEBHOOK_URL"
+
+  deploy-staging:
+    if: ${{ inputs.environment == 'staging' }}
+    needs: fetch-artifact
+    runs-on: ubuntu-latest
+    environment: staging
+    # Map secrets to env so they can be referenced in if: conditions
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+    steps:
+      - name: Deploy over SSH (staging)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST_STAGING }}
+          username: ${{ secrets.SSH_USER_STAGING }}
+          key: ${{ secrets.SSH_KEY_STAGING }}
+          port: ${{ secrets.SSH_PORT_STAGING || 22 }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            OWNER='${{ needs.fetch-artifact.outputs.owner }}'
+            DIGEST_API='${{ needs.fetch-artifact.outputs.api }}'
+            DIGEST_WEB='${{ needs.fetch-artifact.outputs.web }}'
+
+            if ! command -v cosign >/dev/null 2>&1; then
+              curl -fsSL -o /usr/local/bin/cosign https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64
+              chmod +x /usr/local/bin/cosign
+            fi
+
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+
+            ISSUER="https://token.actions.githubusercontent.com"
+            IDENTITY="https://github.com/${{ github.repository }}/.github/workflows/docker-ghcr.yml@refs/heads/main"
+            for svc in api web; do
+              IMG_REF="ghcr.io/${OWNER}/infamous-freight-enterprises-${svc}@$(eval echo \$DIGEST_${svc^^})"
+              COSIGN_EXPERIMENTAL=true cosign verify --certificate-oidc-issuer "$ISSUER" --certificate-identity "$IDENTITY" "$IMG_REF"
+              COSIGN_EXPERIMENTAL=true cosign verify-attestation --type cyclonedx --certificate-oidc-issuer "$ISSUER" --certificate-identity "$IDENTITY" "$IMG_REF"
+            done
+
+            export GHCR_OWNER="$OWNER"
+            cat > docker-compose.override.yml <<EOF
+            services:
+              api:
+                image: ghcr.io/${OWNER}/infamous-freight-enterprises-api@${DIGEST_API}
+              web:
+                image: ghcr.io/${OWNER}/infamous-freight-enterprises-web@${DIGEST_WEB}
+            EOF
+
+            docker compose -f docker-compose.prod.yml -f docker-compose.override.yml pull
+            docker compose -f docker-compose.prod.yml -f docker-compose.override.yml up -d
+
+      - name: Notify Slack (success)
+        if: ${{ success() && env.SLACK_WEBHOOK_URL != '' }}
+        run: |
+          payload=$(jq -n --arg text "✅ Rollback (staging) succeeded\nAPI: ghcr.io/${{ needs.fetch-artifact.outputs.owner }}/infamous-freight-enterprises-api@${{ needs.fetch-artifact.outputs.api }}\nWEB: ghcr.io/${{ needs.fetch-artifact.outputs.owner }}/infamous-freight-enterprises-web@${{ needs.fetch-artifact.outputs.web }}" '{text: $text}')
+          curl -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
+
+      - name: Notify Slack (failure)
+        if: ${{ failure() && env.SLACK_WEBHOOK_URL != '' }}
+        run: |
+          payload=$(jq -n --arg text "❌ Rollback (staging) FAILED. See run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" '{text: $text}')
+          curl -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
+
+      - name: Notify Teams (success)
+        if: ${{ success() && env.TEAMS_WEBHOOK_URL != '' }}
+        run: |
+          text="✅ Rollback (staging) succeeded%0AAPI: ghcr.io/${{ needs.fetch-artifact.outputs.owner }}/infamous-freight-enterprises-api@${{ needs.fetch-artifact.outputs.api }}%0AWEB: ghcr.io/${{ needs.fetch-artifact.outputs.owner }}/infamous-freight-enterprises-web@${{ needs.fetch-artifact.outputs.web }}"
+          curl -H 'Content-Type: application/json' -d "{\"text\": \"$text\"}" "$TEAMS_WEBHOOK_URL"
+
+      - name: Notify Teams (failure)
+        if: ${{ failure() && env.TEAMS_WEBHOOK_URL != '' }}
+        run: |
+          text="❌ Rollback (staging) FAILED. See run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          curl -H 'Content-Type: application/json' -d "{\"text\": \"$text\"}" "$TEAMS_WEBHOOK_URL"
