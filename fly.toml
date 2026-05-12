@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for infamous-freight-api on 2026-05-11T23:51:06Z
+# fly.toml app configuration file generated for infamous-freight-api on 2026-05-12T02:49:30Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -13,9 +13,6 @@ dockerfile = "Dockerfile"
 strategy = "rolling"
 wait_timeout = "10m0s"
 
-[processes]
-app = "node apps/api/dist/src/server.js"
-
 [env]
 HOST = "0.0.0.0"
 NODE_ENV = "production"
@@ -25,12 +22,12 @@ PORT = "3000"
 auto_start_machines = true
 auto_stop_machines = false
 force_https = true
-internal_port = 3000
+internal_port = 3_000
 min_machines_running = 1
-processes = ["app"]
+processes = [ "app" ]
 
   [[http_service.checks]]
-  grace_period = "1m30s"
+  grace_period = "1m"
   interval = "30s"
   method = "GET"
   path = "/api/health/live"
@@ -40,6 +37,9 @@ processes = ["app"]
   hard_limit = 40
   soft_limit = 25
   type = "requests"
+
+[processes]
+app = "node apps/api/dist/src/server.js"
 
 [[vm]]
   cpu_kind = 'shared'
