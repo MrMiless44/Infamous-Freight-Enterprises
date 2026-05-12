@@ -11,25 +11,32 @@ permissions:
 
 jobs:
   triage:
-    name: Label issues by content
+    name: Label and summarize issues
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
       GH_TOKEN: ${{ github.token }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_TRIAGE_MODEL: ${{ vars.OPENAI_TRIAGE_MODEL || 'gpt-5.4-mini' }}
+      REPO: ${{ github.repository }}
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
     steps:
-      - name: Apply deterministic triage labels
+      - name: Apply deterministic labels and optional AI summary
         shell: bash
         run: |
           set -euo pipefail
+
+          if [[ -z "${ISSUE_NUMBER:-}" ]]; then
+            echo "No issue payload found. This workflow should be run by an issue event."
+            exit 0
+          fi
 
           python3 <<'PY' > /tmp/labels.txt
           import json
           import os
           import re
 
-          event_path = os.environ["GITHUB_EVENT_PATH"]
-          with open(event_path, "r", encoding="utf-8") as f:
+          with open(os.environ["GITHUB_EVENT_PATH"], "r", encoding="utf-8") as f:
               event = json.load(f)
 
           issue = event.get("issue") or {}
@@ -55,14 +62,95 @@ jobs:
           PY
 
           while IFS= read -r label; do
-            gh label create "${label}" --color EDEDED --force >/dev/null 2>&1 || true
-            gh issue edit "${{ github.event.issue.number }}" --add-label "${label}"
+            [[ -z "${label}" ]] && continue
+            gh label create "${label}" --repo "${REPO}" --color EDEDED --force >/dev/null 2>&1 || true
+            gh issue edit "${ISSUE_NUMBER}" --repo "${REPO}" --add-label "${label}"
           done < /tmp/labels.txt
 
-          if [[ -n "${OPENAI_API_KEY:-}" ]]; then
-            note="AI triage key detected. Deterministic labels applied; optional AI summary generation can be enabled next."
-          else
-            note="Deterministic triage labels applied. Add OPENAI_API_KEY as a repository secret to enable AI-assisted summaries later."
-          fi
+          python3 <<'PY' > /tmp/triage-comment.md
+          import json
+          import os
+          import urllib.error
+          import urllib.request
 
-          gh issue comment "${{ github.event.issue.number }}" --body "${note}"
+          with open(os.environ["GITHUB_EVENT_PATH"], "r", encoding="utf-8") as f:
+              event = json.load(f)
+
+          issue = event.get("issue") or {}
+          title = issue.get("title", "")
+          body = issue.get("body") or ""
+          labels = [line.strip() for line in open("/tmp/labels.txt", encoding="utf-8") if line.strip()]
+
+          api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+          model = os.environ.get("OPENAI_TRIAGE_MODEL", "gpt-5.4-mini").strip() or "gpt-5.4-mini"
+
+          if not api_key:
+              print("Deterministic triage labels applied. `OPENAI_API_KEY` was not visible to this workflow run, so no AI summary was generated. Confirm the secret is saved in this repository or organization and is allowed for GitHub Actions.")
+              raise SystemExit(0)
+
+          prompt = f"""
+          You are triaging a GitHub issue for Infamous Freight, a freight/logistics platform.
+          Produce a concise markdown comment with:
+          - likely category
+          - urgency
+          - recommended owner/team
+          - next 3 actions
+          - risk notes
+
+          Keep claims conservative. Do not invent business facts.
+
+          Issue title:
+          {title}
+
+          Issue body:
+          {body}
+
+          Deterministic labels:
+          {', '.join(labels)}
+          """.strip()
+
+          payload = {
+              "model": model,
+              "input": prompt,
+              "instructions": "You are a production-minded GitHub issue triage assistant. Be concise, safe, and operationally practical.",
+              "store": False,
+          }
+
+          req = urllib.request.Request(
+              "https://api.openai.com/v1/responses",
+              data=json.dumps(payload).encode("utf-8"),
+              headers={
+                  "Authorization": f"Bearer {api_key}",
+                  "Content-Type": "application/json",
+              },
+              method="POST",
+          )
+
+          try:
+              with urllib.request.urlopen(req, timeout=30) as resp:
+                  data = json.loads(resp.read().decode("utf-8"))
+          except urllib.error.HTTPError as exc:
+              detail = exc.read().decode("utf-8", errors="replace")[:1000]
+              print(f"Deterministic triage labels applied. OpenAI API request failed with HTTP {exc.code}. Check `OPENAI_API_KEY`, billing, and optional `OPENAI_TRIAGE_MODEL`. Details: `{detail}`")
+              raise SystemExit(0)
+          except Exception as exc:
+              print(f"Deterministic triage labels applied. OpenAI API request failed before completion: `{exc}`")
+              raise SystemExit(0)
+
+          output_text = data.get("output_text")
+          if not output_text:
+              parts = []
+              for item in data.get("output", []):
+                  for content in item.get("content", []):
+                      text = content.get("text")
+                      if text:
+                          parts.append(text)
+              output_text = "\n".join(parts).strip()
+
+          if output_text:
+              print("AI-assisted triage summary generated.\n\n" + output_text)
+          else:
+              print("Deterministic triage labels applied. OpenAI returned no readable summary text.")
+          PY
+
+          gh issue comment "${ISSUE_NUMBER}" --repo "${REPO}" --body-file /tmp/triage-comment.md

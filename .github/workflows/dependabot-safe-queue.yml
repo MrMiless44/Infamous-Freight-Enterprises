@@ -17,6 +17,7 @@ jobs:
     timeout-minutes: 10
     env:
       GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
       PR_NUMBER: ${{ github.event.pull_request.number }}
     steps:
       - name: Apply safe queue labels and comment
@@ -24,9 +25,9 @@ jobs:
         run: |
           set -euo pipefail
 
-          gh label create dependencies --color EDEDED --force >/dev/null 2>&1 || true
-          gh label create safe-queue --color EDEDED --force >/dev/null 2>&1 || true
+          gh label create dependencies --repo "${REPO}" --color EDEDED --force >/dev/null 2>&1 || true
+          gh label create safe-queue --repo "${REPO}" --color EDEDED --force >/dev/null 2>&1 || true
 
-          gh pr edit "${PR_NUMBER}" --add-label dependencies --add-label safe-queue
+          gh pr edit "${PR_NUMBER}" --repo "${REPO}" --add-label dependencies --add-label safe-queue
 
-          gh pr comment "${PR_NUMBER}" --body "Dependabot PR queued. Full Validation and CodeQL must pass before merge. Major version updates require manual review."
+          gh pr comment "${PR_NUMBER}" --repo "${REPO}" --body "Dependabot PR queued. Full Validation and CodeQL must pass before merge. Major version updates require manual review."
