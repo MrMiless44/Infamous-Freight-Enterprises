@@ -12,7 +12,7 @@ Evidence in the repo:
 - `apps/api/package.json` depends on `express`, `cors`, `helmet`, Prisma, Sentry, and related TypeScript tooling.
 - `apps/api/src/server.ts` starts the app by importing `createApp()` and listening on `process.env.PORT`.
 - `apps/api/src/app.ts` registers Express middleware and API routes directly.
-- `netlify.toml` publishes `apps/web/dist`, routes public Netlify Function endpoints first, proxies `/api/health` and `/api/*`, and keeps the SPA fallback last.
+- `netlify.toml` publishes `apps/web/dist`, keeps repo-owned Netlify Functions out of normal deploys, proxies `/api/health`, public freight intake paths, and `/api/*` to the Fly.io API, and keeps the SPA fallback last.
 
 ## Documentation Drift to Resolve
 

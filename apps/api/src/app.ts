@@ -632,6 +632,10 @@ function isValidDateString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0 && !Number.isNaN(Date.parse(value));
 }
 
+function isValidPublicTrackingNumber(value: unknown): value is string {
+  return typeof value === 'string' && /^IF-\d{5}$/i.test(value.trim());
+}
+
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
@@ -900,6 +904,20 @@ function registerRoutes(app: express.Express, dataStore: DataStore, auditLogger:
       source: req.body?.source ?? 'exit-intent',
     });
     res.status(201).json({ data });
+  }));
+
+  app.get('/api/public/shipments/:trackingNumber', wrapAsync(async (req, res) => {
+    const trackingNumber = getRouteParam(req, 'trackingNumber').trim().toUpperCase();
+
+    if (!isValidPublicTrackingNumber(trackingNumber)) {
+      throw new HttpError(
+        400,
+        'invalid_tracking_number',
+        'Tracking number must use the IF-##### format.',
+      );
+    }
+
+    throw new HttpError(404, 'shipment_not_found', 'No public shipment was found for that tracking number.');
   }));
 
   app.get('/api/billing/status', requireTenant, requireRole, wrapAsync(async (req, res) => {

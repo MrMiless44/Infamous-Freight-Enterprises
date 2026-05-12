@@ -165,7 +165,7 @@ fly deploy --app infamous-freight-api
 
 # Web (Netlify)
 npm run build:web
-netlify deploy --prod --dir=apps/web/dist --functions netlify/functions
+netlify deploy --prod --dir=apps/web/dist --functions netlify/disabled-functions
 ```
 
 ---

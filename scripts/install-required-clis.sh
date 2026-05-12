@@ -9,9 +9,13 @@ mkdir -p "${TOOLS_DIR}"
 install_flyctl() {
   if command -v flyctl >/dev/null 2>&1 || [[ -x "${TOOLS_DIR}/flyctl" ]]; then
     echo "flyctl already installed"
-    return
+  else
+    curl -fsSL https://fly.io/install.sh | FLYCTL_INSTALL="${REPO_ROOT}/.tools" sh
   fi
-  curl -fsSL https://fly.io/install.sh | FLYCTL_INSTALL="${REPO_ROOT}/.tools" sh
+
+  if [[ -x "${TOOLS_DIR}/flyctl" && ! -e "${TOOLS_DIR}/fly" ]]; then
+    ln -s "${TOOLS_DIR}/flyctl" "${TOOLS_DIR}/fly"
+  fi
 }
 
 install_supabase() {

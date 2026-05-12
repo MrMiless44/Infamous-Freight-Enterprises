@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import maplibregl, { type GeoJSONSource, type LngLatBoundsLike, type Map } from 'maplibre-gl';
+import type { GeoJSONSource, LngLatBoundsLike, Map } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 type ShipmentRouteMapProps = {
@@ -92,17 +92,25 @@ export const ShipmentRouteMap: React.FC<ShipmentRouteMapProps> = ({ origin, dest
   useEffect(() => {
     if (!containerRef.current || !route) return;
 
-    const map = new maplibregl.Map({
-      container: containerRef.current,
-      style: 'https://demotiles.maplibre.org/style.json',
-      center: route.truck,
-      zoom: 4,
-      attributionControl: false,
-    });
+    let isCancelled = false;
+    let mapInstance: Map | null = null;
 
-    mapRef.current = map;
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
-    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+    const initializeMap = async () => {
+      const { default: maplibregl } = await import('maplibre-gl');
+      if (isCancelled || !containerRef.current) return;
+
+      const map = new maplibregl.Map({
+        container: containerRef.current,
+        style: 'https://demotiles.maplibre.org/style.json',
+        center: route.truck,
+        zoom: 4,
+        attributionControl: false,
+      });
+
+      mapRef.current = map;
+      mapInstance = map;
+      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+      map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
 
     const loadRoute = () => {
       const line: GeoJSON.Feature<GeoJSON.LineString> = {
@@ -155,11 +163,15 @@ export const ShipmentRouteMap: React.FC<ShipmentRouteMapProps> = ({ origin, dest
       });
     };
 
-    map.on('load', loadRoute);
-    map.on('error', () => setMapError('Route map is temporarily unavailable.'));
+      map.on('load', loadRoute);
+      map.on('error', () => setMapError('Route map is temporarily unavailable.'));
+    };
+
+    void initializeMap();
 
     return () => {
-      map.remove();
+      isCancelled = true;
+      mapInstance?.remove();
       mapRef.current = null;
     };
   }, [destination, origin, route, status]);

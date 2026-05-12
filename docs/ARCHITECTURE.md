@@ -78,7 +78,7 @@ The API package uses Express as its only backend runtime. The server starts from
 
 Netlify builds only the React/Vite web app and publishes `apps/web/dist`.
 
-The production browser API path is `/api`, not a hardcoded direct API origin. Netlify handles exact public function routes first, proxies `/api/health` and broader `/api/*` traffic to the Fly.io API, and serves the SPA fallback after those API rules.
+The production browser API path is `/api`, not a hardcoded direct API origin. Netlify currently keeps repo-owned functions disabled for normal deploys, proxies `/api/health`, exact public freight paths, and broader `/api/*` traffic to the Fly.io API, and serves the SPA fallback after those API rules.
 
 The canonical public web host is `https://www.infamousfreight.com`. The apex domain and default Netlify hostname redirect to that host.
 

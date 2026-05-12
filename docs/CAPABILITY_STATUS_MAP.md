@@ -17,7 +17,7 @@ This map tracks the implementation status of each platform capability for sales,
 
 | Capability | Status | Notes |
 |------------|--------|-------|
-| Quote request intake (public form) | Live | Web form + Netlify Function + API endpoint |
+| Quote request intake (public form) | Live | Web form + Fly API endpoint through the Netlify proxy |
 | Quote-to-load conversion | Live | API workflow with approval guard |
 | Load CRUD | Live | Full create/read with tenant isolation |
 | Driver management | Live | Create/list with carrier scoping |
@@ -89,7 +89,7 @@ This map tracks the implementation status of each platform capability for sales,
 | Fly.io API hosting | Live | Express 5 with graceful degradation |
 | Netlify proxy to Fly.io | Live | /api/* and /socket.io/* proxied |
 | Domain consolidation | Live | Apex and Netlify subdomain redirect to www |
-| Netlify Functions (freight intake) | Live | Public quote + load request endpoints |
+| Netlify Functions (freight intake) | Planned | Repo entrypoints are retained, but normal Netlify deploys currently disable functions and proxy public API paths to Fly.io |
 | Netlify Database (Postgres) | Live | Public freight intake storage |
 | Sentry error tracking | Beta | Opt-in via DSN, needs scrubbing policy |
 | API request latency logging | Live | Structured JSON logs with durationMs per /api route |

@@ -4,7 +4,7 @@ This runbook records the required setup path for Infamous Freight and the curren
 
 ## Current Checkout Status
 
-This checkout is the Netlify-oriented Infamous Freight monorepo. It uses React, Vite, Netlify Functions, an Express API, Prisma, PostgreSQL, and Fly.io deployment support.
+This checkout is the Netlify-oriented Infamous Freight monorepo. It uses React, Vite, Netlify web hosting, an Express API, Prisma, PostgreSQL, and Fly.io deployment support. Repo-owned Netlify Functions are retained as code entrypoints, but normal production deploys currently disable them and proxy public API paths to Fly.io.
 
 It is not the Laravel/Inertia/Laravel Sail source tree described by the requested LoadPartner TMS setup. Do not run `sail`, Laravel migrations, Composer install, or PHP setup commands against this checkout unless the repository has first been replaced with the Laravel TMS repository.
 

@@ -53,7 +53,6 @@ SUPABASE_SERVICE_ROLE_KEY=<supabase service role key>
 SUPABASE_ANON_KEY=<supabase anon key>
 SUPABASE_JWT_SECRET=<supabase jwt secret>
 VITE_SUPABASE_URL=https://<project>.supabase.co
-VITE_SUPABASE_DATABASE_URL=https://<project>.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=<supabase publishable key>
 VITE_SUPABASE_ANON_KEY=<supabase anon key>
 NEXT_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
