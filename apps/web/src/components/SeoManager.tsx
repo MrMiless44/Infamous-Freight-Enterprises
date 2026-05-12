@@ -9,28 +9,28 @@ type SeoConfig = {
 
 const SITE_URL = (import.meta.env.VITE_SITE_URL ?? BRAND.siteUrl).replace(/\/$/, '');
 const OG_IMAGE = `${SITE_URL}/og-image.png`;
-const OG_IMAGE_ALT = `${BRAND.displayName} AI Freight Command Center`;
+const OG_IMAGE_ALT = `${BRAND.displayName} freight quote and logistics support`;
 
 const DEFAULT_SEO: SeoConfig = {
-  title: `${BRAND.displayName} — AI Freight Command Center`,
-  description: BRAND.description,
+  title: `${BRAND.displayName} - Freight Quotes and Logistics Support`,
+  description: 'Request freight quotes, share shipment details, and contact dispatch support for freight coordination.',
 };
 
 const SEO_BY_PATH: Record<string, SeoConfig> = {
   '/': {
-    title: `${BRAND.displayName} — AI Freight Operating System`,
+    title: `${BRAND.displayName} - Request Freight Quotes and Dispatch Support`,
     description:
-      'Run dispatch, visibility, and carrier operations from one AI-powered operating system built for modern fleets.'
+      'Request freight quotes, share shipment details, and connect with dispatch and logistics support from quote request to delivery.'
   },
   '/home': {
-    title: `${BRAND.displayName} — AI Freight Operating System`,
+    title: `${BRAND.displayName} - Request Freight Quotes and Dispatch Support`,
     description:
-      'Run dispatch, visibility, and carrier operations from one AI-powered operating system built for modern fleets.'
+      'Request freight quotes, share shipment details, and connect with dispatch and logistics support from quote request to delivery.'
   },
   '/request-quote': {
     title: `Request a Freight Quote | ${BRAND.displayName}`,
     description:
-      `Submit shipment details and receive a fast quote with AI-assisted lane and carrier matching from ${BRAND.displayName}.`
+      `Submit origin, destination, equipment needs, pickup timing, and contact details for dispatch review from ${BRAND.displayName}.`
   },
   '/track-shipment': {
     title: `Track Shipment in Real Time | ${BRAND.displayName}`,
@@ -46,17 +46,49 @@ const SEO_BY_PATH: Record<string, SeoConfig> = {
     title: `Freight Services | ${BRAND.displayName}`,
     description: 'Review local, regional, box truck, cargo van, sprinter van, and dispatch support services.'
   },
+  '/services/full-truckload': {
+    title: `Full Truckload Freight Services | ${BRAND.displayName}`,
+    description: 'Request full truckload freight quotes for dedicated dry van, flatbed, or reefer capacity with dispatch review.'
+  },
+  '/services/ltl-freight': {
+    title: `LTL Freight Services | ${BRAND.displayName}`,
+    description: 'Request less-than-truckload freight quotes for palletized shipments that do not need a full trailer.'
+  },
+  '/services/flatbed': {
+    title: `Flatbed Freight Services | ${BRAND.displayName}`,
+    description: 'Request flatbed freight quotes for open-deck, oversized, heavy, or irregular freight with securement planning.'
+  },
+  '/services/reefer': {
+    title: `Reefer Freight Services | ${BRAND.displayName}`,
+    description: 'Request temperature-controlled reefer freight quotes with pickup timing, lane details, and equipment needs reviewed.'
+  },
+  '/services/expedited': {
+    title: `Expedited Freight Services | ${BRAND.displayName}`,
+    description: 'Request expedited freight options reviewed by lane, pickup timing, equipment type, and available capacity.'
+  },
+  '/services/dedicated-lanes': {
+    title: `Dedicated Freight Lanes | ${BRAND.displayName}`,
+    description: 'Request recurring dedicated lane support with written terms, repeatable dispatch details, and capacity planning.'
+  },
+  '/services/freight-brokerage': {
+    title: `Freight Brokerage Support | ${BRAND.displayName}`,
+    description: 'Request freight brokerage support connecting shipment requirements with reviewed carrier capacity and written terms.'
+  },
+  '/services/final-mile': {
+    title: `Final Mile Delivery Services | ${BRAND.displayName}`,
+    description: 'Request final mile delivery support for hub, warehouse, retail, and customer delivery freight.'
+  },
   '/services/box-truck': {
     title: `Box Truck Freight Services | ${BRAND.displayName}`,
     description: 'Book 16 to 26 ft box truck freight for retail replenishment, commercial equipment, warehouse transfers, and regional lanes.'
   },
   '/services/cargo-van': {
     title: `Cargo Van Freight Services | ${BRAND.displayName}`,
-    description: 'Fast small freight delivery by cargo van for parts runs, medical supplies, retail goods, and same-day local moves.'
+    description: 'Cargo van freight for parts runs, retail goods, documents, samples, and scheduled or expedited local moves by lane availability.'
   },
   '/services/sprinter-van': {
     title: `Sprinter Van Freight Services | ${BRAND.displayName}`,
-    description: 'Expedited light freight by sprinter van for trade shows, light pallets, regional same-day, and time-sensitive shipments.'
+    description: 'Expedited light freight by sprinter van for trade shows, light pallets, regional lanes, and time-sensitive shipments by capacity.'
   },
   '/services/local-freight': {
     title: `Local Freight Delivery Services | ${BRAND.displayName}`,
@@ -128,7 +160,7 @@ const SEO_BY_PATH: Record<string, SeoConfig> = {
   },
   '/product-hunt': {
     title: `Infamous Freight on Product Hunt | ${BRAND.displayName}`,
-    description: 'The TMS that actually understands trucking. AI-powered load management, real-time tracking, and automated exception handling.'
+    description: 'Product preview information for Infamous Freight freight workflows, quote intake, tracking, and dispatch tools.'
   },
   '/gdpr': {
     title: `Privacy & Data Protection (GDPR) | ${BRAND.displayName}`,
@@ -202,7 +234,7 @@ const FAQ_ITEMS = [
   {
     question: 'How do I get a freight quote from Infamous Freight?',
     answer:
-      'Submit your shipment details including pickup location, destination, freight type, and timing on the Request a Quote page. Our dispatch team reviews your request and provides a rate with carrier and equipment confirmation, typically within hours.',
+      'Submit your shipment details including pickup location, destination, freight type, equipment needs, pickup timing, and contact details on the Request a Quote page. Dispatch reviews your request and follows up with next steps.',
   },
   {
     question: 'What types of freight services do you offer?',
@@ -212,27 +244,27 @@ const FAQ_ITEMS = [
   {
     question: 'How does real-time shipment tracking work?',
     answer:
-      'Every load gets a live tracking timeline from pickup to delivery. You receive status updates, ETA changes, and proof-of-delivery events as they happen. Enter your reference number on the Track Shipment page for instant visibility.',
+      'Shipment tracking organizes status updates, ETA changes, delivery details, and proof-of-delivery events when they are available. Enter your reference number on the Track Shipment page for visibility.',
   },
   {
     question: 'What is your carrier vetting process?',
     answer:
-      'Every carrier is verified for FMCSA authority, active insurance, safety scores, and driver identity before touching a load. We re-check credentials on policy events and maintain documented records for every assignment.',
+      'Carrier qualification is reviewed before assignment, and operational details are confirmed before dispatch.',
   },
   {
     question: 'How do carriers and drivers get paid?',
     answer:
-      'Standard carrier pay terms are included with every load. QuickPay options are available at 2.5% for 48-hour and 3.5% for same-day settlement. Instant payout is also available at 4% with transparent fee structure.',
+      'Carrier payment terms are confirmed in writing before a shipment is assigned. Any faster payment option depends on the written agreement for that load.',
   },
   {
     question: 'What areas does Infamous Freight service?',
     answer:
-      'We cover local and regional freight lanes across core U.S. markets with verified carrier capacity. Service areas include major metro regions and multi-city distribution corridors with coordinated pickup and delivery windows.',
+      'Local and regional freight support depends on lane, timing, equipment needs, and available capacity. Share the route on the quote form so dispatch can review it.',
   },
   {
     question: 'Do you offer same-day or expedited freight?',
     answer:
-      'Yes. Cargo van and sprinter van services support same-day pickup and delivery for time-sensitive freight. Expedited options are available for parts runs, medical supplies, trade show materials, and urgent commercial shipments.',
+      'Expedited options are available by lane, pickup timing, equipment, and carrier capacity. Share the timing on the quote form so dispatch can review the request.',
   },
   {
     question: 'How do I apply to drive with Infamous Freight?',

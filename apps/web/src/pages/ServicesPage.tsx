@@ -9,10 +9,10 @@ const ServicesPage: React.FC = () => {
         <header className="mb-14 max-w-3xl">
           <p className="font-display text-sm font-semibold uppercase tracking-[0.2em] text-infamous-red-light">Services</p>
           <h1 className="mt-3 font-display text-4xl font-black uppercase tracking-tight sm:text-5xl">
-            Freight services built around verified execution.
+            Freight services built around clear quote intake.
           </h1>
           <p className="mt-5 text-lg leading-8 text-[#B88989]">
-            From small freight to full truckload, every service runs on the same operating standard — verified carriers, real-time tracking, and proof of delivery.
+            From small freight to full truckload, every service starts with shipment details, dispatch review, written terms, and clear communication.
           </p>
         </header>
 
@@ -43,12 +43,12 @@ const ServicesPage: React.FC = () => {
           <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
             <div>
               <p className="font-display text-sm font-semibold uppercase tracking-[0.2em] text-infamous-red-light">What stays consistent</p>
-              <h2 className="mt-3 font-display text-3xl font-bold">Every service runs on the same operating standard.</h2>
+              <h2 className="mt-3 font-display text-3xl font-bold">Every service starts with the same quote process.</h2>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               {[
                 'Complete quote intake before dispatch',
-                'Verified driver and carrier handoff',
+                'Carrier qualification reviewed before assignment',
                 'Tracking updates through delivery',
                 'Proof of delivery and support follow-up',
               ].map((item) => (

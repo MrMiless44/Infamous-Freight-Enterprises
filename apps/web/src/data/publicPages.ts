@@ -19,9 +19,9 @@ export const servicePages: ServicePage[] = [
     eyebrow: 'Dedicated capacity',
     summary: 'Full truckload freight for shipments that fill an entire trailer — dry van, flatbed, or reefer.',
     description:
-      'Full truckload is the right choice when your freight fills or nearly fills a 53-foot trailer. No shared space, no extra stops, direct pickup to direct delivery with verified carriers.',
+      'Full truckload is the right choice when your freight fills or nearly fills a 53-foot trailer. Shipment details, equipment fit, timing, and dispatch requirements are reviewed before booking.',
     Icon: Truck,
-    bullets: ['Dedicated trailer for your freight only', 'Direct pickup and delivery — no hub stops', 'Dry van, flatbed, and reefer options', 'Verified carriers with safety and insurance checks'],
+    bullets: ['Dedicated trailer for your freight only', 'Direct pickup and delivery planning', 'Dry van, flatbed, and reefer options', 'Carrier qualification reviewed before assignment'],
     bestFor: ['Large volume shipments', 'Time-sensitive full loads', 'High-value freight', 'Consistent lane commitments'],
   },
   {
@@ -61,11 +61,11 @@ export const servicePages: ServicePage[] = [
     slug: 'expedited',
     title: 'Expedited freight',
     eyebrow: 'Time-critical',
-    summary: 'Expedited freight for urgent shipments that need same-day or next-day delivery with priority handling.',
+    summary: 'Expedited freight for urgent shipments reviewed by lane, pickup timing, equipment, and available capacity.',
     description:
-      'When time matters more than cost, expedited freight gets your shipment moving immediately. Dedicated equipment, direct routes, and real-time tracking from pickup to delivery.',
+      'When timing is tight, expedited freight requests are reviewed for lane fit, pickup timing, equipment, and available capacity before booking.',
     Icon: Zap,
-    bullets: ['Same-day and next-day options', 'Dedicated driver and equipment', 'Direct routing — no stops', 'Priority dispatch and real-time tracking'],
+    bullets: ['Expedited options by lane and capacity', 'Dedicated equipment when available', 'Direct routing when operationally appropriate', 'Priority dispatch review and status updates'],
     bestFor: ['Production line shutdowns', 'Emergency parts delivery', 'Medical supplies', 'Time-critical documents'],
   },
   {
@@ -74,20 +74,20 @@ export const servicePages: ServicePage[] = [
     eyebrow: 'Recurring freight',
     summary: 'Dedicated lane freight for recurring routes with consistent volume, pricing, and carrier assignment.',
     description:
-      'Dedicated lanes lock in pricing, carrier quality, and service consistency for routes you run regularly. Reduce rate volatility and build reliable carrier relationships.',
+      'Dedicated lanes support recurring routes with written terms, repeatable dispatch details, and reviewed carrier fit for routes you run regularly.',
     Icon: Route,
-    bullets: ['Locked-in rate agreements', 'Consistent carrier and driver assignment', 'Priority capacity on your lanes', 'Performance tracking and scorecards'],
+    bullets: ['Written rate agreements', 'Carrier fit reviewed for recurring lanes', 'Capacity planning for recurring routes', 'Shipment notes and performance follow-up'],
     bestFor: ['Weekly recurring freight', 'Distribution center lanes', 'Manufacturing supply chains', 'Retail replenishment routes'],
   },
   {
     slug: 'freight-brokerage',
     title: 'Freight brokerage',
     eyebrow: 'Full-service',
-    summary: 'Full-service freight brokerage connecting shippers with verified carriers across all equipment types.',
+    summary: 'Freight coordination connecting shipper needs with reviewed carrier capacity across equipment types.',
     description:
-      'Infamous Freight operates as a licensed freight broker, matching your shipments with vetted carriers. Rate negotiation, carrier vetting, load tracking, and payment handled end-to-end.',
+      'Freight brokerage support helps match shipment requirements with carrier capacity. Rate terms, carrier qualification, tracking expectations, and payment details are confirmed in writing.',
     Icon: Warehouse,
-    bullets: ['Licensed and bonded brokerage', 'Carrier vetting and compliance checks', 'Rate negotiation and market pricing', 'End-to-end shipment management'],
+    bullets: ['Carrier qualification reviewed before assignment', 'Shipment details verified before booking', 'Rate terms confirmed in writing', 'Shipment coordination from request to delivery'],
     bestFor: ['Shippers without carrier relationships', 'Overflow capacity needs', 'New market or lane coverage', 'Seasonal freight surges'],
   },
   {
@@ -120,7 +120,7 @@ export const servicePages: ServicePage[] = [
     description:
       'Cargo vans are ideal for lighter freight that needs direct pickup, direct delivery, and fewer touches than standard parcel networks.',
     Icon: Send,
-    bullets: ['Direct pickup and delivery', 'Small freight and parts movement', 'Same-day and scheduled options', 'Status updates through delivery'],
+    bullets: ['Direct pickup and delivery planning', 'Small freight and parts movement', 'Expedited and scheduled options by capacity', 'Status updates through delivery'],
     bestFor: ['Parts runs', 'Small business freight', 'Medical or retail supplies', 'Hotshot local moves'],
   },
   {
@@ -132,7 +132,7 @@ export const servicePages: ServicePage[] = [
       'Sprinter vans bridge the gap between cargo van and box truck. They are useful for expedited shipments, longer local lanes, and lightweight pallet freight.',
     Icon: Route,
     bullets: ['Flexible cargo space', 'Expedited regional movement', 'Fewer handling points', 'Driver and shipment visibility'],
-    bestFor: ['Expedited freight', 'Light palletized shipments', 'Regional same-day lanes', 'Trade show or event freight'],
+    bestFor: ['Expedited freight', 'Light palletized shipments', 'Regional time-sensitive lanes', 'Trade show or event freight'],
   },
   {
     slug: 'local-freight',
@@ -142,7 +142,7 @@ export const servicePages: ServicePage[] = [
     description:
       'Local freight requires tight communication, clean pickup details, and reliable proof. Infamous Freight organizes the request, driver assignment, tracking, and POD in one workflow.',
     Icon: MapPinned,
-    bullets: ['Same-city and metro delivery', 'Pickup and delivery window coordination', 'Driver status updates', 'POD collection and follow-up'],
+    bullets: ['Same-city and metro delivery planning', 'Pickup and delivery window coordination', 'Driver status updates', 'POD collection and follow-up'],
     bestFor: ['Local business delivery', 'Warehouse moves', 'Retail replenishment', 'Scheduled routes'],
   },
   {
@@ -151,7 +151,7 @@ export const servicePages: ServicePage[] = [
     eyebrow: 'Multi-city lanes',
     summary: 'Regional freight for shipments moving between cities, distribution points, warehouses, and customer locations.',
     description:
-      'Regional freight benefits from verified carriers, dispatch oversight, ETA visibility, and documentation that stays attached to the shipment.',
+      'Regional freight benefits from carrier qualification review, dispatch oversight, ETA visibility, and documentation that stays attached to the shipment.',
     Icon: Warehouse,
     bullets: ['City-to-city freight moves', 'Carrier fit and equipment coordination', 'ETA and exception tracking', 'POD and invoice support'],
     bestFor: ['Distribution lanes', 'Manufacturing moves', 'Retail supply chains', 'Recurring freight'],

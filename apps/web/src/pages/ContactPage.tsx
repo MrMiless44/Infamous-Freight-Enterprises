@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Clock3, Mail, MapPin, Phone, Send, Truck } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Clock3, Mail, MapPin, Send, Truck } from 'lucide-react';
 import { submitNetlifyForm } from '@/lib/netlifyForms';
 
 const initialForm = {
@@ -16,17 +16,20 @@ const contactCards = [
   {
     label: 'Dispatch and quotes',
     value: 'dispatch@infamousfreight.com',
+    href: 'mailto:dispatch@infamousfreight.com',
     icon: <Mail size={20} />,
   },
   {
-    label: 'Driver onboarding',
+    label: 'Carrier and partner inquiries',
     value: 'drivers@infamousfreight.com',
+    href: 'mailto:drivers@infamousfreight.com',
     icon: <Truck size={20} />,
   },
   {
     label: 'General support',
     value: 'support@infamousfreight.com',
-    icon: <Phone size={20} />,
+    href: 'mailto:support@infamousfreight.com',
+    icon: <Mail size={20} />,
   },
 ];
 
@@ -61,10 +64,18 @@ const ContactPage: React.FC = () => {
       <div className="mx-auto max-w-7xl">
         <header className="mb-10 max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Contact</p>
-          <h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">Talk to dispatch, onboarding, or support.</h1>
+          <h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">Request a quote or contact dispatch.</h1>
           <p className="mt-4 text-lg leading-8 text-[#F5E8E8]/80">
-            Send a quote question, driver onboarding request, partnership note, or support issue. The right team will follow up with next steps.
+            Freight inquiries move fastest through the quote form. Use direct email for dispatch questions, carrier and partner inquiries, or general support.
           </p>
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+            <Link to="/request-quote" className="inline-flex items-center justify-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 font-semibold text-[#F5E8E8]">
+              Request a Quote <ArrowRight size={17} />
+            </Link>
+            <a href="mailto:dispatch@infamousfreight.com" className="inline-flex items-center justify-center gap-2 rounded-xl border border-infamous-border bg-infamous-card px-5 py-3 font-semibold text-[#F5E8E8]">
+              Email Dispatch <Mail size={17} />
+            </a>
+          </div>
         </header>
 
         <section className="mb-8 grid gap-4 md:grid-cols-3">
@@ -72,7 +83,9 @@ const ContactPage: React.FC = () => {
             <div key={card.label} className="rounded-2xl border border-infamous-border bg-infamous-card p-5">
               <div className="mb-3 text-infamous-orange">{card.icon}</div>
               <p className="text-sm text-[#B88989]/70">{card.label}</p>
-              <p className="mt-1 font-semibold text-[#F5E8E8]">{card.value}</p>
+              <a href={card.href} className="mt-1 block font-semibold text-[#F5E8E8] underline-offset-4 hover:text-infamous-orange hover:underline">
+                {card.value}
+              </a>
             </div>
           ))}
         </section>
@@ -176,7 +189,7 @@ const ContactPage: React.FC = () => {
             <div className="rounded-3xl border border-infamous-border bg-infamous-panel p-6">
               <MapPin className="mb-3 text-infamous-orange" size={24} />
               <h2 className="text-lg font-bold">Service region</h2>
-              <p className="mt-3 text-sm leading-6 text-[#B88989]">Local and regional freight across core U.S. lanes, with emphasis on verified capacity and shipment visibility.</p>
+              <p className="mt-3 text-sm leading-6 text-[#B88989]">Local and regional freight support depends on lane, timing, equipment needs, and available capacity.</p>
             </div>
             <Link to="/request-quote" className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 font-semibold text-[#F5E8E8]">
               Need a quote instead? <ArrowRight size={17} />
