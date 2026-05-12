@@ -9,6 +9,7 @@ import {
   MapPin,
   Package,
   Paperclip,
+  Phone,
   Send,
   Settings,
   Truck,
@@ -123,6 +124,93 @@ const STEPS = [
   { label: 'Review', icon: ClipboardList },
 ];
 
+type FormState = typeof initialForm;
+type FormField = keyof FormState;
+type ValidationErrors = Partial<Record<FormField | 'attachment', string>>;
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_PATTERN = /^[+()\-\s.\d]{7,40}$/;
+const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024;
+const ALLOWED_ATTACHMENT_EXTENSIONS = new Set(['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'txt']);
+
+const stepFields: Record<number, FormField[]> = {
+  0: ['origin', 'pickupDate', 'company', 'contact', 'phone', 'email'],
+  1: ['destination', 'deliveryDate', 'miles'],
+  2: ['freightType', 'weight', 'dimensions', 'equipment'],
+  3: ['instructions'],
+  4: ['origin', 'pickupDate', 'company', 'contact', 'phone', 'email', 'destination', 'deliveryDate', 'miles', 'freightType', 'weight', 'equipment'],
+};
+
+const labels: Record<FormField | 'attachment', string> = {
+  company: 'Company name',
+  contact: 'Contact name',
+  email: 'Email',
+  phone: 'Phone',
+  origin: 'Origin city / state',
+  destination: 'Destination city / state',
+  freightType: 'Freight type',
+  equipment: 'Equipment',
+  weight: 'Weight',
+  miles: 'Lane miles',
+  dimensions: 'Dimensions / pallet count',
+  pickupDate: 'Pickup date',
+  deliveryDate: 'Delivery date',
+  instructions: 'Special instructions',
+  attachment: 'Attachment',
+};
+
+const isDateBefore = (left: string, right: string) => new Date(`${left}T00:00:00`).getTime() < new Date(`${right}T00:00:00`).getTime();
+
+const validateForm = (form: FormState, attachment: File | null): ValidationErrors => {
+  const errors: ValidationErrors = {};
+  const required: FormField[] = ['company', 'contact', 'email', 'origin', 'pickupDate', 'destination', 'freightType', 'weight'];
+
+  required.forEach((field) => {
+    if (!form[field].trim()) {
+      errors[field] = `${labels[field]} is required.`;
+    }
+  });
+
+  if (form.email.trim() && !EMAIL_PATTERN.test(form.email.trim())) {
+    errors.email = 'Enter a valid email address.';
+  }
+
+  if (form.phone.trim() && !PHONE_PATTERN.test(form.phone.trim())) {
+    errors.phone = 'Enter a valid phone number.';
+  }
+
+  const weight = Number(form.weight);
+  if (form.weight.trim() && (!Number.isFinite(weight) || weight <= 0)) {
+    errors.weight = 'Enter a weight greater than 0 lbs.';
+  }
+
+  const miles = Number(form.miles);
+  if (form.miles.trim() && (!Number.isFinite(miles) || miles < 0)) {
+    errors.miles = 'Lane miles must be zero or greater.';
+  }
+
+  if (form.pickupDate && form.deliveryDate && isDateBefore(form.deliveryDate, form.pickupDate)) {
+    errors.deliveryDate = 'Delivery date must be on or after pickup.';
+  }
+
+  if (attachment) {
+    const extension = attachment.name.split('.').pop()?.toLowerCase() ?? '';
+    if (attachment.size > MAX_ATTACHMENT_BYTES) {
+      errors.attachment = 'Attachments must be 8 MB or smaller.';
+    } else if (!ALLOWED_ATTACHMENT_EXTENSIONS.has(extension)) {
+      errors.attachment = 'Use a PDF, image, document, spreadsheet, CSV, or text file.';
+    }
+  }
+
+  return errors;
+};
+
+const getStepErrors = (errors: ValidationErrors, currentStep: number) => {
+  const allowedFields = new Set<FormField | 'attachment'>(stepFields[currentStep] ?? []);
+  if (currentStep === 3) allowedFields.add('attachment');
+  return Object.entries(errors).filter(([field]) => allowedFields.has(field as FormField | 'attachment'));
+};
+
 const InputField: React.FC<{
   label: string;
   name: string;
@@ -133,7 +221,8 @@ const InputField: React.FC<{
   required?: boolean;
   autoComplete?: string;
   inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
-}> = ({ label, name, type = 'text', value, onChange, placeholder, required, autoComplete, inputMode }) => (
+  error?: string;
+}> = ({ label, name, type = 'text', value, onChange, placeholder, required, autoComplete, inputMode, error }) => (
   <label className="block">
     <span className="mb-2 block text-sm font-medium text-[#F5E8E8]/80">
       {label} {required && <span className="text-infamous-orange">*</span>}
@@ -147,8 +236,11 @@ const InputField: React.FC<{
       required={required}
       autoComplete={autoComplete}
       inputMode={inputMode}
-      className="input-field"
+      aria-invalid={Boolean(error)}
+      aria-describedby={error ? `${name}-error` : undefined}
+      className={`input-field ${error ? 'border-red-400 focus:border-red-300 focus:ring-red-300/30' : ''}`}
     />
+    {error && <span id={`${name}-error`} className="mt-2 block text-xs font-semibold text-red-200">{error}</span>}
   </label>
 );
 
@@ -159,27 +251,43 @@ const PublicQuoteRequestPage: React.FC = () => {
   const [trackingNumber, setTrackingNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [errors, setErrors] = useState<ValidationErrors>({});
+  const [touched, setTouched] = useState(false);
   const [attachment, setAttachment] = useState<File | null>(null);
 
   const estimate = useMemo(() => computeEstimate(form), [form]);
+  const formErrors = useMemo(() => validateForm(form, attachment), [form, attachment]);
+  const activeErrors = touched ? errors : {};
+  const currentStepErrors = getStepErrors(activeErrors, step);
+  const progress = Math.round(((step + 1) / STEPS.length) * 100);
 
   const updateField = (key: keyof typeof initialForm, value: string) => {
     setForm((current) => ({ ...current, [key]: value }));
+    setErrors((current) => {
+      if (!current[key]) return current;
+      const next = { ...current };
+      delete next[key];
+      return next;
+    });
   };
 
   const canProceed = (s: number): boolean => {
-    switch (s) {
-      case 0: return Boolean(form.origin.trim() && form.pickupDate);
-      case 1: return Boolean(form.destination.trim());
-      case 2: return Boolean(form.freightType.trim() && form.weight.trim());
-      case 3: return true;
-      case 4: return Boolean(form.company.trim() && form.contact.trim() && form.email.trim());
-      default: return true;
-    }
+    return getStepErrors(formErrors, s).length === 0;
   };
 
   const nextStep = () => {
-    if (step < STEPS.length - 1 && canProceed(step)) setStep(step + 1);
+    const nextErrors = validateForm(form, attachment);
+    const stepErrors = getStepErrors(nextErrors, step);
+    if (stepErrors.length > 0) {
+      setTouched(true);
+      setErrors(nextErrors);
+      setError('Please fix the highlighted fields before continuing.');
+      return;
+    }
+
+    setError('');
+    setErrors(nextErrors);
+    if (step < STEPS.length - 1) setStep(step + 1);
   };
 
   const prevStep = () => {
@@ -188,8 +296,20 @@ const PublicQuoteRequestPage: React.FC = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    const nextErrors = validateForm(form, attachment);
+    const blockingStep = STEPS.findIndex((_, index) => getStepErrors(nextErrors, index).length > 0);
+
+    if (blockingStep >= 0) {
+      setTouched(true);
+      setErrors(nextErrors);
+      setStep(blockingStep);
+      setError('Please fix the highlighted fields before submitting.');
+      return;
+    }
+
     setLoading(true);
     setError('');
+    setErrors({});
 
     try {
       const quotePayload = {
@@ -237,15 +357,15 @@ const PublicQuoteRequestPage: React.FC = () => {
             <h2 className="text-xl font-bold">Pickup Details</h2>
             <p className="text-sm text-[#B88989]">Where is the freight being picked up?</p>
             <div className="grid gap-4 sm:grid-cols-2">
-              <InputField label="Origin City / State" name="origin" value={form.origin} onChange={(v) => updateField('origin', v)} required />
-              <InputField label="Pickup Date" name="pickupDate" type="date" value={form.pickupDate} onChange={(v) => updateField('pickupDate', v)} required />
+              <InputField label="Origin City / State" name="origin" value={form.origin} onChange={(v) => updateField('origin', v)} required error={activeErrors.origin} />
+              <InputField label="Pickup Date" name="pickupDate" type="date" value={form.pickupDate} onChange={(v) => updateField('pickupDate', v)} required error={activeErrors.pickupDate} />
             </div>
-            <InputField label="Company Name" name="company" value={form.company} onChange={(v) => updateField('company', v)} required />
+            <InputField label="Company Name" name="company" value={form.company} onChange={(v) => updateField('company', v)} required error={activeErrors.company} autoComplete="organization" />
             <div className="grid gap-4 sm:grid-cols-2">
-              <InputField label="Contact Name" name="contact" value={form.contact} onChange={(v) => updateField('contact', v)} required />
-              <InputField label="Phone" name="phone" type="tel" value={form.phone} onChange={(v) => updateField('phone', v)} autoComplete="tel" inputMode="tel" />
+              <InputField label="Contact Name" name="contact" value={form.contact} onChange={(v) => updateField('contact', v)} required error={activeErrors.contact} autoComplete="name" />
+              <InputField label="Phone" name="phone" type="tel" value={form.phone} onChange={(v) => updateField('phone', v)} autoComplete="tel" inputMode="tel" error={activeErrors.phone} />
             </div>
-            <InputField label="Email" name="email" type="email" value={form.email} onChange={(v) => updateField('email', v)} required autoComplete="email" />
+            <InputField label="Email" name="email" type="email" value={form.email} onChange={(v) => updateField('email', v)} required autoComplete="email" error={activeErrors.email} />
           </div>
         );
       case 1:
@@ -254,10 +374,10 @@ const PublicQuoteRequestPage: React.FC = () => {
             <h2 className="text-xl font-bold">Delivery Details</h2>
             <p className="text-sm text-[#B88989]">Where is the freight going?</p>
             <div className="grid gap-4 sm:grid-cols-2">
-              <InputField label="Destination City / State" name="destination" value={form.destination} onChange={(v) => updateField('destination', v)} required />
-              <InputField label="Delivery Date (optional)" name="deliveryDate" type="date" value={form.deliveryDate} onChange={(v) => updateField('deliveryDate', v)} />
+              <InputField label="Destination City / State" name="destination" value={form.destination} onChange={(v) => updateField('destination', v)} required error={activeErrors.destination} />
+              <InputField label="Delivery Date (optional)" name="deliveryDate" type="date" value={form.deliveryDate} onChange={(v) => updateField('deliveryDate', v)} error={activeErrors.deliveryDate} />
             </div>
-            <InputField label="Lane Miles (optional)" name="miles" type="number" value={form.miles} onChange={(v) => updateField('miles', v)} inputMode="numeric" />
+            <InputField label="Lane Miles (optional)" name="miles" type="number" value={form.miles} onChange={(v) => updateField('miles', v)} inputMode="numeric" error={activeErrors.miles} />
           </div>
         );
       case 2:
@@ -265,10 +385,10 @@ const PublicQuoteRequestPage: React.FC = () => {
           <div className="space-y-5">
             <h2 className="text-xl font-bold">Freight Details</h2>
             <p className="text-sm text-[#B88989]">Tell us about the load.</p>
-            <InputField label="Freight Type" name="freightType" value={form.freightType} onChange={(v) => updateField('freightType', v)} required placeholder="e.g. Palletized goods, machinery, retail" />
+            <InputField label="Freight Type" name="freightType" value={form.freightType} onChange={(v) => updateField('freightType', v)} required placeholder="e.g. Palletized goods, machinery, retail" error={activeErrors.freightType} />
             <div className="grid gap-4 sm:grid-cols-2">
-              <InputField label="Weight (lbs)" name="weight" type="number" value={form.weight} onChange={(v) => updateField('weight', v)} required inputMode="numeric" />
-              <InputField label="Dimensions / Pallet Count" name="dimensions" value={form.dimensions} onChange={(v) => updateField('dimensions', v)} placeholder="e.g. 4 pallets, 48x40x60" />
+              <InputField label="Weight (lbs)" name="weight" type="number" value={form.weight} onChange={(v) => updateField('weight', v)} required inputMode="numeric" error={activeErrors.weight} />
+              <InputField label="Dimensions / Pallet Count" name="dimensions" value={form.dimensions} onChange={(v) => updateField('dimensions', v)} placeholder="e.g. 4 pallets, 48x40x60" error={activeErrors.dimensions} />
             </div>
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-[#F5E8E8]/80">Equipment <span className="text-infamous-orange">*</span></span>
@@ -276,6 +396,8 @@ const PublicQuoteRequestPage: React.FC = () => {
                 name="equipment"
                 value={form.equipment}
                 onChange={(e) => updateField('equipment', e.target.value)}
+                aria-invalid={Boolean(activeErrors.equipment)}
+                aria-describedby={activeErrors.equipment ? 'equipment-error' : undefined}
                 className="input-field"
               >
                 <option>Dry van</option>
@@ -286,6 +408,7 @@ const PublicQuoteRequestPage: React.FC = () => {
                 <option>Cargo van</option>
                 <option>Sprinter van</option>
               </select>
+              {activeErrors.equipment && <span id="equipment-error" className="mt-2 block text-xs font-semibold text-red-200">{activeErrors.equipment}</span>}
             </label>
           </div>
         );
@@ -301,11 +424,14 @@ const PublicQuoteRequestPage: React.FC = () => {
                 maxLength={2000}
                 value={form.instructions}
                 onChange={(e) => updateField('instructions', e.target.value)}
+                aria-invalid={Boolean(activeErrors.instructions)}
+                aria-describedby={activeErrors.instructions ? 'instructions-error' : undefined}
                 className="input-field min-h-32"
                 placeholder="Pickup windows, delivery requirements, accessorials, dock notes, liftgate, etc."
               />
+              {activeErrors.instructions && <span id="instructions-error" className="mt-2 block text-xs font-semibold text-red-200">{activeErrors.instructions}</span>}
             </label>
-            <label className="block rounded-xl border border-dashed border-infamous-border bg-infamous-panel p-5 transition hover:border-infamous-red/30 cursor-pointer">
+            <label className={`block rounded-xl border border-dashed bg-infamous-panel p-5 transition hover:border-infamous-red/30 cursor-pointer ${activeErrors.attachment ? 'border-red-400' : 'border-infamous-border'}`}>
               <span className="flex items-center gap-2 text-sm font-medium text-[#F5E8E8]/80">
                 <Paperclip size={16} className="text-infamous-red-light" /> Attach freight document
               </span>
@@ -316,10 +442,21 @@ const PublicQuoteRequestPage: React.FC = () => {
                 name="attachment"
                 type="file"
                 accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv,.txt"
-                onChange={(e) => setAttachment(e.target.files?.[0] ?? null)}
+                aria-invalid={Boolean(activeErrors.attachment)}
+                aria-describedby={activeErrors.attachment ? 'attachment-error' : undefined}
+                onChange={(e) => {
+                  setAttachment(e.target.files?.[0] ?? null);
+                  setErrors((current) => {
+                    if (!current.attachment) return current;
+                    const next = { ...current };
+                    delete next.attachment;
+                    return next;
+                  });
+                }}
                 className="mt-3 block w-full text-sm text-[#F5E8E8]/80 file:mr-4 file:rounded-lg file:border-0 file:bg-infamous-red file:px-4 file:py-2 file:font-semibold file:text-[#F5E8E8]"
               />
               {attachment && <span className="mt-2 block text-xs text-[#B88989]/70">{attachment.name}</span>}
+              {activeErrors.attachment && <span id="attachment-error" className="mt-2 block text-xs font-semibold text-red-200">{activeErrors.attachment}</span>}
             </label>
           </div>
         );
@@ -376,7 +513,7 @@ const PublicQuoteRequestPage: React.FC = () => {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-infamous-dark px-5 py-8 text-[#F5E8E8] lg:px-6">
+      <div className="min-h-screen bg-infamous-dark px-4 py-6 text-[#F5E8E8] sm:px-5 lg:px-6 lg:py-8">
         <div className="mx-auto max-w-2xl">
           <div className="rounded-xl border border-[#36D399]/30 bg-infamous-card p-8 text-center">
             <CheckCircle2 className="mx-auto mb-4 text-[#36D399]" size={48} />
@@ -395,7 +532,7 @@ const PublicQuoteRequestPage: React.FC = () => {
             )}
             <button
               type="button"
-              onClick={() => { setSubmitted(false); setForm(initialForm); setTrackingNumber(''); setAttachment(null); setStep(0); }}
+              onClick={() => { setSubmitted(false); setForm(initialForm); setTrackingNumber(''); setAttachment(null); setStep(0); setErrors({}); setTouched(false); setError(''); }}
               className="mt-6 inline-flex items-center gap-2 rounded-xl bg-infamous-red px-6 py-3 font-semibold text-[#F5E8E8] transition hover:bg-infamous-red-light"
             >
               Submit Another Request
@@ -407,20 +544,40 @@ const PublicQuoteRequestPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-infamous-dark px-5 py-8 text-[#F5E8E8] lg:px-6">
+    <div className="min-h-screen bg-infamous-dark px-4 py-5 text-[#F5E8E8] sm:px-5 lg:px-6 lg:py-8">
       <div className="mx-auto max-w-6xl">
         <Link to="/" className="mb-6 inline-flex items-center gap-2 text-sm text-[#B88989] hover:text-[#F5E8E8]">
           <ArrowLeft size={16} /> Back
         </Link>
 
+        <header className="mb-6 grid gap-4 rounded-xl border border-infamous-border bg-infamous-card p-5 sm:p-6 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-infamous-red-light">Freight quote intake</p>
+            <h1 className="mt-2 text-2xl font-black leading-tight sm:text-4xl">Request a quote without waiting on a call.</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-[#B88989]">
+              Share the lane, freight, and contact details dispatch needs to price the move and confirm capacity.
+            </p>
+          </div>
+          <Link to="/contact" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-infamous-border bg-infamous-panel px-4 text-sm font-semibold text-[#F5E8E8] transition hover:border-infamous-red/40">
+            <Phone size={16} className="text-infamous-red-light" /> Contact dispatch
+          </Link>
+        </header>
+
         <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
           {/* Main Form */}
-          <div className="rounded-xl border border-infamous-border bg-infamous-card p-6 lg:p-8">
+          <div className="rounded-xl border border-infamous-border bg-infamous-card p-4 sm:p-6 lg:p-8">
             {/* Step Indicator */}
-            <div className="mb-8">
-              <div className="flex items-center gap-1 overflow-x-auto pb-2">
+            <div className="mb-7">
+              <div className="mb-3 flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.12em] text-infamous-muted">
+                <span>Step {step + 1} of {STEPS.length}</span>
+                <span>{progress}% complete</span>
+              </div>
+              <div className="mb-4 h-2 overflow-hidden rounded-full bg-infamous-panel">
+                <div className="h-full rounded-full bg-infamous-red transition-all" style={{ width: `${progress}%` }} />
+              </div>
+              <div className="flex snap-x items-center gap-1 overflow-x-auto pb-2">
                 {STEPS.map((s, i) => (
-                  <div key={s.label} className="flex items-center gap-1 shrink-0">
+                  <div key={s.label} className="flex shrink-0 snap-start items-center gap-1">
                     <button
                       type="button"
                       onClick={() => { if (i <= step) setStep(i); }}
@@ -468,11 +625,22 @@ const PublicQuoteRequestPage: React.FC = () => {
 
               {renderStepContent()}
 
-              {error && <p className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">{error}</p>}
+              {(error || currentStepErrors.length > 0) && (
+                <div className="mt-5 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-100" role="alert" aria-live="polite">
+                  {error && <p className="font-semibold">{error}</p>}
+                  {currentStepErrors.length > 0 && (
+                    <ul className="mt-2 space-y-1 text-xs text-red-100/85">
+                      {currentStepErrors.map(([field, message]) => (
+                        <li key={field}>{message}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
 
-              <div className="mt-8 flex items-center justify-between">
+              <div className="sticky bottom-0 -mx-4 mt-8 flex items-center justify-between gap-3 border-t border-infamous-border bg-infamous-card/95 px-4 py-4 backdrop-blur sm:static sm:mx-0 sm:border-t-0 sm:bg-transparent sm:px-0 sm:py-0">
                 {step > 0 ? (
-                  <button type="button" onClick={prevStep} className="btn-secondary inline-flex items-center gap-2">
+                  <button type="button" onClick={prevStep} className="btn-secondary inline-flex min-h-12 items-center gap-2">
                     <ArrowLeft size={16} /> Back
                   </button>
                 ) : <div />}
@@ -481,8 +649,7 @@ const PublicQuoteRequestPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={nextStep}
-                    disabled={!canProceed(step)}
-                    className="btn-primary inline-flex items-center gap-2"
+                    className="btn-primary inline-flex min-h-12 flex-1 items-center justify-center gap-2 sm:flex-none"
                   >
                     Continue <ArrowRight size={16} />
                   </button>
@@ -490,7 +657,7 @@ const PublicQuoteRequestPage: React.FC = () => {
                   <button
                     type="submit"
                     disabled={loading || !canProceed(step)}
-                    className="btn-primary btn-lg inline-flex items-center gap-2"
+                    className="btn-primary btn-lg inline-flex min-h-12 flex-1 items-center justify-center gap-2 sm:flex-none"
                   >
                     {loading ? 'Submitting...' : 'Submit Quote Request'} <Send size={17} />
                   </button>
