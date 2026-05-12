@@ -126,9 +126,7 @@ jobs:
             --network "$DOCKER_NETWORK" \
             -e DATABASE_URL="$DATABASE_URL" \
             "$IMAGE_NAME" \
-            node node_modules/prisma/build/index.js migrate deploy \
-            --schema apps/api/prisma/schema.prisma \
-            --config apps/api/prisma.config.ts
+            sh -lc 'cd apps/api && npx prisma migrate deploy --schema prisma/schema.prisma'
 
       - name: Start runtime container
         run: |
