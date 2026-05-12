@@ -67,3 +67,6 @@ apps/api/coverage/
 
 # Local CLI bootstrap artifacts
 .tools/
+
+# This repo is pnpm-managed; do not commit npm lockfiles.
+package-lock.json
