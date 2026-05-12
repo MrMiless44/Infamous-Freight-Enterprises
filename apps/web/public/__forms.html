@@ -23,6 +23,7 @@
       <input type="hidden" name="clientSubmittedAt" />
       <input type="hidden" name="pageUrl" />
       <input type="text" name="company" autocomplete="organization" maxlength="120" />
+      <input type="text" name="name" autocomplete="name" maxlength="120" />
       <input type="text" name="contact" autocomplete="name" maxlength="120" />
       <input type="email" name="email" autocomplete="email" maxlength="160" />
       <input type="tel" name="phone" autocomplete="tel" maxlength="40" />
@@ -34,13 +35,16 @@
       <input type="text" name="dimensions" maxlength="120" />
       <input type="number" name="miles" min="0" step="0.1" />
       <input type="date" name="pickupDate" />
+      <input type="text" name="pickupTiming" maxlength="120" />
       <input type="date" name="deliveryDate" />
       <input type="text" name="trackingNumber" maxlength="80" />
       <input type="number" name="estimateLow" min="0" step="0.01" />
       <input type="number" name="estimateMid" min="0" step="0.01" />
       <input type="number" name="estimateHigh" min="0" step="0.01" />
       <input type="file" name="attachment" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv,.txt" />
+      <textarea name="freightDetails" maxlength="2000"></textarea>
       <textarea name="instructions" maxlength="2000"></textarea>
+      <textarea name="notes" maxlength="2000"></textarea>
     </form>
 
     <form

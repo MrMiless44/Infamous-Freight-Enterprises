@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -17,7 +18,7 @@ import {
   User,
   XCircle,
 } from 'lucide-react';
-import { ShipmentRouteMap } from '@/components/ShipmentRouteMap';
+import { LazyShipmentRouteMap, preloadShipmentRouteMap } from '@/components/LazyShipmentRouteMap';
 
 const timelineSteps = [
   { key: 'quote_created', label: 'Quote Created', date: 'Apr 25, 2026 · 9:15 AM' },
@@ -143,6 +144,10 @@ const ShipmentDetailPage: React.FC = () => {
   const { trackingId } = useParams<{ trackingId: string }>();
   const shipment = shipmentData[trackingId as keyof typeof shipmentData];
 
+  useEffect(() => {
+    preloadShipmentRouteMap();
+  }, []);
+
   if (!shipment) {
     return (
       <div className="min-h-screen bg-infamous-dark text-[#F5E8E8] flex items-center justify-center p-6">
@@ -255,7 +260,7 @@ const ShipmentDetailPage: React.FC = () => {
                 </h2>
               </div>
               <div className="h-72 lg:h-80">
-                <ShipmentRouteMap origin={shipment.origin} destination={shipment.destination} status={shipment.status} />
+                <LazyShipmentRouteMap origin={shipment.origin} destination={shipment.destination} status={shipment.status} />
               </div>
             </div>
 

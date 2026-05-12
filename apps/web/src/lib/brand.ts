@@ -10,5 +10,5 @@ export const BRAND = {
   notificationIcon: '/favicon.svg',
   ogImageAlt: 'Infamous Freight — We Move. You Win.',
   description:
-    'Infamous Freight is a verified freight command center for quote intake, dispatch coordination, carrier execution, shipment visibility, and proof workflows.',
+    'Infamous Freight helps shippers, carriers, and dispatch teams coordinate freight quotes, shipment details, tracking context, and delivery follow-up.',
 };

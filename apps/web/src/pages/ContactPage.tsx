@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Clock3, Mail, MapPin, Phone, Send, Truck } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Clock3, Mail, MapPin, Send, Truck } from 'lucide-react';
 import { submitNetlifyForm } from '@/lib/netlifyForms';
 
 const initialForm = {
@@ -16,17 +16,20 @@ const contactCards = [
   {
     label: 'Dispatch and quotes',
     value: 'dispatch@infamousfreight.com',
+    href: 'mailto:dispatch@infamousfreight.com',
     icon: <Mail size={20} />,
   },
   {
     label: 'Driver onboarding',
     value: 'drivers@infamousfreight.com',
+    href: 'mailto:drivers@infamousfreight.com',
     icon: <Truck size={20} />,
   },
   {
     label: 'General support',
     value: 'support@infamousfreight.com',
-    icon: <Phone size={20} />,
+    href: 'mailto:support@infamousfreight.com',
+    icon: <Mail size={20} />,
   },
 ];
 
@@ -65,6 +68,9 @@ const ContactPage: React.FC = () => {
           <p className="mt-4 text-lg leading-8 text-[#F5E8E8]/80">
             Send a quote question, driver onboarding request, partnership note, or support issue. The right team will follow up with next steps.
           </p>
+          <Link to="/request-quote" className="mt-6 inline-flex items-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 font-semibold text-[#F5E8E8] transition hover:opacity-90">
+            Request a Quote <ArrowRight size={17} />
+          </Link>
         </header>
 
         <section className="mb-8 grid gap-4 md:grid-cols-3">
@@ -72,7 +78,9 @@ const ContactPage: React.FC = () => {
             <div key={card.label} className="rounded-2xl border border-infamous-border bg-infamous-card p-5">
               <div className="mb-3 text-infamous-orange">{card.icon}</div>
               <p className="text-sm text-[#B88989]/70">{card.label}</p>
-              <p className="mt-1 font-semibold text-[#F5E8E8]">{card.value}</p>
+              <a href={card.href} className="mt-1 inline-flex font-semibold text-[#F5E8E8] hover:text-infamous-orange">
+                {card.value}
+              </a>
             </div>
           ))}
         </section>
