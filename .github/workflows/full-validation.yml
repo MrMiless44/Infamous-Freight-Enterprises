@@ -120,6 +120,14 @@ jobs:
       - name: Build runtime image
         run: docker build --pull -t "$IMAGE_NAME" .
 
+      - name: Apply Prisma migrations for runtime checks
+        run: |
+          docker run --rm \
+            --network "$DOCKER_NETWORK" \
+            -e DATABASE_URL="$DATABASE_URL" \
+            "$IMAGE_NAME" \
+            sh -lc 'cd apps/api && npx prisma migrate deploy --schema prisma/schema.prisma'
+
       - name: Start runtime container
         run: |
           docker run -d \
@@ -127,6 +135,8 @@ jobs:
             --network "$DOCKER_NETWORK" \
             -e DATABASE_URL="$DATABASE_URL" \
             -e NODE_ENV=production \
+            -e AUTH_MODE=header \
+            -e ALLOW_UNSAFE_HEADER_AUTH=true \
             -e PORT=3000 \
             -e HOST=0.0.0.0 \
             -p 3000:3000 \
