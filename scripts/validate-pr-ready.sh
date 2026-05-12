@@ -10,9 +10,18 @@ pnpm --filter @infamous-freight/api lint
 pnpm --filter @infamous-freight/api test -- --runInBand
 pnpm audit --prod
 
-if rg -n "changeme|sk_test_|whsec_|SG\.|replace-this-in-production" .env.example docker-compose.yml; then
-  echo "Secret-like placeholders still detected in tracked templates." >&2
-  exit 1
+PLACEHOLDER_PATTERN="changeme|sk_test_|whsec_|SG\.|replace-this-in-production"
+if command -v rg >/dev/null 2>&1; then
+  if rg -n "${PLACEHOLDER_PATTERN}" .env.example docker-compose.yml; then
+    echo "Secret-like placeholders still detected in tracked templates." >&2
+    exit 1
+  fi
+else
+  echo "rg not found; falling back to grep for placeholder scan." >&2
+  if grep -En "${PLACEHOLDER_PATTERN}" .env.example docker-compose.yml; then
+    echo "Secret-like placeholders still detected in tracked templates." >&2
+    exit 1
+  fi
 fi
 
 echo "PR readiness checks completed."
