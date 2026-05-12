@@ -29,9 +29,12 @@ env:
   AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'       # set this to the path to your function app project, defaults to the repository root
   NODE_VERSION: '22.x'                      # set this to the node version to use
 
+permissions:
+  contents: read
+
 jobs:
   build-and-deploy:
-    runs-on: windows-latest # For Linux, use ubuntu-latest
+    runs-on: ubuntu-latest # Changed from windows-latest; tests require /usr/bin/bash
     environment: dev
     steps:
     - name: 'Checkout GitHub Action'
@@ -52,7 +55,7 @@ jobs:
       uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d # v4.1.0
 
     - name: 'Resolve Project Dependencies Using pnpm'
-      shell: pwsh # For Linux, use bash
+      shell: bash
       run: |
         pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
         pnpm install --frozen-lockfile
