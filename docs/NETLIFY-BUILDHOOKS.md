@@ -43,8 +43,8 @@ ID of the integration's own site. Netlify keeps those deploys immutable.
 | **Source artifact** | `https://4edbdf6f-0af6-455f-904c-471a5280ba53.netlify.app/packages/buildhooks.tgz` |
 | **Pinned version** | `0.0.0-42wva` |
 | **lock-file integrity** | `sha512-sE3NF7BBlrAgLNbN3ECDtYw5Aq8BqXqboUh88Wvfohm3l0glYWf7Pmkyl7CRHc9IXjpMgZejmA3y2un7xHWpPw==` |
-| **Status** | ✅ **Retained** — actively used. LaunchDarkly edge-config and flag-sync functions (`apps/web/.netlify/functions-internal/official-launchdarkly_*.mts`) depend on this build hook to set up the runtime environment on every deploy. |
-| **Update path** | Upgrade via the Netlify × LaunchDarkly integration settings; LaunchDarkly will push a new tarball URL and lockfile entry. Verify the new integrity hash before merging. |
+| **Status** | 🗑️ **Removed** — no application code references LaunchDarkly, and the generated `official-launchdarkly_*` functions caused Netlify function uploads to fail when the site's function runtime environment exceeded Netlify's 4 KB limit. |
+| **Update path** | Re-enable only after confirming the Netlify site environment assigned to functions is below the runtime limit. Upgrade via the Netlify × LaunchDarkly integration settings; LaunchDarkly will push a new tarball URL and lockfile entry. Verify the new integrity hash before merging. |
 
 ---
 
