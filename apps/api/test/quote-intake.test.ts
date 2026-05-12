@@ -82,6 +82,26 @@ describe('quote intake workflow', () => {
     expect(response.body.data.status).toBe('new');
   });
 
+  it('rejects invalid public shipment tracking numbers without authentication', async () => {
+    const app = createApp();
+
+    const response = await request(app)
+      .get('/api/public/shipments/invalid-tracking')
+      .expect(400);
+
+    expect(response.body.error).toBe('invalid_tracking_number');
+  });
+
+  it('returns a public not found response for valid but unknown tracking numbers', async () => {
+    const app = createApp();
+
+    const response = await request(app)
+      .get('/api/public/shipments/IF-99999')
+      .expect(404);
+
+    expect(response.body.error).toBe('shipment_not_found');
+  });
+
   it('accepts a demo booking lead', async () => {
     const app = createApp();
 

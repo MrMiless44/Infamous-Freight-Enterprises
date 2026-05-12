@@ -84,7 +84,7 @@ Netlify UI path:
 4. `Trigger deploy`
 5. `Deploy site`
 
-The committed Netlify configuration publishes `apps/web/dist` and deploys functions from `netlify/functions`, so a normal Git or UI-triggered production deploy should include both the static web app and Netlify-hosted public API functions.
+The committed Netlify configuration publishes `apps/web/dist` and keeps repo-owned functions disabled for normal Git and UI-triggered production deploys. Public browser API paths are expected to resolve through the Netlify proxy to the Fly.io API origin.
 
 CLI deploys should rely on the `NETLIFY_AUTH_TOKEN` environment variable instead of passing secrets through command-line flags:
 

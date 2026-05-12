@@ -26,7 +26,7 @@ If you want one system for **dispatch**, **tracking**, **paperwork**, **analytic
 - `apps/api` — 🛠️ Node.js + Express 5 backend, TypeScript, Prisma, billing helpers, and freight workflow logic
 - `apps/web` — 🌐 React 19 + Vite frontend, strict TypeScript, operator surfaces, and client-side API helpers
 - `apps/mobile` — 📱 reserved mobile surface *(planned)*
-- `netlify/functions` — ⚡ Netlify-hosted public intake and lightweight lookup routes
+- `netlify/functions` — ⚡ retained function entrypoints for future packaging or emergency fallback; normal Netlify deploys currently keep these disabled and proxy browser API traffic to Fly.io
 - `netlify/database/migrations` — 🗄️ Netlify Database migrations. Applied migrations must remain immutable.
 - `docs/` — 📚 architecture, launch, operations, Stripe, Netlify, and production-readiness docs
 - `scripts/` — 🔁 local setup, validation, deployment helpers, and operational tooling
@@ -205,14 +205,14 @@ Production browser traffic should use the same-origin Netlify API path:
 VITE_API_URL=/api
 ```
 
-The committed Netlify configuration publishes the Vite output from `apps/web/dist`, redirects the apex and default Netlify hostname to `https://www.infamousfreight.com`, serves exact Netlify Function routes for public freight intake, proxies `/api/health` and broader `/api/*` traffic to the Fly.io API, and keeps the SPA fallback last.
+The committed Netlify configuration publishes the Vite output from `apps/web/dist`, redirects the apex and default Netlify hostname to `https://www.infamousfreight.com`, keeps repo-owned Netlify Functions out of normal deploys, proxies `/api/health`, public freight intake paths, and broader `/api/*` traffic to the Fly.io API, and keeps the SPA fallback last.
 
 Launch-critical checks should verify:
 
 - `https://www.infamousfreight.com`
 - `https://infamousfreight.com` redirecting to the `www` host
 - `https://www.infamousfreight.com/api/health`
-- Netlify Function public routes under `/api/public/*`
+- Public API routes under `/api/public/*` through the Netlify-to-Fly proxy
 
 Direct `api.infamousfreight.com` checks are useful for operations diagnostics only after that domain is confirmed.
 
