@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { GeoJSONSource, LngLatBoundsLike, Map } from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
 
 type ShipmentRouteMapProps = {
   origin: string;
@@ -96,6 +95,7 @@ export const ShipmentRouteMap: React.FC<ShipmentRouteMapProps> = ({ origin, dest
     let mapInstance: Map | null = null;
 
     const initializeMap = async () => {
+      await import('maplibre-gl/dist/maplibre-gl.css');
       const { default: maplibregl } = await import('maplibre-gl');
       if (isCancelled || !containerRef.current) return;
 

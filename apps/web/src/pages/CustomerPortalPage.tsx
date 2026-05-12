@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   AlertTriangle,
@@ -18,7 +18,7 @@ import {
   Truck,
 } from 'lucide-react';
 import { demoQuotes, demoShipments } from '@/data/mvpFreightData';
-import { ShipmentRouteMap } from '@/components/ShipmentRouteMap';
+import { LazyShipmentRouteMap, preloadShipmentRouteMap } from '@/components/LazyShipmentRouteMap';
 
 const statusColorMap: Record<string, string> = {
   'In Transit': 'badge-blue',
@@ -59,6 +59,11 @@ const recentDocuments = [
 const CustomerPortalPage: React.FC = () => {
   const [trackingInput, setTrackingInput] = useState('');
   const [selectedShipment, setSelectedShipment] = useState(demoShipments[0]);
+
+  useEffect(() => {
+    preloadShipmentRouteMap();
+  }, []);
+
   return (
     <div className="min-h-screen bg-infamous-dark px-5 py-8 text-[#F5E8E8] lg:px-6">
       <div className="mx-auto max-w-7xl">
@@ -196,7 +201,7 @@ const CustomerPortalPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="h-[280px]">
-                  <ShipmentRouteMap
+                  <LazyShipmentRouteMap
                     origin={selectedShipment.origin}
                     destination={selectedShipment.destination}
                     status={selectedShipment.status.toLowerCase().replace(/\s+/g, '_')}
