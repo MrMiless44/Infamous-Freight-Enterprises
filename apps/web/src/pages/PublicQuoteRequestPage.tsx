@@ -68,6 +68,7 @@ type FieldErrors = Partial<Record<keyof typeof initialForm | 'attachment', strin
 const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024;
 const ALLOWED_ATTACHMENT_EXTENSIONS = new Set(['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'txt']);
 const SUBMISSION_TIMEOUT_MS = 12_000;
+const GENERIC_SUBMISSION_ERROR = 'We could not submit the form. Please try again or contact dispatch directly.';
 type SubmissionOutcome =
   | { channel: 'primary'; success: true; trackingNumber: string }
   | { channel: 'netlify'; success: true }
@@ -325,7 +326,7 @@ const PublicQuoteRequestPage: React.FC = () => {
           ...(attachment ? { attachment } : {}),
         }),
         SUBMISSION_TIMEOUT_MS,
-        'We could not submit the form. Please try again or contact dispatch directly.'
+        GENERIC_SUBMISSION_ERROR
       )
         .then(() => {
           const outcome: SubmissionOutcome = { channel: 'netlify', success: true };
@@ -337,22 +338,23 @@ const PublicQuoteRequestPage: React.FC = () => {
         });
 
       const firstFinished = await Promise.race([primarySubmission, netlifySubmission]);
-      let primaryResult: SubmissionOutcome | undefined =
-        firstFinished.channel === 'primary' ? firstFinished : undefined;
-      let netlifyResult: SubmissionOutcome | undefined =
-        firstFinished.channel === 'netlify' ? firstFinished : undefined;
+      let primaryResult: SubmissionOutcome | undefined;
+      let netlifyResult: SubmissionOutcome | undefined;
+
+      if (firstFinished.channel === 'primary') primaryResult = firstFinished;
+      if (firstFinished.channel === 'netlify') netlifyResult = firstFinished;
 
       if (!firstFinished.success) {
         if (!primaryResult) primaryResult = await primarySubmission;
         if (!netlifyResult) netlifyResult = await netlifySubmission;
 
         if (!primaryResult.success && !netlifyResult.success) {
-          throw netlifyResult.error ?? primaryResult.error ?? new Error('We could not submit the form. Please try again or contact dispatch directly.');
+          throw netlifyResult.error ?? primaryResult.error ?? new Error(GENERIC_SUBMISSION_ERROR);
         }
       }
 
       const quoteTrackingNumber =
-        primaryResult?.channel === 'primary' && primaryResult.success ? primaryResult.trackingNumber : '';
+        primaryResult?.success && primaryResult.channel === 'primary' ? primaryResult.trackingNumber : '';
 
       setTrackingNumber(quoteTrackingNumber);
       trackFunnelEvent('funnel_quote_request', { equipment: form.equipment });
@@ -363,10 +365,8 @@ const PublicQuoteRequestPage: React.FC = () => {
         estimateMid: estimate?.mid,
         estimateConfidence: estimate?.confidence,
         trackingNumber: quoteTrackingNumber,
-        savedToPrimaryApi:
-          primaryResult?.channel === 'primary' ? primaryResult.success : undefined,
-        savedToNetlifyForms:
-          netlifyResult?.channel === 'netlify' ? netlifyResult.success : undefined,
+        savedToPrimaryApi: primaryResult?.success,
+        savedToNetlifyForms: netlifyResult?.success,
       });
       setSubmitted(true);
     } catch (err) {
