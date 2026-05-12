@@ -21,7 +21,6 @@ import {
   Monitor,
   Cpu,
   Globe,
-  Star,
   Menu,
   X,
 } from 'lucide-react';
@@ -29,12 +28,12 @@ import { trackPublicEvent, trackFunnelEvent } from '@/lib/analytics';
 import { BRAND } from '@/lib/brand';
 
 const navLinks = [
-  { label: 'Home', href: '/' },
   { label: 'Services', href: '/services' },
-  { label: 'Shippers', href: '/customer-portal' },
+  { label: 'Request Quote', href: '/request-quote' },
+  { label: 'Track Shipment', href: '/track-shipment' },
   { label: 'Carriers', href: '/carrier-portal' },
-  { label: 'Tracking', href: '/track-shipment' },
   { label: 'About', href: '/about' },
+  { label: 'Contact', href: '/contact' },
 ] as const;
 
 const executionSteps = [
@@ -47,33 +46,33 @@ const executionSteps = [
 const trustCards = [
   {
     icon: Shield,
-    title: 'Verified Carriers',
-    description: 'Every carrier checked for FMCSA authority, active insurance, safety scores, and driver ID before they touch a load.',
+    title: 'Documented Handoffs',
+    description: 'Carrier documents are reviewed before dispatch and the shipment details are checked before booking.',
   },
   {
     icon: MapPin,
-    title: 'Live Tracking',
-    description: 'Real-time shipment visibility from pickup to delivery. Status updates, ETA changes, and exception alerts as they happen.',
+    title: 'Shipment Updates',
+    description: 'Status updates, ETA changes, and exception notes are kept connected to the shipment record where available.',
   },
   {
     icon: Clock,
     title: 'Fast Execution',
-    description: 'From quote to booked load in hours. Same-day pickup available. Expedited and time-critical freight supported.',
+    description: 'Quote requests are routed around lane, equipment, timing, and contact details so dispatch can respond with the right next step.',
   },
   {
     icon: DollarSign,
     title: 'Transparent Pricing',
-    description: 'Clear rates with no hidden fees. QuickPay options for carriers. Automated invoicing for shippers.',
+    description: 'Rate details and payment terms are confirmed in writing before the shipment is booked.',
   },
   {
     icon: FileText,
     title: 'Proof of Delivery',
-    description: 'Photos, signatures, and timestamped proof captured at delivery. Accessible from your portal immediately.',
+    description: 'Bills of lading, delivery notes, photos, and proof documents can stay attached to the shipment workflow.',
   },
   {
     icon: BarChart3,
     title: 'Operations Visibility',
-    description: 'Dashboards for shippers, carriers, and dispatch. See exactly where every load stands and what needs attention.',
+    description: 'Quote, load, tracking, and document context stays organized so teams can see what needs follow-up.',
   },
 ];
 
@@ -90,7 +89,7 @@ const carrierBenefits = [
   'Browse available loads',
   'One-tap status updates',
   'Upload POD from your phone',
-  'QuickPay & same-day payment',
+  'Payment terms confirmed in writing',
   'Simple dispatch communication',
   'GPS tracking built in',
 ];
@@ -118,27 +117,6 @@ const techFeatures = [
   },
 ];
 
-const testimonials = [
-  {
-    quote: 'Infamous Freight cut our booking time in half. The tracking alone is worth switching.',
-    name: 'Sarah M.',
-    role: 'Logistics Manager',
-    company: 'Regional Distribution Co.',
-  },
-  {
-    quote: 'As an owner-operator, the driver app is exactly what I needed. One-tap updates, no hassle.',
-    name: 'James R.',
-    role: 'Owner-Operator',
-    company: 'Independent Carrier',
-  },
-  {
-    quote: 'We rebook the same lanes every week now. The system remembers everything.',
-    name: 'Michael T.',
-    role: 'Supply Chain Director',
-    company: 'Manufacturing Corp.',
-  },
-];
-
 const servicesList = [
   { title: 'Full Truckload', slug: 'full-truckload', description: 'Dedicated truck capacity for larger shipments.' },
   { title: 'Less Than Truckload', slug: 'ltl-freight', description: 'Share truck space for cost-effective smaller loads.' },
@@ -146,14 +124,14 @@ const servicesList = [
   { title: 'Reefer', slug: 'reefer', description: 'Temperature-controlled freight for perishable and sensitive goods.' },
   { title: 'Expedited Freight', slug: 'expedited', description: 'Time-critical shipments with priority handling.' },
   { title: 'Dedicated Lanes', slug: 'dedicated-lanes', description: 'Recurring routes with locked-in pricing and carriers.' },
-  { title: 'Freight Brokerage', slug: 'freight-brokerage', description: 'Full-service brokerage connecting shippers with verified carriers.' },
+  { title: 'Freight Brokerage', slug: 'freight-brokerage', description: 'Brokerage support for matching shipment details with carrier capacity.' },
   { title: 'Final Mile', slug: 'final-mile', description: 'Last-leg delivery from distribution center to end customer.' },
 ];
 
 const faqItems = [
   {
     question: 'How do I get a freight quote?',
-    answer: 'Submit your shipment details on the Request a Quote page — pickup location, destination, freight type, and timing. Our dispatch team reviews and provides a rate with carrier confirmation, typically within hours.',
+    answer: 'Submit your shipment details on the Request a Quote page — pickup location, destination, freight type, timing, and contact information. Dispatch reviews the request and follows up with the next step.',
   },
   {
     question: 'What types of freight do you handle?',
@@ -165,15 +143,15 @@ const faqItems = [
   },
   {
     question: 'How do carriers get paid?',
-    answer: 'Standard carrier pay terms on every load. QuickPay available at 2.5% (48-hour) and 3.5% (same-day). Instant payout at 4%. Transparent fees, no surprises.',
+    answer: 'Carrier payment terms are confirmed in writing before dispatch. Carriers should review the written rate confirmation and payment terms for each load.',
   },
   {
     question: 'What is the carrier vetting process?',
-    answer: 'Authority, insurance, safety scores, and driver identity verified before a carrier is assigned. Re-checked on policy events with documented records for every assignment.',
+    answer: 'Carrier documents and shipment requirements are reviewed before dispatch, and the agreed equipment, timing, and communication expectations are documented for the load.',
   },
   {
     question: 'Do you offer same-day freight?',
-    answer: 'Yes. Cargo van and sprinter van services support same-day pickup and delivery for time-sensitive freight including parts runs, medical supplies, and urgent commercial shipments.',
+    answer: 'Expedited options can be requested for time-sensitive freight. Availability depends on lane, timing, equipment, and carrier capacity.',
   },
 ];
 
@@ -203,11 +181,11 @@ const FaqItem: React.FC<{ id: string; question: string; answer: string }> = ({ i
   );
 };
 
-const liveMetrics = [
-  { label: 'Active Loads', value: '42', color: 'text-infamous-red-light' },
-  { label: 'On-Time Rate', value: '96.4%', color: 'text-[#36D399]' },
-  { label: 'Carriers Verified', value: '380+', color: 'text-infamous-ember' },
-  { label: 'Cities Covered', value: '120+', color: 'text-infamous-orange' },
+const workflowHighlights = [
+  { label: 'Quote Intake', value: 'Lane + contact first', color: 'text-infamous-red-light' },
+  { label: 'Booking', value: 'Details verified', color: 'text-[#36D399]' },
+  { label: 'Dispatch', value: 'Documents reviewed', color: 'text-infamous-ember' },
+  { label: 'Delivery', value: 'Updates documented', color: 'text-infamous-orange' },
 ];
 
 const LandingPage: React.FC = () => {
@@ -306,11 +284,11 @@ const LandingPage: React.FC = () => {
               {BRAND.tagline}
             </p>
             <h1 className="font-display text-4xl font-black uppercase tracking-tight sm:text-5xl lg:text-[3.5rem] lg:leading-[1.1]">
-              Freight Control. Real-Time Visibility.{' '}
-              <span className="text-infamous-red-light text-glow">Zero Guesswork.</span>
+              Freight Quotes, Dispatch Coordination, and{' '}
+              <span className="text-infamous-red-light text-glow">Shipment Visibility.</span>
             </h1>
             <p className="mt-7 max-w-2xl text-lg leading-8 text-[#B88989]">
-              Infamous Freight gives shippers, carriers, and dispatch teams a faster way to quote, book, track, and manage freight from one powerful command center.
+              Infamous Freight helps shippers, carriers, and dispatch teams move freight with clear intake, written confirmations, tracking context, and communication from quote to delivery.
             </p>
 
             <div className="mt-12 flex flex-col gap-4 sm:flex-row">
@@ -333,12 +311,12 @@ const LandingPage: React.FC = () => {
 
           {/* Metrics bar */}
           <div className="mt-20">
-            <p className="text-[10px] text-infamous-muted uppercase tracking-wider mb-3 text-center lg:text-left">Sample workflow data</p>
+            <p className="text-[10px] text-infamous-muted uppercase tracking-wider mb-3 text-center lg:text-left">Operating process</p>
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            {liveMetrics.map((metric) => (
+            {workflowHighlights.map((metric) => (
               <div key={metric.label} className="glass-card-subtle rounded-[18px] p-5">
                 <p className="text-xs font-medium uppercase tracking-wider text-infamous-muted">{metric.label}</p>
-                <p className={`mt-2 text-3xl font-black font-display ${metric.color}`}>{metric.value}</p>
+                <p className={`mt-2 text-lg font-black font-display ${metric.color}`}>{metric.value}</p>
               </div>
             ))}
             </div>
@@ -355,7 +333,7 @@ const LandingPage: React.FC = () => {
               Freight services for every load size and timeline
             </h2>
             <p className="mt-4 text-[#B88989] leading-7">
-              From expedited cargo vans to full truckload, every service runs on the same verified execution standard.
+              From expedited cargo vans to full truckload, every service starts with clear shipment details, written expectations, and dispatch follow-up.
             </p>
           </div>
 
@@ -393,7 +371,7 @@ const LandingPage: React.FC = () => {
             <p className="font-display text-sm font-semibold uppercase tracking-[0.2em] text-infamous-red-light">How It Works</p>
             <h2 className="mt-3 font-display text-3xl font-black uppercase lg:text-4xl">Quote. Book. Track. Deliver.</h2>
             <p className="mt-4 mx-auto max-w-2xl text-[#B88989]">
-              The entire freight lifecycle in one connected platform — from first request to final invoice.
+              A practical freight workflow from first request to delivery documents.
             </p>
           </div>
 
@@ -418,10 +396,10 @@ const LandingPage: React.FC = () => {
       <section className="border-b border-infamous-border bg-infamous-darker">
         <div className="mx-auto max-w-7xl px-5 py-24 lg:px-6">
           <div className="mb-14 text-center">
-            <p className="font-display text-sm font-semibold uppercase tracking-[0.2em] text-infamous-red-light">Command Center</p>
-            <h2 className="mt-3 font-display text-3xl font-black uppercase lg:text-4xl">One platform. Every freight operation.</h2>
+            <p className="font-display text-sm font-semibold uppercase tracking-[0.2em] text-infamous-red-light">Shipment Visibility</p>
+            <h2 className="mt-3 font-display text-3xl font-black uppercase lg:text-4xl">Keep freight details connected.</h2>
             <p className="mt-4 mx-auto max-w-2xl text-[#B88989]">
-              Real-time visibility into every load, carrier, and delivery from a single operations dashboard.
+              Lane details, status updates, exceptions, and delivery documents stay organized around the shipment.
             </p>
           </div>
 
@@ -441,10 +419,10 @@ const LandingPage: React.FC = () => {
             <div className="p-6">
               <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
                 {[
-                  { label: 'Active Loads', value: '42', color: 'text-infamous-red-light' },
-                  { label: 'Loads Needing Action', value: '7', color: 'text-infamous-orange' },
-                  { label: 'Deliveries Today', value: '12', color: 'text-[#36D399]' },
-                  { label: 'Exceptions', value: '3', color: 'text-[#FF0033]' },
+                  { label: 'Lane details', value: 'Ready', color: 'text-infamous-red-light' },
+                  { label: 'Pickup timing', value: 'Confirmed', color: 'text-infamous-orange' },
+                  { label: 'Documents', value: 'Attached', color: 'text-[#36D399]' },
+                  { label: 'Exceptions', value: 'Flagged', color: 'text-[#FF0033]' },
                 ].map((stat) => (
                   <div key={stat.label} className="rounded-[14px] border border-infamous-border/60 bg-infamous-panel p-4">
                     <p className="text-xs text-infamous-muted">{stat.label}</p>
@@ -510,9 +488,9 @@ const LandingPage: React.FC = () => {
               <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-infamous-red/20 bg-infamous-red/5 px-4 py-1.5 text-xs font-semibold text-infamous-red-light uppercase tracking-wider">
                 <Truck size={14} /> For Shippers
               </div>
-              <h3 className="mt-5 font-display text-2xl font-black uppercase">Ship freight with full visibility</h3>
+              <h3 className="mt-5 font-display text-2xl font-black uppercase">Request freight with clear details</h3>
               <p className="mt-4 text-[#B88989] leading-7">
-                Your portal gives you active shipments, real-time tracking, quote history, invoices, documents, and direct messaging with dispatch — all in one clean dashboard.
+                Start with the lane, equipment, timing, and contact details dispatch needs to respond. Add freight details when they are available.
               </p>
               <ul className="mt-8 space-y-3">
                 {shipperBenefits.map((b) => (
@@ -523,11 +501,11 @@ const LandingPage: React.FC = () => {
                 ))}
               </ul>
               <Link
-                to="/customer-portal"
+                to="/request-quote"
                 onClick={() => trackPublicEvent('portal_cta_click', { portal: 'customer', source: 'shipper_section' })}
                 className="mt-10 btn-primary inline-flex items-center gap-2 glow-medium"
               >
-                Shipper Portal <ArrowRight size={16} />
+                Request Quote <ArrowRight size={16} />
               </Link>
             </div>
 
@@ -536,9 +514,9 @@ const LandingPage: React.FC = () => {
               <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[#36D399]/20 bg-[#36D399]/5 px-4 py-1.5 text-xs font-semibold text-[#36D399] uppercase tracking-wider">
                 <Users size={14} /> For Carriers & Drivers
               </div>
-              <h3 className="mt-5 font-display text-2xl font-black uppercase">Move freight with zero guesswork</h3>
+              <h3 className="mt-5 font-display text-2xl font-black uppercase">Move freight with written expectations</h3>
               <p className="mt-4 text-[#B88989] leading-7">
-                See your current load, next action, navigation, and upload tools the moment you open the app. Built for drivers on the road — large buttons, minimal typing, one-tap updates.
+                Carrier and driver workflows focus on load details, communication, status updates, proof documents, and payment terms confirmed in writing.
               </p>
               <ul className="mt-8 space-y-3">
                 {carrierBenefits.map((b) => (
@@ -565,9 +543,9 @@ const LandingPage: React.FC = () => {
         <div className="mx-auto max-w-7xl px-5 py-24 lg:px-6">
           <div className="mb-14 text-center">
             <p className="font-display text-sm font-semibold uppercase tracking-[0.2em] text-infamous-red-light">Technology</p>
-            <h2 className="mt-3 font-display text-3xl font-black uppercase lg:text-4xl">Built to move fast. Wired to stay visible.</h2>
+            <h2 className="mt-3 font-display text-3xl font-black uppercase lg:text-4xl">Built for practical freight follow-through.</h2>
             <p className="mt-4 mx-auto max-w-2xl text-[#B88989]">
-              Purpose-built freight technology that connects every part of the operation.
+              Public quote intake, tracking, portals, and dispatch tools support the same operating workflow.
             </p>
           </div>
 
@@ -586,27 +564,24 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* === TESTIMONIALS === */}
+      {/* === TRUST PROCESS === */}
       <section className="border-b border-infamous-border bg-infamous-darker">
         <div className="mx-auto max-w-7xl px-5 py-24 lg:px-6">
           <div className="mb-14 text-center">
-            <p className="font-display text-sm font-semibold uppercase tracking-[0.2em] text-infamous-red-light">What They Say</p>
-            <h2 className="mt-3 font-display text-3xl font-black uppercase lg:text-4xl">Trusted by freight professionals</h2>
+            <p className="font-display text-sm font-semibold uppercase tracking-[0.2em] text-infamous-red-light">How Trust Is Built</p>
+            <h2 className="mt-3 font-display text-3xl font-black uppercase lg:text-4xl">Clear steps before freight moves.</h2>
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
-            {testimonials.map((t) => (
-              <div key={t.name} className="glass-card-subtle rounded-[18px] p-6">
-                <div className="flex gap-1 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={14} className="text-infamous-red-light fill-infamous-red-light" />
-                  ))}
-                </div>
-                <p className="text-[15px] leading-7 text-[#F5E8E8]/90 italic">"{t.quote}"</p>
-                <div className="mt-5 pt-4 border-t border-infamous-border/40">
-                  <p className="text-sm font-bold text-[#F5E8E8]">{t.name}</p>
-                  <p className="text-xs text-infamous-muted">{t.role}, {t.company}</p>
-                </div>
+            {[
+              ['Quote details checked', 'Origin, destination, equipment, pickup timing, freight details, and contact information are reviewed before dispatch follow-up.'],
+              ['Terms confirmed in writing', 'Rates, payment terms, pickup details, delivery expectations, and required documents are kept explicit before booking.'],
+              ['Updates stay connected', 'Shipment notes, tracking references, exceptions, and delivery documents stay tied to the load record where available.'],
+            ].map(([title, description]) => (
+              <div key={title} className="glass-card-subtle rounded-[18px] p-6">
+                <CheckCircle2 className="mb-4 text-infamous-red-light" size={22} />
+                <h3 className="text-lg font-bold text-[#F5E8E8]">{title}</h3>
+                <p className="mt-3 text-sm leading-7 text-[#B88989]">{description}</p>
               </div>
             ))}
           </div>
@@ -643,7 +618,7 @@ const LandingPage: React.FC = () => {
           >
             <h2 className="font-display text-3xl font-black uppercase lg:text-4xl">Ready to move freight?</h2>
             <p className="mt-5 mx-auto max-w-xl text-lg text-[#B88989]">
-              Get a quote in minutes. Track every load. Pay carriers fast. All from one platform.
+              Send the lane, timing, equipment, and contact details. Dispatch can follow up with the next step.
             </p>
             <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
               <Link
@@ -675,7 +650,7 @@ const LandingPage: React.FC = () => {
             </Link>
             <p className="mt-2 font-display text-sm font-bold uppercase tracking-[0.2em] text-infamous-muted">{BRAND.tagline}</p>
             <p className="mt-3 max-w-md leading-6">
-              Freight management platform with verified carriers, real-time tracking, and end-to-end shipment visibility.
+              Freight services with clear quote intake, documented handoffs, tracking context, and delivery follow-up.
             </p>
             <div className="mt-4 flex items-center gap-4">
               <Link to="/contact" className="flex items-center gap-2 text-[#B88989] hover:text-[#F5E8E8] transition">

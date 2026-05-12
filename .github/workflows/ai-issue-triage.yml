@@ -1,0 +1,67 @@
+name: AI Issue Triage
+
+on:
+  issues:
+    types: [opened, edited, reopened]
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  triage:
+    name: Label issues by content
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    steps:
+      - name: Apply deterministic triage labels
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python3 <<'PY' > /tmp/labels.txt
+          import json
+          import os
+          import re
+
+          event_path = os.environ["GITHUB_EVENT_PATH"]
+          with open(event_path, "r", encoding="utf-8") as f:
+              event = json.load(f)
+
+          issue = event.get("issue") or {}
+          text = f"{issue.get('title', '')}\n\n{issue.get('body') or ''}".lower()
+
+          labels = {"needs-triage"}
+          rules = [
+              (r"bug|error|broken|fail|crash|exception", "bug"),
+              (r"security|vulnerability|secret|token|auth", "security"),
+              (r"deploy|netlify|fly|docker|runner|workflow|ci|cd", "infrastructure"),
+              (r"stripe|billing|invoice|checkout|payment", "billing"),
+              (r"driver|dispatch|load|shipment|carrier|freight", "freight-ops"),
+              (r"ai|openai|agent|automation|triage", "ai"),
+          ]
+
+          for pattern, label in rules:
+              if re.search(pattern, text):
+                  labels.add(label)
+
+          for label in sorted(labels):
+              print(label)
+          PY
+
+          while IFS= read -r label; do
+            gh label create "${label}" --color EDEDED --force >/dev/null 2>&1 || true
+            gh issue edit "${{ github.event.issue.number }}" --add-label "${label}"
+          done < /tmp/labels.txt
+
+          if [[ -n "${OPENAI_API_KEY:-}" ]]; then
+            note="AI triage key detected. Deterministic labels applied; optional AI summary generation can be enabled next."
+          else
+            note="Deterministic triage labels applied. Add OPENAI_API_KEY as a repository secret to enable AI-assisted summaries later."
+          fi
+
+          gh issue comment "${{ github.event.issue.number }}" --body "${note}"

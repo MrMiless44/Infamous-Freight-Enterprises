@@ -1,0 +1,55 @@
+name: Automation Supervisor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/30 * * * *"
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: automation-supervisor
+  cancel-in-progress: true
+
+jobs:
+  supervise:
+    name: Summarize recent CI failures
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+    steps:
+      - name: Scan recent failed workflow runs
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          report_file="/tmp/failed-runs.md"
+          : > "${report_file}"
+
+          gh api "repos/${REPO}/actions/runs" \
+            -f status=completed \
+            -f conclusion=failure \
+            -F per_page=20 \
+            --jq '.workflow_runs[] | select(.event != "schedule") | "- [" + .name + "](" + .html_url + ") on `" + .head_branch + "` at " + .updated_at' \
+            | head -n 10 > "${report_file}" || true
+
+          failure_count=$(grep -c '^-' "${report_file}" || true)
+
+          {
+            echo "## Automation Supervisor"
+            echo ""
+            echo "Recent non-scheduled failed workflow runs: ${failure_count}"
+            echo "Hard report cap per cycle: 10"
+            echo ""
+            if [[ "${failure_count}" -gt 0 ]]; then
+              cat "${report_file}"
+            else
+              echo "No recent failed workflow runs found."
+            fi
+            echo ""
+            echo "This workflow is read-only. It does not approve PRs, merge code, retry jobs, or bypass branch protection."
+          } >> "${GITHUB_STEP_SUMMARY}"

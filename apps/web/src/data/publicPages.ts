@@ -19,9 +19,9 @@ export const servicePages: ServicePage[] = [
     eyebrow: 'Dedicated capacity',
     summary: 'Full truckload freight for shipments that fill an entire trailer — dry van, flatbed, or reefer.',
     description:
-      'Full truckload is the right choice when your freight fills or nearly fills a 53-foot trailer. No shared space, no extra stops, direct pickup to direct delivery with verified carriers.',
+      'Full truckload is the right choice when your freight fills or nearly fills a 53-foot trailer. Shipment details are verified before booking so equipment, timing, and route expectations are clear before dispatch.',
     Icon: Truck,
-    bullets: ['Dedicated trailer for your freight only', 'Direct pickup and delivery — no hub stops', 'Dry van, flatbed, and reefer options', 'Verified carriers with safety and insurance checks'],
+    bullets: ['Dedicated trailer planning for larger freight', 'Direct pickup and delivery coordination', 'Dry van, flatbed, and reefer options', 'Carrier documents reviewed before dispatch'],
     bestFor: ['Large volume shipments', 'Time-sensitive full loads', 'High-value freight', 'Consistent lane commitments'],
   },
   {
@@ -54,7 +54,7 @@ export const servicePages: ServicePage[] = [
     description:
       'Reefer trailers maintain precise temperatures throughout transit. Continuous monitoring, temperature logs, and compliance documentation included on every load.',
     Icon: Snowflake,
-    bullets: ['Precise temperature management', 'Continuous temp monitoring and logs', 'FSMA and food safety compliance', 'Cold chain documentation on delivery'],
+    bullets: ['Temperature requirements documented before booking', 'Transit updates coordinated through delivery', 'Handling notes reviewed with pickup details', 'Delivery documentation collected when available'],
     bestFor: ['Perishable food products', 'Pharmaceutical shipments', 'Frozen goods', 'Temperature-sensitive materials'],
   },
   {
@@ -72,22 +72,22 @@ export const servicePages: ServicePage[] = [
     slug: 'dedicated-lanes',
     title: 'Dedicated lanes',
     eyebrow: 'Recurring freight',
-    summary: 'Dedicated lane freight for recurring routes with consistent volume, pricing, and carrier assignment.',
+    summary: 'Dedicated lane freight for recurring routes with planned capacity, documented pricing, and consistent handoffs.',
     description:
-      'Dedicated lanes lock in pricing, carrier quality, and service consistency for routes you run regularly. Reduce rate volatility and build reliable carrier relationships.',
+      'Dedicated lanes help recurring freight move with fewer surprises. Lane details, payment terms, capacity expectations, and communication steps are confirmed in writing before dispatch.',
     Icon: Route,
-    bullets: ['Locked-in rate agreements', 'Consistent carrier and driver assignment', 'Priority capacity on your lanes', 'Performance tracking and scorecards'],
+    bullets: ['Written rate and service expectations', 'Recurring lane and equipment notes', 'Capacity planning for known schedules', 'Shipment notes reviewed before each move'],
     bestFor: ['Weekly recurring freight', 'Distribution center lanes', 'Manufacturing supply chains', 'Retail replenishment routes'],
   },
   {
     slug: 'freight-brokerage',
     title: 'Freight brokerage',
     eyebrow: 'Full-service',
-    summary: 'Full-service freight brokerage connecting shippers with verified carriers across all equipment types.',
+    summary: 'Freight brokerage support for matching shipment details with available carrier capacity.',
     description:
-      'Infamous Freight operates as a licensed freight broker, matching your shipments with vetted carriers. Rate negotiation, carrier vetting, load tracking, and payment handled end-to-end.',
+      'Freight brokerage support starts with clear intake: lane, equipment, timing, freight details, and written rate confirmation before the load is booked.',
     Icon: Warehouse,
-    bullets: ['Licensed and bonded brokerage', 'Carrier vetting and compliance checks', 'Rate negotiation and market pricing', 'End-to-end shipment management'],
+    bullets: ['Shipment details verified before booking', 'Carrier documents reviewed before dispatch', 'Rate and payment terms confirmed in writing', 'Clear communication from quote to delivery'],
     bestFor: ['Shippers without carrier relationships', 'Overflow capacity needs', 'New market or lane coverage', 'Seasonal freight surges'],
   },
   {
@@ -151,7 +151,7 @@ export const servicePages: ServicePage[] = [
     eyebrow: 'Multi-city lanes',
     summary: 'Regional freight for shipments moving between cities, distribution points, warehouses, and customer locations.',
     description:
-      'Regional freight benefits from verified carriers, dispatch oversight, ETA visibility, and documentation that stays attached to the shipment.',
+      'Regional freight benefits from clear lane details, dispatch oversight, ETA communication, and documentation that stays attached to the shipment.',
     Icon: Warehouse,
     bullets: ['City-to-city freight moves', 'Carrier fit and equipment coordination', 'ETA and exception tracking', 'POD and invoice support'],
     bestFor: ['Distribution lanes', 'Manufacturing moves', 'Retail supply chains', 'Recurring freight'],
