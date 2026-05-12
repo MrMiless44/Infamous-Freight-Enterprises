@@ -13,8 +13,6 @@ concurrency:
 
 env:
   NODE_VERSION: "22"
-  FLY_APP_NAME: infamous-freight-api
-  FLY_APP_URL: https://infamous-freight-api.fly.dev
   FLY_API_URL: https://api.infamousfreight.com
 
 jobs:
@@ -50,6 +48,18 @@ jobs:
       - name: Setup flyctl
         uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1 # master (2026-04-08)
 
+      - name: Resolve Fly app details
+        id: fly
+        run: |
+          set -euo pipefail
+          fly_app_name="$(awk -F'"' '/^app =/ {print $2}' fly.toml)"
+          if [ -z "$fly_app_name" ]; then
+            echo "::error::Could not determine Fly app name from fly.toml."
+            exit 1
+          fi
+          echo "fly_app_name=$fly_app_name" >> "$GITHUB_OUTPUT"
+          echo "fly_app_url=https://${fly_app_name}.fly.dev" >> "$GITHUB_OUTPUT"
+
       - name: Deploy to Fly.io
         run: |
           set -euo pipefail
@@ -57,7 +67,7 @@ jobs:
           attempt=1
           until [ "$attempt" -gt "$max_attempts" ]; do
             echo "Fly deploy attempt $attempt/$max_attempts"
-            if flyctl deploy --remote-only --config fly.toml --app "$FLY_APP_NAME" --wait-timeout 10m --strategy rolling; then
+            if flyctl deploy --remote-only --config fly.toml --app "${{ steps.fly.outputs.fly_app_name }}" --wait-timeout 10m --strategy rolling; then
               break
             fi
             if [ "$attempt" -eq "$max_attempts" ]; then
@@ -71,7 +81,7 @@ jobs:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
       - name: Verify deployment health
-        run: scripts/fly-post-deploy-check.sh "$FLY_APP_NAME" "$FLY_APP_URL" "$FLY_API_URL"
+        run: scripts/fly-post-deploy-check.sh "${{ steps.fly.outputs.fly_app_name }}" "${{ steps.fly.outputs.fly_app_url }}" "$FLY_API_URL"
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
@@ -81,8 +91,8 @@ jobs:
           {
             echo "## Deploy API"
             echo ""
-            echo "- App: \`$FLY_APP_NAME\`"
-            echo "- Fly URL: $FLY_APP_URL"
+            echo "- App: \`${{ steps.fly.outputs.fly_app_name }}\`"
+            echo "- Fly URL: ${{ steps.fly.outputs.fly_app_url }}"
             echo "- API URL: $FLY_API_URL"
             echo "- SHA: ${{ github.sha }}"
           } >> "$GITHUB_STEP_SUMMARY"
