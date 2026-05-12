@@ -18,7 +18,7 @@ import {
   Truck,
 } from 'lucide-react';
 import { demoQuotes, demoShipments } from '@/data/mvpFreightData';
-import { ShipmentRouteMap } from '@/components/ShipmentRouteMap';
+import { LazyShipmentRouteMap } from '@/components/LazyShipmentRouteMap';
 
 const statusColorMap: Record<string, string> = {
   'In Transit': 'badge-blue',
@@ -196,7 +196,7 @@ const CustomerPortalPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="h-[280px]">
-                  <ShipmentRouteMap
+                  <LazyShipmentRouteMap
                     origin={selectedShipment.origin}
                     destination={selectedShipment.destination}
                     status={selectedShipment.status.toLowerCase().replace(/\s+/g, '_')}

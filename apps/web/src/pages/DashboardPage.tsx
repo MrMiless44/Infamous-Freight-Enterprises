@@ -8,7 +8,7 @@ import {
   AlertCircle, Bell, Plus, DollarSign,
 } from 'lucide-react';
 import WidgetErrorBoundary from '@/components/ui/WidgetErrorBoundary';
-import { ShipmentRouteMap } from '@/components/ShipmentRouteMap';
+import { LazyShipmentRouteMap } from '@/components/LazyShipmentRouteMap';
 
 interface ActiveLoad {
   ref: string;
@@ -189,7 +189,7 @@ const DashboardPage: React.FC = () => {
               </div>
             </div>
             <div className="h-[320px]">
-              <ShipmentRouteMap origin="Atlanta, GA" destination="Dallas, TX" status="in_transit" />
+              <LazyShipmentRouteMap origin="Atlanta, GA" destination="Dallas, TX" status="in_transit" />
             </div>
           </div>
         </WidgetErrorBoundary>

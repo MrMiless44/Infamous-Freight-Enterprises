@@ -17,7 +17,7 @@ import {
   User,
   XCircle,
 } from 'lucide-react';
-import { ShipmentRouteMap } from '@/components/ShipmentRouteMap';
+import { LazyShipmentRouteMap } from '@/components/LazyShipmentRouteMap';
 
 const timelineSteps = [
   { key: 'quote_created', label: 'Quote Created', date: 'Apr 25, 2026 · 9:15 AM' },
@@ -255,7 +255,7 @@ const ShipmentDetailPage: React.FC = () => {
                 </h2>
               </div>
               <div className="h-72 lg:h-80">
-                <ShipmentRouteMap origin={shipment.origin} destination={shipment.destination} status={shipment.status} />
+                <LazyShipmentRouteMap origin={shipment.origin} destination={shipment.destination} status={shipment.status} />
               </div>
             </div>
 
