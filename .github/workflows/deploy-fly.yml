@@ -120,7 +120,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Generate Prisma client
+      - name: Generate Prisma Client
         run: pnpm -C apps/api run prisma:generate
 
       - name: Build API
