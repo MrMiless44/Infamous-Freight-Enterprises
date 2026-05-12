@@ -95,13 +95,23 @@ async function recordBatch(req: Request) {
   const db = getDatabase();
   const saved: unknown[] = [];
   const skipped: number[] = [];
+  const skippedDetails: Array<{ index: number; reason: 'missing_coordinates' | 'invalid_coordinates' | 'insert_failed' }> =
+    [];
 
   for (let i = 0; i < body.positions.length; i++) {
     const pos = body.positions[i];
     const lat = toNumber(pos.lat);
     const lng = toNumber(pos.lng);
-    if (lat === null || lng === null) { skipped.push(i); continue; }
-    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) { skipped.push(i); continue; }
+    if (lat === null || lng === null) {
+      skipped.push(i);
+      skippedDetails.push({ index: i, reason: 'missing_coordinates' });
+      continue;
+    }
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      skipped.push(i);
+      skippedDetails.push({ index: i, reason: 'invalid_coordinates' });
+      continue;
+    }
 
     const id = genId();
     const loadId = text(pos.loadId, 64) || null;
@@ -127,10 +137,16 @@ async function recordBatch(req: Request) {
       }
     } catch {
       skipped.push(i);
+      skippedDetails.push({ index: i, reason: 'insert_failed' });
     }
   }
 
-  return json(201, { positions: saved, count: saved.length, skipped: skipped.length > 0 ? skipped : undefined });
+  return json(201, {
+    positions: saved,
+    count: saved.length,
+    skipped: skipped.length > 0 ? skipped : undefined,
+    skippedDetails: skippedDetails.length > 0 ? skippedDetails : undefined,
+  });
 }
 
 async function getLoadPositions(loadId: string, req: Request) {

@@ -7,13 +7,20 @@ import { text, parseUrl, extractParam } from './lib/validate.ts';
 
 const ALLOWED_TYPES = ['BOL', 'POD', 'RATE_CONFIRMATION', 'INSURANCE', 'LICENSE', 'OTHER'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const WINDOWS_RESERVED_FILE_NAMES = new Set([
+  'CON', 'PRN', 'AUX', 'NUL',
+  'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
+  'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9',
+]);
 
 function sanitizeDownloadFileName(fileName: string): string {
   const baseName = fileName.split(/[\\/]/).pop() ?? 'download';
   const withoutControls = baseName.replace(/[\u0000-\u001F\u007F]/g, '');
   const withoutLeadingDots = withoutControls.replace(/^\.+/, '');
   const safeName = withoutLeadingDots.replace(/[^A-Za-z0-9._-]/g, '_').slice(0, 255);
-  return safeName.length > 0 ? safeName : 'download';
+  const [nameOnly] = safeName.split('.', 1);
+  if (!nameOnly || WINDOWS_RESERVED_FILE_NAMES.has(nameOnly.toUpperCase())) return 'download';
+  return safeName;
 }
 
 function rowToDocument(row: Record<string, unknown>) {

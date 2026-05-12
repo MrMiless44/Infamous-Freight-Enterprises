@@ -71,6 +71,7 @@ services:
       XERO_CLIENT_SECRET: ${XERO_CLIENT_SECRET}
       SENDGRID_API_KEY: ${SENDGRID_API_KEY}
     ports:
+      # Expose API on localhost:3001 while app listens on 3000 in-container.
       - "3001:3000"
     depends_on:
       postgres:

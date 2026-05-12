@@ -18,7 +18,13 @@ Keep answers practical, concise, and focused on freight logistics. Do not invent
 const HISTORY_LIMIT = 20;
 const MAX_MESSAGE_LENGTH = 4000;
 
-const openai = new OpenAI();
+const getOpenAIClient = () => {
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY is required for chat.');
+  }
+  return new OpenAI({ apiKey });
+};
 
 const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), {
@@ -71,7 +77,7 @@ export default async (req: Request) => {
 
   let stream: AsyncIterable<ChatCompletionChunk>;
   try {
-    stream = await openai.chat.completions.create({
+    stream = await getOpenAIClient().chat.completions.create({
       model: 'gpt-5.2',
       messages: [{ role: 'system', content: CHAT_SYSTEM_PROMPT }, ...messages],
       stream: true,
