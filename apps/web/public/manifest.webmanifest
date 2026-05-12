@@ -1,7 +1,7 @@
 {
   "name": "Infamous Freight",
   "short_name": "Infamous",
-  "description": "Verified freight command center for quote intake, dispatch coordination, carrier execution, shipment visibility, and proof workflows.",
+  "description": "Freight quote intake, dispatch coordination, shipment tracking context, and delivery follow-up.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

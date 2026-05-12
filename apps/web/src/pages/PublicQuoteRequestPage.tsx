@@ -116,8 +116,7 @@ const computeEstimate = (form: typeof initialForm): Estimate | null => {
 };
 
 const STEPS = [
-  { label: 'Pickup', icon: MapPin },
-  { label: 'Delivery', icon: MapPin },
+  { label: 'Basics', icon: MapPin },
   { label: 'Freight', icon: Package },
   { label: 'Options', icon: Settings },
   { label: 'Review', icon: ClipboardList },
@@ -169,11 +168,10 @@ const PublicQuoteRequestPage: React.FC = () => {
 
   const canProceed = (s: number): boolean => {
     switch (s) {
-      case 0: return Boolean(form.origin.trim() && form.pickupDate);
-      case 1: return Boolean(form.destination.trim());
-      case 2: return Boolean(form.freightType.trim() && form.weight.trim());
-      case 3: return true;
-      case 4: return Boolean(form.company.trim() && form.contact.trim() && form.email.trim());
+      case 0: return Boolean(form.origin.trim() && form.destination.trim() && form.equipment.trim() && form.pickupDate && form.contact.trim() && form.phone.trim() && form.email.trim());
+      case 1: return true;
+      case 2: return true;
+      case 3: return Boolean(form.origin.trim() && form.destination.trim() && form.contact.trim() && form.phone.trim() && form.email.trim());
       default: return true;
     }
   };
@@ -199,18 +197,30 @@ const PublicQuoteRequestPage: React.FC = () => {
           : undefined,
       };
 
-      const { quote } = await createPublicQuoteRequest(quotePayload);
+      let apiTrackingNumber = '';
+      let apiError: Error | null = null;
+
+      try {
+        const { quote } = await createPublicQuoteRequest(quotePayload);
+        apiTrackingNumber = quote.trackingNumber;
+      } catch (err) {
+        apiError = err instanceof Error ? err : new Error('Dispatch intake API is temporarily unavailable.');
+      }
 
       await submitNetlifyForm('quote-request', {
         ...form,
-        trackingNumber: quote.trackingNumber,
+        name: form.contact,
+        pickupTiming: form.pickupDate,
+        freightDetails: [form.freightType, form.weight ? `${form.weight} lbs` : '', form.dimensions].filter(Boolean).join(' | '),
+        notes: form.instructions,
+        trackingNumber: apiTrackingNumber,
         estimateLow: estimate?.low,
         estimateMid: estimate?.mid,
         estimateHigh: estimate?.high,
         ...(attachment ? { attachment } : {}),
       });
 
-      setTrackingNumber(quote.trackingNumber);
+      setTrackingNumber(apiTrackingNumber);
       trackFunnelEvent('funnel_quote_request', { equipment: form.equipment });
       trackPublicEvent('form_submit_success', {
         form: 'quote-request',
@@ -218,12 +228,20 @@ const PublicQuoteRequestPage: React.FC = () => {
         equipment: form.equipment,
         estimateMid: estimate?.mid,
         estimateConfidence: estimate?.confidence,
-        trackingNumber: quote.trackingNumber,
+        trackingNumber: apiTrackingNumber,
+        usedFallbackOnly: Boolean(apiError),
       });
       setSubmitted(true);
+      if (apiError) {
+        setError('');
+      }
     } catch (err) {
       trackPublicEvent('form_submit_error', { form: 'quote-request' });
-      setError(err instanceof Error ? err.message : 'Could not submit this quote request.');
+      setError(
+        err instanceof Error
+          ? `${err.message} For urgent freight, email dispatch@infamousfreight.com with your origin, destination, equipment, pickup timing, and contact info.`
+          : 'Could not submit this quote request. For urgent freight, email dispatch@infamousfreight.com with your shipment details.'
+      );
     } finally {
       setLoading(false);
     }
@@ -234,62 +252,60 @@ const PublicQuoteRequestPage: React.FC = () => {
       case 0:
         return (
           <div className="space-y-5">
-            <h2 className="text-xl font-bold">Pickup Details</h2>
-            <p className="text-sm text-[#B88989]">Where is the freight being picked up?</p>
+            <h2 className="text-xl font-bold">Start Your Quote</h2>
+            <p className="text-sm text-[#B88989]">Share the lane, equipment, pickup timing, and best contact first. Extra freight details can come next.</p>
             <div className="grid gap-4 sm:grid-cols-2">
               <InputField label="Origin City / State" name="origin" value={form.origin} onChange={(v) => updateField('origin', v)} required />
-              <InputField label="Pickup Date" name="pickupDate" type="date" value={form.pickupDate} onChange={(v) => updateField('pickupDate', v)} required />
+              <InputField label="Destination City / State" name="destination" value={form.destination} onChange={(v) => updateField('destination', v)} required />
             </div>
-            <InputField label="Company Name" name="company" value={form.company} onChange={(v) => updateField('company', v)} required />
             <div className="grid gap-4 sm:grid-cols-2">
-              <InputField label="Contact Name" name="contact" value={form.contact} onChange={(v) => updateField('contact', v)} required />
-              <InputField label="Phone" name="phone" type="tel" value={form.phone} onChange={(v) => updateField('phone', v)} autoComplete="tel" inputMode="tel" />
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-[#F5E8E8]/80">Equipment / Service Type <span className="text-infamous-orange">*</span></span>
+                <select
+                  name="equipment"
+                  value={form.equipment}
+                  onChange={(e) => updateField('equipment', e.target.value)}
+                  className="input-field"
+                  required
+                >
+                  <option>Dry van</option>
+                  <option>Reefer</option>
+                  <option>Flatbed</option>
+                  <option>Power only</option>
+                  <option>Box truck</option>
+                  <option>Cargo van</option>
+                  <option>Sprinter van</option>
+                  <option>Freight brokerage</option>
+                  <option>Freight dispatch</option>
+                </select>
+              </label>
+              <InputField label="Pickup Timing" name="pickupDate" type="date" value={form.pickupDate} onChange={(v) => updateField('pickupDate', v)} required />
             </div>
-            <InputField label="Email" name="email" type="email" value={form.email} onChange={(v) => updateField('email', v)} required autoComplete="email" />
+            <InputField label="Company Name (optional)" name="company" value={form.company} onChange={(v) => updateField('company', v)} />
+            <div className="grid gap-4 sm:grid-cols-3">
+              <InputField label="Contact Name" name="contact" value={form.contact} onChange={(v) => updateField('contact', v)} required />
+              <InputField label="Phone" name="phone" type="tel" value={form.phone} onChange={(v) => updateField('phone', v)} required autoComplete="tel" inputMode="tel" />
+              <InputField label="Email" name="email" type="email" value={form.email} onChange={(v) => updateField('email', v)} required autoComplete="email" />
+            </div>
           </div>
         );
       case 1:
         return (
           <div className="space-y-5">
-            <h2 className="text-xl font-bold">Delivery Details</h2>
-            <p className="text-sm text-[#B88989]">Where is the freight going?</p>
+            <h2 className="text-xl font-bold">Freight Details</h2>
+            <p className="text-sm text-[#B88989]">Add what is known now. These details help dispatch quote accurately but are not required to start the lead.</p>
+            <InputField label="Freight Type" name="freightType" value={form.freightType} onChange={(v) => updateField('freightType', v)} placeholder="e.g. Palletized goods, machinery, retail" />
             <div className="grid gap-4 sm:grid-cols-2">
-              <InputField label="Destination City / State" name="destination" value={form.destination} onChange={(v) => updateField('destination', v)} required />
-              <InputField label="Delivery Date (optional)" name="deliveryDate" type="date" value={form.deliveryDate} onChange={(v) => updateField('deliveryDate', v)} />
+              <InputField label="Weight (lbs)" name="weight" type="number" value={form.weight} onChange={(v) => updateField('weight', v)} inputMode="numeric" />
+              <InputField label="Dimensions / Pallet Count" name="dimensions" value={form.dimensions} onChange={(v) => updateField('dimensions', v)} placeholder="e.g. 4 pallets, 48x40x60" />
             </div>
-            <InputField label="Lane Miles (optional)" name="miles" type="number" value={form.miles} onChange={(v) => updateField('miles', v)} inputMode="numeric" />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <InputField label="Delivery Date (optional)" name="deliveryDate" type="date" value={form.deliveryDate} onChange={(v) => updateField('deliveryDate', v)} />
+              <InputField label="Lane Miles (optional)" name="miles" type="number" value={form.miles} onChange={(v) => updateField('miles', v)} inputMode="numeric" />
+            </div>
           </div>
         );
       case 2:
-        return (
-          <div className="space-y-5">
-            <h2 className="text-xl font-bold">Freight Details</h2>
-            <p className="text-sm text-[#B88989]">Tell us about the load.</p>
-            <InputField label="Freight Type" name="freightType" value={form.freightType} onChange={(v) => updateField('freightType', v)} required placeholder="e.g. Palletized goods, machinery, retail" />
-            <div className="grid gap-4 sm:grid-cols-2">
-              <InputField label="Weight (lbs)" name="weight" type="number" value={form.weight} onChange={(v) => updateField('weight', v)} required inputMode="numeric" />
-              <InputField label="Dimensions / Pallet Count" name="dimensions" value={form.dimensions} onChange={(v) => updateField('dimensions', v)} placeholder="e.g. 4 pallets, 48x40x60" />
-            </div>
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-[#F5E8E8]/80">Equipment <span className="text-infamous-orange">*</span></span>
-              <select
-                name="equipment"
-                value={form.equipment}
-                onChange={(e) => updateField('equipment', e.target.value)}
-                className="input-field"
-              >
-                <option>Dry van</option>
-                <option>Reefer</option>
-                <option>Flatbed</option>
-                <option>Power only</option>
-                <option>Box truck</option>
-                <option>Cargo van</option>
-                <option>Sprinter van</option>
-              </select>
-            </label>
-          </div>
-        );
-      case 3:
         return (
           <div className="space-y-5">
             <h2 className="text-xl font-bold">Service Options</h2>
@@ -323,7 +339,7 @@ const PublicQuoteRequestPage: React.FC = () => {
             </label>
           </div>
         );
-      case 4:
+      case 3:
         return (
           <div className="space-y-5">
             <h2 className="text-xl font-bold">Review Your Quote Request</h2>
@@ -391,6 +407,14 @@ const PublicQuoteRequestPage: React.FC = () => {
                 <Link to={`/track-shipment?tracking=${encodeURIComponent(trackingNumber)}`} className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-infamous-red-light hover:underline">
                   View tracking status <ArrowRight size={14} />
                 </Link>
+              </div>
+            )}
+            {!trackingNumber && (
+              <div className="mt-6 rounded-xl border border-infamous-border bg-infamous-panel p-5 text-left">
+                <p className="text-xs uppercase tracking-wider text-infamous-muted">Fallback Capture</p>
+                <p className="mt-1 text-sm leading-6 text-[#F5E8E8]/80">
+                  The quote details were captured for dispatch. A tracking reference may be assigned after review.
+                </p>
               </div>
             )}
             <button
@@ -470,7 +494,7 @@ const PublicQuoteRequestPage: React.FC = () => {
 
               {error && <p className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">{error}</p>}
 
-              <div className="mt-8 flex items-center justify-between">
+              <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 {step > 0 ? (
                   <button type="button" onClick={prevStep} className="btn-secondary inline-flex items-center gap-2">
                     <ArrowLeft size={16} /> Back
@@ -496,6 +520,9 @@ const PublicQuoteRequestPage: React.FC = () => {
                   </button>
                 )}
               </div>
+              <p className="mt-4 text-sm leading-6 text-[#B88989]">
+                Urgent pickup or form trouble? Email <a href="mailto:dispatch@infamousfreight.com" className="font-semibold text-infamous-red-light hover:underline">dispatch@infamousfreight.com</a> with the lane, equipment, pickup timing, freight details, and contact info.
+              </p>
             </form>
           </div>
 

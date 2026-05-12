@@ -4,12 +4,12 @@ import { ArrowRight, Infinity, Menu, X } from 'lucide-react';
 import { BRAND } from '@/lib/brand';
 
 const navLinks = [
-  { label: 'Home', href: '/' },
   { label: 'Services', href: '/services' },
-  { label: 'Shippers', href: '/customer-portal' },
+  { label: 'Request Quote', href: '/request-quote' },
+  { label: 'Track Shipment', href: '/track-shipment' },
   { label: 'Carriers', href: '/carrier-portal' },
-  { label: 'Tracking', href: '/track-shipment' },
   { label: 'About', href: '/about' },
+  { label: 'Contact', href: '/contact' },
 ];
 
 const footerGroups = [
@@ -71,7 +71,6 @@ const PublicLayout: React.FC = () => {
             {navLinks.map((item) => {
               const active = pathname === item.href
                 || (item.href === '/services' && pathname.startsWith('/services'))
-                || (item.href === '/customer-portal' && pathname.startsWith('/customer'))
                 || (item.href === '/carrier-portal' && pathname.startsWith('/carrier'));
               return (
                 <Link
@@ -152,7 +151,7 @@ const PublicLayout: React.FC = () => {
             </Link>
             <p className="mt-2 font-display text-sm font-bold uppercase tracking-[0.2em] text-infamous-muted">{BRAND.tagline}</p>
             <p className="mt-3 max-w-md leading-6">
-              Freight management platform with verified carriers, real-time tracking, and end-to-end shipment visibility.
+              Freight services with clear quote intake, documented handoffs, tracking context, and delivery follow-up.
             </p>
             <p className="mt-6 text-xs text-infamous-muted">© {new Date().getFullYear()} {BRAND.legalName}. All rights reserved.</p>
           </div>

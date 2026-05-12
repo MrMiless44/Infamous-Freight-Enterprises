@@ -1,0 +1,32 @@
+name: Dependabot Safe Queue
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  queue:
+    name: Mark Dependabot PRs for safe review
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      - name: Apply safe queue labels and comment
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          gh label create dependencies --color EDEDED --force >/dev/null 2>&1 || true
+          gh label create safe-queue --color EDEDED --force >/dev/null 2>&1 || true
+
+          gh pr edit "${PR_NUMBER}" --add-label dependencies --add-label safe-queue
+
+          gh pr comment "${PR_NUMBER}" --body "Dependabot PR queued. Full Validation and CodeQL must pass before merge. Major version updates require manual review."

@@ -29,9 +29,9 @@ interface OnboardingStage {
 const onboardingStages: OnboardingStage[] = [
   { id: 'application', label: 'Application', detail: 'MC#, USDOT, contact', icon: <FileText size={16} /> },
   { id: 'documents',   label: 'Documents',   detail: 'W-9, voided check, agreement', icon: <FileCheck2 size={16} /> },
-  { id: 'insurance',   label: 'Insurance',   detail: 'COI on file with $1M auto + cargo', icon: <ShieldCheck size={16} /> },
-  { id: 'compliance',  label: 'Compliance',  detail: 'FMCSA authority + safety review', icon: <ClipboardCheck size={16} /> },
-  { id: 'approved',    label: 'Approved',    detail: 'Cleared to book Infamous loads', icon: <UserCheck size={16} /> },
+  { id: 'insurance',   label: 'Insurance',   detail: 'Insurance documents requested', icon: <ShieldCheck size={16} /> },
+  { id: 'compliance',  label: 'Document review',  detail: 'Carrier documents reviewed before dispatch', icon: <ClipboardCheck size={16} /> },
+  { id: 'approved',    label: 'Ready',    detail: 'Eligible for load review', icon: <UserCheck size={16} /> },
 ];
 
 const currentStageId = 'compliance' as OnboardingStageId;
@@ -65,7 +65,7 @@ const CarrierPortalPage: React.FC = () => {
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-infamous-green-light">Onboarding Status</p>
               <h2 className="mt-1 text-lg font-bold">
                 {isApproved
-                  ? 'Approved — cleared to book loads'
+                  ? 'Ready for load review'
                   : `Step ${currentIdx + 1} of ${onboardingStages.length}: ${onboardingStages[currentIdx]?.label}`}
               </h2>
             </div>
