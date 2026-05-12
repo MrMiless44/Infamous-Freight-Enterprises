@@ -60,20 +60,20 @@ describe('Netlify production routing', () => {
     expect(apiProxy).toBeLessThan(spaFallback);
     expect(socketProxy).toBeLessThan(spaFallback);
     expect(rootContent).toContain('to = "https://infamous-freight-api.fly.dev/api/health"');
-    expect(rootContent).toContain('to = "/.netlify/functions/load-requests"');
-    expect(rootContent).toContain('to = "/.netlify/functions/public-freight"');
-    expect(rootContent).toContain('to = "/.netlify/functions/public-freight?trackingNumber=:trackingNumber"');
+    expect(rootContent).toContain('to = "https://infamous-freight-api.fly.dev/api/load-requests"');
+    expect(rootContent).toContain('to = "https://infamous-freight-api.fly.dev/api/public/quote-requests"');
+    expect(rootContent).toContain('to = "https://infamous-freight-api.fly.dev/api/public/shipments/:trackingNumber"');
     expect(rootContent).toContain('to = "https://infamous-freight-api.fly.dev/api/:splat"');
     expect(rootContent).toContain('to = "https://infamous-freight-api.fly.dev/socket.io/:splat"');
     expect(rootContent).toContain('from = "/api/*"\n  to = "https://infamous-freight-api.fly.dev/api/:splat"\n  status = 200\n  force = true');
     expect(rootContent).toContain('from = "/socket.io/*"\n  to = "https://infamous-freight-api.fly.dev/socket.io/:splat"\n  status = 200\n  force = true');
   });
 
-  it('publishes the Netlify functions directory on normal Git deploys', () => {
+  it('keeps repo-owned Netlify functions out of normal Git deploys', () => {
     const rootContent = read(rootNetlify);
 
     expect(rootContent).toContain('[build]');
-    expect(rootContent).toContain('functions = "netlify/functions"');
+    expect(rootContent).toContain('functions = "netlify/disabled-functions"');
   });
 
   it('keeps public Netlify function entrypoints present for deploy packaging', () => {
@@ -90,9 +90,9 @@ describe('Netlify production routing', () => {
     const redirectContent = read(publicRedirects);
 
     const healthProxy = indexOf(redirectContent, '/api/health https://infamous-freight-api.fly.dev/api/health 200!');
-    const loadRequestsProxy = indexOf(redirectContent, '/api/load-requests /.netlify/functions/load-requests 200!');
-    const quoteRequestsProxy = indexOf(redirectContent, '/api/public/quote-requests /.netlify/functions/public-freight 200!');
-    const shipmentLookupProxy = indexOf(redirectContent, '/api/public/shipments/:trackingNumber /.netlify/functions/public-freight?trackingNumber=:trackingNumber 200!');
+    const loadRequestsProxy = indexOf(redirectContent, '/api/load-requests https://infamous-freight-api.fly.dev/api/load-requests 200!');
+    const quoteRequestsProxy = indexOf(redirectContent, '/api/public/quote-requests https://infamous-freight-api.fly.dev/api/public/quote-requests 200!');
+    const shipmentLookupProxy = indexOf(redirectContent, '/api/public/shipments/:trackingNumber https://infamous-freight-api.fly.dev/api/public/shipments/:trackingNumber 200!');
     const apiProxy = indexOf(redirectContent, '/api/* https://infamous-freight-api.fly.dev/api/:splat 200!');
     const socketProxy = indexOf(redirectContent, '/socket.io/* https://infamous-freight-api.fly.dev/socket.io/:splat 200!');
     const spaFallback = indexOf(redirectContent, '/*    /index.html   200');
@@ -105,20 +105,19 @@ describe('Netlify production routing', () => {
     expect(socketProxy).toBeLessThan(spaFallback);
   });
 
-  it('keeps CLI production deploys paired with Netlify functions', () => {
+  it('keeps CLI production deploys from uploading repo-owned Netlify functions', () => {
     const script = read(path.join(repoRoot, 'scripts/netlify-production-readiness.sh'));
 
-    expect(script).toContain('netlify-cli deploy --prod --dir apps/web/dist --functions netlify/functions');
+    expect(script).toContain('netlify-cli deploy --prod --dir apps/web/dist --functions netlify/disabled-functions');
   });
 
-  it('keeps public Netlify function route checks in production readiness automation', () => {
+  it('keeps public Fly API route checks in production readiness automation', () => {
     const script = read(path.join(repoRoot, 'scripts/netlify-production-readiness.sh'));
 
     expect(script).toContain('PUBLIC_QUOTE_PREFLIGHT_URL="${PUBLIC_QUOTE_PREFLIGHT_URL:-https://www.infamousfreight.com/api/public/quote-requests}"');
     expect(script).toContain('PUBLIC_INVALID_SHIPMENT_URL="${PUBLIC_INVALID_SHIPMENT_URL:-https://www.infamousfreight.com/api/public/shipments/invalid-tracking}"');
-    expect(script).toContain('PUBLIC_FREIGHT_FUNCTION_URL="${PUBLIC_FREIGHT_FUNCTION_URL:-https://www.infamousfreight.com/.netlify/functions/public-freight}"');
     expect(script).toContain('run_step "Public quote API preflight check" curl_options "$PUBLIC_QUOTE_PREFLIGHT_URL"');
     expect(script).toContain('run_step "Public invalid shipment lookup check" curl_expect_status 400 "$PUBLIC_INVALID_SHIPMENT_URL"');
-    expect(script).toContain('run_step "Direct public freight function preflight check" curl_options "$PUBLIC_FREIGHT_FUNCTION_URL"');
+    expect(script).not.toContain('.netlify/functions/public-freight');
   });
 });

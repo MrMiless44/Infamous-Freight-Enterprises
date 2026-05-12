@@ -18,11 +18,11 @@ https://infamousfreight.com/* https://www.infamousfreight.com/:splat 301!
 # Browser-critical API health proxy
 /api/health https://infamous-freight-api.fly.dev/api/health 200!
 
-# Netlify-hosted API endpoints
-/api/load-requests /.netlify/functions/load-requests 200!
-/api/load-requests/* /.netlify/functions/load-requests/:splat 200!
-/api/public/quote-requests /.netlify/functions/public-freight 200!
-/api/public/shipments/:trackingNumber /.netlify/functions/public-freight?trackingNumber=:trackingNumber 200!
+# Fly-hosted API endpoints
+/api/load-requests https://infamous-freight-api.fly.dev/api/load-requests 200!
+/api/load-requests/* https://infamous-freight-api.fly.dev/api/load-requests/:splat 200!
+/api/public/quote-requests https://infamous-freight-api.fly.dev/api/public/quote-requests 200!
+/api/public/shipments/:trackingNumber https://infamous-freight-api.fly.dev/api/public/shipments/:trackingNumber 200!
 
 # Production API proxy
 /api/* https://infamous-freight-api.fly.dev/api/:splat 200!

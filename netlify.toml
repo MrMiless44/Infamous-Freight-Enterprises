@@ -1,12 +1,17 @@
 [build]
   publish = "apps/web/dist"
   command = "pnpm run build:web"
-  functions = "netlify/functions"
+  # Keep repo-owned functions out of this deploy. The site currently proxies the
+  # API to Fly.io so oversized site-level env vars do not block function upload.
+  functions = "netlify/disabled-functions"
 
 [build.environment]
   NODE_VERSION = "22"
   NETLIFY_NEXT_PLUGIN_SKIP = "true"
   SENTRY_DISABLE_UPLOAD = "true"
+  # The app does not read FEATURE_FLAGS, and oversized values under this name
+  # can exceed Netlify's per-function environment limit during deploy.
+  FEATURE_FLAGS = ""
 
 [[redirects]]
   from = "https://infamousfreight.com/*"
@@ -28,144 +33,144 @@
 
 [[redirects]]
   from = "/api/load-requests"
-  to = "/.netlify/functions/load-requests"
+  to = "https://infamous-freight-api.fly.dev/api/load-requests"
   status = 200
   force = true
 
 [[redirects]]
   from = "/api/load-requests/*"
-  to = "/.netlify/functions/load-requests/:splat"
+  to = "https://infamous-freight-api.fly.dev/api/load-requests/:splat"
   status = 200
   force = true
 
 [[redirects]]
   from = "/api/public/quote-requests"
-  to = "/.netlify/functions/public-freight"
+  to = "https://infamous-freight-api.fly.dev/api/public/quote-requests"
   status = 200
   force = true
 
 [[redirects]]
   from = "/api/public/shipments/:trackingNumber"
-  to = "/.netlify/functions/public-freight?trackingNumber=:trackingNumber"
+  to = "https://infamous-freight-api.fly.dev/api/public/shipments/:trackingNumber"
   status = 200
   force = true
 
 [[redirects]]
   from = "/api/chat"
-  to = "/.netlify/functions/chat"
+  to = "https://infamous-freight-api.fly.dev/api/chat"
   status = 200
   force = true
 
 # Accounts / Auth
 [[redirects]]
   from = "/api/auth/*"
-  to = "/.netlify/functions/accounts"
+  to = "https://infamous-freight-api.fly.dev/api/auth/:splat"
   status = 200
   force = true
 
 # Loads
 [[redirects]]
   from = "/api/loads/*"
-  to = "/.netlify/functions/loads"
+  to = "https://infamous-freight-api.fly.dev/api/loads/:splat"
   status = 200
   force = true
 
 [[redirects]]
   from = "/api/loads"
-  to = "/.netlify/functions/loads"
+  to = "https://infamous-freight-api.fly.dev/api/loads"
   status = 200
   force = true
 
 # Carriers
 [[redirects]]
   from = "/api/carriers/*"
-  to = "/.netlify/functions/carriers"
+  to = "https://infamous-freight-api.fly.dev/api/carriers/:splat"
   status = 200
   force = true
 
 [[redirects]]
   from = "/api/carriers"
-  to = "/.netlify/functions/carriers"
+  to = "https://infamous-freight-api.fly.dev/api/carriers"
   status = 200
   force = true
 
 # Drivers
 [[redirects]]
   from = "/api/drivers/*"
-  to = "/.netlify/functions/drivers"
+  to = "https://infamous-freight-api.fly.dev/api/drivers/:splat"
   status = 200
   force = true
 
 [[redirects]]
   from = "/api/drivers"
-  to = "/.netlify/functions/drivers"
+  to = "https://infamous-freight-api.fly.dev/api/drivers"
   status = 200
   force = true
 
 # ELD / HOS
 [[redirects]]
   from = "/api/eld/*"
-  to = "/.netlify/functions/drivers"
+  to = "https://infamous-freight-api.fly.dev/api/eld/:splat"
   status = 200
   force = true
 
 # GPS Tracking
 [[redirects]]
   from = "/api/tracking/*"
-  to = "/.netlify/functions/tracking"
+  to = "https://infamous-freight-api.fly.dev/api/tracking/:splat"
   status = 200
   force = true
 
 # Quotes / Pricing
 [[redirects]]
   from = "/api/quotes/*"
-  to = "/.netlify/functions/quotes"
+  to = "https://infamous-freight-api.fly.dev/api/quotes/:splat"
   status = 200
   force = true
 
 [[redirects]]
   from = "/api/quotes"
-  to = "/.netlify/functions/quotes"
+  to = "https://infamous-freight-api.fly.dev/api/quotes"
   status = 200
   force = true
 
 # Documents
 [[redirects]]
   from = "/api/documents/*"
-  to = "/.netlify/functions/documents"
+  to = "https://infamous-freight-api.fly.dev/api/documents/:splat"
   status = 200
   force = true
 
 # Invoices
 [[redirects]]
   from = "/api/invoices/*"
-  to = "/.netlify/functions/invoices"
+  to = "https://infamous-freight-api.fly.dev/api/invoices/:splat"
   status = 200
   force = true
 
 [[redirects]]
   from = "/api/invoices"
-  to = "/.netlify/functions/invoices"
+  to = "https://infamous-freight-api.fly.dev/api/invoices"
   status = 200
   force = true
 
 # Notifications
 [[redirects]]
   from = "/api/notifications/*"
-  to = "/.netlify/functions/notifications-api"
+  to = "https://infamous-freight-api.fly.dev/api/notifications/:splat"
   status = 200
   force = true
 
 [[redirects]]
   from = "/api/notifications"
-  to = "/.netlify/functions/notifications-api"
+  to = "https://infamous-freight-api.fly.dev/api/notifications"
   status = 200
   force = true
 
 # Mobile App Backend
 [[redirects]]
   from = "/api/mobile/*"
-  to = "/.netlify/functions/mobile"
+  to = "https://infamous-freight-api.fly.dev/api/mobile/:splat"
   status = 200
   force = true
 
