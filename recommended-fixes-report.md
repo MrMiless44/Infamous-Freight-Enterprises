@@ -16,3 +16,8 @@
 
 - `pnpm --filter @infamous-freight/api lint`
 - `pnpm --filter @infamous-freight/api test -- --runInBand`
+
+## Verification (2026-05-12)
+
+- ✅ `pnpm --filter @infamous-freight/api lint`
+- ✅ `pnpm --filter @infamous-freight/api test -- --runInBand`
