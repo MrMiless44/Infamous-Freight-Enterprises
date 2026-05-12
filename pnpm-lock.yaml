@@ -13,7 +13,10 @@ importers:
     dependencies:
       '@netlify/database':
         specifier: ^1.0.0
-        version: 1.0.0(mysql2@3.15.3)(postgres@3.4.7)
+        version: 1.0.0(@electric-sql/pglite@0.4.1)(mysql2@3.15.3)(postgres@3.4.7)
+      '@supabase/supabase-js':
+        specifier: ^2.105.4
+        version: 2.105.4
       openai:
         specifier: ^6.37.0
         version: 6.37.0(ws@8.20.0)
@@ -109,6 +112,9 @@ importers:
       '@stripe/stripe-js':
         specifier: ^9.4.0
         version: 9.4.0
+      '@supabase/ssr':
+        specifier: ^0.10.3
+        version: 0.10.3(@supabase/supabase-js@2.105.4)
       '@supabase/supabase-js':
         specifier: ^2.105.4
         version: 2.105.4
@@ -1714,6 +1720,11 @@ packages:
   '@supabase/realtime-js@2.105.4':
     resolution: {integrity: sha512-6ov6c59+8D9h7q4M4Gy/uDJlC0Akxl9/714Y+6vJ+Sijuc16TS/p5DwhfRCLNcIhNiej1gEt+CQUwsjiPt4PxQ==}
     engines: {node: '>=20.0.0'}
+
+  '@supabase/ssr@0.10.3':
+    resolution: {integrity: sha512-ux2CJgX89h0Fz2lY7ZNafNG2SkXpyRc5dz77K9eKeBLPdtywQixKwIuetDeIViAJBp/buOUVmgj8PVesOklNpw==}
+    peerDependencies:
+      '@supabase/supabase-js': ^2.105.3
 
   '@supabase/storage-js@2.105.4':
     resolution: {integrity: sha512-Jx+pzMP1Whjof2PWHoVBUA75/p7PQE9CqKBzn1oXVyJDOggMLSH2OzVWwsXYaxEpdC1K/KltwmOX44nL3LHl9g==}
@@ -5305,12 +5316,12 @@ snapshots:
 
   '@neondatabase/serverless@1.1.0': {}
 
-  '@netlify/database@1.0.0(mysql2@3.15.3)(postgres@3.4.7)':
+  '@netlify/database@1.0.0(@electric-sql/pglite@0.4.1)(mysql2@3.15.3)(postgres@3.4.7)':
     dependencies:
       '@neondatabase/serverless': 1.1.0
       '@netlify/runtime-utils': 2.3.0
       pg: 8.20.0
-      waddler: 0.1.1(@neondatabase/serverless@1.1.0)(mysql2@3.15.3)(pg@8.20.0)(postgres@3.4.7)
+      waddler: 0.1.1(@electric-sql/pglite@0.4.1)(@neondatabase/serverless@1.1.0)(mysql2@3.15.3)(pg@8.20.0)(postgres@3.4.7)
       ws: 8.20.0
     transitivePeerDependencies:
       - '@clickhouse/client'
@@ -6076,6 +6087,11 @@ snapshots:
     dependencies:
       '@supabase/phoenix': 0.4.2
       tslib: 2.8.1
+
+  '@supabase/ssr@0.10.3(@supabase/supabase-js@2.105.4)':
+    dependencies:
+      '@supabase/supabase-js': 2.105.4
+      cookie: 1.1.1
 
   '@supabase/storage-js@2.105.4':
     dependencies:
@@ -8857,8 +8873,9 @@ snapshots:
     dependencies:
       xml-name-validator: 5.0.0
 
-  waddler@0.1.1(@neondatabase/serverless@1.1.0)(mysql2@3.15.3)(pg@8.20.0)(postgres@3.4.7):
+  waddler@0.1.1(@electric-sql/pglite@0.4.1)(@neondatabase/serverless@1.1.0)(mysql2@3.15.3)(pg@8.20.0)(postgres@3.4.7):
     optionalDependencies:
+      '@electric-sql/pglite': 0.4.1
       '@neondatabase/serverless': 1.1.0
       mysql2: 3.15.3
       pg: 8.20.0
