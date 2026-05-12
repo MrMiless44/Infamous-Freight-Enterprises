@@ -31,7 +31,7 @@ https://infamous-freight.netlify.app/* https://www.infamousfreight.com/:splat 30
 /api/carriers/* /.netlify/functions/carriers 200!
 /api/drivers /.netlify/functions/drivers 200!
 /api/drivers/* /.netlify/functions/drivers 200!
-/api/eld/* /.netlify/functions/drivers 200!
+/api/eld/drivers/:driverId/hos /.netlify/functions/drivers 200!
 /api/tracking/* /.netlify/functions/tracking 200!
 /api/quotes /.netlify/functions/quotes 200!
 /api/quotes/* /.netlify/functions/quotes 200!
