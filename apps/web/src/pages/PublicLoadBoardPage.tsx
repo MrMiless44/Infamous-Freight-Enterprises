@@ -195,8 +195,8 @@ const PublicLoadBoardPage: React.FC = () => {
             Available freight from Infamous Freight.
           </h1>
           <p className="mt-4 max-w-2xl text-lg leading-7 text-[#F5E8E8]/80">
-            Verified shipper. Rate confirmation in writing before you roll. QuickPay on every load
-            once you're approved. Browse open lanes and request the ones that fit your truck.
+            Rate confirmation in writing before you roll. Payment terms are confirmed on each load.
+            Browse open lanes and request the ones that fit your truck.
           </p>
           <div className="mt-6 flex flex-wrap gap-3 text-sm">
             <Link
@@ -388,7 +388,7 @@ const PublicLoadBoardPage: React.FC = () => {
                 }}
                 className="h-4 w-4 accent-infamous-orange"
               />
-              <Zap size={14} className="text-infamous-orange" aria-hidden="true" /> QuickPay loads only
+              <Zap size={14} className="text-infamous-orange" aria-hidden="true" /> Payment terms listed
             </label>
             <button
               type="button"
@@ -461,7 +461,7 @@ const PublicLoadBoardPage: React.FC = () => {
                       ) : null}
                       {load.quickPay ? (
                         <span className="inline-flex items-center gap-1 rounded-full bg-[#36D399]/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-300">
-                          <Zap size={12} /> QuickPay
+                          <Zap size={12} /> Terms listed
                         </span>
                       ) : null}
                     </div>
@@ -536,9 +536,9 @@ const PublicLoadBoardPage: React.FC = () => {
               icon: <CheckCircle2 size={20} />,
             },
             {
-              title: 'QuickPay on POD',
+              title: 'Written payment terms',
               detail:
-                'Approved carriers get standard pay free, 48-hour QuickPay 2.5%, same-day 3.5%, instant 4%.',
+                'Payment terms are confirmed in writing before dispatch and should be reviewed on each rate confirmation.',
               icon: <Zap size={20} />,
             },
           ].map((card) => (
@@ -601,7 +601,7 @@ const PublicLoadBoardPage: React.FC = () => {
                 </div>
                 <p>
                   Dispatch has the request for <span className="font-semibold text-[#F5E8E8]">{requestLoad.id}</span>{' '}
-                  and will respond with a written rate confirmation if your authority and insurance are on file.
+                  and will respond with a written rate confirmation if the required carrier documents are on file.
                   Approved carriers can also track this in the carrier portal.
                 </p>
                 <div className="mt-5 flex flex-wrap gap-2">
@@ -624,7 +624,7 @@ const PublicLoadBoardPage: React.FC = () => {
             ) : (
               <form onSubmit={submitRequest} className="px-5 py-4">
                 <p className="mb-4 text-xs text-[#B88989]">
-                  Send your authority and contact info. Dispatch verifies authority and insurance before
+                  Send your authority and contact info. Dispatch reviews carrier documents before
                   issuing a rate confirmation — this does not commit you to the load.
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2">
