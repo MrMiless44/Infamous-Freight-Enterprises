@@ -2,6 +2,61 @@ name: Deploy Fly API
 
 on:
   workflow_call:
+    secrets:
+      FLY_API_TOKEN:
+        required: true
+      DATABASE_URL:
+        required: false
+      SUPABASE_URL:
+        required: false
+      SUPABASE_SERVICE_KEY:
+        required: false
+      SUPABASE_SERVICE_ROLE_KEY:
+        required: false
+      SUPABASE_JWT_SECRET:
+        required: false
+      STRIPE_SECRET_KEY:
+        required: false
+      STRIPE_WEBHOOK_SECRET:
+        required: false
+      REDIS_URL:
+        required: false
+      REDIS_HOST:
+        required: false
+      REDIS_PASSWORD:
+        required: false
+      SENTRY_DSN:
+        required: false
+      SENTRY_AUTH_TOKEN:
+        required: false
+      DAT_API_KEY:
+        required: false
+      TRUCKSTOP_API_KEY:
+        required: false
+      LOADBOARD_API_KEY:
+        required: false
+      SAMSARA_API_TOKEN:
+        required: false
+      MOTIVE_CLIENT_ID:
+        required: false
+      MOTIVE_CLIENT_SECRET:
+        required: false
+      QBO_CLIENT_ID:
+        required: false
+      QBO_CLIENT_SECRET:
+        required: false
+      XERO_CLIENT_ID:
+        required: false
+      XERO_CLIENT_SECRET:
+        required: false
+      SENDGRID_API_KEY:
+        required: false
+      RTS_API_KEY:
+        required: false
+      OTR_API_KEY:
+        required: false
+      APEX_API_KEY:
+        required: false
   workflow_dispatch:
 
 concurrency:

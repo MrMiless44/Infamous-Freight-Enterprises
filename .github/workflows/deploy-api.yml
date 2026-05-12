@@ -9,4 +9,31 @@ permissions:
 jobs:
   deploy:
     uses: ./.github/workflows/deploy-fly.yml
-    secrets: inherit
+    secrets:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      SUPABASE_JWT_SECRET: ${{ secrets.SUPABASE_JWT_SECRET }}
+      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+      STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+      REDIS_URL: ${{ secrets.REDIS_URL }}
+      REDIS_HOST: ${{ secrets.REDIS_HOST }}
+      REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      DAT_API_KEY: ${{ secrets.DAT_API_KEY }}
+      TRUCKSTOP_API_KEY: ${{ secrets.TRUCKSTOP_API_KEY }}
+      LOADBOARD_API_KEY: ${{ secrets.LOADBOARD_API_KEY }}
+      SAMSARA_API_TOKEN: ${{ secrets.SAMSARA_API_TOKEN }}
+      MOTIVE_CLIENT_ID: ${{ secrets.MOTIVE_CLIENT_ID }}
+      MOTIVE_CLIENT_SECRET: ${{ secrets.MOTIVE_CLIENT_SECRET }}
+      QBO_CLIENT_ID: ${{ secrets.QBO_CLIENT_ID }}
+      QBO_CLIENT_SECRET: ${{ secrets.QBO_CLIENT_SECRET }}
+      XERO_CLIENT_ID: ${{ secrets.XERO_CLIENT_ID }}
+      XERO_CLIENT_SECRET: ${{ secrets.XERO_CLIENT_SECRET }}
+      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+      RTS_API_KEY: ${{ secrets.RTS_API_KEY }}
+      OTR_API_KEY: ${{ secrets.OTR_API_KEY }}
+      APEX_API_KEY: ${{ secrets.APEX_API_KEY }}
