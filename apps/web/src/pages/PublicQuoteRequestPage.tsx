@@ -70,24 +70,11 @@ const ALLOWED_ATTACHMENT_EXTENSIONS = new Set(['pdf', 'jpg', 'jpeg', 'png', 'doc
 const SUBMISSION_TIMEOUT_MS = 12_000;
 const GENERIC_SUBMISSION_ERROR = 'We could not submit the form. Please try again or contact dispatch directly.';
 const PRIMARY_TIMEOUT_ERROR = 'Dispatch intake timed out. Your details were not saved to tracking.';
+const NETLIFY_TIMEOUT_ERROR = 'Netlify lead capture timed out. Please try again or contact dispatch directly.';
 type SubmissionOutcome =
   | { channel: 'primary'; success: true; trackingNumber: string }
   | { channel: 'netlify'; success: true }
   | { channel: 'primary' | 'netlify'; success: false; error: unknown };
-
-const withTimeout = <T,>(promise: Promise<T>, timeoutMs: number, message: string): Promise<T> =>
-  new Promise<T>((resolve, reject) => {
-    const timeoutHandle = window.setTimeout(() => reject(new Error(message)), timeoutMs);
-    promise
-      .then((result) => {
-        window.clearTimeout(timeoutHandle);
-        resolve(result);
-      })
-      .catch((error) => {
-        window.clearTimeout(timeoutHandle);
-        reject(error);
-      });
-  });
 
 const formatCurrency = (value: number) =>
   value.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
@@ -326,24 +313,32 @@ const PublicQuoteRequestPage: React.FC = () => {
           window.clearTimeout(primaryTimeoutHandle);
         });
 
-      const netlifySubmission = withTimeout(
-        submitNetlifyForm('quote-request', {
+      const netlifyAbortController = new AbortController();
+      const netlifyTimeoutHandle = window.setTimeout(() => {
+        netlifyAbortController.abort();
+      }, SUBMISSION_TIMEOUT_MS);
+
+      const netlifySubmission = submitNetlifyForm('quote-request', {
           ...form,
           estimateLow: estimate?.low,
           estimateMid: estimate?.mid,
           estimateHigh: estimate?.high,
           ...(attachment ? { attachment } : {}),
-        }),
-        SUBMISSION_TIMEOUT_MS,
-        GENERIC_SUBMISSION_ERROR
-      )
+        }, { signal: netlifyAbortController.signal })
         .then(() => {
           const outcome: SubmissionOutcome = { channel: 'netlify', success: true };
           return outcome;
         })
         .catch((error) => {
-          const outcome: SubmissionOutcome = { channel: 'netlify', success: false, error };
+          const normalizedError =
+            error instanceof DOMException && error.name === 'AbortError'
+              ? new Error(NETLIFY_TIMEOUT_ERROR)
+              : error;
+          const outcome: SubmissionOutcome = { channel: 'netlify', success: false, error: normalizedError };
           return outcome;
+        })
+        .finally(() => {
+          window.clearTimeout(netlifyTimeoutHandle);
         });
 
       const firstFinished = await Promise.race([primarySubmission, netlifySubmission]);
@@ -360,7 +355,7 @@ const PublicQuoteRequestPage: React.FC = () => {
         ]);
 
         if (!primaryResult.success && !netlifyResult.success) {
-          throw netlifyResult.error ?? primaryResult.error ?? new Error(GENERIC_SUBMISSION_ERROR);
+          throw primaryResult.error ?? netlifyResult.error ?? new Error(GENERIC_SUBMISSION_ERROR);
         }
       }
 
@@ -376,8 +371,8 @@ const PublicQuoteRequestPage: React.FC = () => {
         estimateMid: estimate?.mid,
         estimateConfidence: estimate?.confidence,
         trackingNumber: quoteTrackingNumber,
-        savedToPrimaryApi: primaryResult?.success ?? false,
-        savedToNetlifyForms: netlifyResult?.success ?? false,
+        savedToPrimaryApi: primaryResult?.success,
+        savedToNetlifyForms: netlifyResult?.success,
       });
       setSubmitted(true);
     } catch (err) {
