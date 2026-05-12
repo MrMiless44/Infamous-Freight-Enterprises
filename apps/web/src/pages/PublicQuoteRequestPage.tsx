@@ -161,6 +161,7 @@ const PublicQuoteRequestPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [attachment, setAttachment] = useState<File | null>(null);
+  const [attachmentWarning, setAttachmentWarning] = useState(false);
 
   const estimate = useMemo(() => computeEstimate(form), [form]);
 
@@ -190,8 +191,13 @@ const PublicQuoteRequestPage: React.FC = () => {
     event.preventDefault();
     setLoading(true);
     setError('');
+    setAttachmentWarning(false);
 
     try {
+      if (form.pickupDate && form.deliveryDate && new Date(form.deliveryDate) < new Date(form.pickupDate)) {
+        setError('Delivery date must be on or after the pickup date.');
+        return;
+      }
       const quotePayload = {
         ...form,
         estimate: estimate
@@ -236,6 +242,10 @@ const PublicQuoteRequestPage: React.FC = () => {
         throw new Error(
           `${apiError instanceof Error ? apiError.message : 'Dispatch intake is temporarily unavailable.'} Netlify Forms fallback also failed. Contact dispatch directly by email.`
         );
+      }
+
+      if (apiTrackingNumber && formError && attachment) {
+        setAttachmentWarning(true);
       }
 
       setTrackingNumber(apiTrackingNumber);
@@ -404,6 +414,15 @@ const PublicQuoteRequestPage: React.FC = () => {
             <p className="mt-3 text-[#B88989]">
               Dispatch will review your lane, confirm equipment fit and available capacity, and reply with pricing.
             </p>
+            {attachmentWarning && (
+              <p className="mt-3 rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm text-yellow-200">
+                Your quote request was received, but your attached document was not captured. Please{' '}
+                <a href={`mailto:${DISPATCH_EMAIL}?subject=Attachment%20for%20${encodeURIComponent(trackingNumber)}`} className="font-semibold underline underline-offset-4">
+                  email your attachment to dispatch
+                </a>{' '}
+                referencing your tracking number.
+              </p>
+            )}
             {!trackingNumber && (
               <p className="mt-3 rounded-xl border border-infamous-border bg-infamous-panel p-4 text-sm text-[#F5E8E8]/80">
                 The request was captured by the Netlify Forms fallback. A tracking reference may be added after dispatch reviews it.
@@ -420,7 +439,7 @@ const PublicQuoteRequestPage: React.FC = () => {
             )}
             <button
               type="button"
-              onClick={() => { setSubmitted(false); setForm(initialForm); setTrackingNumber(''); setAttachment(null); setStep(0); }}
+              onClick={() => { setSubmitted(false); setForm(initialForm); setTrackingNumber(''); setAttachment(null); setAttachmentWarning(false); setStep(0); }}
               className="mt-6 inline-flex items-center gap-2 rounded-xl bg-infamous-red px-6 py-3 font-semibold text-[#F5E8E8] transition hover:bg-infamous-red-light"
             >
               Submit Another Request

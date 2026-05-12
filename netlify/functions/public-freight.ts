@@ -100,7 +100,6 @@ async function createQuote(req: Request) {
   const equipment = text(body.equipment, 80) || 'Dry van';
 
   const missing: string[] = [];
-  if (!company) missing.push('company');
   if (!contact) missing.push('contact');
   if (!email) missing.push('email');
   if (!origin) missing.push('origin');
