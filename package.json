@@ -14,7 +14,7 @@
     "dev:web": "pnpm -C apps/web run dev",
     "build": "pnpm run build:api && pnpm run build:web",
     "build:api": "node scripts/ensure-api-workspace.js && pnpm -C apps/api run build",
-    "build:web": "pnpm -C apps/web run build",
+    "build:web": "bash scripts/check-pnpm-only.sh && pnpm -C apps/web run build",
     "start": "node scripts/ensure-api-workspace.js && pnpm -C apps/api run start:prod",
     "lint": "node scripts/ensure-api-workspace.js && pnpm -C apps/api run lint && pnpm -C apps/web run lint",
     "test": "pnpm run test:api && pnpm run test:web",
