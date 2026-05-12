@@ -8,6 +8,14 @@ import { text, parseUrl, extractParam } from './lib/validate.ts';
 const ALLOWED_TYPES = ['BOL', 'POD', 'RATE_CONFIRMATION', 'INSURANCE', 'LICENSE', 'OTHER'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
+function sanitizeDownloadFileName(fileName: string): string {
+  const baseName = fileName.split(/[\\/]/).pop() ?? 'download';
+  const withoutControls = baseName.replace(/[\u0000-\u001F\u007F]/g, '');
+  const withoutLeadingDots = withoutControls.replace(/^\.+/, '');
+  const safeName = withoutLeadingDots.replace(/[^A-Za-z0-9._-]/g, '_').slice(0, 255);
+  return safeName.length > 0 ? safeName : 'download';
+}
+
 function rowToDocument(row: Record<string, unknown>) {
   return {
     id: row.id,
@@ -88,12 +96,13 @@ async function downloadDocument(docId: string) {
     const data = await store.get(doc.blob_key as string, { type: 'arrayBuffer' });
     if (!data) return json(404, { error: 'file_not_found', message: 'File data no longer available.' });
 
-    const safeName = (doc.file_name as string).replace(/["\\\r\n]/g, '_');
+    const safeName = sanitizeDownloadFileName(String(doc.file_name || 'download'));
+    const encodedSafeName = encodeURIComponent(safeName);
     return new Response(data, {
       status: 200,
       headers: {
         'content-type': (doc.mime_type as string) || 'application/octet-stream',
-        'content-disposition': `attachment; filename="${safeName}"`,
+        'content-disposition': `attachment; filename="${safeName}"; filename*=UTF-8''${encodedSafeName}`,
         'cache-control': 'private, max-age=3600',
       },
     });
