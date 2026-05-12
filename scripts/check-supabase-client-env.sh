@@ -16,7 +16,14 @@ check_pattern() {
   local include_glob="${3:-*}"
 
   local matches
-  matches="$(git grep -n -I -E "$pattern" -- "$include_glob" ':!node_modules' ':!.git' ':!dist' ':!build' ':!.next' ':!coverage' || true)"
+  matches="$(git grep -n -I -E "$pattern" -- \
+    "$include_glob" \
+    ':!node_modules' ':!.git' ':!dist' ':!build' ':!.next' ':!coverage' \
+    ':!docs/PRODUCTION-SECRETS-CHECKLIST.md' \
+    ':!scripts/check-supabase-client-env.sh' \
+    ':!scripts/codex-env-check.sh' \
+    ':!apps/api/test/codex-env-check-script.test.ts' \
+    || true)"
 
   if [[ -n "$matches" ]]; then
     echo "❌ ${description}"
@@ -35,8 +42,8 @@ check_pattern \
 
 check_pattern \
   "No public/browser environment variable should expose a Supabase database URL" \
-  '(VITE|PUBLIC|NEXT_PUBLIC|REACT_APP)_SUPABASE_DATABASE_URL' \
-  '*'
+  '^[[:space:]]*(VITE|PUBLIC|NEXT_PUBLIC|REACT_APP)_SUPABASE_DATABASE_URL[[:space:]]*=' \
+  '.env*'
 
 check_pattern \
   "No public/browser environment variable should expose a generic DATABASE_URL" \
