@@ -127,6 +127,44 @@ Use [`LEGAL_BUSINESS_RECORD_UPDATE.md`](./LEGAL_BUSINESS_RECORD_UPDATE.md) to al
 - [ ] Rate confirmation is signed
 - [ ] Driver and dispatcher contacts are verified
 
+## Driver and Load Pre-Dispatch Release Gate
+
+Complete this gate before a truck leaves the yard, before pickup, and whenever a driver, equipment unit, commodity, route, or appointment changes. Do not mark a load ready for dispatch from assumptions alone; retain non-sensitive evidence in the operating system or load file.
+
+### Hours of Service and RODS
+
+- [ ] Current RODS reviewed, including edits, unassigned drive time, personal conveyance, yard move, false entries, and missing entries.
+- [ ] Driver has enough available hours for pickup, transit, delivery, required breaks, and expected inspection or enforcement delay.
+- [ ] ETA plan accounts for Roadcheck activity, weigh station delays, parking constraints, route restrictions, and appointment windows.
+
+### Driver Qualification
+
+- [ ] CDL is current, valid for the vehicle class, and not expired.
+- [ ] Medical card is current and not expired.
+- [ ] Required endorsements are current for the commodity or equipment, if applicable.
+- [ ] U.S. driver has no disqualifying status before dispatch release.
+
+### Cargo Securement
+
+- [ ] Tie-down count, aggregate WLL, edge protection, dunnage, blocking and bracing, and commodity-specific securement rules are verified.
+- [ ] No loose equipment, tools, spare securement gear, or debris can shift during transit.
+- [ ] Chains, straps, hooks, binders, anchor points, synthetic webbing, and fittings are inspected for wear, cuts, cracks, deformation, corrosion, or other damage.
+
+### Vehicle and Inspection Readiness
+
+- [ ] Common Level I inspection items are checked before leaving the yard or pickup, including driver documents, brake system, coupling devices, exhaust, frame, fuel system, lights, steering, suspension, tires, wheels, rims, hubs, windshield wipers, and emergency equipment.
+- [ ] Paper and digital documents are accessible, current, legible, and available to the driver.
+
+### Load Paperwork and Commercial Terms
+
+- [ ] Driver has BOL, rate confirmation, pickup and delivery appointment details, addresses, contacts, and reference numbers.
+- [ ] Detention, layover, TONU, driver assist, lumper, storage, re-delivery, and wait-time terms are in writing before dispatch.
+
+### Contacts and Escalation
+
+- [ ] Driver has dispatch, broker, shipper or receiver, roadside assistance, and insurance contacts.
+- [ ] After-hours escalation path is documented for load, roadside, claim, and safety issues.
+
 ---
 
 ## Change Management

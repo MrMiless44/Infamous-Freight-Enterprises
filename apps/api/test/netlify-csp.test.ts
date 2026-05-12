@@ -110,4 +110,15 @@ describe('Netlify production routing', () => {
 
     expect(script).toContain('netlify-cli deploy --prod --dir apps/web/dist --functions netlify/functions');
   });
+
+  it('keeps public Netlify function route checks in production readiness automation', () => {
+    const script = read(path.join(repoRoot, 'scripts/netlify-production-readiness.sh'));
+
+    expect(script).toContain('PUBLIC_QUOTE_PREFLIGHT_URL="${PUBLIC_QUOTE_PREFLIGHT_URL:-https://www.infamousfreight.com/api/public/quote-requests}"');
+    expect(script).toContain('PUBLIC_INVALID_SHIPMENT_URL="${PUBLIC_INVALID_SHIPMENT_URL:-https://www.infamousfreight.com/api/public/shipments/invalid-tracking}"');
+    expect(script).toContain('PUBLIC_FREIGHT_FUNCTION_URL="${PUBLIC_FREIGHT_FUNCTION_URL:-https://www.infamousfreight.com/.netlify/functions/public-freight}"');
+    expect(script).toContain('run_step "Public quote API preflight check" curl_options "$PUBLIC_QUOTE_PREFLIGHT_URL"');
+    expect(script).toContain('run_step "Public invalid shipment lookup check" curl_expect_status 400 "$PUBLIC_INVALID_SHIPMENT_URL"');
+    expect(script).toContain('run_step "Direct public freight function preflight check" curl_options "$PUBLIC_FREIGHT_FUNCTION_URL"');
+  });
 });
