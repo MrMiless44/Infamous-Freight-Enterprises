@@ -33,6 +33,7 @@
     "ai:check": "bash scripts/check-ai-runtime.sh",
     "env:bootstrap": "bash scripts/bootstrap-environment.sh",
     "env:check": "bash scripts/codex-env-check.sh",
+    "env:check:frontend": "bash scripts/check-client-env-safety.sh",
     "env:check:strict": "bash scripts/codex-env-check.sh --strict",
     "codex:env-check": "bash scripts/codex-env-check.sh",
     "codex:env-check:strict": "bash scripts/codex-env-check.sh --strict",
@@ -57,8 +58,7 @@
     "netlify:production:readiness": "bash scripts/netlify-production-readiness.sh",
     "production:secrets:setup": "bash scripts/setup-production-secrets.sh",
     "production:secrets:dry-run": "DRY_RUN=true bash scripts/setup-production-secrets.sh",
-    "check:prisma-versions": "node scripts/check-prisma-version-alignment.js",
-    "env:check:frontend": "bash scripts/check-client-env-safety.sh"
+    "check:prisma-versions": "node scripts/check-prisma-version-alignment.js"
   },
   "devDependencies": {
     "@netlify/edge-functions": "^3.0.6",

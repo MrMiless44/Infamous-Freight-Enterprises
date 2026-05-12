@@ -68,17 +68,22 @@ jobs:
     steps:
       - name: Deploy over SSH (production)
         uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
+        env:
+          ROLLBACK_OWNER: ${{ needs.fetch-artifact.outputs.owner }}
+          ROLLBACK_DIGEST_API: ${{ needs.fetch-artifact.outputs.api }}
+          ROLLBACK_DIGEST_WEB: ${{ needs.fetch-artifact.outputs.web }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
+          envs: ROLLBACK_OWNER,ROLLBACK_DIGEST_API,ROLLBACK_DIGEST_WEB
           script_stop: true
           script: |
             set -euo pipefail
-            OWNER='${{ needs.fetch-artifact.outputs.owner }}'
-            DIGEST_API='${{ needs.fetch-artifact.outputs.api }}'
-            DIGEST_WEB='${{ needs.fetch-artifact.outputs.web }}'
+            OWNER="$ROLLBACK_OWNER"
+            DIGEST_API="$ROLLBACK_DIGEST_API"
+            DIGEST_WEB="$ROLLBACK_DIGEST_WEB"
 
             if ! command -v cosign >/dev/null 2>&1; then
               curl -fsSL -o /usr/local/bin/cosign https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64
@@ -90,7 +95,8 @@ jobs:
             ISSUER="https://token.actions.githubusercontent.com"
             IDENTITY="https://github.com/${{ github.repository }}/.github/workflows/docker-ghcr.yml@refs/heads/main"
             for svc in api web; do
-              IMG_REF="ghcr.io/${OWNER}/infamous-freight-enterprises-${svc}@$(eval echo \$DIGEST_${svc^^})"
+              varname="DIGEST_${svc^^}"
+              IMG_REF="ghcr.io/${OWNER}/infamous-freight-enterprises-${svc}@${!varname}"
               COSIGN_EXPERIMENTAL=true cosign verify --certificate-oidc-issuer "$ISSUER" --certificate-identity "$IDENTITY" "$IMG_REF"
               COSIGN_EXPERIMENTAL=true cosign verify-attestation --type cyclonedx --certificate-oidc-issuer "$ISSUER" --certificate-identity "$IDENTITY" "$IMG_REF"
             done
@@ -109,8 +115,12 @@ jobs:
 
       - name: Notify Slack (success)
         if: ${{ success() && env.SLACK_WEBHOOK_URL != '' }}
+        env:
+          GHCR_OWNER: ${{ needs.fetch-artifact.outputs.owner }}
+          API_DIGEST: ${{ needs.fetch-artifact.outputs.api }}
+          WEB_DIGEST: ${{ needs.fetch-artifact.outputs.web }}
         run: |
-          payload=$(jq -n --arg text "✅ Rollback (production) succeeded\nAPI: ghcr.io/${{ needs.fetch-artifact.outputs.owner }}/infamous-freight-enterprises-api@${{ needs.fetch-artifact.outputs.api }}\nWEB: ghcr.io/${{ needs.fetch-artifact.outputs.owner }}/infamous-freight-enterprises-web@${{ needs.fetch-artifact.outputs.web }}" '{text: $text}')
+          payload=$(jq -n --arg text "✅ Rollback (production) succeeded\nAPI: ghcr.io/${GHCR_OWNER}/infamous-freight-enterprises-api@${API_DIGEST}\nWEB: ghcr.io/${GHCR_OWNER}/infamous-freight-enterprises-web@${WEB_DIGEST}" '{text: $text}')
           curl -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
 
       - name: Notify Slack (failure)
@@ -121,8 +131,12 @@ jobs:
 
       - name: Notify Teams (success)
         if: ${{ success() && env.TEAMS_WEBHOOK_URL != '' }}
+        env:
+          GHCR_OWNER: ${{ needs.fetch-artifact.outputs.owner }}
+          API_DIGEST: ${{ needs.fetch-artifact.outputs.api }}
+          WEB_DIGEST: ${{ needs.fetch-artifact.outputs.web }}
         run: |
-          text="✅ Rollback (production) succeeded%0AAPI: ghcr.io/${{ needs.fetch-artifact.outputs.owner }}/infamous-freight-enterprises-api@${{ needs.fetch-artifact.outputs.api }}%0AWEB: ghcr.io/${{ needs.fetch-artifact.outputs.owner }}/infamous-freight-enterprises-web@${{ needs.fetch-artifact.outputs.web }}"
+          text="✅ Rollback (production) succeeded%0AAPI: ghcr.io/${GHCR_OWNER}/infamous-freight-enterprises-api@${API_DIGEST}%0AWEB: ghcr.io/${GHCR_OWNER}/infamous-freight-enterprises-web@${WEB_DIGEST}"
           curl -H 'Content-Type: application/json' -d "{\"text\": \"$text\"}" "$TEAMS_WEBHOOK_URL"
 
       - name: Notify Teams (failure)
@@ -143,17 +157,22 @@ jobs:
     steps:
       - name: Deploy over SSH (staging)
         uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
+        env:
+          ROLLBACK_OWNER: ${{ needs.fetch-artifact.outputs.owner }}
+          ROLLBACK_DIGEST_API: ${{ needs.fetch-artifact.outputs.api }}
+          ROLLBACK_DIGEST_WEB: ${{ needs.fetch-artifact.outputs.web }}
         with:
           host: ${{ secrets.SSH_HOST_STAGING }}
           username: ${{ secrets.SSH_USER_STAGING }}
           key: ${{ secrets.SSH_KEY_STAGING }}
           port: ${{ secrets.SSH_PORT_STAGING || 22 }}
+          envs: ROLLBACK_OWNER,ROLLBACK_DIGEST_API,ROLLBACK_DIGEST_WEB
           script_stop: true
           script: |
             set -euo pipefail
-            OWNER='${{ needs.fetch-artifact.outputs.owner }}'
-            DIGEST_API='${{ needs.fetch-artifact.outputs.api }}'
-            DIGEST_WEB='${{ needs.fetch-artifact.outputs.web }}'
+            OWNER="$ROLLBACK_OWNER"
+            DIGEST_API="$ROLLBACK_DIGEST_API"
+            DIGEST_WEB="$ROLLBACK_DIGEST_WEB"
 
             if ! command -v cosign >/dev/null 2>&1; then
               curl -fsSL -o /usr/local/bin/cosign https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64
@@ -165,7 +184,8 @@ jobs:
             ISSUER="https://token.actions.githubusercontent.com"
             IDENTITY="https://github.com/${{ github.repository }}/.github/workflows/docker-ghcr.yml@refs/heads/main"
             for svc in api web; do
-              IMG_REF="ghcr.io/${OWNER}/infamous-freight-enterprises-${svc}@$(eval echo \$DIGEST_${svc^^})"
+              varname="DIGEST_${svc^^}"
+              IMG_REF="ghcr.io/${OWNER}/infamous-freight-enterprises-${svc}@${!varname}"
               COSIGN_EXPERIMENTAL=true cosign verify --certificate-oidc-issuer "$ISSUER" --certificate-identity "$IDENTITY" "$IMG_REF"
               COSIGN_EXPERIMENTAL=true cosign verify-attestation --type cyclonedx --certificate-oidc-issuer "$ISSUER" --certificate-identity "$IDENTITY" "$IMG_REF"
             done
@@ -184,8 +204,12 @@ jobs:
 
       - name: Notify Slack (success)
         if: ${{ success() && env.SLACK_WEBHOOK_URL != '' }}
+        env:
+          GHCR_OWNER: ${{ needs.fetch-artifact.outputs.owner }}
+          API_DIGEST: ${{ needs.fetch-artifact.outputs.api }}
+          WEB_DIGEST: ${{ needs.fetch-artifact.outputs.web }}
         run: |
-          payload=$(jq -n --arg text "✅ Rollback (staging) succeeded\nAPI: ghcr.io/${{ needs.fetch-artifact.outputs.owner }}/infamous-freight-enterprises-api@${{ needs.fetch-artifact.outputs.api }}\nWEB: ghcr.io/${{ needs.fetch-artifact.outputs.owner }}/infamous-freight-enterprises-web@${{ needs.fetch-artifact.outputs.web }}" '{text: $text}')
+          payload=$(jq -n --arg text "✅ Rollback (staging) succeeded\nAPI: ghcr.io/${GHCR_OWNER}/infamous-freight-enterprises-api@${API_DIGEST}\nWEB: ghcr.io/${GHCR_OWNER}/infamous-freight-enterprises-web@${WEB_DIGEST}" '{text: $text}')
           curl -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
 
       - name: Notify Slack (failure)
@@ -196,8 +220,12 @@ jobs:
 
       - name: Notify Teams (success)
         if: ${{ success() && env.TEAMS_WEBHOOK_URL != '' }}
+        env:
+          GHCR_OWNER: ${{ needs.fetch-artifact.outputs.owner }}
+          API_DIGEST: ${{ needs.fetch-artifact.outputs.api }}
+          WEB_DIGEST: ${{ needs.fetch-artifact.outputs.web }}
         run: |
-          text="✅ Rollback (staging) succeeded%0AAPI: ghcr.io/${{ needs.fetch-artifact.outputs.owner }}/infamous-freight-enterprises-api@${{ needs.fetch-artifact.outputs.api }}%0AWEB: ghcr.io/${{ needs.fetch-artifact.outputs.owner }}/infamous-freight-enterprises-web@${{ needs.fetch-artifact.outputs.web }}"
+          text="✅ Rollback (staging) succeeded%0AAPI: ghcr.io/${GHCR_OWNER}/infamous-freight-enterprises-api@${API_DIGEST}%0AWEB: ghcr.io/${GHCR_OWNER}/infamous-freight-enterprises-web@${WEB_DIGEST}"
           curl -H 'Content-Type: application/json' -d "{\"text\": \"$text\"}" "$TEAMS_WEBHOOK_URL"
 
       - name: Notify Teams (failure)
