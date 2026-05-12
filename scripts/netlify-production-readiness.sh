@@ -6,6 +6,9 @@ cd "$ROOT_DIR"
 
 WEB_HEALTH_URL="${WEB_HEALTH_URL:-https://www.infamousfreight.com/api/health}"
 SITE_URL="${SITE_URL:-https://www.infamousfreight.com}"
+PUBLIC_QUOTE_PREFLIGHT_URL="${PUBLIC_QUOTE_PREFLIGHT_URL:-https://www.infamousfreight.com/api/public/quote-requests}"
+PUBLIC_INVALID_SHIPMENT_URL="${PUBLIC_INVALID_SHIPMENT_URL:-https://www.infamousfreight.com/api/public/shipments/invalid-tracking}"
+PUBLIC_FREIGHT_FUNCTION_URL="${PUBLIC_FREIGHT_FUNCTION_URL:-https://www.infamousfreight.com/.netlify/functions/public-freight}"
 API_HEALTH_URL="${API_HEALTH_URL:-https://api.infamousfreight.com/health}"
 API_HEALTH_FALLBACK_URL="${API_HEALTH_FALLBACK_URL:-https://api.infamousfreight.com/api/health}"
 
@@ -25,6 +28,21 @@ curl_get() {
   curl --fail --show-error --silent --location --retry 5 --retry-delay 10 --retry-connrefused --max-time 30 "$@"
 }
 
+curl_options() {
+  curl --fail --show-error --silent --location --retry 5 --retry-delay 10 --retry-connrefused --max-time 30 --request OPTIONS "$@"
+}
+
+curl_expect_status() {
+  local expected_status="$1"
+  shift
+  local status
+  status="$(curl --show-error --silent --location --retry 5 --retry-delay 10 --retry-connrefused --max-time 30 --output /dev/null --write-out '%{http_code}' "$@")"
+  if [[ "$status" != "$expected_status" ]]; then
+    echo "Expected HTTP ${expected_status}, got HTTP ${status} for $*" >&2
+    return 1
+  fi
+}
+
 if [[ "${ALLOW_LOCKFILE_UPDATE:-false}" == "true" ]]; then
   run_step "Install workspace deps (lockfile updates allowed)" pnpm install --no-frozen-lockfile
 else
@@ -40,6 +58,9 @@ run_step "Docker build validation" pnpm docker:build
 
 run_step "Site HEAD check" curl_head "$SITE_URL"
 run_step "Canonical API health check" curl_get "$WEB_HEALTH_URL"
+run_step "Public quote API preflight check" curl_options "$PUBLIC_QUOTE_PREFLIGHT_URL"
+run_step "Public invalid shipment lookup check" curl_expect_status 400 "$PUBLIC_INVALID_SHIPMENT_URL"
+run_step "Direct public freight function preflight check" curl_options "$PUBLIC_FREIGHT_FUNCTION_URL"
 
 echo ""
 echo "==> Optional direct API domain checks"

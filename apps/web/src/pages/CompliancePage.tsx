@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ShieldCheck, AlertTriangle, FileCheck, Clock, TrendingDown, Truck, Ban, ExternalLink, Activity } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, FileCheck, Clock, TrendingDown, Truck, Ban, ExternalLink, Activity, ClipboardCheck } from 'lucide-react';
 import WidgetErrorBoundary from '@/components/ui/WidgetErrorBoundary';
 import EmptyState from '@/components/ui/EmptyState';
 
@@ -20,6 +20,11 @@ interface BASICScore {
   alertStatus: 'no_alert' | 'alert' | 'intervention';
 }
 
+interface DispatchReviewSection {
+  title: string;
+  items: string[];
+}
+
 const mockDocs: DocExpiry[] = [
   { id: '1', name: 'Auto Liability', type: 'insurance', number: 'POL-2024-001', issuedBy: 'Progressive', expiryDate: '2025-05-15', daysLeft: 25, status: 'expiring_soon' },
   { id: '2', name: 'Cargo Insurance', type: 'insurance', number: 'POL-2024-002', issuedBy: 'Northland', expiryDate: '2025-08-22', daysLeft: 124, status: 'active' },
@@ -38,6 +43,52 @@ const mockBASICs: BASICScore[] = [
   { category: 'Crash Indicator', percentile: 45, alertStatus: 'no_alert' },
 ];
 
+const preDispatchReview: DispatchReviewSection[] = [
+  {
+    title: 'Hours and RODS',
+    items: [
+      'Review current RODS, edits, unassigned drive time, personal conveyance, yard move, and false or missing entries.',
+      'Confirm available hours cover pickup, transit, delivery, inspection delay, required breaks, and any enforcement delay.',
+    ],
+  },
+  {
+    title: 'Driver Qualification',
+    items: [
+      'Confirm the driver has a current CDL, current medical card, and required endorsements for the equipment or commodity.',
+      'Verify no driver qualification document is expired before release.',
+      'Confirm U.S. driver has no disqualifying status before dispatch release.',
+    ],
+  },
+  {
+    title: 'Securement',
+    items: [
+      'Verify tie-down count, WLL, edge protection, dunnage, blocking and bracing, commodity-specific rules, and no loose equipment.',
+      'Inspect chains, straps, hooks, binders, anchor points, synthetic webbing, and fittings for wear, cuts, cracks, deformation, corrosion, or other damage.',
+    ],
+  },
+  {
+    title: 'Vehicle Inspection',
+    items: [
+      'Inspect common Level I vehicle items before leaving the yard or pickup, including driver documents, brake system, coupling devices, exhaust, frame, fuel system, lights, steering, suspension, tires, wheels, rims, hubs, windshield wipers, and emergency equipment.',
+      'Confirm paper and digital documents are accessible, current, legible, and available to the driver.',
+    ],
+  },
+  {
+    title: 'Load Paperwork',
+    items: [
+      'Confirm the driver has BOL, rate confirmation, pickup and delivery appointment details, addresses, contacts, and reference numbers.',
+      'Confirm detention, layover, TONU, driver assist, lumper, storage, re-delivery, and wait-time terms are in writing.',
+    ],
+  },
+  {
+    title: 'Trip Plan and Contacts',
+    items: [
+      'Build ETA plan with Roadcheck stops, weigh station delays, and parking constraints.',
+      'Confirm dispatch, broker, shipper or receiver, roadside assistance, and insurance contacts are available to the driver.',
+    ],
+  },
+];
+
 const docStatusBadge = {
   active: 'badge-green',
   expiring_soon: 'badge-yellow',
@@ -45,7 +96,7 @@ const docStatusBadge = {
 };
 
 const CompliancePage: React.FC = () => {
-  const [tab, setTab] = useState<'documents' | 'csa' | 'alerts'>('documents');
+  const [tab, setTab] = useState<'documents' | 'predispatch' | 'csa' | 'alerts'>('documents');
   const criticalAlerts = mockDocs.filter((d) => d.daysLeft <= 7);
   const expiredCount = mockDocs.filter((d) => d.status === 'expired').length;
 
@@ -54,7 +105,7 @@ const CompliancePage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Compliance</h1>
-          <p className="text-sm text-[#B88989]/70 mt-0.5">Track document expiries, CSA scores, and renewal alerts · sample data</p>
+          <p className="text-sm text-[#B88989]/70 mt-0.5">Track document expiries, driver release gates, CSA scores, and renewal alerts · sample data</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2 bg-infamous-card border border-infamous-border rounded-xl px-3 py-2">
@@ -75,7 +126,7 @@ const CompliancePage: React.FC = () => {
           { label: 'Active Documents', value: mockDocs.filter((d) => d.status === 'active').length, icon: <FileCheck size={18} />, color: 'text-green-400' },
           { label: 'Expiring Soon', value: mockDocs.filter((d) => d.status === 'expiring_soon').length, icon: <Clock size={18} />, color: 'text-yellow-400' },
           { label: 'Expired', value: expiredCount, icon: <AlertTriangle size={18} />, color: 'text-red-400' },
-          { label: 'BASIC Alerts', value: mockBASICs.filter((b) => b.alertStatus === 'alert').length, icon: <TrendingDown size={18} />, color: 'text-infamous-orange' },
+          { label: 'Dispatch Gates', value: preDispatchReview.length, icon: <ClipboardCheck size={18} />, color: 'text-infamous-orange' },
         ].map((stat, i) => (
           <div key={i} className="card flex items-center gap-3">
             <span className={stat.color}>{stat.icon}</span>
@@ -89,7 +140,7 @@ const CompliancePage: React.FC = () => {
 
       {/* Tabs */}
       <div className="flex gap-2 border-b border-infamous-border">
-        {(['documents', 'csa', 'alerts'] as const).map((t) => (
+        {(['documents', 'predispatch', 'csa', 'alerts'] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -97,7 +148,7 @@ const CompliancePage: React.FC = () => {
               tab === t ? 'border-infamous-orange text-infamous-orange' : 'border-transparent text-[#B88989]/70 hover:text-[#F5E8E8]'
             }`}
           >
-            {t === 'csa' ? 'CSA Scores' : t}
+            {t === 'csa' ? 'CSA Scores' : t === 'predispatch' ? 'Pre-dispatch' : t}
             {t === 'alerts' && criticalAlerts.length > 0 && (
               <span className="ml-2 bg-red-500 text-[#F5E8E8] text-[10px] font-bold px-1.5 py-0.5 rounded-full">{criticalAlerts.length}</span>
             )}
@@ -139,6 +190,32 @@ const CompliancePage: React.FC = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {tab === 'predispatch' && (
+        <div className="space-y-4">
+          <div className="alert-warning rounded-xl px-4 py-3 text-sm leading-6">
+            This is a release checklist for dispatch review. A driver or load can only be confirmed after actual ELD, document, securement, vehicle, paperwork, route, and contact evidence is reviewed.
+          </div>
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            {preDispatchReview.map((section) => (
+              <div key={section.title} className="card">
+                <h2 className="text-base font-semibold mb-3 flex items-center gap-2">
+                  <ClipboardCheck size={17} className="text-infamous-orange" />
+                  {section.title}
+                </h2>
+                <ul className="space-y-2">
+                  {section.items.map((item) => (
+                    <li key={item} className="flex gap-2 text-sm leading-6 text-[#F5E8E8]/85">
+                      <span className="mt-2 h-1.5 w-1.5 rounded-full bg-infamous-orange flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
