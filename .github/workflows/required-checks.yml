@@ -58,6 +58,12 @@ jobs:
       - name: Verify required environment variables
         run: pnpm run codex:env-check:strict
 
+      - name: Verify frontend env safety
+        run: pnpm run env:check:frontend
+
+      - name: Verify Supabase client env safety
+        run: pnpm run env:check:supabase-client
+
       - name: Generate Prisma client
         run: pnpm run prisma:generate
 

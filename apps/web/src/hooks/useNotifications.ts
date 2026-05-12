@@ -56,12 +56,12 @@ export function useNotifications(userId: string, companyId: string) {
       }
     });
 
-    newSocket.on('load:update', (update) => {
-      console.log('Load update:', update);
+    newSocket.on('load:update', (_update) => {
+      // handled via notification event
     });
 
-    newSocket.on('exception:alert', (alert) => {
-      console.log('Exception alert:', alert);
+    newSocket.on('exception:alert', (_alert) => {
+      // handled via notification event
     });
 
     setSocket(newSocket);

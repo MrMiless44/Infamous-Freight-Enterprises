@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_NAME="${1:-infamous-freight}"
+APP_NAME="${1:-infamous-freight-api}"
 
 echo "==> Saving remote Fly config"
 fly config save -a "${APP_NAME}" --yes

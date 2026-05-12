@@ -29,6 +29,12 @@ else
   echo "⚠️ jq missing (recommended for scripts/install-dev-clis.sh and operational tooling)" >&2
 fi
 
+if command -v shellcheck >/dev/null 2>&1 || [[ -x "${TOOLS_DIR}/shellcheck" ]]; then
+  echo "✅ shellcheck found (recommended)"
+else
+  echo "⚠️ shellcheck missing (recommended for shell script linting)" >&2
+fi
+
 if [[ "$missing" -ne 0 ]]; then
   exit 1
 fi

@@ -120,14 +120,14 @@ SAMSARA_API_KEY
 
 ## Fly.io API runtime secrets
 
-Set with `flyctl secrets set` for app `infamous-freight`:
+Set with `flyctl secrets set` for app `infamous-freight-api`:
 
 ```text
 SITE_URL=https://www.infamousfreight.com
 PUBLIC_SITE_URL=https://www.infamousfreight.com
 FRONTEND_URL=https://www.infamousfreight.com
 CORS_ORIGIN=https://www.infamousfreight.com
-API_PUBLIC_URL=https://infamous-freight.fly.dev
+API_PUBLIC_URL=https://infamous-freight-api.fly.dev
 DATABASE_URL=<production postgres connection string>
 ```
 

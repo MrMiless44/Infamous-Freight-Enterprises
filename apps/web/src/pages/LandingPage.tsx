@@ -177,8 +177,9 @@ const faqItems = [
   },
 ];
 
-const FaqItem: React.FC<{ question: string; answer: string }> = ({ question, answer }) => {
+const FaqItem: React.FC<{ id: string; question: string; answer: string }> = ({ id, question, answer }) => {
   const [open, setOpen] = useState(false);
+  const panelId = `${id}-panel`;
   return (
     <div className="border-b border-infamous-border/60 last:border-0">
       <button
@@ -186,14 +187,16 @@ const FaqItem: React.FC<{ question: string; answer: string }> = ({ question, ans
         onClick={() => setOpen(!open)}
         className="flex w-full items-center justify-between gap-4 py-5 text-left"
         aria-expanded={open}
+        aria-controls={panelId}
       >
         <span className="text-base font-semibold text-[#F5E8E8]">{question}</span>
         <ChevronDown
+          aria-hidden="true"
           size={18}
           className={`shrink-0 text-infamous-muted transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
         />
       </button>
-      <div className={`overflow-hidden transition-all duration-200 ${open ? 'max-h-60 pb-5' : 'max-h-0'}`}>
+      <div id={panelId} aria-hidden={!open} className={`overflow-hidden transition-all duration-200 ${open ? 'max-h-60 pb-5' : 'max-h-0'}`}>
         <p className="text-sm leading-7 text-[#B88989]">{answer}</p>
       </div>
     </div>
@@ -220,7 +223,7 @@ const LandingPage: React.FC = () => {
       <header className="sticky top-0 z-40 border-b border-infamous-border bg-infamous-darker/95 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5 lg:px-6">
           <Link to="/" className="flex items-center gap-3" aria-label="Infamous Freight home">
-            <Infinity size={28} className="text-infamous-red-light" strokeWidth={2.5} style={{ filter: 'drop-shadow(0 0 8px rgba(255, 59, 48, 0.8))' }} />
+            <Infinity aria-hidden="true" size={28} className="text-infamous-red-light" strokeWidth={2.5} style={{ filter: 'drop-shadow(0 0 8px rgba(255, 59, 48, 0.8))' }} />
             <span className="hidden sm:block">
               <span className="block font-display text-lg font-black leading-none text-[#F5E8E8]">{BRAND.displayName}</span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-infamous-muted">{BRAND.tagline}</span>
@@ -258,16 +261,18 @@ const LandingPage: React.FC = () => {
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="lg:hidden p-2 rounded-lg text-[#B88989] hover:text-[#F5E8E8] hover:bg-white/5 transition"
-              aria-label="Toggle menu"
+              aria-controls="landing-mobile-navigation"
+              aria-expanded={mobileMenuOpen}
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             >
-              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+              {mobileMenuOpen ? <X aria-hidden="true" size={22} /> : <Menu aria-hidden="true" size={22} />}
             </button>
           </div>
         </div>
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <nav className="lg:hidden border-t border-infamous-border bg-infamous-darker px-5 py-4 space-y-1" aria-label="Mobile navigation">
+          <nav id="landing-mobile-navigation" className="lg:hidden border-t border-infamous-border bg-infamous-darker px-5 py-4 space-y-1" aria-label="Mobile navigation">
             {navLinks.map((item) => (
               <Link
                 key={item.href}
@@ -617,8 +622,8 @@ const LandingPage: React.FC = () => {
           </div>
 
           <div className="glass-card-subtle rounded-[18px] px-6">
-            {faqItems.map((faq) => (
-              <FaqItem key={faq.question} question={faq.question} answer={faq.answer} />
+            {faqItems.map((faq, index) => (
+              <FaqItem key={faq.question} id={`faq-${index}`} question={faq.question} answer={faq.answer} />
             ))}
           </div>
 
@@ -665,7 +670,7 @@ const LandingPage: React.FC = () => {
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.2fr_2fr]">
           <div>
             <Link to="/" className="flex items-center gap-3 text-[#F5E8E8]" aria-label="Infamous Freight home">
-              <Infinity size={32} className="text-infamous-red-light" strokeWidth={2.5} style={{ filter: 'drop-shadow(0 0 10px rgba(255, 59, 48, 0.8))' }} />
+              <Infinity aria-hidden="true" size={32} className="text-infamous-red-light" strokeWidth={2.5} style={{ filter: 'drop-shadow(0 0 10px rgba(255, 59, 48, 0.8))' }} />
               <span className="font-display text-lg font-black">Infamous Freight</span>
             </Link>
             <p className="mt-2 font-display text-sm font-bold uppercase tracking-[0.2em] text-infamous-muted">{BRAND.tagline}</p>

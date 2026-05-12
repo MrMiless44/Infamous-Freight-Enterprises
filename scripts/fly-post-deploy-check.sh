@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_NAME="${1:-infamous-freight}"
-APP_URL="${2:-https://infamous-freight.fly.dev}"
+APP_NAME="${1:-infamous-freight-api}"
+APP_URL="${2:-https://infamous-freight-api.fly.dev}"
 API_URL="${3:-https://api.infamousfreight.com}"
 ALLOW_MULTI_IMAGE_DEPLOY="${ALLOW_MULTI_IMAGE_DEPLOY:-false}"
 

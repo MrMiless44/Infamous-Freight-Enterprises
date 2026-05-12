@@ -33,7 +33,7 @@ Verify access:
 
 ```bash
 gh repo view Infaemous-Freight/Infamous-freight
-flyctl status --app infamous-freight
+flyctl status --app infamous-freight-api
 netlify status
 ```
 
@@ -148,7 +148,7 @@ Confirm:
 After applying secrets, redeploy both sides:
 
 ```bash
-flyctl deploy --app infamous-freight
+flyctl deploy --app infamous-freight-api
 ```
 
 Trigger a fresh Netlify production deploy from the dashboard or via Netlify CLI.
@@ -163,8 +163,8 @@ pnpm run production:preflight
 pnpm run production:smoke-test
 curl -i https://www.infamousfreight.com
 curl -i https://www.infamousfreight.com/api/health
-curl -i https://infamous-freight.fly.dev/health
-curl -i https://infamous-freight.fly.dev/api/health
+curl -i https://infamous-freight-api.fly.dev/health
+curl -i https://infamous-freight-api.fly.dev/api/health
 ```
 
 Record evidence in:

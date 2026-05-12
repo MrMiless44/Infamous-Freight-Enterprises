@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_NAME="${APP_NAME:-infamous-freight}"
+APP_NAME="${APP_NAME:-infamous-freight-api}"
 MPG_CLUSTER_ID="${MPG_CLUSTER_ID:-kyzl60xmlk6opj9g}"
 PRIMARY_REGION="${PRIMARY_REGION:-dfw}"
 CORS_ORIGINS="${CORS_ORIGINS:-https://www.infamousfreight.com,https://infamousfreight.com}"

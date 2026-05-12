@@ -90,8 +90,10 @@ const DriversPage: React.FC = () => {
 
       {/* Filters */}
       <div className="flex gap-3">
-        <input type="text" className="input-field flex-1 max-w-xs" placeholder="Search drivers..." value={search} onChange={(e) => setSearch(e.target.value)} />
-        <select className="input-field w-36" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+        <label htmlFor="drivers-search" className="sr-only">Search drivers</label>
+        <input id="drivers-search" type="text" className="input-field flex-1 max-w-xs" placeholder="Search drivers..." value={search} onChange={(e) => setSearch(e.target.value)} />
+        <label htmlFor="drivers-status" className="sr-only">Filter drivers by status</label>
+        <select id="drivers-status" className="input-field w-36" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
           <option>All Status</option>
           <option>available</option>
           <option>driving</option>
