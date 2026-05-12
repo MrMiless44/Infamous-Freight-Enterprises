@@ -9,10 +9,77 @@ fly deploy
 fly status
 ```
 
+If CLIs are missing, install them first:
+
+```bash
+# Fly CLI
+curl -L https://fly.io/install.sh | sh
+export FLYCTL_INSTALL="$HOME/.fly"
+export PATH="$FLYCTL_INSTALL/bin:$PATH"
+
+# Docker CLI (Ubuntu/Debian)
+sudo apt-get update && sudo apt-get install -y docker.io
+```
+
 Optional preflight (recommended before `fly deploy`):
 
 ```bash
 scripts/fly-preflight.sh infamous-freight-api https://infamous-freight-api.fly.dev https://api.infamousfreight.com
+```
+
+## Digest-pinned production deploy (no image drift)
+
+Use `fly deploy --image` with a **sha256 digest** so Fly cannot drift to a retagged image:
+
+```bash
+APP="infamous-freight-api"
+IMAGE="ghcr.io/infaemous-freight/infamous-freight-api@sha256:43fd4f0f0eafd34a17ab1b18a6e5b1760e54e56f2bf0491be325e06da105bc00"
+
+fly auth login
+fly secrets list --app "$APP"
+fly deploy --app "$APP" --image "$IMAGE" --strategy canary --wait-timeout 10m --yes
+```
+
+Immediate verification:
+
+```bash
+fly status --app "$APP"
+fly checks list --app "$APP"
+fly releases --app "$APP" --image
+fly logs --app "$APP" --no-tail
+curl -i https://infamous-freight-api.fly.dev/api/health/live
+curl -i https://infamous-freight-api.fly.dev/api/health
+```
+
+Expected:
+- `/api/health/live` returns HTTP 200 when process liveness is healthy.
+- `/api/health` returns HTTP 200 only when app dependencies (for example database) are healthy.
+
+If Fly cannot pull the digest from GHCR (private image/auth required), mirror into Fly registry:
+
+```bash
+APP="infamous-freight-api"
+TAG="a21800dae96e56fda18195ef00ad6d276b48bb43"
+
+docker login ghcr.io
+docker pull ghcr.io/infaemous-freight/infamous-freight-api:$TAG
+
+fly auth docker
+docker tag ghcr.io/infaemous-freight/infamous-freight-api:$TAG registry.fly.io/$APP:$TAG
+docker push registry.fly.io/$APP:$TAG
+
+fly deploy --app "$APP" --image registry.fly.io/$APP:$TAG --strategy canary --wait-timeout 10m --yes
+```
+
+If checks are split (for example one machine passing on 3000 and another stale machine failing on 8080), reconcile one machine at a time:
+
+```bash
+APP="infamous-freight-api"
+fly status --app "$APP"
+fly checks list --app "$APP"
+
+# deploy one machine at a time to avoid split rollout states
+fly deploy --app "$APP" --strategy rolling --max-concurrent 1 --wait-timeout 10m --yes
 ```
 
 ## CI / GitHub Actions token setup
