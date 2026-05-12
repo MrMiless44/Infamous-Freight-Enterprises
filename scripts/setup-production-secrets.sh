@@ -161,6 +161,9 @@ add_fly_secret STRIPE_CHECKOUT_SUCCESS_URL
 add_fly_secret STRIPE_CHECKOUT_CANCEL_URL
 add_fly_secret STRIPE_PORTAL_RETURN_URL
 add_fly_secret RATE_LIMIT_ENABLED
+add_fly_secret API_RATE_LIMIT_ENABLED
+add_fly_secret RATE_LIMIT_WINDOW_MS
+add_fly_secret RATE_LIMIT_MAX_REQUESTS
 add_fly_secret SENTRY_DSN
 add_fly_secret REDIS_URL
 add_fly_secret REDIS_HOST
