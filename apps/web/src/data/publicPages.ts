@@ -102,6 +102,22 @@ export const servicePages: ServicePage[] = [
     bestFor: ['E-commerce deliveries', 'Retail store replenishment', 'Furniture and appliance delivery', 'B2B last-mile freight'],
   },
   {
+    slug: 'amazon-delivery',
+    title: 'Amazon delivery integration',
+    eyebrow: 'MCF and shipping orchestration',
+    summary: 'Amazon delivery workflow planning for routing eligible orders through Amazon fulfillment and shipping services.',
+    description:
+      'Amazon delivery integration helps connect Infamous Freight order intake, inventory context, rate review, label generation, tracking, and customer updates with Amazon logistics workflows where the shipper has approved access.',
+    Icon: Warehouse,
+    bullets: [
+      'Inventory and fulfillment-center availability review',
+      'Order routing rules for local carrier or Amazon fulfillment paths',
+      'Shipping rate, label, and tracking workflow planning',
+      'Status update intake for dispatcher and customer visibility',
+    ],
+    bestFor: ['Multi-channel sellers', 'E-commerce fulfillment', 'Parcel and final-mile routing', 'Shipper operations teams'],
+  },
+  {
     slug: 'box-truck',
     title: 'Box truck freight',
     eyebrow: '16 to 26 ft capacity',

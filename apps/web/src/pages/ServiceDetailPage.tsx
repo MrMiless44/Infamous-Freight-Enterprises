@@ -19,6 +19,7 @@ const serviceResourceMap: Record<string, string[]> = {
   'dedicated-lanes': ['ltl-vs-ftl-freight'],
   'freight-brokerage': ['what-is-freight-dispatch', 'ltl-vs-ftl-freight'],
   'final-mile': ['freight-tracking-explained', 'box-truck-shipping-guide'],
+  'amazon-delivery': ['freight-tracking-explained', 'what-is-freight-dispatch'],
 };
 
 const ServiceDetailPage: React.FC = () => {
