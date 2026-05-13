@@ -49,7 +49,25 @@ jobs:
       # and run them directly from within your pipeline. It is recommended to review the Fortify GitHub Action
       # documentation at https://github.com/fortify/github-action#readme for more information on the various
       # configuration options and available sub-actions.
+      - name: Check Fortify FoD credentials
+        id: fortify-credentials
+        shell: bash
+        env:
+          FOD_TENANT: ${{secrets.FOD_TENANT}}
+          FOD_USER: ${{secrets.FOD_USER}}
+          FOD_PASSWORD: ${{secrets.FOD_PAT}}
+          FOD_CLIENT_ID: ${{secrets.FOD_CLIENT_ID}}
+          FOD_CLIENT_SECRET: ${{secrets.FOD_CLIENT_SECRET}}
+        run: |
+          if [[ -n "$FOD_TENANT" && (( -n "$FOD_USER" && -n "$FOD_PASSWORD" ) || ( -n "$FOD_CLIENT_ID" && -n "$FOD_CLIENT_SECRET" )) ]]; then
+            echo "has_credentials=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_credentials=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Skipping Fortify scan because required FoD credentials are not configured."
+          fi
+
       - name: Run Fortify Scan
+        if: ${{ steps.fortify-credentials.outputs.has_credentials == 'true' }}
         # Specify Fortify GitHub Action version to run. As per GitHub starter workflow requirements, this example
         # uses the commit id corresponding to version 1.6.2. It is recommended to check whether any later releases
         # are available at https://github.com/fortify/github-action/releases. Depending on the amount of stability
