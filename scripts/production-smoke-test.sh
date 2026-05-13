@@ -16,11 +16,11 @@ if [[ "${final_url}" != "${WEB_URL%/}/" ]]; then
 fi
 
 echo "Checking API liveness..."
-curl --fail --show-error --silent "${API_URL%/}/health/live"
+curl --fail --show-error --silent "${API_URL%/}/api/health/live"
 echo
 
 echo "Checking API readiness..."
-curl --fail --show-error --silent "${API_URL%/}/health/ready"
+curl --fail --show-error --silent "${API_URL%/}/api/health/ready"
 echo
 
 echo "Production smoke test passed."
