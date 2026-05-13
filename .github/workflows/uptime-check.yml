@@ -32,8 +32,10 @@ jobs:
           declare -a checks=(
             "Frontend (www)|https://www.infamousfreight.com|200"
             "Bare-domain → www redirect|https://infamousfreight.com|200"
-            "API live (direct)|https://infamous-freight.fly.dev/api/health/live|200"
-            "API ready (direct)|https://infamous-freight.fly.dev/api/health/ready|200"
+            "API live (Fly direct)|https://infamous-freight-api.fly.dev/api/health/live|200"
+            "API ready (Fly direct)|https://infamous-freight-api.fly.dev/api/health/ready|200"
+            "API live (custom domain)|https://api.infamousfreight.com/api/health/live|200"
+            "API ready (custom domain)|https://api.infamousfreight.com/api/health/ready|200"
             "API live (proxied via Netlify)|https://www.infamousfreight.com/api/health/live|200"
           )
           # Note: --location is used, so redirect checks verify the final 200 response.
