@@ -50,6 +50,7 @@ jobs:
       # documentation at https://github.com/fortify/github-action#readme for more information on the various
       # configuration options and available sub-actions.
       - name: Run Fortify Scan
+        if: ${{ secrets.FOD_TENANT != '' && ((secrets.FOD_USER != '' && secrets.FOD_PAT != '') || (secrets.FOD_CLIENT_ID != '' && secrets.FOD_CLIENT_SECRET != '')) }}
         # Specify Fortify GitHub Action version to run. As per GitHub starter workflow requirements, this example
         # uses the commit id corresponding to version 1.6.2. It is recommended to check whether any later releases
         # are available at https://github.com/fortify/github-action/releases. Depending on the amount of stability
