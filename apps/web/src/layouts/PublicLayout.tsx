@@ -29,6 +29,7 @@ const footerGroups = [
       { label: 'Full Truckload', href: '/services/full-truckload' },
       { label: 'Flatbed', href: '/services/flatbed' },
       { label: 'Expedited', href: '/services/expedited' },
+      { label: 'Amazon Delivery', href: '/services/amazon-delivery' },
     ],
   },
   {

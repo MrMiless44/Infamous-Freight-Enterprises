@@ -78,6 +78,10 @@ const SEO_BY_PATH: Record<string, SeoConfig> = {
     title: `Final Mile Delivery Services | ${BRAND.displayName}`,
     description: 'Coordinate final mile delivery from distribution centers, warehouses, hubs, and retail locations with delivery documentation.'
   },
+  '/services/amazon-delivery': {
+    title: `Amazon Delivery Integration | ${BRAND.displayName}`,
+    description: 'Plan Amazon MCF and shipping workflows for eligible e-commerce orders, inventory visibility, labels, tracking, and customer delivery updates.'
+  },
   '/services/box-truck': {
     title: `Box Truck Freight Services | ${BRAND.displayName}`,
     description: 'Book 16 to 26 ft box truck freight for retail replenishment, commercial equipment, warehouse transfers, and regional lanes.'
