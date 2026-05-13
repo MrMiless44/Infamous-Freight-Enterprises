@@ -13,7 +13,7 @@ importers:
     dependencies:
       '@netlify/database':
         specifier: ^1.0.0
-        version: 1.0.0(@electric-sql/pglite@0.4.1)(mysql2@3.15.3)(postgres@3.4.7)
+        version: 1.0.0(mysql2@3.15.3)(postgres@3.4.7)
       '@supabase/supabase-js':
         specifier: ^2.105.4
         version: 2.105.4
@@ -25,8 +25,8 @@ importers:
         specifier: ^3.0.6
         version: 3.0.6
       '@netlify/functions':
-        specifier: ^5.2.0
-        version: 5.2.0
+        specifier: ^5.2.1
+        version: 5.2.1
       '@resvg/resvg-js':
         specifier: 2.6.2
         version: 2.6.2
@@ -992,8 +992,8 @@ packages:
     resolution: {integrity: sha512-xkVcTcpAuQKAY5GXKOjPTIct5Mz53NPHXOasggA+LTAxDDV4ohqSM8BIaXh1SgbcniHZyFhBqhc5hxZ+fFz5bQ==}
     engines: {node: '>=18.0.0'}
 
-  '@netlify/functions@5.2.0':
-    resolution: {integrity: sha512-Pj93qeQd1tkQ5xm9gWJZmBf/1riLYqYHc0OzFukrJomrj82Ott53Rr/Q88H1ms5cF+P5QXRKWmA2JSxSybKfjA==}
+  '@netlify/functions@5.2.1':
+    resolution: {integrity: sha512-F1CCXeWC/4E/mj8La38WwFJ6oyymTBeIWYO87nyjN0L8mvb0tugcMsu+V6QkUllMtnBezdM0ApCaY+eWGmnj+g==}
     engines: {node: '>=18.0.0'}
 
   '@netlify/runtime-utils@2.3.0':
@@ -5301,12 +5301,12 @@ snapshots:
 
   '@neondatabase/serverless@1.1.0': {}
 
-  '@netlify/database@1.0.0(@electric-sql/pglite@0.4.1)(mysql2@3.15.3)(postgres@3.4.7)':
+  '@netlify/database@1.0.0(mysql2@3.15.3)(postgres@3.4.7)':
     dependencies:
       '@neondatabase/serverless': 1.1.0
       '@netlify/runtime-utils': 2.3.0
       pg: 8.20.0
-      waddler: 0.1.1(@electric-sql/pglite@0.4.1)(@neondatabase/serverless@1.1.0)(mysql2@3.15.3)(pg@8.20.0)(postgres@3.4.7)
+      waddler: 0.1.1(@neondatabase/serverless@1.1.0)(mysql2@3.15.3)(pg@8.20.0)(postgres@3.4.7)
       ws: 8.20.0
     transitivePeerDependencies:
       - '@clickhouse/client'
@@ -5335,7 +5335,7 @@ snapshots:
     dependencies:
       '@netlify/types': 2.6.0
 
-  '@netlify/functions@5.2.0':
+  '@netlify/functions@5.2.1':
     dependencies:
       '@netlify/types': 2.6.0
 
@@ -8852,9 +8852,8 @@ snapshots:
     dependencies:
       xml-name-validator: 5.0.0
 
-  waddler@0.1.1(@electric-sql/pglite@0.4.1)(@neondatabase/serverless@1.1.0)(mysql2@3.15.3)(pg@8.20.0)(postgres@3.4.7):
+  waddler@0.1.1(@neondatabase/serverless@1.1.0)(mysql2@3.15.3)(pg@8.20.0)(postgres@3.4.7):
     optionalDependencies:
-      '@electric-sql/pglite': 0.4.1
       '@neondatabase/serverless': 1.1.0
       mysql2: 3.15.3
       pg: 8.20.0

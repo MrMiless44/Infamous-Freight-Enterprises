@@ -12,6 +12,7 @@ permissions:
 jobs:
   triage:
     name: Label and summarize issues
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.actor != 'github-actions[bot]' && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association)) }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -147,10 +148,25 @@ jobs:
                           parts.append(text)
               output_text = "\n".join(parts).strip()
 
+          marker = "<!-- ai-issue-triage-summary -->"
           if output_text:
-              print("AI-assisted triage summary generated.\n\n" + output_text)
+              print(marker + "\nAI-assisted triage summary generated.\n\n" + output_text)
           else:
-              print("Deterministic triage labels applied. OpenAI returned no readable summary text.")
+              print(marker + "\nDeterministic triage labels applied. OpenAI returned no readable summary text.")
           PY
+
+          existing_comment_ids=""
+          if ! existing_comment_ids="$(gh api "repos/${REPO}/issues/${ISSUE_NUMBER}/comments" --paginate --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("<!-- ai-issue-triage-summary -->"))) | .id')"; then
+            echo "Warning: unable to query existing AI triage comments for issue #${ISSUE_NUMBER}. Continuing with a new triage comment." >&2
+            existing_comment_ids=""
+          fi
+          if [[ -n "${existing_comment_ids}" ]]; then
+            while IFS= read -r comment_id; do
+              [[ -z "${comment_id}" ]] && continue
+              if ! delete_error="$(gh api --method DELETE "repos/${REPO}/issues/comments/${comment_id}" 2>&1)"; then
+                echo "Warning: unable to delete previous AI triage comment ${comment_id} for issue #${ISSUE_NUMBER}. Details: ${delete_error}" >&2
+              fi
+            done <<< "${existing_comment_ids}"
+          fi
 
           gh issue comment "${ISSUE_NUMBER}" --repo "${REPO}" --body-file /tmp/triage-comment.md

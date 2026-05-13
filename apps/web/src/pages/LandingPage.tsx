@@ -126,6 +126,7 @@ const servicesList = [
   { title: 'Dedicated Lanes', slug: 'dedicated-lanes', description: 'Recurring routes with locked-in pricing and carriers.' },
   { title: 'Freight Brokerage', slug: 'freight-brokerage', description: 'Brokerage support for matching shipment details with carrier capacity.' },
   { title: 'Final Mile', slug: 'final-mile', description: 'Last-leg delivery from distribution center to end customer.' },
+  { title: 'Amazon Delivery', slug: 'amazon-delivery', description: 'MCF and shipping workflow planning for eligible e-commerce orders.' },
 ];
 
 const faqItems = [
@@ -677,6 +678,7 @@ const LandingPage: React.FC = () => {
                 <Link to="/services/full-truckload" className="block hover:text-infamous-red-light transition">Full Truckload</Link>
                 <Link to="/services/flatbed" className="block hover:text-infamous-red-light transition">Flatbed</Link>
                 <Link to="/services/expedited" className="block hover:text-infamous-red-light transition">Expedited</Link>
+                <Link to="/services/amazon-delivery" className="block hover:text-infamous-red-light transition">Amazon Delivery</Link>
               </div>
             </div>
             <div>

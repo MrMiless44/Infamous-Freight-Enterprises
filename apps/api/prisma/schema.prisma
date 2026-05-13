@@ -32,6 +32,9 @@ model Carrier {
   carrierPayments       CarrierPayment[]
   aiUsageEvents         AiUsageEvent[]
   stripeOneTimePayments StripeOneTimePayment[]
+  amazonConnections     AmazonConnection[]
+  amazonInventoryItems  AmazonInventoryItem[]
+  amazonFulfillments    AmazonFulfillmentRequest[]
   rateAgreement         RateAgreement?
 }
 
@@ -398,4 +401,70 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([userId])
   @@index([createdAt])
+}
+
+model AmazonConnection {
+  id            String    @id @default(cuid())
+  carrierId     String
+  accountLabel  String
+  sellerAccount String?
+  marketplaceId String?
+  region        String    @default("NA")
+  status        String    @default("not_configured")
+  enabled       Boolean   @default(false)
+  lastSyncedAt  DateTime?
+  metadata      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  carrier Carrier @relation(fields: [carrierId], references: [id])
+
+  @@index([carrierId])
+  @@index([carrierId, status])
+}
+
+model AmazonInventoryItem {
+  id              String    @id @default(cuid())
+  carrierId       String
+  sellerSku       String
+  fulfillmentSku  String?
+  productName     String?
+  availableUnits  Int       @default(0)
+  reservedUnits   Int       @default(0)
+  inboundUnits    Int       @default(0)
+  lastSyncedAt    DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  carrier Carrier @relation(fields: [carrierId], references: [id])
+
+  @@unique([carrierId, sellerSku])
+  @@index([carrierId, availableUnits])
+}
+
+model AmazonFulfillmentRequest {
+  id                   String    @id @default(cuid())
+  carrierId            String
+  loadId               String?
+  orderReference       String
+  routeDecision        String
+  status               String    @default("planned")
+  serviceLevel         String?
+  amazonOrderId        String?
+  amazonShipmentId     String?
+  carrierService       String?
+  trackingNumber       String?
+  labelDocumentId      String?
+  fulfillmentStatus    String?
+  lastEventType        String?
+  lastEventAt          DateTime?
+  requestPayload       String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  carrier Carrier @relation(fields: [carrierId], references: [id])
+
+  @@unique([carrierId, orderReference])
+  @@index([carrierId, status])
+  @@index([trackingNumber])
 }
