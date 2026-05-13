@@ -561,6 +561,243 @@ function getRouteParam(req: Request, name: string): string {
   );
 }
 
+type AmazonRoutingDecision = 'amazon_mcf' | 'amazon_shipping' | 'local_carrier' | 'manual_review';
+
+function getPrismaOrThrow() {
+  const prisma = getPrismaClient();
+
+  if (!prisma) {
+    throw new HttpError(503, 'database_unavailable', 'Database access is required for this endpoint.');
+  }
+
+  return prisma as unknown as Record<string, any>;
+}
+
+function cleanString(value: unknown, max = 240): string {
+  return typeof value === 'string' ? value.trim().slice(0, max) : '';
+}
+
+function cleanInteger(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) return Math.max(0, Math.round(value));
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? Math.max(0, Math.round(parsed)) : null;
+  }
+
+  return null;
+}
+
+function parseAmazonMetadata(value: unknown): string | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return null;
+  }
+
+  return JSON.stringify(value);
+}
+
+function chooseAmazonRoute(body: Record<string, unknown>, inventoryAvailable: boolean): AmazonRoutingDecision {
+  const requested = cleanString(body.requestedRoute, 40);
+  if (requested === 'amazon_mcf' || requested === 'amazon_shipping' || requested === 'local_carrier') {
+    return requested;
+  }
+
+  const orderType = cleanString(body.orderType, 80).toLowerCase();
+  const packageType = cleanString(body.packageType, 80).toLowerCase();
+
+  if (orderType.includes('ecommerce') && inventoryAvailable) return 'amazon_mcf';
+  if (packageType.includes('parcel')) return 'amazon_shipping';
+  if (cleanInteger(body.weightLbs) !== null && Number(cleanInteger(body.weightLbs)) > 150) return 'local_carrier';
+
+  return 'manual_review';
+}
+
+async function getAmazonConnection(prisma: Record<string, any>, carrierId: string) {
+  return prisma.amazonConnection.findFirst({
+    where: { carrierId },
+    orderBy: { updatedAt: 'desc' },
+  });
+}
+
+async function registerAmazonDeliveryRoutes(
+  app: express.Express,
+  protectedApi: Array<(req: Request, res: Response, next: NextFunction) => unknown>,
+  auditLogger: AuditLogger,
+) {
+  app.get('/api/amazon-delivery/status', ...protectedApi, wrapAsync(async (req, res) => {
+    const carrierId = getRequiredTenantId(req);
+    const prisma = getPrismaOrThrow();
+    const [connection, inventoryCount, openRequests] = await Promise.all([
+      getAmazonConnection(prisma, carrierId),
+      prisma.amazonInventoryItem.count({ where: { carrierId } }),
+      prisma.amazonFulfillmentRequest.count({
+        where: { carrierId, status: { in: ['planned', 'submitted', 'label_ready', 'in_transit'] } },
+      }),
+    ]);
+
+    res.status(200).json({
+      data: {
+        connection: connection
+          ? {
+              id: connection.id,
+              accountLabel: connection.accountLabel,
+              sellerAccount: connection.sellerAccount,
+              marketplaceId: connection.marketplaceId,
+              region: connection.region,
+              status: connection.status,
+              enabled: connection.enabled,
+              lastSyncedAt: connection.lastSyncedAt,
+            }
+          : null,
+        inventoryCount,
+        openRequests,
+      },
+    });
+  }));
+
+  app.put('/api/amazon-delivery/connection', ...protectedApi, wrapAsync(async (req, res) => {
+    const carrierId = getRequiredTenantId(req);
+    const accountLabel = cleanString(req.body?.accountLabel, 120) || 'Amazon logistics account';
+    const status = cleanString(req.body?.status, 40) || 'pending_authorization';
+    const allowedStatuses = ['not_configured', 'pending_authorization', 'connected', 'paused', 'error'];
+
+    if (!allowedStatuses.includes(status)) {
+      throw new HttpError(400, 'amazon_connection_status_invalid', 'Amazon connection status is invalid.');
+    }
+
+    const prisma = getPrismaOrThrow();
+    const existing = await getAmazonConnection(prisma, carrierId);
+    const data = {
+      carrierId,
+      accountLabel,
+      sellerAccount: cleanString(req.body?.sellerAccount, 120) || null,
+      marketplaceId: cleanString(req.body?.marketplaceId, 80) || null,
+      region: cleanString(req.body?.region, 16) || 'NA',
+      status,
+      enabled: req.body?.enabled === true,
+      metadata: parseAmazonMetadata(req.body?.metadata),
+    };
+    const connection = existing
+      ? await prisma.amazonConnection.update({ where: { id: existing.id }, data })
+      : await prisma.amazonConnection.create({ data });
+
+    const user = getAuditUser(req);
+    void auditLogger.log({ entityType: 'amazon_delivery', entityId: connection.id, action: 'connection_upsert', ...user, requestId: req.requestId });
+    res.status(existing ? 200 : 201).json({ data: connection });
+  }));
+
+  app.post('/api/amazon-delivery/inventory', ...protectedApi, wrapAsync(async (req, res) => {
+    const carrierId = getRequiredTenantId(req);
+    const sellerSku = cleanString(req.body?.sellerSku, 160);
+    if (!sellerSku) throw new HttpError(400, 'amazon_inventory_sku_required', 'sellerSku is required.');
+
+    const prisma = getPrismaOrThrow();
+    const item = await prisma.amazonInventoryItem.upsert({
+      where: { carrierId_sellerSku: { carrierId, sellerSku } },
+      update: {
+        fulfillmentSku: cleanString(req.body?.fulfillmentSku, 160) || null,
+        productName: cleanString(req.body?.productName, 240) || null,
+        availableUnits: cleanInteger(req.body?.availableUnits) ?? 0,
+        reservedUnits: cleanInteger(req.body?.reservedUnits) ?? 0,
+        inboundUnits: cleanInteger(req.body?.inboundUnits) ?? 0,
+        lastSyncedAt: new Date(),
+      },
+      create: {
+        carrierId,
+        sellerSku,
+        fulfillmentSku: cleanString(req.body?.fulfillmentSku, 160) || null,
+        productName: cleanString(req.body?.productName, 240) || null,
+        availableUnits: cleanInteger(req.body?.availableUnits) ?? 0,
+        reservedUnits: cleanInteger(req.body?.reservedUnits) ?? 0,
+        inboundUnits: cleanInteger(req.body?.inboundUnits) ?? 0,
+        lastSyncedAt: new Date(),
+      },
+    });
+
+    res.status(201).json({ data: item });
+  }));
+
+  app.post('/api/amazon-delivery/routing-preview', ...protectedApi, wrapAsync(async (req, res) => {
+    const carrierId = getRequiredTenantId(req);
+    const sellerSku = cleanString(req.body?.sellerSku, 160);
+    const prisma = getPrismaOrThrow();
+    const connection = await getAmazonConnection(prisma, carrierId);
+    const inventory = sellerSku
+      ? await prisma.amazonInventoryItem.findUnique({ where: { carrierId_sellerSku: { carrierId, sellerSku } } })
+      : null;
+    const inventoryAvailable = Boolean(inventory && inventory.availableUnits > 0);
+    const routeDecision = connection?.enabled && connection?.status === 'connected'
+      ? chooseAmazonRoute(req.body ?? {}, inventoryAvailable)
+      : 'manual_review';
+
+    res.status(200).json({
+      data: {
+        routeDecision,
+        amazonAvailable: Boolean(connection?.enabled && connection?.status === 'connected'),
+        inventoryAvailable,
+        reason: routeDecision === 'manual_review'
+          ? 'Amazon delivery requires connected account status, eligible package details, and available inventory.'
+          : 'Order details match an Amazon delivery path.',
+      },
+    });
+  }));
+
+  app.post('/api/amazon-delivery/fulfillment-requests', ...protectedApi, wrapAsync(async (req, res) => {
+    const carrierId = getRequiredTenantId(req);
+    const orderReference = cleanString(req.body?.orderReference, 160);
+    if (!orderReference) throw new HttpError(400, 'amazon_order_reference_required', 'orderReference is required.');
+
+    const prisma = getPrismaOrThrow();
+    const routeDecision = chooseAmazonRoute(req.body ?? {}, false);
+    const fulfillment = await prisma.amazonFulfillmentRequest.upsert({
+      where: { carrierId_orderReference: { carrierId, orderReference } },
+      update: {
+        loadId: cleanString(req.body?.loadId, 80) || null,
+        routeDecision,
+        status: cleanString(req.body?.status, 40) || 'planned',
+        serviceLevel: cleanString(req.body?.serviceLevel, 80) || null,
+        requestPayload: parseAmazonMetadata(req.body) ?? '{}',
+      },
+      create: {
+        carrierId,
+        loadId: cleanString(req.body?.loadId, 80) || null,
+        orderReference,
+        routeDecision,
+        status: cleanString(req.body?.status, 40) || 'planned',
+        serviceLevel: cleanString(req.body?.serviceLevel, 80) || null,
+        requestPayload: parseAmazonMetadata(req.body) ?? '{}',
+      },
+    });
+
+    const user = getAuditUser(req);
+    void auditLogger.log({ entityType: 'amazon_delivery', entityId: fulfillment.id, action: 'fulfillment_planned', ...user, requestId: req.requestId });
+    res.status(201).json({ data: fulfillment });
+  }));
+
+  app.post('/api/amazon-delivery/webhook', ...protectedApi, wrapAsync(async (req, res) => {
+    const carrierId = getRequiredTenantId(req);
+    const orderReference = cleanString(req.body?.orderReference, 160);
+    if (!orderReference) throw new HttpError(400, 'amazon_order_reference_required', 'orderReference is required.');
+
+    const prisma = getPrismaOrThrow();
+    const fulfillment = await prisma.amazonFulfillmentRequest.update({
+      where: { carrierId_orderReference: { carrierId, orderReference } },
+      data: {
+        amazonOrderId: cleanString(req.body?.amazonOrderId, 160) || undefined,
+        amazonShipmentId: cleanString(req.body?.amazonShipmentId, 160) || undefined,
+        carrierService: cleanString(req.body?.carrierService, 120) || undefined,
+        trackingNumber: cleanString(req.body?.trackingNumber, 120) || undefined,
+        labelDocumentId: cleanString(req.body?.labelDocumentId, 160) || undefined,
+        fulfillmentStatus: cleanString(req.body?.fulfillmentStatus, 80) || undefined,
+        lastEventType: cleanString(req.body?.eventType, 120) || 'status_update',
+        lastEventAt: new Date(),
+        status: cleanString(req.body?.status, 40) || undefined,
+      },
+    });
+
+    res.status(200).json({ data: fulfillment });
+  }));
+}
+
 function getFreightOperationResource(req: Request): FreightOperationResource {
   const resource = getRouteParam(req, 'resource');
 
@@ -994,6 +1231,8 @@ function registerRoutes(app: express.Express, dataStore: DataStore, auditLogger:
   }));
 
   const protectedApi = [requireTenant, requireRole, createRequirePaidSubscription(dataStore)];
+
+  void registerAmazonDeliveryRoutes(app, protectedApi, auditLogger);
 
   app.post('/api/ai-usage/events', ...protectedApi, wrapAsync(async (req, res) => {
     if (!req.body?.feature || typeof req.body.feature !== 'string') {

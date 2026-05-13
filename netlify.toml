@@ -174,6 +174,13 @@
   status = 200
   force = true
 
+# Amazon delivery orchestration
+[[redirects]]
+  from = "/api/amazon-delivery/*"
+  to = "https://infamous-freight-api.fly.dev/api/amazon-delivery/:splat"
+  status = 200
+  force = true
+
 # Fly.io fallback for remaining API routes
 [[redirects]]
   from = "/api/*"

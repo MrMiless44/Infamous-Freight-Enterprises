@@ -29,3 +29,20 @@ Use environment variables for Amazon SP-API client credentials, refresh tokens, 
 ## Implementation Notes
 
 The first production step should be a server-side connection and routing layer, followed by a dashboard panel that shows whether Amazon delivery is available for an order. Label printing and tracking should be added after the fulfillment request and event update paths are proven in a sandbox or limited pilot.
+
+## Implemented Server-Side Foundation
+
+The active Express API now includes protected Amazon delivery orchestration endpoints under `/api/amazon-delivery/*`.
+These endpoints record connection metadata, inventory snapshots, routing previews, planned fulfillment requests, and
+delivery status events without storing Amazon credentials in client code or making live SP-API calls.
+
+- `GET /api/amazon-delivery/status` returns the tenant's connection summary, inventory count, and open fulfillment count.
+- `PUT /api/amazon-delivery/connection` records account label, seller/account metadata, marketplace, region, enabled flag, and connection status.
+- `POST /api/amazon-delivery/inventory` upserts approved inventory availability by seller SKU.
+- `POST /api/amazon-delivery/routing-preview` evaluates whether an order should be reviewed for Amazon MCF, Amazon Shipping, local carrier dispatch, or manual review.
+- `POST /api/amazon-delivery/fulfillment-requests` records the selected route, order reference, service level, payload summary, and shipment linkage before any live Amazon submission.
+- `POST /api/amazon-delivery/webhook` updates fulfillment references, label metadata, tracking numbers, and delivery status events for an existing order reference.
+
+The route remains behind the same protected API middleware as other operating workflows. Production SP-API credentials,
+refresh tokens, role ARNs, marketplace IDs, webhook secrets, and notification verification values must remain environment
+variables and should be added only when the Amazon sandbox or pilot account is ready.
