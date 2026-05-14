@@ -28,6 +28,7 @@ This directory contains operational, architectural, and launch-readiness documen
 
 ## 🚀 Launch & Readiness
 
+- [current-status.md](./current-status.md) — **Runtime source of truth.** Live, demo-backed, and planned capability summary.
 - [CAPABILITY_STATUS_MAP.md](./CAPABILITY_STATUS_MAP.md) — Live/beta/planned status for every platform capability.
 - [LAUNCH_READINESS_INDEX.md](./LAUNCH_READINESS_INDEX.md) — Index of launch-readiness artifacts.
 - [LAUNCH-READINESS-CHECKLIST.md](./LAUNCH-READINESS-CHECKLIST.md) — Pre-launch checklist.

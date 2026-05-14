@@ -12,6 +12,8 @@ This is the entry point for production readiness, beta approval, paid launch app
 
 Ready for verification. Not approved for public launch until all critical checks pass with evidence.
 
+> For the current runtime summary — what is live, what is demo-backed, and what is still planned — see [`docs/current-status.md`](./current-status.md).
+
 ## Required Documents
 
 | Document | Purpose |

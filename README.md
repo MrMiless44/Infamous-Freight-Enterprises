@@ -11,6 +11,10 @@ Dispatch • Fleet intelligence • Driver coordination • Compliance • Billi
 
 ---
 
+> **Runtime truth:** [`docs/current-status.md`](docs/current-status.md) is the single source of truth for what is live, what is demo-backed, and what is still planned. Read it before drawing conclusions about production readiness. For the full per-capability breakdown see [`docs/CAPABILITY_STATUS_MAP.md`](docs/CAPABILITY_STATUS_MAP.md).
+
+---
+
 ## 🚛 Overview
 
 Infamous Freight is an AI-powered freight operations platform for **dispatch execution**, **shipment visibility**, **driver coordination**, **compliance workflows**, **billing**, and **logistics automation**.
@@ -19,7 +23,7 @@ Built as a **pnpm monorepo**, the platform currently ships a **React 19 + Vite w
 
 If you want one system for **dispatch**, **tracking**, **paperwork**, **analytics**, **compliance**, and **operational control**, this is the platform.
 
-> Runtime truth and current hardening status live in [`docs/current-status.md`](docs/current-status.md).
+> Forward-looking feature claims below reflect the intended scope of the platform. Verified-live capabilities are listed in [`docs/current-status.md`](docs/current-status.md).
 
 ---
 
@@ -40,15 +44,27 @@ If you want one system for **dispatch**, **tracking**, **paperwork**, **analytic
 
 ## 🔥 Platform Highlights
 
-- 🚚 AI-assisted dispatch workflows
-- 📍 Real-time shipment location, ETA, and status visibility
-- 💬 Driver-dispatch chat and operational messaging
-- 🤖 Load matching and negotiation support
-- 📄 Digital paperwork, BOL/POD, invoicing, and portal flows
-- 🛡️ Role-based, tenant-aware compliance controls
+**Live (verified in production):**
+- 📍 Shipment tracking, delivery verification, and POD recording
 - 💳 Stripe checkout, customer portal, webhook sync, and one-time payment tracking
-- 📊 Broker, rate, and operational analytics
-- 🔎 Support for load-board, geofencing, CSA, IFTA, and related freight workflow surfaces
+- 🛡️ Role-based, tenant-aware access control and audit logging
+- 🌐 Public quote intake, load board, and carrier/customer portals
+- 🔁 Load CRUD, driver management, and dispatch workflows
+- ⚡ Socket.io realtime notifications
+
+**Demo-backed (deployed; some views use sample data):**
+- 🚚 Dispatch board with status columns
+- 📊 Operational metrics and analytics dashboard
+- 🤖 AI freight assistant (conversational helper in beta)
+
+**Planned (on roadmap, not yet live):**
+- Auto-dispatch AI (carrier ranking and assignment)
+- DAT / Truckstop / 123Loadboard integrations
+- Samsara / Motive ELD integrations
+- QuickBooks / Xero accounting integrations
+- Voice load booking and rate negotiation AI
+
+> See [`docs/current-status.md`](docs/current-status.md) for the current runtime summary and [`docs/CAPABILITY_STATUS_MAP.md`](docs/CAPABILITY_STATUS_MAP.md) for the full per-capability status table.
 
 ---
 
@@ -300,6 +316,8 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for PR and style expectations.
 ## 📚 Documentation
 
 - [Project Docs Index](docs/README.md)
+- [Current Runtime Status](docs/current-status.md)
+- [Capability Status Map](docs/CAPABILITY_STATUS_MAP.md)
 - [Local Startup Checklist](docs/LOCAL_STARTUP_CHECKLIST.md)
 - [Environment Variables Reference](docs/environment/ENVIRONMENT_VARIABLES_COMPLETE.md)
 - [Detailed Architecture](docs/ARCHITECTURE.md)
