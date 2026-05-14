@@ -19,6 +19,8 @@ Built as a **pnpm monorepo**, the platform currently ships a **React 19 + Vite w
 
 If you want one system for **dispatch**, **tracking**, **paperwork**, **analytics**, **compliance**, and **operational control**, this is the platform.
 
+> Runtime truth and current hardening status live in [`docs/current-status.md`](docs/current-status.md).
+
 ---
 
 ## 📦 Monorepo Overview
