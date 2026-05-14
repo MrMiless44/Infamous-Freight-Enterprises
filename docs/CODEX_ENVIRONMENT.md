@@ -45,6 +45,32 @@ CORS_ORIGINS=http://localhost:5173
 CORS_ORIGIN=http://localhost:5173
 ```
 
+## Execution loop and deployment guardrails
+
+Use this operating loop for all Codex tasks in this repository:
+
+1. Discover
+2. Build
+3. Verify
+4. Optimize
+5. Scale
+
+Fly.io deployment safety requirements:
+
+- App name: `infamous-freight-api`
+- Keep runtime `PORT=3000`
+- Keep `fly.toml` `http_service.internal_port = 3000`
+- Keep Docker runtime command as `node apps/api/dist/src/server.js`
+- Liveness check path: `/api/health/live`
+- Do not use `flyctl config save -a infamous-freight-api --yes` unless explicitly required.
+
+Supabase/security guardrails:
+
+- Supabase browser/server clients must use `SUPABASE_URL` or `VITE_SUPABASE_URL`.
+- Never use `SUPABASE_DATABASE_URL` (or any `PUBLIC_`/`NEXT_PUBLIC_`/`VITE_` variant) for Supabase client setup.
+- Database connection strings belong only in `DATABASE_URL` on server-side runtime.
+- Production must include `SUPABASE_JWT_SECRET` or `JWT_SECRET` (prefer `SUPABASE_JWT_SECRET` when validating Supabase tokens).
+
 ## Recommended local development defaults
 
 Use these non-secret values for local development:
@@ -60,6 +86,8 @@ STRIPE_PORTAL_RETURN_URL=http://localhost:5173/billing
 VITE_API_URL=http://localhost:3001
 VITE_SOCKET_URL=ws://localhost:3001
 ```
+
+These local defaults are intentionally separate from Fly runtime requirements (`PORT=3000` and `http_service.internal_port = 3000`) used by the deployed API app.
 
 Use test/dev keys for Stripe, Supabase, and database credentials. Do not use production credentials in local or experimental Codex environments unless the task explicitly requires production verification.
 
