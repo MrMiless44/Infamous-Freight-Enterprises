@@ -29,6 +29,9 @@ on:
 jobs:
   Fortify-AST-Scan:
     # Use the appropriate runner for building your source code. Ensure dev tools required to build your code are present and configured appropriately (MSBuild, Python, etc).
+    # Skip when neither FoD credentials (FOD_TENANT, FOD_USER, FOD_PAT) nor SSC token (SSC_TOKEN) are configured.
+    # Unset secrets evaluate to empty strings in GitHub Actions expressions.
+    if: ${{ (secrets.FOD_TENANT != '' && secrets.FOD_USER != '' && secrets.FOD_PAT != '') || secrets.SSC_TOKEN != '' }}
     runs-on: ubuntu-latest
     permissions:
       actions: read
