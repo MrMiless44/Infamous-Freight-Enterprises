@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: required-checks-${{ github.ref }}
+  group: required-checks-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -41,7 +41,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Set up pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d # v4.1.0
         with:
           run_install: false
 
@@ -52,25 +52,54 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
+        id: install
         run: pnpm install --frozen-lockfile
 
       - name: Verify required environment variables
+        id: env_strict
         run: pnpm run codex:env-check:strict
 
       - name: Verify frontend env safety
+        id: env_frontend
         run: pnpm run env:check:frontend
 
       - name: Verify Supabase client env safety
+        id: env_supabase
         run: pnpm run env:check:supabase-client
 
       - name: Generate Prisma client
+        id: prisma
         run: pnpm run prisma:generate
 
       - name: Lint
+        id: lint
         run: pnpm run lint
 
-      - name: Build
-        run: pnpm run build
+      - name: Typecheck API
+        id: typecheck_api
+        run: pnpm -C apps/api exec tsc -p tsconfig.json --noEmit
 
-      - name: Test
-        run: pnpm run test
+      - name: Typecheck web
+        id: typecheck_web
+        run: pnpm -C apps/web exec tsc -p tsconfig.json --noEmit
+
+      - name: API coverage tests
+        id: api_coverage
+        run: pnpm -C apps/api run test:coverage
+
+      - name: Write required-checks summary
+        if: always()
+        run: |
+          {
+            echo "## Required Checks Summary"
+            echo ""
+            echo "- install: ${{ steps.install.outcome }}"
+            echo "- env strict: ${{ steps.env_strict.outcome }}"
+            echo "- frontend env safety: ${{ steps.env_frontend.outcome }}"
+            echo "- supabase env safety: ${{ steps.env_supabase.outcome }}"
+            echo "- prisma generate: ${{ steps.prisma.outcome }}"
+            echo "- lint: ${{ steps.lint.outcome }}"
+            echo "- API typecheck: ${{ steps.typecheck_api.outcome }}"
+            echo "- web typecheck: ${{ steps.typecheck_web.outcome }}"
+            echo "- API coverage: ${{ steps.api_coverage.outcome }}"
+          } >> "$GITHUB_STEP_SUMMARY"

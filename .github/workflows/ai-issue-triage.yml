@@ -4,18 +4,41 @@ on:
   issues:
     types: [opened, edited, reopened]
   workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Issue number to triage
+        required: true
+        type: string
 
 permissions:
   issues: write
   contents: read
 
+concurrency:
+  group: ai-issue-triage-${{ github.event_name }}-${{ github.event.issue.number || github.event.inputs.issue_number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   triage:
     name: Label issues by content
+    if: |
+      github.actor != 'github-actions[bot]' &&
+      (
+        github.event_name == 'workflow_dispatch' ||
+        (
+          github.event_name == 'issues' &&
+          (
+            github.event.issue.author_association == 'OWNER' ||
+            github.event.issue.author_association == 'MEMBER' ||
+            github.event.issue.author_association == 'COLLABORATOR'
+          )
+        )
+      )
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
       GH_TOKEN: ${{ github.token }}
+      ISSUE_NUMBER: ${{ github.event.issue.number || github.event.inputs.issue_number }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     steps:
       - name: Apply deterministic triage labels
@@ -23,16 +46,31 @@ jobs:
         run: |
           set -euo pipefail
 
+          if [[ -z "${ISSUE_NUMBER:-}" ]]; then
+            echo "::error::No issue number supplied."
+            exit 1
+          fi
+
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            gh issue view "${ISSUE_NUMBER}" --json title,body > /tmp/issue.json
+          else
+            python3 <<'PY' > /tmp/issue.json
+            import json
+            import os
+
+            with open(os.environ["GITHUB_EVENT_PATH"], "r", encoding="utf-8") as f:
+                event = json.load(f)
+            issue = event.get("issue") or {}
+            print(json.dumps({"title": issue.get("title", ""), "body": issue.get("body") or ""}))
+            PY
+          fi
+
           python3 <<'PY' > /tmp/labels.txt
           import json
-          import os
           import re
 
-          event_path = os.environ["GITHUB_EVENT_PATH"]
-          with open(event_path, "r", encoding="utf-8") as f:
-              event = json.load(f)
-
-          issue = event.get("issue") or {}
+          with open("/tmp/issue.json", "r", encoding="utf-8") as f:
+              issue = json.load(f)
           text = f"{issue.get('title', '')}\n\n{issue.get('body') or ''}".lower()
 
           labels = {"needs-triage"}
@@ -55,7 +93,7 @@ jobs:
 
           while IFS= read -r label; do
             gh label create "${label}" --color EDEDED --force >/dev/null 2>&1 || true
-            gh issue edit "${{ github.event.issue.number }}" --add-label "${label}"
+            gh issue edit "${ISSUE_NUMBER}" --add-label "${label}"
           done < /tmp/labels.txt
 
           if [[ -n "${OPENAI_API_KEY:-}" ]]; then
@@ -64,4 +102,4 @@ jobs:
             note="Deterministic triage labels applied. Add OPENAI_API_KEY as a repository secret to enable AI-assisted summaries later."
           fi
 
-          gh issue comment "${{ github.event.issue.number }}" --body "${note}"
+          gh issue comment "${ISSUE_NUMBER}" --body "${note}"
