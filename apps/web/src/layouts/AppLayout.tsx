@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/store/app-store';
 import { getSupabase } from '@/hooks/useSupabase';
@@ -13,6 +13,38 @@ import TopBar from '@/components/ui/TopBar';
 import { BRAND } from '@/lib/brand';
 import { Toaster } from 'react-hot-toast';
 import { LayoutDashboard, MessageSquare, Truck, User } from 'lucide-react';
+
+type RouteReadiness = {
+  tone: 'demo' | 'hardening';
+  message: string;
+};
+
+const routeReadinessMap: Record<string, RouteReadiness> = {
+  '/ops': {
+    tone: 'demo',
+    message: 'This dashboard currently includes sample operational data while live services are being wired in.',
+  },
+  '/analytics': {
+    tone: 'hardening',
+    message: 'Analytics is still being hardened. Treat figures here as non-final until production data verification is complete.',
+  },
+  '/compliance': {
+    tone: 'hardening',
+    message: 'Compliance surfaces are still being hardened. Verify critical actions and records against source systems before relying on them operationally.',
+  },
+  '/carriers': {
+    tone: 'hardening',
+    message: 'Carrier management is still being hardened. Confirm workflow completeness before using it as the sole production workflow.',
+  },
+  '/accounting': {
+    tone: 'hardening',
+    message: 'Accounting surfaces are still being hardened. Validate finance-critical outputs before operational use.',
+  },
+  '/quotes': {
+    tone: 'hardening',
+    message: 'Quote operations are still being hardened. Double-check live quote state before customer-facing use.',
+  },
+};
 
 const AppLayout: React.FC = () => {
   const { sidebarOpen, isLoading, user, setUser, setLoading, logout } = useAppStore();
@@ -58,7 +90,6 @@ const AppLayout: React.FC = () => {
 
       const carrierId = session.user.user_metadata?.carrierId;
       if (!carrierId) {
-        // Refuse to mount an authenticated session without a tenant scope.
         logout();
         if (!isPublicPath(location.pathname)) {
           navigate('/login', { replace: true });
@@ -81,7 +112,6 @@ const AppLayout: React.FC = () => {
         id: session.user.id,
         email: session.user.email ?? '',
         name: session.user.user_metadata?.full_name ?? session.user.email?.split('@')[0] ?? 'User',
-        // Default to least-privilege role; elevate via verified user_metadata only.
         role: session.user.user_metadata?.role ?? 'driver',
         carrierId,
         subscriptionStatus,
@@ -108,6 +138,13 @@ const AppLayout: React.FC = () => {
     }
   }, [isLoading, location.pathname, navigate, user]);
 
+  const readinessNotice = useMemo(() => {
+    const matchedPath = Object.keys(routeReadinessMap).find((path) =>
+      location.pathname === path || location.pathname.startsWith(`${path}/`)
+    );
+    return matchedPath ? routeReadinessMap[matchedPath] : null;
+  }, [location.pathname]);
+
   if (isLoading) {
     return (
       <div className="h-screen w-screen flex items-center justify-center bg-infamous-dark">
@@ -126,6 +163,20 @@ const AppLayout: React.FC = () => {
       className="bg-yellow-600 text-black text-center text-sm py-1 px-3"
     >
       You are offline — recent changes may not save until your connection returns.
+    </div>
+  ) : null;
+
+  const readinessBanner = readinessNotice ? (
+    <div
+      role="note"
+      aria-live="polite"
+      className={`text-sm px-4 py-2 border-b ${
+        readinessNotice.tone === 'demo'
+          ? 'bg-blue-950/80 text-blue-100 border-blue-800/70'
+          : 'bg-amber-950/80 text-amber-100 border-amber-800/70'
+      }`}
+    >
+      {readinessNotice.tone === 'demo' ? 'Demo-backed surface:' : 'Still being hardened:'} {readinessNotice.message}
     </div>
   ) : null;
 
@@ -152,12 +203,12 @@ const AppLayout: React.FC = () => {
       <Sidebar />
       <div className={`flex flex-col flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'} max-md:!ml-0`}>
         {offlineBanner}
+        {readinessBanner}
         <TopBar />
         <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6">
           <Outlet />
         </main>
       </div>
-      {/* Mobile Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-infamous-border bg-infamous-navy md:hidden" aria-label="Mobile navigation">
         <div className="flex items-center justify-around py-2">
           {[
