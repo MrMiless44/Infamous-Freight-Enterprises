@@ -17,7 +17,27 @@ import { trackPublicEvent, trackFunnelEvent } from '@/lib/analytics';
 import { submitNetlifyForm } from '@/lib/netlifyForms';
 import { createPublicQuoteRequest } from '@/lib/publicFreightApi';
 
-const initialForm = {
+type QuoteFormState = {
+  company: string;
+  contact: string;
+  email: string;
+  phone: string;
+  origin: string;
+  destination: string;
+  freightType: string;
+  equipment: string;
+  weight: string;
+  miles: string;
+  dimensions: string;
+  pickupDate: string;
+  deliveryDate: string;
+  instructions: string;
+  contactConsent: boolean;
+};
+
+type QuoteTextField = Exclude<keyof QuoteFormState, 'contactConsent'>;
+
+const initialForm: QuoteFormState = {
   company: '',
   contact: '',
   email: '',
@@ -32,6 +52,7 @@ const initialForm = {
   pickupDate: '',
   deliveryDate: '',
   instructions: '',
+  contactConsent: false,
 };
 
 const equipmentBaseRpm: Record<string, number> = {
@@ -63,10 +84,16 @@ type Estimate = {
   reason: string;
 };
 
+const quotingSteps = [
+  'Dispatch reviews the lane, equipment, pickup timing, and freight notes.',
+  'Carrier fit and capacity are checked before a rate is confirmed.',
+  'Pricing, pickup details, and next steps are sent back through your preferred contact.',
+];
+
 const formatCurrency = (value: number) =>
   value.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 
-const computeEstimate = (form: typeof initialForm): Estimate | null => {
+const computeEstimate = (form: QuoteFormState): Estimate | null => {
   const miles = Number(form.miles);
   if (!miles || miles <= 0) return null;
 
@@ -162,7 +189,7 @@ const PublicQuoteRequestPage: React.FC = () => {
 
   const estimate = useMemo(() => computeEstimate(form), [form]);
 
-  const updateField = (key: keyof typeof initialForm, value: string) => {
+  const updateField = (key: QuoteTextField, value: string) => {
     setForm((current) => ({ ...current, [key]: value }));
   };
 
@@ -171,7 +198,7 @@ const PublicQuoteRequestPage: React.FC = () => {
       case 0: return Boolean(form.origin.trim() && form.destination.trim() && form.equipment.trim() && form.pickupDate && form.contact.trim() && form.phone.trim() && form.email.trim());
       case 1: return true;
       case 2: return true;
-      case 3: return Boolean(form.origin.trim() && form.destination.trim() && form.contact.trim() && form.phone.trim() && form.email.trim());
+      case 3: return Boolean(form.origin.trim() && form.destination.trim() && form.contact.trim() && form.phone.trim() && form.email.trim() && form.contactConsent);
       default: return true;
     }
   };
@@ -190,8 +217,9 @@ const PublicQuoteRequestPage: React.FC = () => {
     setError('');
 
     try {
+      const { contactConsent: _contactConsent, ...apiForm } = form;
       const quotePayload = {
-        ...form,
+        ...apiForm,
         estimate: estimate
           ? { low: estimate.low, mid: estimate.mid, high: estimate.high, rpm: estimate.rpm, confidence: estimate.confidence }
           : undefined,
@@ -209,6 +237,7 @@ const PublicQuoteRequestPage: React.FC = () => {
 
       await submitNetlifyForm('quote-request', {
         ...form,
+        contactConsent: form.contactConsent ? 'yes' : 'no',
         name: form.contact,
         pickupTiming: form.pickupDate,
         freightDetails: [form.freightType, form.weight ? `${form.weight} lbs` : '', form.dimensions].filter(Boolean).join(' | '),
@@ -296,9 +325,12 @@ const PublicQuoteRequestPage: React.FC = () => {
             <p className="text-sm text-[#B88989]">Add what is known now. These details help dispatch quote accurately but are not required to start the lead.</p>
             <InputField label="Freight Type" name="freightType" value={form.freightType} onChange={(v) => updateField('freightType', v)} placeholder="e.g. Palletized goods, machinery, retail" />
             <div className="grid gap-4 sm:grid-cols-2">
-              <InputField label="Weight (lbs)" name="weight" type="number" value={form.weight} onChange={(v) => updateField('weight', v)} inputMode="numeric" />
+              <InputField label="Weight (lbs)" name="weight" type="number" value={form.weight} onChange={(v) => updateField('weight', v)} inputMode="numeric" placeholder="Estimated total weight" />
               <InputField label="Dimensions / Pallet Count" name="dimensions" value={form.dimensions} onChange={(v) => updateField('dimensions', v)} placeholder="e.g. 4 pallets, 48x40x60" />
             </div>
+            <p className="text-xs leading-5 text-[#B88989]/80">
+              Estimates are fine. Exact dimensions, pallet count, and weight help reduce follow-up questions before dispatch confirms pricing.
+            </p>
             <div className="grid gap-4 sm:grid-cols-2">
               <InputField label="Delivery Date (optional)" name="deliveryDate" type="date" value={form.deliveryDate} onChange={(v) => updateField('deliveryDate', v)} />
               <InputField label="Lane Miles (optional)" name="miles" type="number" value={form.miles} onChange={(v) => updateField('miles', v)} inputMode="numeric" />
@@ -383,6 +415,22 @@ const PublicQuoteRequestPage: React.FC = () => {
                 <p className="mt-1 text-xs text-[#B88989]">Mid: {formatCurrency(estimate.mid)} · {estimate.confidence}% confidence</p>
               </div>
             )}
+            <label className="flex gap-3 rounded-xl border border-infamous-border bg-infamous-panel p-4 text-sm leading-6 text-[#F5E8E8]/80">
+              <input
+                name="contactConsent"
+                type="checkbox"
+                checked={form.contactConsent}
+                onChange={(event) => setForm((current) => ({ ...current, contactConsent: event.target.checked }))}
+                required
+                className="mt-1 h-4 w-4 rounded border-infamous-border bg-infamous-dark text-infamous-red focus:ring-infamous-red"
+              />
+              <span>
+                I agree that Infamous Freight may contact me about this quote request. I have reviewed the{' '}
+                <Link to="/privacy" className="font-semibold text-infamous-red-light hover:underline">Privacy Policy</Link>
+                {' '}and{' '}
+                <Link to="/terms" className="font-semibold text-infamous-red-light hover:underline">Terms</Link>.
+              </span>
+            </label>
           </div>
         );
       default:
@@ -560,9 +608,9 @@ const PublicQuoteRequestPage: React.FC = () => {
 
             {/* Progress */}
             <div className="rounded-xl border border-infamous-border bg-infamous-card p-6">
-              <h2 className="font-bold">What Happens Next</h2>
+              <h2 className="font-bold">How Quoting Works</h2>
               <div className="mt-4 space-y-3">
-                {['Lane reviewed by dispatch', 'Carrier capacity checked', 'Rate confirmed', 'Pickup details finalized'].map((s, i) => (
+                {quotingSteps.map((s, i) => (
                   <div key={s} className="flex gap-3">
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-infamous-red/10 text-xs font-bold text-infamous-red-light">{i + 1}</span>
                     <p className="pt-0.5 text-sm text-[#B88989]">{s}</p>
