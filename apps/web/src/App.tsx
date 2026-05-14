@@ -5,6 +5,7 @@ import PublicLayout from '@/layouts/PublicLayout';
 import SeoManager from '@/components/SeoManager';
 import { AppErrorBoundary } from '@/components/SentryErrorBoundary';
 import RouteGuard from '@/components/RouteGuard';
+import RouteReadinessGate from '@/components/RouteReadinessGate';
 import { BRAND } from '@/lib/brand';
 import { AiChatWidget } from '@/components/AiChatWidget';
 
@@ -127,24 +128,146 @@ function App() {
           <Route path="/onboarding" element={<OnboardingWizard />} />
 
           <Route element={<AppLayout />}>
-            <Route path="/ops" element={<DashboardPage />} />
-            <Route path="/loads" element={<LoadsPage />} />
-            <Route path="/dispatch" element={<RouteGuard minRole="dispatcher"><DispatchBoardPage /></RouteGuard>} />
-            <Route path="/drivers" element={<RouteGuard minRole="dispatcher"><DriversPage /></RouteGuard>} />
-            <Route path="/invoices" element={<RouteGuard minRole="dispatcher"><InvoicesPage /></RouteGuard>} />
-            <Route path="/analytics" element={<RouteGuard minRole="admin"><MetricsDashboard /></RouteGuard>} />
-            <Route path="/compliance" element={<RouteGuard minRole="admin"><CompliancePage /></RouteGuard>} />
-            <Route path="/settings" element={<RouteGuard minRole="admin"><SettingsPage /></RouteGuard>} />
-            <Route path="/billing" element={<RouteGuard minRole="owner"><BillingRequiredPage /></RouteGuard>} />
+            <Route
+              path="/ops"
+              element={
+                <RouteReadinessGate route="/ops">
+                  <DashboardPage />
+                </RouteReadinessGate>
+              }
+            />
+            <Route
+              path="/loads"
+              element={
+                <RouteReadinessGate route="/loads">
+                  <LoadsPage />
+                </RouteReadinessGate>
+              }
+            />
+            <Route
+              path="/dispatch"
+              element={
+                <RouteGuard minRole="dispatcher">
+                  <RouteReadinessGate route="/dispatch">
+                    <DispatchBoardPage />
+                  </RouteReadinessGate>
+                </RouteGuard>
+              }
+            />
+            <Route
+              path="/drivers"
+              element={
+                <RouteGuard minRole="dispatcher">
+                  <RouteReadinessGate route="/drivers">
+                    <DriversPage />
+                  </RouteReadinessGate>
+                </RouteGuard>
+              }
+            />
+            <Route
+              path="/invoices"
+              element={
+                <RouteGuard minRole="dispatcher">
+                  <RouteReadinessGate route="/invoices">
+                    <InvoicesPage />
+                  </RouteReadinessGate>
+                </RouteGuard>
+              }
+            />
+            <Route
+              path="/analytics"
+              element={
+                <RouteGuard minRole="admin">
+                  <RouteReadinessGate route="/analytics">
+                    <MetricsDashboard />
+                  </RouteReadinessGate>
+                </RouteGuard>
+              }
+            />
+            <Route
+              path="/compliance"
+              element={
+                <RouteGuard minRole="admin">
+                  <RouteReadinessGate route="/compliance">
+                    <CompliancePage />
+                  </RouteReadinessGate>
+                </RouteGuard>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <RouteGuard minRole="admin">
+                  <RouteReadinessGate route="/settings">
+                    <SettingsPage />
+                  </RouteReadinessGate>
+                </RouteGuard>
+              }
+            />
+            <Route
+              path="/billing"
+              element={
+                <RouteGuard minRole="owner">
+                  <RouteReadinessGate route="/billing">
+                    <BillingRequiredPage />
+                  </RouteReadinessGate>
+                </RouteGuard>
+              }
+            />
             <Route path="/rate-comparison" element={<RouteGuard minRole="dispatcher"><RateComparisonTool /></RouteGuard>} />
             <Route path="/pay-per-load" element={<RouteGuard minRole="owner"><PayPerLoadPricing /></RouteGuard>} />
             <Route path="/referrals" element={<RouteGuard minRole="dispatcher"><ReferralProgram /></RouteGuard>} />
             <Route path="/launch-validation" element={<RouteGuard minRole="admin"><LaunchValidationPage /></RouteGuard>} />
-            <Route path="/carriers" element={<RouteGuard minRole="admin"><CarriersPage /></RouteGuard>} />
-            <Route path="/accounting" element={<RouteGuard minRole="admin"><AccountingDashboardPage /></RouteGuard>} />
-            <Route path="/quotes" element={<RouteGuard minRole="dispatcher"><QuoteRequestsPage /></RouteGuard>} />
-            <Route path="/messages" element={<RouteGuard minRole="driver"><MessagesPage /></RouteGuard>} />
-            <Route path="/driver-app" element={<RouteGuard minRole="driver"><DriverAppPage /></RouteGuard>} />
+            <Route
+              path="/carriers"
+              element={
+                <RouteGuard minRole="admin">
+                  <RouteReadinessGate route="/carriers">
+                    <CarriersPage />
+                  </RouteReadinessGate>
+                </RouteGuard>
+              }
+            />
+            <Route
+              path="/accounting"
+              element={
+                <RouteGuard minRole="admin">
+                  <RouteReadinessGate route="/accounting">
+                    <AccountingDashboardPage />
+                  </RouteReadinessGate>
+                </RouteGuard>
+              }
+            />
+            <Route
+              path="/quotes"
+              element={
+                <RouteGuard minRole="dispatcher">
+                  <RouteReadinessGate route="/quotes">
+                    <QuoteRequestsPage />
+                  </RouteReadinessGate>
+                </RouteGuard>
+              }
+            />
+            <Route
+              path="/messages"
+              element={
+                <RouteGuard minRole="driver">
+                  <RouteReadinessGate route="/messages">
+                    <MessagesPage />
+                  </RouteReadinessGate>
+                </RouteGuard>
+              }
+            />
+            <Route
+              path="/driver-app"
+              element={
+                <RouteGuard minRole="driver">
+                  <RouteReadinessGate route="/driver-app">
+                    <DriverAppPage />
+                  </RouteReadinessGate>
+                </RouteGuard>
+              }
+            />
           </Route>
 
           <Route path="*" element={<NotFoundPage />} />
