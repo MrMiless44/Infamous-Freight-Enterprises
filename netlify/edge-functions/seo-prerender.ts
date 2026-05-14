@@ -239,9 +239,18 @@ function escapeHtml(str: string): string {
 }
 
 function stripSeoMeta(html: string): string {
-  return html
-    .replace(/\s*<meta\s+property="og:[^"]+"\s+content="[^"]*"\s*\/?>/g, '')
-    .replace(/\s*<meta\s+name="twitter:[^"]+"\s+content="[^"]*"\s*\/?>/g, '');
+  const hasPrefixedMetaAttr = (tag: string, attr: 'property' | 'name', prefix: string): boolean => {
+    const attrMatch = tag.match(new RegExp(`\\b${attr}\\s*=\\s*(['"])(.*?)\\1`, 'i'));
+    return !!attrMatch && attrMatch[2].toLowerCase().startsWith(prefix);
+  };
+
+  const hasContentAttr = (tag: string): boolean => /\bcontent\s*=\s*(['"]).*?\1/i.test(tag);
+
+  return html.replace(/\s*<meta\b[^>]*>/gi, (tag) => {
+    const isOgMeta = hasPrefixedMetaAttr(tag, 'property', 'og:');
+    const isTwitterMeta = hasPrefixedMetaAttr(tag, 'name', 'twitter:');
+    return (isOgMeta || isTwitterMeta) && hasContentAttr(tag) ? '' : tag;
+  });
 }
 
 function buildBreadcrumb(pathname: string): object {

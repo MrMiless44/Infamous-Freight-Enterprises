@@ -18,7 +18,7 @@ function sanitizeDownloadFileName(fileName: string): string {
   const withoutControls = baseName.replace(/[\u0000-\u001F\u007F]/g, '');
   const withoutLeadingDots = withoutControls.replace(/^\.+/, '');
   const safeName = withoutLeadingDots.replace(/[^A-Za-z0-9._-]/g, '_').slice(0, 255);
-  const [nameOnly] = safeName.split('.', 1);
+  const nameOnly = safeName.split('.')[0];
   if (!nameOnly || WINDOWS_RESERVED_FILE_NAMES.has(nameOnly.toUpperCase())) return 'download';
   return safeName;
 }

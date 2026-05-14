@@ -23,6 +23,9 @@ const getOpenAIClient = () => {
   if (!apiKey) {
     throw new Error('OPENAI_API_KEY is required for chat.');
   }
+  if (!apiKey.startsWith('sk-') || apiKey.length < 20) {
+    throw new Error('OPENAI_API_KEY format is invalid for chat.');
+  }
   return new OpenAI({ apiKey });
 };
 

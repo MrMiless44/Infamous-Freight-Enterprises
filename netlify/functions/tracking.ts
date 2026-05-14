@@ -94,7 +94,6 @@ async function recordBatch(req: Request) {
 
   const db = getDatabase();
   const saved: unknown[] = [];
-  const skipped: number[] = [];
   const skippedDetails: Array<{ index: number; reason: 'missing_coordinates' | 'invalid_coordinates' | 'insert_failed' }> =
     [];
 
@@ -103,12 +102,10 @@ async function recordBatch(req: Request) {
     const lat = toNumber(pos.lat);
     const lng = toNumber(pos.lng);
     if (lat === null || lng === null) {
-      skipped.push(i);
       skippedDetails.push({ index: i, reason: 'missing_coordinates' });
       continue;
     }
     if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-      skipped.push(i);
       skippedDetails.push({ index: i, reason: 'invalid_coordinates' });
       continue;
     }
@@ -136,7 +133,6 @@ async function recordBatch(req: Request) {
         `;
       }
     } catch {
-      skipped.push(i);
       skippedDetails.push({ index: i, reason: 'insert_failed' });
     }
   }
@@ -144,7 +140,7 @@ async function recordBatch(req: Request) {
   return json(201, {
     positions: saved,
     count: saved.length,
-    skipped: skipped.length > 0 ? skipped : undefined,
+    skipped: skippedDetails.length > 0 ? skippedDetails.map((item) => item.index) : undefined,
     skippedDetails: skippedDetails.length > 0 ? skippedDetails : undefined,
   });
 }
