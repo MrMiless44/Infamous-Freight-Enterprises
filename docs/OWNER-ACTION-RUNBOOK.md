@@ -95,21 +95,19 @@ curl -fsS https://api.infamousfreight.com/api/health/live
 curl -fsS https://api.infamousfreight.com/api/health/ready
 ```
 
-## 6. Supabase SECURITY DEFINER leftovers
+## 6. Supabase security migration verify/rollback
 
-### Current remaining advisor warnings
-- `public.review_document(uuid, text, text)`
-- `public.verify_profile(uuid, boolean, text)`
+### Applied migration
+- `supabase/migrations/20260514043500_harden_remaining_security_definer_rpc.sql`
 
-### Current decision
-Do not blindly revoke authenticated execution. These functions contain auth and role checks and may be used by admin/dispatcher workflows.
+### Verify after deploy
+1. Run Supabase Security Advisors and confirm no SECURITY DEFINER execution warning remains for:
+   - `public.review_document(uuid, text, text)`
+   - `public.verify_profile(uuid, boolean, text)`
+2. Smoke test admin/dispatcher profile verification and document review flows.
 
-### Required before changing
-1. Find all frontend/API call paths.
-2. Add tests for admin/dispatcher allowed cases.
-3. Add tests for unauthorized users being rejected.
-4. Convert to safer invoker/RLS design or move behind service-role backend endpoint.
-5. Rerun Supabase Security Advisors.
+### Rollback path
+If admin/dispatcher flows regress after deployment, restore previous function privilege model in a rollback migration by setting both functions back to `SECURITY DEFINER` and restoring their prior grants, then rerun advisors and smoke tests.
 
 ## 7. Decision rule
 
@@ -120,4 +118,4 @@ No new production feature scope until:
 3. Deploy Fly API passes.
 4. Uptime Check passes.
 5. Supabase leaked password protection is enabled.
-6. Remaining SECURITY DEFINER RPC warnings have a test-backed remediation plan or explicit accepted-risk note.
+6. Supabase Security Advisors pass for SECURITY DEFINER RPC exposure and webhook tables/views.
