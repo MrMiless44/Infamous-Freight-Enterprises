@@ -7,6 +7,9 @@ export const BRAND = {
   tagline: 'WE MOVE. YOU WIN.',
   siteUrl: 'https://www.infamousfreight.com',
   supportEmail: 'support@infamousfreight.com',
+  dispatchEmail: 'dispatch@infamousfreight.com',
+  dispatchPhone: '(469) 505-0985',
+  dispatchPhoneHref: 'tel:+14695050985',
   notificationIcon: '/favicon.svg',
   ogImageAlt: 'Infamous Freight — We Move. You Win.',
   description:

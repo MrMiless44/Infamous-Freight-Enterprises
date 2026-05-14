@@ -5,6 +5,7 @@ import {
   ChevronDown,
   CheckCircle2,
   FileText,
+  Mail,
   MapPin,
   Package,
   Phone,
@@ -33,6 +34,7 @@ const navLinks = [
   { label: 'Track Shipment', href: '/track-shipment' },
   { label: 'Carriers', href: '/carrier-portal' },
   { label: 'About', href: '/about' },
+  { label: 'FAQ', href: '/faq' },
   { label: 'Contact', href: '/contact' },
 ] as const;
 
@@ -605,6 +607,8 @@ const LandingPage: React.FC = () => {
 
           <p className="mt-6 text-center text-sm text-infamous-muted">
             Have another question?{' '}
+            <Link to="/faq" className="font-semibold text-infamous-red-light hover:underline">View all FAQs</Link>
+            {' · '}
             <Link to="/contact" className="font-semibold text-infamous-red-light hover:underline">Contact dispatch</Link>
           </p>
         </div>
@@ -653,10 +657,13 @@ const LandingPage: React.FC = () => {
             <p className="mt-3 max-w-md leading-6">
               Freight services with clear quote intake, documented handoffs, tracking context, and delivery follow-up.
             </p>
-            <div className="mt-4 flex items-center gap-4">
-              <Link to="/contact" className="flex items-center gap-2 text-[#B88989] hover:text-[#F5E8E8] transition">
-                <Phone size={14} /> <span>Contact</span>
-              </Link>
+            <div className="mt-4 space-y-1.5">
+              <a href={BRAND.dispatchPhoneHref} className="flex items-center gap-2 text-[#B88989] hover:text-infamous-red-light transition">
+                <Phone size={14} className="text-infamous-red-light" /> {BRAND.dispatchPhone}
+              </a>
+              <a href={`mailto:${BRAND.supportEmail}`} className="flex items-center gap-2 text-[#B88989] hover:text-infamous-red-light transition">
+                <Mail size={14} className="text-infamous-red-light" /> {BRAND.supportEmail}
+              </a>
             </div>
             <p className="mt-6 text-xs text-infamous-muted">© {new Date().getFullYear()} {BRAND.legalName || 'Infamous Freight'}. All rights reserved.</p>
           </div>
@@ -694,6 +701,7 @@ const LandingPage: React.FC = () => {
               <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-[#F5E8E8]/80">Company</h2>
               <div className="space-y-2.5">
                 <Link to="/about" className="block hover:text-infamous-red-light transition">About</Link>
+                <Link to="/faq" className="block hover:text-infamous-red-light transition">FAQ</Link>
                 <Link to="/contact" className="block hover:text-infamous-red-light transition">Contact</Link>
                 <Link to="/terms" className="block hover:text-infamous-red-light transition">Terms</Link>
                 <Link to="/privacy" className="block hover:text-infamous-red-light transition">Privacy</Link>

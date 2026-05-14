@@ -122,6 +122,10 @@ const SEO_BY_PATH: Record<string, SeoConfig> = {
     title: `About | ${BRAND.displayName}`,
     description: 'Learn how Infamous Freight approaches verified freight operations, tracking, PODs, and cleaner handoffs.'
   },
+  '/faq': {
+    title: `Frequently Asked Questions | ${BRAND.displayName}`,
+    description: 'Find answers to common questions about freight quotes, services, shipment tracking, carrier operations, pricing, and the Infamous Freight platform.'
+  },
   '/drive': {
     title: `Apply to Drive | ${BRAND.displayName}`,
     description: 'Apply to join the Infamous Freight driver network for verified local and regional freight opportunities.'
@@ -204,6 +208,7 @@ const INDEXABLE_ROUTES = new Set([
   '/contact',
   '/about',
   '/drive',
+  '/faq',
   '/customer-portal',
   '/carrier-portal',
   '/load-board',
@@ -227,6 +232,7 @@ const ORGANIZATION_JSONLD = JSON.stringify({
   contactPoint: {
     '@type': 'ContactPoint',
     email: BRAND.supportEmail,
+    telephone: BRAND.dispatchPhone,
     contactType: 'customer service',
   },
   sameAs: [
@@ -293,14 +299,32 @@ const FAQ_JSONLD = JSON.stringify({
 const SeoManager = () => {
   const location = useLocation();
   const pathname = (location.pathname || '/').replace(/\/$/, '') || '/';
-  const seo = SEO_BY_PATH[pathname] ?? DEFAULT_SEO;
   const canonicalPath = pathname === '/home' ? '/' : pathname;
   const canonicalUrl = `${SITE_URL}${canonicalPath}`;
   const isIndexable = INDEXABLE_ROUTES.has(pathname) || pathname.startsWith('/services/') || pathname.startsWith('/resources/');
   const isArticle = pathname.startsWith('/resources/') && pathname !== '/resources';
   const isHome = pathname === '/' || pathname === '/home';
+  const isFaq = pathname === '/faq';
   const isServiceDetail = pathname.startsWith('/services/') && pathname !== '/services';
   const isResourceArticle = pathname.startsWith('/resources/') && pathname !== '/resources';
+
+  const seo = SEO_BY_PATH[pathname] ?? ((): SeoConfig => {
+    const slug = pathname.split('/').pop() ?? '';
+    const readable = slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    if (isServiceDetail) {
+      return {
+        title: `${readable} Freight Services | ${BRAND.displayName}`,
+        description: `Request ${readable.toLowerCase()} freight services with quote intake, carrier coordination, and delivery follow-up from ${BRAND.displayName}.`,
+      };
+    }
+    if (isResourceArticle) {
+      return {
+        title: `${readable} | ${BRAND.displayName}`,
+        description: `Read about ${readable.toLowerCase()} — practical freight knowledge for shippers, carriers, and logistics teams from ${BRAND.displayName}.`,
+      };
+    }
+    return DEFAULT_SEO;
+  })();
 
   const breadcrumbJsonLd = (isServiceDetail || isResourceArticle) ? JSON.stringify({
     '@context': 'https://schema.org',
@@ -352,7 +376,7 @@ const SeoManager = () => {
       <meta name="twitter:image" content={OG_IMAGE} />
       <meta name="twitter:image:alt" content={OG_IMAGE_ALT} />
       <script type="application/ld+json">{ORGANIZATION_JSONLD}</script>
-      {isHome && <script type="application/ld+json">{FAQ_JSONLD}</script>}
+      {(isHome || isFaq) && <script type="application/ld+json">{FAQ_JSONLD}</script>}
       {breadcrumbJsonLd && <script type="application/ld+json">{breadcrumbJsonLd}</script>}
     </Helmet>
   );

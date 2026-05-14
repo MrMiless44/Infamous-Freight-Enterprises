@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Eye, ShieldCheck, Truck, Users } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Eye, Headset, LayoutDashboard, Phone, Shield, ShieldCheck, Truck, Users, Zap } from 'lucide-react';
+import { BRAND } from '@/lib/brand';
 
 const standards = [
   'Verify drivers, carriers, insurance, authority, and payment details before loads move',
@@ -24,6 +25,20 @@ const values = [
     description: 'The platform is built around the daily freight workflow: quote, assign, dispatch, track, deliver, invoice, follow up.',
     icon: <Truck size={22} />,
   },
+];
+
+const metrics = [
+  { value: '15+', label: 'Equipment and service types', icon: <Truck size={18} /> },
+  { value: '24/7', label: 'Dispatch availability', icon: <Headset size={18} /> },
+  { value: 'Real-time', label: 'Shipment tracking and ETA', icon: <Zap size={18} /> },
+  { value: 'End-to-end', label: 'Quote to POD platform', icon: <LayoutDashboard size={18} /> },
+];
+
+const commitments = [
+  { title: 'Documented rate confirmations', description: 'Written rate agreements before any load moves — no verbal-only arrangements.' },
+  { title: 'Carrier document review', description: 'Insurance, authority, and operating credentials verified and kept on file.' },
+  { title: 'Proof-of-delivery workflows', description: 'BOL signatures, delivery photos, and timestamps captured and accessible to all parties.' },
+  { title: 'Transparent communication', description: 'Status updates, ETA changes, and exception alerts pushed proactively — not on request.' },
 ];
 
 const AboutPage: React.FC = () => {
@@ -67,6 +82,16 @@ const AboutPage: React.FC = () => {
           </div>
         </section>
 
+        <section className="mt-14 grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {metrics.map((metric) => (
+            <div key={metric.label} className="rounded-2xl border border-infamous-border bg-infamous-card p-5 text-center">
+              <div className="mx-auto mb-3 inline-flex rounded-xl bg-infamous-orange/10 p-2.5 text-infamous-orange">{metric.icon}</div>
+              <p className="text-2xl font-black text-[#F5E8E8]">{metric.value}</p>
+              <p className="mt-1 text-xs leading-5 text-[#B88989]">{metric.label}</p>
+            </div>
+          ))}
+        </section>
+
         <section className="mt-14 grid gap-5 md:grid-cols-3">
           {values.map((value) => (
             <article key={value.title} className="rounded-3xl border border-infamous-border bg-infamous-card p-6">
@@ -92,6 +117,37 @@ const AboutPage: React.FC = () => {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        <section className="mt-14">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Our commitments</p>
+          <h2 className="mt-2 text-3xl font-bold">How we operate, documented.</h2>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            {commitments.map((item) => (
+              <div key={item.title} className="flex gap-4 rounded-2xl border border-infamous-border bg-infamous-card p-5">
+                <Shield className="mt-0.5 flex-shrink-0 text-infamous-orange" size={20} />
+                <div>
+                  <h3 className="font-bold text-[#F5E8E8]">{item.title}</h3>
+                  <p className="mt-1 text-sm leading-6 text-[#B88989]">{item.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-14 rounded-3xl border border-infamous-border bg-infamous-card p-8 text-center">
+          <h2 className="text-2xl font-bold">Ready to move freight?</h2>
+          <p className="mx-auto mt-3 max-w-xl text-[#B88989]">
+            Whether you need a quote, want to join as a carrier, or have questions about our services, the team is ready to help.
+          </p>
+          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link to="/request-quote" className="inline-flex items-center gap-2 rounded-xl bg-infamous-orange px-5 py-3 font-semibold text-[#F5E8E8] transition hover:opacity-90">
+              Request a quote <ArrowRight size={17} />
+            </Link>
+            <a href={BRAND.dispatchPhoneHref} className="inline-flex items-center gap-2 rounded-xl border border-infamous-border bg-infamous-panel px-5 py-3 font-semibold text-[#F5E8E8] transition hover:border-infamous-orange/50">
+              <Phone size={17} /> Call {BRAND.dispatchPhone}
+            </a>
           </div>
         </section>
       </div>

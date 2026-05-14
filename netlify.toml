@@ -25,6 +25,43 @@
   status = 301
   force = true
 
+# Platform subdomain redirects
+[[redirects]]
+  from = "https://app.infamousfreight.com/*"
+  to = "https://www.infamousfreight.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://admin.infamousfreight.com/*"
+  to = "https://www.infamousfreight.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://dispatch.infamousfreight.com/*"
+  to = "https://www.infamousfreight.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://driver.infamousfreight.com/*"
+  to = "https://www.infamousfreight.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://broker.infamousfreight.com/*"
+  to = "https://www.infamousfreight.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://carrier.infamousfreight.com/*"
+  to = "https://www.infamousfreight.com/"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "/api/health"
   to = "https://infamous-freight-api.fly.dev/api/health"

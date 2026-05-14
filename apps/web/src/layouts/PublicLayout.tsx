@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { ArrowRight, Infinity, Mail, Menu, PackageSearch, X } from 'lucide-react';
+import { ArrowRight, Infinity, Mail, Menu, PackageSearch, Phone, X } from 'lucide-react';
 import { BRAND } from '@/lib/brand';
 import { trackPublicEvent } from '@/lib/analytics';
 
@@ -10,6 +10,7 @@ const navLinks = [
   { label: 'Track Shipment', href: '/track-shipment' },
   { label: 'Carriers', href: '/carrier-portal' },
   { label: 'About', href: '/about' },
+  { label: 'FAQ', href: '/faq' },
   { label: 'Contact', href: '/contact' },
 ];
 
@@ -46,6 +47,7 @@ const footerGroups = [
     title: 'Company',
     links: [
       { label: 'About', href: '/about' },
+      { label: 'FAQ', href: '/faq' },
       { label: 'Contact', href: '/contact' },
       { label: 'Terms', href: '/terms' },
       { label: 'Privacy', href: '/privacy' },
@@ -165,11 +167,11 @@ const PublicLayout: React.FC = () => {
             <PackageSearch aria-hidden="true" size={15} /> Track
           </Link>
           <a
-            href={`mailto:${BRAND.supportEmail}`}
-            onClick={() => trackPublicEvent('contact_cta_click', { location: 'mobile_sticky_bar', cta: 'email' })}
+            href={BRAND.dispatchPhoneHref}
+            onClick={() => trackPublicEvent('contact_cta_click', { location: 'mobile_sticky_bar', cta: 'call' })}
             className="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-lg border border-infamous-border bg-infamous-card px-2 text-xs font-bold text-[#F5E8E8]"
           >
-            <Mail aria-hidden="true" size={15} /> Email
+            <Phone aria-hidden="true" size={15} /> Call
           </a>
         </div>
       </nav>
@@ -185,6 +187,14 @@ const PublicLayout: React.FC = () => {
             <p className="mt-3 max-w-md leading-6">
               Freight services with clear quote intake, documented handoffs, tracking context, and delivery follow-up.
             </p>
+            <div className="mt-4 space-y-1.5">
+              <a href={BRAND.dispatchPhoneHref} className="flex items-center gap-2 text-sm hover:text-infamous-red-light transition">
+                <Phone aria-hidden="true" size={14} className="text-infamous-red-light" /> {BRAND.dispatchPhone}
+              </a>
+              <a href={`mailto:${BRAND.supportEmail}`} className="flex items-center gap-2 text-sm hover:text-infamous-red-light transition">
+                <Mail aria-hidden="true" size={14} className="text-infamous-red-light" /> {BRAND.supportEmail}
+              </a>
+            </div>
             <p className="mt-6 text-xs text-infamous-muted">© {new Date().getFullYear()} {BRAND.legalName}. All rights reserved.</p>
           </div>
 

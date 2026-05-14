@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Clock3, Mail, MapPin, Send, Truck } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Clock3, Mail, MapPin, Phone, Send, Truck } from 'lucide-react';
 import { submitNetlifyForm } from '@/lib/netlifyForms';
+import { BRAND } from '@/lib/brand';
 
 const initialForm = {
   name: '',
@@ -18,9 +19,15 @@ type ContactTextKey = Exclude<ContactFormKey, 'contactConsent'>;
 
 const contactCards = [
   {
+    label: 'Call dispatch',
+    value: BRAND.dispatchPhone,
+    href: BRAND.dispatchPhoneHref,
+    icon: <Phone size={20} />,
+  },
+  {
     label: 'Dispatch and quotes',
-    value: 'dispatch@infamousfreight.com',
-    href: 'mailto:dispatch@infamousfreight.com',
+    value: BRAND.dispatchEmail,
+    href: `mailto:${BRAND.dispatchEmail}`,
     icon: <Mail size={20} />,
   },
   {
@@ -31,8 +38,8 @@ const contactCards = [
   },
   {
     label: 'General support',
-    value: 'support@infamousfreight.com',
-    href: 'mailto:support@infamousfreight.com',
+    value: BRAND.supportEmail,
+    href: `mailto:${BRAND.supportEmail}`,
     icon: <Mail size={20} />,
   },
 ];
@@ -77,7 +84,7 @@ const ContactPage: React.FC = () => {
           </Link>
         </header>
 
-        <section className="mb-8 grid gap-4 md:grid-cols-3">
+        <section className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {contactCards.map((card) => (
             <div key={card.label} className="rounded-2xl border border-infamous-border bg-infamous-card p-5">
               <div className="mb-3 text-infamous-orange">{card.icon}</div>
@@ -92,7 +99,7 @@ const ContactPage: React.FC = () => {
         <section className="grid gap-6 lg:grid-cols-[1fr_360px]">
           <div className="rounded-3xl border border-infamous-border bg-infamous-card p-6 lg:p-8">
             <h2 className="text-2xl font-bold">Send a message</h2>
-            <p className="mt-2 text-sm text-[#B88989]">For urgent active-load issues, include the tracking or load number in your message.</p>
+            <p className="mt-2 text-sm text-[#B88989]">For urgent active-load issues, call dispatch at <a href={BRAND.dispatchPhoneHref} className="font-semibold text-infamous-orange hover:underline">{BRAND.dispatchPhone}</a> or include the tracking or load number in your message.</p>
 
             {submitted ? (
               <div className="mt-6 rounded-2xl border border-green-500/30 bg-green-500/10 p-6">
