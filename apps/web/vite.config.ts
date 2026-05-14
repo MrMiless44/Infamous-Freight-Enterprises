@@ -67,8 +67,10 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    // Keep terser as the default minifier for conservative output compatibility,
-    // but allow faster CI builds with VITE_MINIFIER=esbuild when needed.
+    // Keep terser as the default because esbuild minification has previously produced
+    // less stable output for our Sentry/source-map diagnostics in production bundles
+    // (see 2026-05 follow-up hardening updates on this branch).
+    // Allow faster CI builds with VITE_MINIFIER=esbuild when that tradeoff is acceptable.
     minify: requestedMinifier,
     terserOptions: {
       format: {

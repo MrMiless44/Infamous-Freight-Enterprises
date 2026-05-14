@@ -1,6 +1,8 @@
 import type { Context, Config } from '@netlify/edge-functions';
 
 const SITE_URL = 'https://www.infamousfreight.com';
+// Use a stable static image published from apps/web/public/og-image.png so social
+// crawlers can reliably fetch previews without depending on dynamic generation.
 const OG_IMAGE = `${SITE_URL}/og-image.png`;
 const BRAND_NAME = 'Infamous Freight';
 const OG_IMAGE_ALT = 'Infamous Freight AI Freight Command Center';

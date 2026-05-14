@@ -51,6 +51,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
+      # Internal API process port; host access remains localhost:3001 via the port map below.
       PORT: 3000
       DATABASE_URL: postgresql://${DB_USER:-infamous}:${DB_PASSWORD:?DB_PASSWORD is required}@postgres:5432/${DB_NAME:-infamous_freight}?schema=public
       REDIS_HOST: redis
@@ -71,7 +72,8 @@ services:
       XERO_CLIENT_SECRET: ${XERO_CLIENT_SECRET}
       SENDGRID_API_KEY: ${SENDGRID_API_KEY}
     ports:
-      # Expose API on localhost:3001 while app listens on 3000 in-container.
+      # Expose API on localhost:3001 while app listens on 3000 in-container
+      # so local callers can keep using http://localhost:3001 (including Vite proxy defaults).
       - "3001:3000"
     depends_on:
       postgres:
