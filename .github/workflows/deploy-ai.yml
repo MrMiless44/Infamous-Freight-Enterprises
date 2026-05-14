@@ -52,6 +52,9 @@ jobs:
       - name: Type-check web
         run: pnpm -C apps/web exec tsc -p tsconfig.json --noEmit
 
+      - name: Validate Fly deployment consistency
+        run: bash scripts/validate-fly-deployment-consistency.sh
+
       - name: Test API workspace
         run: pnpm -C apps/api run test -- --runInBand
 
@@ -95,13 +98,14 @@ jobs:
         uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1 # master (2026-04-08)
 
       - name: Deploy to Fly.io
+        # Source of truth: docs/fly-deployment-runbook.md#canonical-fly-deployment-identity-source-of-truth
         run: |
           set -euo pipefail
           max_attempts=3
           attempt=1
           until [ "$attempt" -gt "$max_attempts" ]; do
             echo "Fly deploy attempt $attempt/$max_attempts"
-            if flyctl deploy --remote-only --wait-timeout 10m --strategy rolling --app infamous-freight; then
+            if flyctl deploy --remote-only --wait-timeout 10m --strategy rolling --app infamous-freight-api; then
               break
             fi
             if [ "$attempt" -eq "$max_attempts" ]; then
@@ -115,7 +119,7 @@ jobs:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
       - name: Verify deployment health
-        run: scripts/fly-post-deploy-check.sh infamous-freight https://infamous-freight.fly.dev https://api.infamousfreight.com
+        run: scripts/fly-post-deploy-check.sh infamous-freight-api https://infamous-freight-api.fly.dev https://api.infamousfreight.com
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
@@ -125,7 +129,7 @@ jobs:
           {
             echo "## Deploy AI — Fly.io"
             echo ""
-            echo "- App: \`infamous-freight\`"
+            echo "- App: \`infamous-freight-api\`"
             echo "- API: https://api.infamousfreight.com"
             echo "- SHA: ${{ github.sha }}"
           } >> "$GITHUB_STEP_SUMMARY"

@@ -53,6 +53,10 @@ jobs:
         run: |
           bash -n scripts/fly-post-deploy-check.sh
           bash -n scripts/fly-preflight.sh
+          bash -n scripts/validate-fly-deployment-consistency.sh
+
+      - name: Validate Fly deployment consistency
+        run: bash scripts/validate-fly-deployment-consistency.sh
 
       - name: Test API workspace
         run: pnpm -C apps/api run test -- --runInBand
@@ -148,13 +152,14 @@ jobs:
         uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1  # master (2026-04-08)
 
       - name: Deploy to Fly.io
+        # Source of truth: docs/fly-deployment-runbook.md#canonical-fly-deployment-identity-source-of-truth
         run: |
           set -euo pipefail
           max_attempts=3
           attempt=1
           until [ "$attempt" -gt "$max_attempts" ]; do
             echo "Fly deploy attempt $attempt/$max_attempts"
-            if flyctl deploy --remote-only --wait-timeout 10m --strategy rolling --app infamous-freight; then
+            if flyctl deploy --remote-only --wait-timeout 10m --strategy rolling --app infamous-freight-api; then
               break
             fi
             if [ "$attempt" -eq "$max_attempts" ]; then
@@ -162,10 +167,10 @@ jobs:
               exit 1
             fi
             echo "Deploy attempt $attempt failed. Releasing stale machine leases before retry..."
-            flyctl machines list --app infamous-freight --json 2>/dev/null \
+            flyctl machines list --app infamous-freight-api --json 2>/dev/null \
               | jq -r '.[].id' \
               | while read -r machine_id; do
-                  if flyctl machine release-lease "$machine_id" --app infamous-freight 2>&1; then
+                  if flyctl machine release-lease "$machine_id" --app infamous-freight-api 2>&1; then
                     echo "Released lease for machine $machine_id"
                   else
                     echo "Could not release lease for machine $machine_id (may already be free)"
@@ -178,7 +183,7 @@ jobs:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
       - name: Verify Fly.io release convergence
-        run: scripts/fly-post-deploy-check.sh infamous-freight https://infamous-freight.fly.dev https://api.infamousfreight.com
+        run: scripts/fly-post-deploy-check.sh infamous-freight-api https://infamous-freight-api.fly.dev https://api.infamousfreight.com
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
@@ -188,9 +193,9 @@ jobs:
           {
             echo "## Deploy API"
             echo ""
-            echo "Target: Fly.io app infamous-freight"
+            echo "Target: Fly.io app infamous-freight-api"
             echo "API: https://api.infamousfreight.com"
-            echo "Deploy command: flyctl deploy --remote-only --wait-timeout 10m --strategy rolling --app infamous-freight"
+            echo "Deploy command: flyctl deploy --remote-only --wait-timeout 10m --strategy rolling --app infamous-freight-api"
           } >> "$GITHUB_STEP_SUMMARY"
 
   # ===== NOTIFY =====

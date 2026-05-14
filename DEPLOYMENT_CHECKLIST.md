@@ -4,6 +4,8 @@
 
 Production code is buildable. Production readiness still requires environment configuration, database migration, Stripe verification, deployment, and health-check confirmation.
 
+Canonical Fly deployment identity source-of-truth: [`docs/fly-deployment-runbook.md#canonical-fly-deployment-identity-source-of-truth`](docs/fly-deployment-runbook.md#canonical-fly-deployment-identity-source-of-truth).
+
 ## Build artifacts
 
 - API: `apps/api/dist/src/server.js`
@@ -163,9 +165,9 @@ fly certs check api.infamousfreight.com -a YOUR_FLY_APP_NAME
 ### Backend API on Fly.io
 
 ```bash
-flyctl deploy --config fly.toml -a infamous-freight
-flyctl status -a infamous-freight
-flyctl logs -a infamous-freight
+flyctl deploy --config fly.toml -a infamous-freight-api
+flyctl status -a infamous-freight-api
+flyctl logs -a infamous-freight-api
 ```
 
 ### Frontend static build
@@ -189,11 +191,11 @@ npm run prisma:generate --workspace apps/api
 npm run build --workspace apps/api
 npm test --workspace apps/api
 npm run build --workspace apps/web
-flyctl deploy --config fly.toml -a infamous-freight
+flyctl deploy --config fly.toml -a infamous-freight-api
 curl -i https://api.infamousfreight.com/health
 curl -i https://api.infamousfreight.com/api/health
-flyctl status -a infamous-freight
-flyctl logs -a infamous-freight
+flyctl status -a infamous-freight-api
+flyctl logs -a infamous-freight-api
 ```
 
 ## Production readiness gate
