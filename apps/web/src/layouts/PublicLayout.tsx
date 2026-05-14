@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { ArrowRight, Infinity, Menu, X } from 'lucide-react';
+import { ArrowRight, Infinity, Mail, Menu, PackageSearch, X } from 'lucide-react';
 import { BRAND } from '@/lib/brand';
+import { trackPublicEvent } from '@/lib/analytics';
 
 const navLinks = [
   { label: 'Services', href: '/services' },
@@ -57,7 +58,7 @@ const PublicLayout: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-infamous-dark text-[#F5E8E8]">
+    <div className="min-h-screen bg-infamous-dark pb-20 text-[#F5E8E8] lg:pb-0">
       <header className="sticky top-0 z-50 border-b border-infamous-border bg-infamous-darker/95 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5 lg:px-6">
           <Link to="/" className="flex items-center gap-3" aria-label="Infamous Freight home">
@@ -99,6 +100,7 @@ const PublicLayout: React.FC = () => {
             </Link>
             <Link
               to="/request-quote"
+              onClick={() => trackPublicEvent('quote_cta_click', { location: 'desktop_header', cta: 'get_quote' })}
               className="inline-flex items-center gap-2 btn-primary text-sm glow-high"
             >
               Get a Quote <ArrowRight size={15} />
@@ -142,6 +144,35 @@ const PublicLayout: React.FC = () => {
       <main id="main-content">
         <Outlet />
       </main>
+
+      <nav
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-infamous-border bg-infamous-darker/95 px-3 py-2 shadow-[0_-10px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl lg:hidden"
+        aria-label="Quick freight actions"
+      >
+        <div className="mx-auto grid max-w-md grid-cols-3 gap-2">
+          <Link
+            to="/request-quote"
+            onClick={() => trackPublicEvent('quote_cta_click', { location: 'mobile_sticky_bar', cta: 'quote' })}
+            className="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-lg bg-infamous-red px-2 text-xs font-bold text-[#F5E8E8]"
+          >
+            <ArrowRight aria-hidden="true" size={15} /> Quote
+          </Link>
+          <Link
+            to="/track-shipment"
+            onClick={() => trackPublicEvent('tracking_cta_click', { location: 'mobile_sticky_bar', cta: 'track' })}
+            className="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-lg border border-infamous-border bg-infamous-card px-2 text-xs font-bold text-[#F5E8E8]"
+          >
+            <PackageSearch aria-hidden="true" size={15} /> Track
+          </Link>
+          <a
+            href={`mailto:${BRAND.supportEmail}`}
+            onClick={() => trackPublicEvent('contact_cta_click', { location: 'mobile_sticky_bar', cta: 'email' })}
+            className="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-lg border border-infamous-border bg-infamous-card px-2 text-xs font-bold text-[#F5E8E8]"
+          >
+            <Mail aria-hidden="true" size={15} /> Email
+          </a>
+        </div>
+      </nav>
 
       <footer className="border-t border-infamous-border bg-infamous-darker px-5 py-14 text-sm text-[#B88989] lg:px-6">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.2fr_2fr]">
