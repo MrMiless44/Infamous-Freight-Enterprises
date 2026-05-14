@@ -154,7 +154,7 @@ jobs:
           attempt=1
           until [ "$attempt" -gt "$max_attempts" ]; do
             echo "Fly deploy attempt $attempt/$max_attempts"
-            if flyctl deploy --remote-only --wait-timeout 10m --strategy rolling --app infamous-freight; then
+            if flyctl deploy --remote-only --wait-timeout 10m --strategy rolling --app infamous-freight-api; then
               break
             fi
             if [ "$attempt" -eq "$max_attempts" ]; then
@@ -168,7 +168,7 @@ jobs:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
       - name: Verify Fly.io release convergence
-        run: scripts/fly-post-deploy-check.sh infamous-freight https://infamous-freight.fly.dev https://api.infamousfreight.com
+        run: scripts/fly-post-deploy-check.sh infamous-freight-api https://api.infamousfreight.com https://api.infamousfreight.com
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
@@ -178,9 +178,9 @@ jobs:
           {
             echo "## Deploy API"
             echo ""
-            echo "Target: Fly.io app infamous-freight"
+            echo "Target: Fly.io app infamous-freight-api"
             echo "API: https://api.infamousfreight.com"
-            echo "Deploy command: flyctl deploy --remote-only --wait-timeout 10m --strategy rolling --app infamous-freight"
+            echo "Deploy command: flyctl deploy --remote-only --wait-timeout 10m --strategy rolling --app infamous-freight-api"
           } >> "$GITHUB_STEP_SUMMARY"
 
   # ===== NOTIFY =====
