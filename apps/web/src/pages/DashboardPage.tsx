@@ -160,12 +160,7 @@ const DashboardPage: React.FC = () => {
           {metrics.map((m) => (
             <div
               key={m.label}
-              className="relative overflow-hidden rounded-[16px] p-4 transition-all group"
-              style={{
-                background: 'rgba(36, 16, 19, 0.85)',
-                border: '1px solid rgba(255, 59, 48, 0.15)',
-                boxShadow: '0 0 12px rgba(255, 26, 26, 0.06)',
-              }}
+              className="panel-neon relative overflow-hidden rounded-[16px] p-4 transition-all group"
             >
               <div className="flex items-center justify-between mb-2">
                 <span className={`${m.color} opacity-70`}>{m.icon}</span>
@@ -183,7 +178,7 @@ const DashboardPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Shipment Tracking Map */}
         <WidgetErrorBoundary label="Shipment tracking">
-          <div className="lg:col-span-2 rounded-[18px] overflow-hidden" style={{ background: 'rgba(36, 16, 19, 0.85)', border: '1px solid rgba(255, 59, 48, 0.15)', boxShadow: '0 0 12px rgba(255, 26, 26, 0.06)' }}>
+          <div className="panel-neon lg:col-span-2 rounded-[18px] overflow-hidden">
             <div className="flex items-center justify-between px-5 py-3 border-b border-infamous-border/60">
               <div className="flex items-center gap-3">
                 <MapPin size={14} className="text-infamous-red-light" />
@@ -201,7 +196,7 @@ const DashboardPage: React.FC = () => {
 
         {/* Alerts Panel */}
         <WidgetErrorBoundary label="Alerts">
-          <div className="rounded-[18px] p-5" style={{ background: 'rgba(36, 16, 19, 0.85)', border: '1px solid rgba(255, 59, 48, 0.15)', boxShadow: '0 0 12px rgba(255, 26, 26, 0.06)' }}>
+          <div className="panel-neon rounded-[18px] p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold uppercase tracking-wide font-display flex items-center gap-2">
                 <AlertTriangle size={14} className="text-infamous-orange" /> Alerts
@@ -246,7 +241,7 @@ const DashboardPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Active Loads */}
         <WidgetErrorBoundary label="Active loads">
-          <div className="lg:col-span-2 rounded-[18px] p-5" style={{ background: 'rgba(36, 16, 19, 0.85)', border: '1px solid rgba(255, 59, 48, 0.15)', boxShadow: '0 0 12px rgba(255, 26, 26, 0.06)' }}>
+          <div className="panel-neon lg:col-span-2 rounded-[18px] p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold uppercase tracking-wide font-display">Active Loads</h2>
               <button onClick={() => navigate('/loads')} className="text-xs text-infamous-red-light hover:underline flex items-center gap-1">
@@ -295,7 +290,7 @@ const DashboardPage: React.FC = () => {
 
         {/* Load Details Panel */}
         <WidgetErrorBoundary label="Load details">
-          <div className="rounded-[18px] p-5" style={{ background: 'rgba(36, 16, 19, 0.85)', border: '1px solid rgba(255, 59, 48, 0.15)', boxShadow: '0 0 12px rgba(255, 26, 26, 0.06)' }}>
+          <div className="panel-neon rounded-[18px] p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold uppercase tracking-wide font-display">Load Details</h2>
               <span className="text-xs font-mono text-infamous-red-light">{selectedLoad.ref}</span>
@@ -446,7 +441,7 @@ const DashboardPage: React.FC = () => {
 
         {/* Dispatch Quick Actions */}
         <WidgetErrorBoundary label="Dispatch controls">
-          <div className="lg:col-span-2 rounded-[18px] p-5" style={{ background: 'rgba(36, 16, 19, 0.85)', border: '1px solid rgba(255, 59, 48, 0.15)', boxShadow: '0 0 12px rgba(255, 26, 26, 0.06)' }}>
+          <div className="panel-neon lg:col-span-2 rounded-[18px] p-5">
             <h2 className="text-sm font-bold uppercase tracking-wide font-display mb-5">Dispatch Controls</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
@@ -489,7 +484,7 @@ const DashboardPage: React.FC = () => {
       </div>
 
       {/* Bottom Brand */}
-      <div className="rounded-[18px] overflow-hidden" style={{ background: 'rgba(36, 16, 19, 0.85)', border: '1px solid rgba(255, 59, 48, 0.12)', boxShadow: '0 0 8px rgba(255, 26, 26, 0.04)' }}>
+      <div className="panel-neon-soft rounded-[18px] overflow-hidden">
         <div className="p-8 text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
             <Infinity size={36} className="text-infamous-red-light" strokeWidth={2.5} style={{ filter: 'drop-shadow(0 0 12px rgba(255, 59, 48, 0.8))' }} />

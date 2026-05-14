@@ -6,6 +6,7 @@ import SeoManager from '@/components/SeoManager';
 import { AppErrorBoundary } from '@/components/SentryErrorBoundary';
 import RouteGuard from '@/components/RouteGuard';
 import { BRAND } from '@/lib/brand';
+import { AiChatWidget } from '@/components/AiChatWidget';
 
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
 const LoadsPage = lazy(() => import('@/pages/LoadsPage'));
@@ -148,6 +149,7 @@ function App() {
 
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
+        <AiChatWidget />
       </Suspense>
     </AppErrorBoundary>
   );

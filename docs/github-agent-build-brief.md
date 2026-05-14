@@ -28,7 +28,7 @@ Current direction (see [`platform-roadmap.md`](./platform-roadmap.md)):
 ## Don't touch unless intentional
 
 - `netlify.toml` 301 redirects from `infamousfreight.com/*` and `infamous-freight.netlify.app/*` to `https://www.infamousfreight.com/:splat` (smoke tests assert this).
-- `fly.toml` `PORT=8080` and `http_service.internal_port=8080` for the `infamous-freight` app.
+- `fly.toml` `PORT=3000` and `http_service.internal_port=3000` for the `infamous-freight-api` app.
 - Prisma schema `binaryTargets = ["native", "debian-openssl-1.1.x"]`.
 - `Dockerfile` runtime stage installing `openssl` via `apt-get`.
 - Stripe billing env aliases: `STRIPE_PRICE_ONE_TIME` with legacy fallback `STRIPE_PRICE_AI_ADDON_PACK`.

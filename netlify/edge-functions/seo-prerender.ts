@@ -1,7 +1,9 @@
 import type { Context, Config } from '@netlify/edge-functions';
 
 const SITE_URL = 'https://www.infamousfreight.com';
-const OG_IMAGE = `${SITE_URL}/.netlify/images?url=/og-image.svg&w=1200&h=630&fit=cover&fm=png`;
+// Use a stable static image published from apps/web/public/og-image.png so social
+// crawlers can reliably fetch previews without depending on dynamic generation.
+const OG_IMAGE = `${SITE_URL}/og-image.png`;
 const BRAND_NAME = 'Infamous Freight';
 const OG_IMAGE_ALT = 'Infamous Freight AI Freight Command Center';
 
@@ -238,6 +240,21 @@ function escapeHtml(str: string): string {
     .replace(/>/g, '&gt;');
 }
 
+function stripSeoMeta(html: string): string {
+  const hasPrefixedMetaAttr = (tag: string, attr: 'property' | 'name', prefix: string): boolean => {
+    const attrMatch = tag.match(new RegExp(`\\b${attr}\\s*=\\s*(['"])(.*?)\\1`, 'i'));
+    return !!attrMatch && attrMatch[2].toLowerCase().startsWith(prefix);
+  };
+
+  const hasContentAttr = (tag: string): boolean => /\bcontent\s*=\s*(['"]).*?\1/i.test(tag);
+
+  return html.replace(/\s*<meta\b[^>]*>/gi, (tag) => {
+    const isOgMeta = hasPrefixedMetaAttr(tag, 'property', 'og:');
+    const isTwitterMeta = hasPrefixedMetaAttr(tag, 'name', 'twitter:');
+    return (isOgMeta || isTwitterMeta) && hasContentAttr(tag) ? '' : tag;
+  });
+}
+
 function buildBreadcrumb(pathname: string): object {
   const items: { name: string; url: string }[] = [
     { name: 'Home', url: SITE_URL + '/' },
@@ -447,6 +464,8 @@ export default async (req: Request, context: Context) => {
   );
 
   const ogType = pathname.startsWith('/resources/') && pathname !== '/resources' ? 'article' : 'website';
+
+  html = stripSeoMeta(html);
 
   const injected = `
     <meta property="og:type" content="${ogType}" />

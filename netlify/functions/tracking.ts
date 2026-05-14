@@ -94,12 +94,21 @@ async function recordBatch(req: Request) {
 
   const db = getDatabase();
   const saved: unknown[] = [];
+  const skippedDetails: Array<{ index: number; reason: 'missing_coordinates' | 'invalid_coordinates' | 'insert_failed' }> =
+    [];
 
-  for (const pos of body.positions) {
+  for (let i = 0; i < body.positions.length; i++) {
+    const pos = body.positions[i];
     const lat = toNumber(pos.lat);
     const lng = toNumber(pos.lng);
-    if (lat === null || lng === null) continue;
-    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) continue;
+    if (lat === null || lng === null) {
+      skippedDetails.push({ index: i, reason: 'missing_coordinates' });
+      continue;
+    }
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      skippedDetails.push({ index: i, reason: 'invalid_coordinates' });
+      continue;
+    }
 
     const id = genId();
     const loadId = text(pos.loadId, 64) || null;
@@ -109,22 +118,31 @@ async function recordBatch(req: Request) {
     const address = text(pos.address, 300) || null;
     const recordedAt = text(pos.recordedAt, 64) || new Date().toISOString();
 
-    const [row] = await db.sql`
-      INSERT INTO gps_positions (id, load_id, driver_id, lat, lng, speed_mph, heading, address, recorded_at)
-      VALUES (${id}, ${loadId}, ${driverId}, ${lat}, ${lng}, ${speedMph}, ${heading}, ${address}, ${recordedAt})
-      RETURNING *
-    `;
-    saved.push(rowToPosition(row as Record<string, unknown>));
-
-    if (driverId) {
-      await db.sql`
-        UPDATE drivers SET current_lat = ${lat}, current_lng = ${lng}, current_location = ${address}
-        WHERE id = ${driverId}
+    try {
+      const [row] = await db.sql`
+        INSERT INTO gps_positions (id, load_id, driver_id, lat, lng, speed_mph, heading, address, recorded_at)
+        VALUES (${id}, ${loadId}, ${driverId}, ${lat}, ${lng}, ${speedMph}, ${heading}, ${address}, ${recordedAt})
+        RETURNING *
       `;
+      saved.push(rowToPosition(row as Record<string, unknown>));
+
+      if (driverId) {
+        await db.sql`
+          UPDATE drivers SET current_lat = ${lat}, current_lng = ${lng}, current_location = ${address}
+          WHERE id = ${driverId}
+        `;
+      }
+    } catch {
+      skippedDetails.push({ index: i, reason: 'insert_failed' });
     }
   }
 
-  return json(201, { positions: saved, count: saved.length });
+  return json(201, {
+    positions: saved,
+    count: saved.length,
+    skipped: skippedDetails.length > 0 ? skippedDetails.map((item) => item.index) : undefined,
+    skippedDetails: skippedDetails.length > 0 ? skippedDetails : undefined,
+  });
 }
 
 async function getLoadPositions(loadId: string, req: Request) {

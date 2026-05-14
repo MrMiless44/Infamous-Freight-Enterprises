@@ -7,6 +7,21 @@ import { text, parseUrl, extractParam } from './lib/validate.ts';
 
 const ALLOWED_TYPES = ['BOL', 'POD', 'RATE_CONFIRMATION', 'INSURANCE', 'LICENSE', 'OTHER'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const WINDOWS_RESERVED_FILE_NAMES = new Set([
+  'CON', 'PRN', 'AUX', 'NUL',
+  'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
+  'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9',
+]);
+
+function sanitizeDownloadFileName(fileName: string): string {
+  const baseName = fileName.split(/[\\/]/).pop() ?? 'download';
+  const withoutControls = baseName.replace(/[\u0000-\u001F\u007F]/g, '');
+  const withoutLeadingDots = withoutControls.replace(/^\.+/, '');
+  const safeName = withoutLeadingDots.replace(/[^A-Za-z0-9._-]/g, '_').slice(0, 255);
+  const nameOnly = safeName.split('.')[0];
+  if (!nameOnly || WINDOWS_RESERVED_FILE_NAMES.has(nameOnly.toUpperCase())) return 'download';
+  return safeName;
+}
 
 function rowToDocument(row: Record<string, unknown>) {
   return {
@@ -88,11 +103,13 @@ async function downloadDocument(docId: string) {
     const data = await store.get(doc.blob_key as string, { type: 'arrayBuffer' });
     if (!data) return json(404, { error: 'file_not_found', message: 'File data no longer available.' });
 
+    const safeName = sanitizeDownloadFileName(String(doc.file_name || 'download'));
+    const encodedSafeName = encodeURIComponent(safeName);
     return new Response(data, {
       status: 200,
       headers: {
         'content-type': (doc.mime_type as string) || 'application/octet-stream',
-        'content-disposition': `attachment; filename="${doc.file_name}"`,
+        'content-disposition': `attachment; filename="${safeName}"; filename*=UTF-8''${encodedSafeName}`,
         'cache-control': 'private, max-age=3600',
       },
     });

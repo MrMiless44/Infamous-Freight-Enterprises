@@ -2,6 +2,7 @@ import { getDatabase } from '@netlify/database';
 import type { Config } from '@netlify/functions';
 import { hashPassword, verifyPassword, createToken, requireAuth, type TokenPayload } from './lib/auth.ts';
 import { json, options, genId } from './lib/http.ts';
+import { ALLOWED_ACCOUNT_ROLES } from './lib/roles.ts';
 import { text, isEmail, parseBody, parseUrl, extractParam } from './lib/validate.ts';
 
 type RegisterInput = {
@@ -24,6 +25,21 @@ type ProfileUpdate = {
   avatar_url?: unknown;
 };
 
+function getPasswordRequirementFailures(password: string): string[] {
+  const failures: string[] = [];
+  if (password.length < 8) failures.push('be at least 8 characters');
+  if (!/[A-Z]/.test(password)) failures.push('include at least one uppercase letter');
+  if (!/[a-z]/.test(password)) failures.push('include at least one lowercase letter');
+  if (!/\d/.test(password)) failures.push('include at least one number');
+  return failures;
+}
+
+function getPasswordErrorCode(failures: string[]): 'password_too_short' | 'password_weak' {
+  return failures.length === 1 && failures[0] === 'be at least 8 characters'
+    ? 'password_too_short'
+    : 'password_weak';
+}
+
 async function register(req: Request) {
   let body: RegisterInput;
   try {
@@ -43,7 +59,12 @@ async function register(req: Request) {
     return json(400, { error: 'missing_fields', fields: ['email', 'password', 'name'].filter((f) => !text((body as Record<string, unknown>)[f])) });
   }
   if (!isEmail(email)) return json(400, { error: 'invalid_email' });
-  if (password.length < 8) return json(400, { error: 'password_too_short', message: 'Password must be at least 8 characters.' });
+  const passwordFailures = getPasswordRequirementFailures(password);
+  if (passwordFailures.length > 0) {
+    const message = `Password must ${passwordFailures.join(', ')}.`;
+    return json(400, { error: getPasswordErrorCode(passwordFailures), message, requirements: passwordFailures });
+  }
+  if (!ALLOWED_ACCOUNT_ROLES.has(role)) return json(400, { error: 'invalid_role' });
 
   const db = getDatabase();
   const existing = await db.sql`SELECT id FROM users WHERE email = ${email} LIMIT 1`;

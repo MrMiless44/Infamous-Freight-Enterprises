@@ -1,4 +1,5 @@
 import { getDatabase } from '@netlify/database';
+import type { Config } from '@netlify/functions';
 
 const MAX_LIST = 50;
 
@@ -47,6 +48,9 @@ const toFiniteNumber = (v: unknown): number | null => {
 
 const SECURITY_HEADERS: Record<string, string> = {
   'content-type': 'application/json; charset=utf-8',
+  'access-control-allow-origin': '*',
+  'access-control-allow-methods': 'GET, POST, OPTIONS',
+  'access-control-allow-headers': 'content-type, authorization',
   'x-content-type-options': 'nosniff',
   'x-frame-options': 'DENY',
   'cache-control': 'no-store',
@@ -196,4 +200,8 @@ export default async (req: Request) => {
   `;
 
   return json(201, { request: { ...record, createdAt: saved.created_at } });
+};
+
+export const config: Config = {
+  path: ['/api/load-requests', '/api/load-requests/:id'],
 };

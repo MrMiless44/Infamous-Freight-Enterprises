@@ -26,6 +26,7 @@ This repository is standardized on **pnpm**.
 - Keep `pnpm-lock.yaml` in sync with any dependency or package manifest changes.
 - Do not mix npm and pnpm lockfile workflows.
 - If a PR changes `package.json`, `apps/**/package.json`, or workspace dependency configuration, update the lockfile when required.
+- Keep Node and pnpm within the `package.json` `engines` range; the pnpm `<11` ceiling is intentional until pnpm 11 compatibility is validated in CI and deployment workflows.
 
 ## Branch naming
 

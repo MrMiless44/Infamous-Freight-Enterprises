@@ -64,7 +64,7 @@ set_secret "SUPABASE_URL" "$SUPABASE_URL"
 set_secret "SUPABASE_SERVICE_KEY" "$SUPABASE_SERVICE_KEY"
 
 # Frontend
-set_secret "VITE_API_URL" "https://infamous-freight.fly.dev"
+set_secret "VITE_API_URL" "https://infamous-freight-api.fly.dev"
 set_secret "VITE_STRIPE_PUBLIC_KEY" "$VITE_STRIPE_PUBLIC_KEY"
 
 # ============================================

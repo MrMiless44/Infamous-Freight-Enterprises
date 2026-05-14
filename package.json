@@ -17,7 +17,9 @@
     "build:web": "pnpm -C apps/web run build",
     "start": "node scripts/ensure-api-workspace.js && pnpm -C apps/api run start:prod",
     "lint": "node scripts/ensure-api-workspace.js && pnpm -C apps/api run lint && pnpm -C apps/web run lint",
-    "test": "node scripts/ensure-api-workspace.js && pnpm -C apps/api run test --",
+    "test": "pnpm run test:api && pnpm run test:web",
+    "test:api": "node scripts/ensure-api-workspace.js && pnpm -C apps/api run test",
+    "test:web": "pnpm -C apps/web run test",
     "test:coverage": "node scripts/ensure-api-workspace.js && pnpm -C apps/api run test:coverage",
     "prisma:generate": "node scripts/ensure-api-workspace.js && pnpm -C apps/api run prisma:generate",
     "prisma:migrate": "node scripts/ensure-api-workspace.js && pnpm -C apps/api exec prisma migrate dev --schema prisma/schema.prisma",
@@ -32,10 +34,14 @@
     "env:bootstrap": "bash scripts/bootstrap-environment.sh",
     "env:check": "bash scripts/codex-env-check.sh",
     "env:check:strict": "bash scripts/codex-env-check.sh --strict",
+    "env:check:frontend": "bash scripts/check-client-env-safety.sh",
+    "env:check:supabase-client": "bash scripts/check-supabase-client-env.sh",
     "codex:env-check": "bash scripts/codex-env-check.sh",
     "codex:env-check:strict": "bash scripts/codex-env-check.sh --strict",
     "validate": "bash scripts/validate-repo.sh",
     "deploy:full": "bash scripts/deploy-entire-repo.sh",
+    "fly:deploy": "bash scripts/fly-sync-validate-deploy.sh",
+    "fly:health": "bash scripts/fly-health-diagnose.sh",
     "setup": "pnpm run env:setup && pnpm run db:setup",
     "env:setup": "node scripts/setup-environment.js",
     "production:preflight": "bash scripts/production-preflight.sh",
@@ -71,11 +77,13 @@
     "@prisma/client": "7.8.0"
   },
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*",
+    "netlify/functions"
   ],
   "engines": {
     "node": ">=22.0.0 <23.0.0",
-    "pnpm": ">=10.0.0"
+    "pnpm": ">=10.0.0 <11.0.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -84,9 +92,13 @@
       "@sentry/cli",
       "esbuild",
       "prisma"
-    ]
+    ],
+    "overrides": {
+      "@hono/node-server": "1.19.13"
+    }
   },
   "dependencies": {
-    "@netlify/database": "^1.0.0"
+    "@netlify/database": "^1.0.0",
+    "openai": "^6.37.0"
   }
 }

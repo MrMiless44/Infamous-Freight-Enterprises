@@ -54,8 +54,11 @@ jobs:
           bash -n scripts/fly-post-deploy-check.sh
           bash -n scripts/fly-preflight.sh
 
-      - name: Test
+      - name: Test API workspace
         run: pnpm -C apps/api run test -- --runInBand
+
+      - name: Test web workspace
+        run: pnpm -C apps/web run test
 
       - name: Write test summary
         if: always()
@@ -69,6 +72,7 @@ jobs:
             echo "- pnpm -C apps/api exec tsc -p tsconfig.json --noEmit"
             echo "- pnpm -C apps/web exec tsc -p tsconfig.json --noEmit"
             echo "- pnpm -C apps/api run test -- --runInBand"
+            echo "- pnpm -C apps/web run test"
           } >> "$GITHUB_STEP_SUMMARY"
 
   # ===== BUILD API =====
@@ -157,6 +161,16 @@ jobs:
               echo "::error::Fly deploy failed after $max_attempts attempts."
               exit 1
             fi
+            echo "Deploy attempt $attempt failed. Releasing stale machine leases before retry..."
+            flyctl machines list --app infamous-freight --json 2>/dev/null \
+              | jq -r '.[].id' \
+              | while read -r machine_id; do
+                  if flyctl machine release-lease "$machine_id" --app infamous-freight 2>&1; then
+                    echo "Released lease for machine $machine_id"
+                  else
+                    echo "Could not release lease for machine $machine_id (may already be free)"
+                  fi
+                done
             sleep $((attempt * 30))
             attempt=$((attempt + 1))
           done

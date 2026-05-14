@@ -2,14 +2,18 @@ import { useState, useEffect, useCallback } from 'react';
 import { createClient, SupabaseClient, User, AuthError } from '@supabase/supabase-js';
 import { trackFunnelEvent } from '@/lib/analytics';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_DATABASE_URL || '';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 let supabaseInstance: SupabaseClient | null = null;
 
 function getSupabase(): SupabaseClient {
   if (!SUPABASE_URL || !SUPABASE_KEY) {
-    throw new Error('Supabase auth is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY (or legacy VITE_SUPABASE_ANON_KEY).');
+    throw new Error('Supabase auth is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY (or legacy VITE_SUPABASE_ANON_KEY). Do not use a database connection string here.');
+  }
+
+  if (SUPABASE_URL.startsWith('postgres://') || SUPABASE_URL.startsWith('postgresql://')) {
+    throw new Error('Invalid Supabase client URL. VITE_SUPABASE_URL must be the project API URL, for example https://your-project-ref.supabase.co, not the Postgres database URL.');
   }
 
   if (!supabaseInstance) {

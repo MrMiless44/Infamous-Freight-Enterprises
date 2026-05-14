@@ -3,7 +3,7 @@ set -euo pipefail
 
 WEB_URL="${WEB_URL:-https://www.infamousfreight.com}"
 BARE_SITE_URL="${BARE_SITE_URL:-https://infamousfreight.com}"
-API_URL="${API_URL:-https://infamous-freight.fly.dev}"
+API_URL="${API_URL:-https://infamous-freight-api.fly.dev}"
 
 echo "Checking canonical frontend..."
 curl --fail --show-error --location --head "${WEB_URL}"

@@ -92,7 +92,16 @@ CLI deploys should rely on the `NETLIFY_AUTH_TOKEN` environment variable instead
 NETLIFY_AUTH_TOKEN=... NETLIFY_SITE_ID=... pnpm netlify:production:readiness
 ```
 
-## 6) Post-deploy production verification
+## 6) Confirm canonical domain configuration in Netlify
+
+In Netlify Dashboard → **Domain management** → **Domains**:
+
+- Set **Primary domain** to `www.infamousfreight.com`.
+- Keep `infamousfreight.com` and `infamous-freight.netlify.app` as aliases.
+
+The committed `netlify.toml` redirects `https://infamousfreight.com/*` to `https://www.infamousfreight.com/:splat`. If Netlify Primary domain is set to apex instead of `www`, Netlify can force `www` back to apex and create an infinite redirect loop that fails production smoke checks.
+
+## 7) Post-deploy production verification
 
 Run the canonical checks first:
 
@@ -115,6 +124,12 @@ Then confirm the bare domain redirects to the canonical www host:
 ```bash
 final_url=$(curl --silent --location --head --retry 5 --retry-delay 10 --retry-connrefused --output /dev/null --write-out '%{url_effective}' https://infamousfreight.com)
 test "$final_url" = "https://www.infamousfreight.com/"
+```
+
+Optionally verify there is no short redirect loop:
+
+```bash
+curl --silent --show-error --location --max-redirs 5 --output /dev/null --write-out '%{http_code} %{url_effective}\n' https://www.infamousfreight.com/
 ```
 
 Optional direct API domain checks (if `api.infamousfreight.com` is configured to the API origin):

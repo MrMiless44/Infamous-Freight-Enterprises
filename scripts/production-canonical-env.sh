@@ -2,8 +2,8 @@
 set -euo pipefail
 
 CANONICAL_SITE_URL="https://www.infamousfreight.com"
-API_PUBLIC_URL="https://infamous-freight.fly.dev"
-FLY_APP="infamous-freight"
+API_PUBLIC_URL="https://infamous-freight-api.fly.dev"
+FLY_APP="infamous-freight-api"
 
 cat <<'BANNER'
 Infamous Freight production canonical environment setup

@@ -115,7 +115,7 @@ const ShipmentTrackingPage: React.FC = () => {
     <div className="min-h-screen bg-infamous-dark px-5 py-8 text-[#F5E8E8] lg:px-6">
       <div className="mx-auto max-w-6xl">
         <Link to="/" className="mb-6 inline-flex items-center gap-2 text-sm text-[#B88989] hover:text-[#F5E8E8]">
-          <ArrowLeft size={16} /> Back
+          <ArrowLeft aria-hidden="true" size={16} /> Back
         </Link>
 
         {/* Search Section */}
@@ -123,7 +123,7 @@ const ShipmentTrackingPage: React.FC = () => {
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <div className="mb-3 inline-flex rounded-lg bg-infamous-red/10 p-3 text-infamous-red-light">
-                <Search size={22} />
+                <Search aria-hidden="true" size={22} />
               </div>
               <h1 className="text-3xl font-black">Track a Shipment</h1>
               <p className="mt-2 text-[#B88989]">Enter your tracking number to see real-time status, timeline, and delivery details.</p>
@@ -140,11 +140,14 @@ const ShipmentTrackingPage: React.FC = () => {
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <input
+              id="tracking-number"
               value={trackingNumber}
               onChange={(e) => setTrackingNumber(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') void lookupShipment(); }}
               className="input-field flex-1"
               placeholder="Enter tracking number (e.g. IF-20491)"
+              aria-label="Tracking number"
+              aria-describedby={lookupError ? 'tracking-lookup-error' : undefined}
             />
             <button
               type="button"
@@ -152,12 +155,12 @@ const ShipmentTrackingPage: React.FC = () => {
               disabled={loading}
               className="btn-primary inline-flex items-center justify-center gap-2"
             >
-              <Search size={17} /> {loading ? 'Searching...' : 'Track Shipment'}
+              <Search aria-hidden="true" size={17} /> {loading ? 'Searching...' : 'Track Shipment'}
             </button>
           </div>
 
           {lookupError && (
-            <p className="mt-4 rounded-lg border border-infamous-orange/30 bg-infamous-orange/10 p-3 text-sm text-infamous-orange-light">{lookupError}</p>
+            <p id="tracking-lookup-error" role="alert" className="mt-4 rounded-lg border border-infamous-orange/30 bg-infamous-orange/10 p-3 text-sm text-infamous-orange-light">{lookupError}</p>
           )}
         </div>
 
@@ -185,7 +188,7 @@ const ShipmentTrackingPage: React.FC = () => {
                   ].map((item) => (
                     <div key={item.label} className="rounded-lg border border-infamous-border bg-infamous-panel p-3">
                       <div className="flex items-center gap-1.5 text-infamous-muted">
-                        <item.icon size={12} />
+                        <item.icon aria-hidden="true" size={12} />
                         <p className="text-xs uppercase tracking-wider">{item.label}</p>
                       </div>
                       <p className="mt-1 text-sm font-semibold text-[#F5E8E8]">{item.value}</p>
@@ -207,7 +210,7 @@ const ShipmentTrackingPage: React.FC = () => {
               {shipment.notes && (
                 <div className="rounded-xl border border-infamous-border bg-infamous-card p-5">
                   <h3 className="flex items-center gap-2 text-sm font-bold text-[#F5E8E8]">
-                    <MessageSquare size={14} className="text-infamous-red-light" /> Dispatch Notes
+                    <MessageSquare aria-hidden="true" size={14} className="text-infamous-red-light" /> Dispatch Notes
                   </h3>
                   <p className="mt-2 text-sm text-[#B88989] leading-6">{shipment.notes}</p>
                 </div>
@@ -216,14 +219,14 @@ const ShipmentTrackingPage: React.FC = () => {
               {/* Documents */}
               <div className="rounded-xl border border-infamous-border bg-infamous-card p-5">
                 <h3 className="flex items-center gap-2 text-sm font-bold text-[#F5E8E8]">
-                  <FileText size={14} className="text-infamous-ember" /> Documents
+                  <FileText aria-hidden="true" size={14} className="text-infamous-ember" /> Documents
                 </h3>
                 <div className="mt-3 space-y-2">
                   {['Bill of Lading', 'Rate Confirmation'].map((doc) => (
                     <div key={doc} className="flex items-center justify-between rounded-lg border border-infamous-border bg-infamous-panel px-4 py-3">
                       <span className="text-sm text-[#F5E8E8]/80">{doc}</span>
-                      <button className="rounded-lg bg-infamous-red/10 p-2 text-infamous-red-light transition hover:bg-infamous-red/20">
-                        <Download size={14} />
+                      <button type="button" className="rounded-lg bg-infamous-red/10 p-2 text-infamous-red-light transition hover:bg-infamous-red/20" aria-label={`Download ${doc}`}>
+                        <Download aria-hidden="true" size={14} />
                       </button>
                     </div>
                   ))}
@@ -255,11 +258,11 @@ const ShipmentTrackingPage: React.FC = () => {
                                   : 'bg-infamous-panel text-infamous-muted border border-infamous-border'
                           }`}>
                             {isExceptionStep ? (
-                              <AlertTriangle size={14} />
+                              <AlertTriangle aria-hidden="true" size={14} />
                             ) : completed ? (
-                              <CheckCircle2 size={14} />
+                              <CheckCircle2 aria-hidden="true" size={14} />
                             ) : (
-                              <Circle size={14} />
+                              <Circle aria-hidden="true" size={14} />
                             )}
                           </div>
                           {!isLast && (
@@ -321,7 +324,7 @@ const ShipmentTrackingPage: React.FC = () => {
                 to="/contact"
                 className="flex items-center gap-3 rounded-xl border border-infamous-border bg-infamous-card p-5 transition hover:border-infamous-red/20"
               >
-                <MessageSquare size={18} className="text-infamous-red-light" />
+                <MessageSquare aria-hidden="true" size={18} className="text-infamous-red-light" />
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-[#F5E8E8]">Need Help?</p>
                   <p className="text-xs text-infamous-muted">Contact dispatch</p>
@@ -331,13 +334,13 @@ const ShipmentTrackingPage: React.FC = () => {
           </div>
         ) : searched ? (
           <div className="mt-6 rounded-xl border border-red-500/20 bg-infamous-card p-8 text-center">
-            <AlertTriangle className="mx-auto mb-3 text-red-400" size={32} />
+            <AlertTriangle aria-hidden="true" className="mx-auto mb-3 text-red-400" size={32} />
             <h2 className="text-xl font-bold">Tracking Number Not Found</h2>
             <p className="mt-2 text-[#B88989]">
               Double-check the format (IF-##### with five digits) or contact dispatch if the shipment should be active.
             </p>
             <Link to="/contact" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-infamous-red-light hover:underline">
-              Contact Dispatch <MessageSquare size={14} />
+              Contact Dispatch <MessageSquare aria-hidden="true" size={14} />
             </Link>
           </div>
         ) : null}

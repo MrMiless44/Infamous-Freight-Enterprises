@@ -51,10 +51,12 @@
       <div class="section">
         <div class="section-title">Connect Your Account</div>
         <div class="input-group">
-          <input type="text" id="api-key-input" placeholder="Paste your API key">
+          <label for="api-key-input" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">API key</label>
+          <input type="text" id="api-key-input" placeholder="Paste your API key" autocomplete="off">
         </div>
         <div class="input-group">
-          <input type="text" id="carrier-id-input" placeholder="Carrier ID">
+          <label for="carrier-id-input" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">Carrier ID</label>
+          <input type="text" id="carrier-id-input" placeholder="Carrier ID" autocomplete="organization">
         </div>
         <button class="btn btn-primary" id="connect-btn">Connect Account</button>
         <p style="font-size:11px;color:#666;margin-top:8px;">

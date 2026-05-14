@@ -27,6 +27,10 @@
   body {
     @apply bg-infamous-dark text-[#F5E8E8] antialiased;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-image:
+      radial-gradient(circle at 20% -10%, rgba(255, 26, 26, 0.2), transparent 30%),
+      radial-gradient(circle at 80% -20%, rgba(255, 26, 26, 0.12), transparent 35%),
+      linear-gradient(180deg, #110406 0%, #080204 45%, #050103 100%);
   }
 
   ::-webkit-scrollbar {
@@ -54,6 +58,18 @@
 }
 
 @layer components {
+  .panel-neon {
+    background: rgba(36, 16, 19, 0.86);
+    border: 1px solid rgba(255, 59, 48, 0.16);
+    box-shadow: 0 0 16px rgba(255, 26, 26, 0.08);
+  }
+
+  .panel-neon-soft {
+    background: rgba(36, 16, 19, 0.8);
+    border: 1px solid rgba(255, 59, 48, 0.12);
+    box-shadow: 0 0 10px rgba(255, 26, 26, 0.05);
+  }
+
   .btn-primary {
     @apply bg-gradient-to-br from-infamous-red to-infamous-red-dark text-[#F5E8E8] font-semibold py-2.5 px-6 rounded-xl transition-all border border-infamous-red-light/40 disabled:opacity-40 disabled:cursor-not-allowed;
     box-shadow: 0 0 18px rgba(255, 26, 26, 0.45);
@@ -192,6 +208,20 @@
 }
 
 @layer utilities {
+  .ops-shell {
+    position: relative;
+  }
+
+  .ops-shell::before {
+    content: "";
+    position: absolute;
+    inset: 10px;
+    border: 1px solid rgba(255, 59, 48, 0.25);
+    border-radius: 14px;
+    pointer-events: none;
+    box-shadow: inset 0 0 24px rgba(255, 26, 26, 0.08), 0 0 30px rgba(255, 26, 26, 0.08);
+  }
+
   .freight-grid {
     background-image:
       linear-gradient(rgba(255, 26, 26, 0.04) 1px, transparent 1px),
@@ -270,5 +300,14 @@
 
   .text-glow-strong {
     text-shadow: 0 0 40px rgba(255, 59, 48, 0.7);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
