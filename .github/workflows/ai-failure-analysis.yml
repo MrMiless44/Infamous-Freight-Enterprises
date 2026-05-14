@@ -1,0 +1,197 @@
+name: AI-Powered Failure Analysis
+
+on:
+  workflow_run:
+    workflows:
+      - CI/CD — Infamous Freight
+      - Deploy Fly API
+      - Vercel Preview Deployment
+      - Smoke Test
+    types:
+      - completed
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+concurrency:
+  group: ai-failure-analysis-${{ github.event.workflow_run.id }}
+  cancel-in-progress: false
+
+jobs:
+  analyze-failures:
+    name: Analyze workflow failures with AI
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event.workflow_run.conclusion == 'failure'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Gather workflow failure details
+        id: failure_context
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+
+          JOBS_JSON=$(gh api "/repos/$REPO/actions/runs/$RUN_ID/jobs?per_page=100")
+          FAILED_JOBS_JSON=$(echo "$JOBS_JSON" | jq '[.jobs[]? | select(.conclusion == "failure" or .conclusion == "timed_out" or .conclusion == "cancelled") ]')
+          FAILED_COUNT=$(echo "$FAILED_JOBS_JSON" | jq 'length')
+
+          FAILED_JOB_SUMMARY=$(echo "$FAILED_JOBS_JSON" | jq -r 'if length == 0 then "- No failed jobs found" else .[] | "- \(.name) (id: \(.id), conclusion: \(.conclusion // "unknown"))" end')
+
+          LOG_EXCERPT=$(gh run view "$RUN_ID" --repo "$REPO" --log-failed 2>/dev/null | tail -c 6000 || true)
+          if [ -z "$LOG_EXCERPT" ]; then
+            LOG_EXCERPT="No failed job logs were available for this run."
+          fi
+
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+          echo "workflow_name=$WORKFLOW_NAME" >> "$GITHUB_OUTPUT"
+          echo "head_branch=$HEAD_BRANCH" >> "$GITHUB_OUTPUT"
+          echo "head_sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
+          echo "failed_count=$FAILED_COUNT" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "failed_job_summary<<EOF"
+            echo "$FAILED_JOB_SUMMARY"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "log_excerpt<<EOF"
+            echo "$LOG_EXCERPT"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Analyze logs with AI
+        id: ai_analysis
+        if: ${{ secrets.OPENAI_API_KEY != '' }}
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          WORKFLOW_NAME: ${{ steps.failure_context.outputs.workflow_name }}
+          HEAD_BRANCH: ${{ steps.failure_context.outputs.head_branch }}
+          HEAD_SHA: ${{ steps.failure_context.outputs.head_sha }}
+          FAILED_JOB_SUMMARY: ${{ steps.failure_context.outputs.failed_job_summary }}
+          LOG_EXCERPT: ${{ steps.failure_context.outputs.log_excerpt }}
+        run: |
+          set -euo pipefail
+
+          PROMPT=$(cat <<EOF
+Analyze this GitHub Actions workflow failure and provide:
+1) a concise root cause summary (max 3 sentences)
+2) 2-3 concrete remediation steps
+
+Workflow: $WORKFLOW_NAME
+Branch: $HEAD_BRANCH
+Commit: $HEAD_SHA
+
+Failed jobs:
+$FAILED_JOB_SUMMARY
+
+Logs excerpt:
+$LOG_EXCERPT
+EOF
+)
+
+          REQUEST_BODY=$(jq -n \
+            --arg model "gpt-4o-mini" \
+            --arg prompt "$PROMPT" \
+            '{model: $model, messages: [{role: "system", content: "You are a CI/CD expert."}, {role: "user", content: $prompt}], max_tokens: 350, temperature: 0.2}')
+
+          RESPONSE=$(timeout 20 curl -sS https://api.openai.com/v1/chat/completions \
+            -H "Authorization: Bearer $OPENAI_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$REQUEST_BODY")
+
+          ANALYSIS=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // empty')
+          if [ -z "$ANALYSIS" ]; then
+            ANALYSIS="AI analysis unavailable for this failure."
+          fi
+
+          {
+            echo "analysis<<EOF"
+            echo "$ANALYSIS"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+        continue-on-error: true
+
+      - name: Prepare fallback analysis
+        id: fallback_analysis
+        if: ${{ steps.ai_analysis.outputs.analysis == '' }}
+        run: |
+          {
+            echo "analysis<<EOF"
+            echo "Automated AI analysis was unavailable. Review failed jobs, inspect the linked run logs, and validate recent commits and secrets/config changes."
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create or update failure issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ steps.failure_context.outputs.run_id }}
+          WORKFLOW_NAME: ${{ steps.failure_context.outputs.workflow_name }}
+          HEAD_BRANCH: ${{ steps.failure_context.outputs.head_branch }}
+          HEAD_SHA: ${{ steps.failure_context.outputs.head_sha }}
+          FAILED_COUNT: ${{ steps.failure_context.outputs.failed_count }}
+          FAILED_JOB_SUMMARY: ${{ steps.failure_context.outputs.failed_job_summary }}
+          ANALYSIS: ${{ steps.ai_analysis.outputs.analysis || steps.fallback_analysis.outputs.analysis }}
+        run: |
+          set -euo pipefail
+
+          RUN_URL="https://github.com/$REPO/actions/runs/$RUN_ID"
+          ISSUE_TITLE="⚠️ Workflow failure: $WORKFLOW_NAME (Run $RUN_ID)"
+
+          ISSUE_BODY=$(cat <<EOF
+## Workflow Failure Analysis
+
+**Workflow:** $WORKFLOW_NAME  
+**Run ID:** $RUN_ID  
+**Branch:** $HEAD_BRANCH  
+**Commit:** $HEAD_SHA  
+**Failed jobs:** $FAILED_COUNT  
+**Run URL:** $RUN_URL
+
+### Failed Job Summary
+$FAILED_JOB_SUMMARY
+
+### 🤖 Analysis
+$ANALYSIS
+
+### 📋 Recommended Next Steps
+1. Review the [workflow run logs]($RUN_URL).
+2. Inspect recent changes in commit \
+   [$HEAD_SHA](https://github.com/$REPO/commit/$HEAD_SHA).
+3. Re-run the workflow after applying fixes.
+EOF
+)
+
+          EXISTING_ISSUE=$(gh issue list --repo "$REPO" --state open --search "\"Run ID:\" \"$RUN_ID\" in:body" --json number --jq '.[0].number // empty')
+
+          if [ -n "$EXISTING_ISSUE" ]; then
+            gh issue comment "$EXISTING_ISSUE" --repo "$REPO" --body "$ISSUE_BODY"
+            echo "Updated existing issue #$EXISTING_ISSUE"
+          else
+            gh issue create --repo "$REPO" --title "$ISSUE_TITLE" --body "$ISSUE_BODY"
+            echo "Created new issue for run $RUN_ID"
+          fi
+
+      - name: Write summary
+        run: |
+          {
+            echo "## AI Failure Analysis"
+            echo ""
+            echo "- Workflow: ${{ steps.failure_context.outputs.workflow_name }}"
+            echo "- Run ID: ${{ steps.failure_context.outputs.run_id }}"
+            echo "- Failed jobs: ${{ steps.failure_context.outputs.failed_count }}"
+            echo ""
+            echo "### Analysis"
+            echo "${{ steps.ai_analysis.outputs.analysis || steps.fallback_analysis.outputs.analysis }}"
+          } >> "$GITHUB_STEP_SUMMARY"
