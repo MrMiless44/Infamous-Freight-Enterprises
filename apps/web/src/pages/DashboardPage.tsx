@@ -1,51 +1,37 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Truck, AlertTriangle, Activity, ChevronRight, Package,
-  MapPin, TrendingUp, Clock, Navigation, Phone,
-  FileUp, CheckCircle2, Infinity, Search,
-  FileText, MessageSquare, Send, Filter,
-  AlertCircle, Bell, Plus, DollarSign,
+  Truck,
+  AlertTriangle,
+  Activity,
+  ChevronRight,
+  Package,
+  MapPin,
+  TrendingUp,
+  Navigation,
+  Phone,
+  FileUp,
+  CheckCircle2,
+  Infinity,
+  Search,
+  FileText,
+  MessageSquare,
+  Send,
+  Filter,
+  AlertCircle,
+  Bell,
+  Plus,
+  DollarSign,
 } from 'lucide-react';
 import WidgetErrorBoundary from '@/components/ui/WidgetErrorBoundary';
 import { LazyShipmentRouteMap, preloadShipmentRouteMap } from '@/components/LazyShipmentRouteMap';
-
-interface ActiveLoad {
-  ref: string;
-  origin: string;
-  destination: string;
-  carrier: string;
-  status: string;
-  statusLabel: string;
-  eta: string;
-  rate: string;
-  equipment: string;
-  weight: string;
-  miles: string;
-  driver: string;
-  phone: string;
-  pickupDate: string;
-  deliveryDate: string;
-  docStatus: { bol: boolean; pod: boolean; rateCon: boolean; invoice: boolean };
-  margin: string;
-}
-
-const mockActiveLoads: ActiveLoad[] = [
-  { ref: 'IF-77391', origin: 'Atlanta, GA', destination: 'Dallas, TX', carrier: 'Swift Logistics', status: 'in_transit', statusLabel: 'In Transit', eta: '6:30 PM', rate: '$3,200', equipment: 'Dry Van', weight: '38,000 lbs', miles: '781 mi', driver: 'Marcus Johnson', phone: '(404) 555-0192', pickupDate: 'May 9, 2026', deliveryDate: 'May 10, 2026', docStatus: { bol: true, pod: false, rateCon: true, invoice: false }, margin: '$480' },
-  { ref: 'IF-77392', origin: 'Chicago, IL', destination: 'Memphis, TN', carrier: 'Road Runner Inc.', status: 'at_pickup', statusLabel: 'At Pickup', eta: '4:00 PM', rate: '$1,850', equipment: 'Reefer', weight: '22,000 lbs', miles: '530 mi', driver: 'James Wright', phone: '(312) 555-0234', pickupDate: 'May 10, 2026', deliveryDate: 'May 11, 2026', docStatus: { bol: true, pod: false, rateCon: true, invoice: false }, margin: '$310' },
-  { ref: 'IF-77393', origin: 'Houston, TX', destination: 'Phoenix, AZ', carrier: 'Desert Haul Co.', status: 'exception', statusLabel: 'Delayed', eta: 'TBD', rate: '$4,100', equipment: 'Flatbed', weight: '44,000 lbs', miles: '1,178 mi', driver: 'Carlos Rivera', phone: '(713) 555-0187', pickupDate: 'May 8, 2026', deliveryDate: 'May 11, 2026', docStatus: { bol: true, pod: false, rateCon: true, invoice: false }, margin: '$615' },
-  { ref: 'IF-77394', origin: 'Los Angeles, CA', destination: 'Seattle, WA', carrier: 'Pacific Freight', status: 'in_transit', statusLabel: 'In Transit', eta: '11:00 PM', rate: '$2,900', equipment: 'Dry Van', weight: '32,000 lbs', miles: '1,135 mi', driver: 'Sarah Chen', phone: '(213) 555-0145', pickupDate: 'May 9, 2026', deliveryDate: 'May 11, 2026', docStatus: { bol: true, pod: false, rateCon: true, invoice: false }, margin: '$420' },
-  { ref: 'IF-77395', origin: 'Miami, FL', destination: 'Atlanta, GA', carrier: 'Southeast Express', status: 'delivered', statusLabel: 'Delivered', eta: 'Complete', rate: '$1,450', equipment: 'Box Truck', weight: '12,000 lbs', miles: '662 mi', driver: 'David Moore', phone: '(305) 555-0198', pickupDate: 'May 8, 2026', deliveryDate: 'May 9, 2026', docStatus: { bol: true, pod: true, rateCon: true, invoice: true }, margin: '$225' },
-  { ref: 'IF-77396', origin: 'Nashville, TN', destination: 'Indianapolis, IN', carrier: 'Midwest Haul', status: 'pickup_scheduled', statusLabel: 'Pickup Scheduled', eta: '2:00 PM', rate: '$1,200', equipment: 'Dry Van', weight: '18,000 lbs', miles: '290 mi', driver: 'Tony Patel', phone: '(615) 555-0173', pickupDate: 'May 10, 2026', deliveryDate: 'May 10, 2026', docStatus: { bol: false, pod: false, rateCon: true, invoice: false }, margin: '$180' },
-];
-
-const deliveryStatuses = [
-  { label: 'In Transit', count: 87, color: 'bg-infamous-red-light', textColor: 'text-infamous-red-light' },
-  { label: 'At Pickup', count: 14, color: 'bg-infamous-ember', textColor: 'text-infamous-ember' },
-  { label: 'Delivered', count: 41, color: 'bg-infamous-green', textColor: 'text-infamous-green' },
-  { label: 'Delayed', count: 8, color: 'bg-infamous-orange', textColor: 'text-infamous-orange' },
-  { label: 'Pickup Scheduled', count: 12, color: 'bg-infamous-muted', textColor: 'text-infamous-muted' },
-];
+import {
+  alerts,
+  dashboardMetricSeeds,
+  deliveryStatuses,
+  mockActiveLoads,
+  type ActiveLoad,
+} from '@/mocks/dashboard';
 
 const statusBarColor: Record<string, string> = {
   in_transit: 'bg-infamous-red-light',
@@ -73,13 +59,6 @@ const statusBadgeClass: Record<string, string> = {
   invoiced: 'bg-[#36D399]/15 text-[#36D399] border border-[#36D399]/25',
 };
 
-const alerts = [
-  { id: 1, severity: 'critical' as const, message: 'IF-77393 delayed — ETA shift pending carrier update', time: '12 min ago' },
-  { id: 2, severity: 'warning' as const, message: 'IF-77396 pickup appointment in 90 minutes — no driver check-in', time: '25 min ago' },
-  { id: 3, severity: 'info' as const, message: 'IF-77395 POD uploaded — invoice ready for review', time: '1 hr ago' },
-  { id: 4, severity: 'resolved' as const, message: 'IF-77391 ETA confirmed — on schedule for 6:30 PM delivery', time: '2 hr ago' },
-];
-
 const alertSeverityStyle: Record<string, string> = {
   critical: 'border-[#FF0033]/30 bg-[#FF0033]/8',
   warning: 'border-infamous-orange/30 bg-infamous-orange/8',
@@ -92,6 +71,14 @@ const alertSeverityIcon: Record<string, React.ReactNode> = {
   warning: <AlertTriangle size={14} className="text-infamous-orange" />,
   info: <Bell size={14} className="text-infamous-red-light" />,
   resolved: <CheckCircle2 size={14} className="text-infamous-green" />,
+};
+
+const metricIconMap: Record<string, React.ReactNode> = {
+  'Active Loads': <Truck size={18} />,
+  'In Transit': <Navigation size={18} />,
+  'Available Drivers': <Package size={18} />,
+  'On-Time Rate': <TrendingUp size={18} />,
+  'Revenue MTD': <Activity size={18} />,
 };
 
 const DashboardPage: React.FC = () => {
@@ -118,17 +105,15 @@ const DashboardPage: React.FC = () => {
 
   const filteredAlerts = alerts.filter((a) => alertFilter === 'all' || a.severity === alertFilter);
 
-  const metrics = [
-    { label: 'Active Loads', value: '128', icon: <Truck size={18} />, color: 'text-infamous-red-light' },
-    { label: 'In Transit', value: '87', icon: <Navigation size={18} />, color: 'text-infamous-red-light' },
-    { label: 'Available Drivers', value: '34', icon: <Package size={18} />, color: 'text-infamous-green' },
-    { label: 'On-Time Rate', value: '96.2%', icon: <TrendingUp size={18} />, color: 'text-infamous-green' },
-    { label: 'Revenue MTD', value: '$2.4M', icon: <Activity size={18} />, color: 'text-infamous-red-light' },
-  ];
+  const metrics = dashboardMetricSeeds.map((metric) => ({
+    label: metric.label,
+    value: metric.value,
+    icon: metricIconMap[metric.label] ?? <Activity size={18} />,
+    color: metric.tone === 'green' ? 'text-infamous-green' : 'text-infamous-red-light',
+  }));
 
   return (
     <div className="space-y-5 animate-fade-in">
-      {/* Quick Action Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="relative flex-1 max-w-md w-full">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-infamous-muted" />
@@ -141,46 +126,34 @@ const DashboardPage: React.FC = () => {
           />
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate('/request-quote')}
-            className="btn-primary inline-flex items-center gap-2 text-sm glow-high"
-          >
+          <button onClick={() => navigate('/request-quote')} className="btn-primary inline-flex items-center gap-2 text-sm glow-high">
             <Plus size={16} /> Create Quote
           </button>
-          <button
-            onClick={() => navigate('/loads')}
-            className="btn-secondary inline-flex items-center gap-2 text-sm"
-          >
+          <button onClick={() => navigate('/loads')} className="btn-secondary inline-flex items-center gap-2 text-sm">
             <Truck size={16} /> All Loads
           </button>
         </div>
       </div>
 
-      {/* Metric Cards Row */}
       <WidgetErrorBoundary label="Operations metrics">
         <div>
           <p className="text-[10px] text-infamous-muted uppercase tracking-wider mb-2">Sample data — connect your account for live metrics</p>
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
-          {metrics.map((m) => (
-            <div
-              key={m.label}
-              className="panel-neon relative overflow-hidden rounded-[16px] p-4 transition-all group"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className={`${m.color} opacity-70`}>{m.icon}</span>
+            {metrics.map((m) => (
+              <div key={m.label} className="panel-neon relative overflow-hidden rounded-[16px] p-4 transition-all group">
+                <div className="flex items-center justify-between mb-2">
+                  <span className={`${m.color} opacity-70`}>{m.icon}</span>
+                </div>
+                <p className="text-3xl font-black font-display tracking-tight">{m.value}</p>
+                <p className="text-[11px] text-infamous-muted mt-1 uppercase tracking-wider font-medium">{m.label}</p>
+                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-infamous-red/30 to-transparent" />
               </div>
-              <p className="text-3xl font-black font-display tracking-tight">{m.value}</p>
-              <p className="text-[11px] text-infamous-muted mt-1 uppercase tracking-wider font-medium">{m.label}</p>
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-infamous-red/30 to-transparent" />
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
         </div>
       </WidgetErrorBoundary>
 
-      {/* Map + Alerts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Shipment Tracking Map */}
         <WidgetErrorBoundary label="Shipment tracking">
           <div className="panel-neon lg:col-span-2 rounded-[18px] overflow-hidden">
             <div className="flex items-center justify-between px-5 py-3 border-b border-infamous-border/60">
@@ -198,7 +171,6 @@ const DashboardPage: React.FC = () => {
           </div>
         </WidgetErrorBoundary>
 
-        {/* Alerts Panel */}
         <WidgetErrorBoundary label="Alerts">
           <div className="panel-neon rounded-[18px] p-5">
             <div className="flex items-center justify-between mb-4">
@@ -223,10 +195,7 @@ const DashboardPage: React.FC = () => {
             </div>
             <div className="space-y-2.5">
               {filteredAlerts.map((alert) => (
-                <div
-                  key={alert.id}
-                  className={`rounded-xl p-3 border ${alertSeverityStyle[alert.severity]} transition hover:brightness-110 cursor-pointer`}
-                >
+                <div key={alert.id} className={`rounded-xl p-3 border ${alertSeverityStyle[alert.severity]} transition hover:brightness-110 cursor-pointer`}>
                   <div className="flex items-start gap-2.5">
                     {alertSeverityIcon[alert.severity]}
                     <div className="flex-1 min-w-0">
@@ -241,9 +210,7 @@ const DashboardPage: React.FC = () => {
         </WidgetErrorBoundary>
       </div>
 
-      {/* Active Loads + Load Details Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Active Loads */}
         <WidgetErrorBoundary label="Active loads">
           <div className="panel-neon lg:col-span-2 rounded-[18px] p-5">
             <div className="flex items-center justify-between mb-4">
@@ -253,7 +220,6 @@ const DashboardPage: React.FC = () => {
               </button>
             </div>
 
-            {/* Table Header */}
             <div className="hidden md:grid grid-cols-[auto_1fr_1fr_110px_80px_80px] gap-3 px-3 py-2.5 text-[11px] text-infamous-muted uppercase tracking-wider font-medium border-b border-infamous-border/60 mb-2">
               <span className="w-2" />
               <span>Load / Route</span>
@@ -292,7 +258,6 @@ const DashboardPage: React.FC = () => {
           </div>
         </WidgetErrorBoundary>
 
-        {/* Load Details Panel */}
         <WidgetErrorBoundary label="Load details">
           <div className="panel-neon rounded-[18px] p-5">
             <div className="flex items-center justify-between mb-4">
@@ -301,7 +266,6 @@ const DashboardPage: React.FC = () => {
             </div>
 
             <div className="space-y-3">
-              {/* Route */}
               <div className="rounded-xl bg-infamous-panel border border-infamous-border/60 p-3">
                 <p className="text-[10px] text-infamous-muted uppercase tracking-wider mb-1">Route</p>
                 <p className="text-[15px] font-medium">{selectedLoad.origin}</p>
@@ -313,7 +277,6 @@ const DashboardPage: React.FC = () => {
                 <p className="text-[15px] font-medium">{selectedLoad.destination}</p>
               </div>
 
-              {/* Details Grid */}
               <div className="grid grid-cols-2 gap-2">
                 <div className="rounded-xl bg-infamous-panel border border-infamous-border/60 p-3">
                   <p className="text-[10px] text-infamous-muted uppercase tracking-wider">Equipment</p>
@@ -333,14 +296,12 @@ const DashboardPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Driver */}
               <div className="rounded-xl bg-infamous-panel border border-infamous-border/60 p-3">
                 <p className="text-[10px] text-infamous-muted uppercase tracking-wider mb-1">Driver</p>
                 <p className="text-sm font-medium">{selectedLoad.driver}</p>
                 <p className="text-xs text-infamous-muted">{selectedLoad.carrier}</p>
               </div>
 
-              {/* Documents Status */}
               <div className="rounded-xl bg-infamous-panel border border-infamous-border/60 p-3">
                 <p className="text-[10px] text-infamous-muted uppercase tracking-wider mb-2">Documents</p>
                 <div className="grid grid-cols-2 gap-1.5">
@@ -351,18 +312,13 @@ const DashboardPage: React.FC = () => {
                     { label: 'Invoice', done: selectedLoad.docStatus.invoice },
                   ].map((doc) => (
                     <div key={doc.label} className="flex items-center gap-1.5 text-xs">
-                      {doc.done ? (
-                        <CheckCircle2 size={12} className="text-infamous-green" />
-                      ) : (
-                        <div className="w-3 h-3 rounded-full border border-infamous-muted/40" />
-                      )}
+                      {doc.done ? <CheckCircle2 size={12} className="text-infamous-green" /> : <div className="w-3 h-3 rounded-full border border-infamous-muted/40" />}
                       <span className={doc.done ? 'text-[#F5E8E8]/80' : 'text-infamous-muted'}>{doc.label}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Pickup / Delivery */}
               <div className="rounded-xl bg-infamous-panel border border-infamous-border/60 p-3">
                 <p className="text-[10px] text-infamous-muted uppercase tracking-wider mb-2">Pickup / Delivery</p>
                 <div className="flex items-center justify-between text-xs">
@@ -379,7 +335,6 @@ const DashboardPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Communication Buttons */}
             <div className="mt-4 grid grid-cols-2 gap-2">
               <button className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold transition-all bg-infamous-red/8 border border-infamous-red/20 text-infamous-red-light hover:bg-infamous-red/15">
                 <MessageSquare size={13} /> Message Customer
@@ -395,7 +350,6 @@ const DashboardPage: React.FC = () => {
               </button>
             </div>
 
-            {/* Document Actions */}
             <div className="mt-3 space-y-1.5">
               {[
                 { label: 'Upload BOL', icon: <FileText size={13} /> },
@@ -403,10 +357,7 @@ const DashboardPage: React.FC = () => {
                 { label: 'View Rate Confirmation', icon: <DollarSign size={13} /> },
                 { label: 'Download Invoice', icon: <FileText size={13} /> },
               ].map((action) => (
-                <button
-                  key={action.label}
-                  className="w-full flex items-center gap-2.5 py-2 px-3 rounded-xl text-xs font-medium transition-all border border-infamous-border/40 text-infamous-muted hover:text-[#F5E8E8] hover:border-infamous-red/20 hover:bg-infamous-red/5"
-                >
+                <button key={action.label} className="w-full flex items-center gap-2.5 py-2 px-3 rounded-xl text-xs font-medium transition-all border border-infamous-border/40 text-infamous-muted hover:text-[#F5E8E8] hover:border-infamous-red/20 hover:bg-infamous-red/5">
                   {action.icon}
                   {action.label}
                 </button>
@@ -416,9 +367,7 @@ const DashboardPage: React.FC = () => {
         </WidgetErrorBoundary>
       </div>
 
-      {/* Delivery Status + Dispatch Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Delivery Status */}
         <WidgetErrorBoundary label="Delivery status">
           <div className="rounded-[18px] p-5" style={{ background: 'rgba(36, 16, 19, 0.85)', border: '1px solid rgba(255, 59, 48, 0.15)', boxShadow: '0 0 12px rgba(255, 26, 26, 0.06)' }}>
             <h2 className="text-sm font-bold uppercase tracking-wide font-display mb-5">Delivery Status</h2>
@@ -443,7 +392,6 @@ const DashboardPage: React.FC = () => {
           </div>
         </WidgetErrorBoundary>
 
-        {/* Dispatch Quick Actions */}
         <WidgetErrorBoundary label="Dispatch controls">
           <div className="panel-neon lg:col-span-2 rounded-[18px] p-5">
             <h2 className="text-sm font-bold uppercase tracking-wide font-display mb-5">Dispatch Controls</h2>
@@ -470,16 +418,10 @@ const DashboardPage: React.FC = () => {
             </div>
 
             <div className="mt-5 flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={() => navigate('/dispatch')}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-infamous-red-light border border-infamous-red/20 bg-infamous-red/5 hover:bg-infamous-red/10 transition-all"
-              >
+              <button onClick={() => navigate('/dispatch')} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-infamous-red-light border border-infamous-red/20 bg-infamous-red/5 hover:bg-infamous-red/10 transition-all">
                 View Full Dispatch Board <ChevronRight size={14} />
               </button>
-              <button
-                onClick={() => navigate('/analytics')}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-infamous-muted border border-infamous-border/60 hover:text-[#F5E8E8] hover:border-infamous-red/20 transition-all"
-              >
+              <button onClick={() => navigate('/analytics')} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-infamous-muted border border-infamous-border/60 hover:text-[#F5E8E8] hover:border-infamous-red/20 transition-all">
                 <TrendingUp size={14} /> View Analytics
               </button>
             </div>
@@ -487,7 +429,6 @@ const DashboardPage: React.FC = () => {
         </WidgetErrorBoundary>
       </div>
 
-      {/* Bottom Brand */}
       <div className="panel-neon-soft rounded-[18px] overflow-hidden">
         <div className="p-8 text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
@@ -497,9 +438,7 @@ const DashboardPage: React.FC = () => {
             <span className="text-infamous-red-light text-glow">Infamous</span>{' '}
             <span className="text-[#F5E8E8]">Freight</span>
           </h2>
-          <p className="mt-2 font-display text-base font-bold uppercase tracking-[0.25em] text-infamous-muted">
-            We Move. You Win.
-          </p>
+          <p className="mt-2 font-display text-base font-bold uppercase tracking-[0.25em] text-infamous-muted">We Move. You Win.</p>
         </div>
       </div>
     </div>
