@@ -3,6 +3,7 @@ import type { Config } from '@netlify/functions';
 import { requireAuth, type TokenPayload } from './lib/auth.ts';
 import { json, options, genId, genTrackingNumber } from './lib/http.ts';
 import { text, toNumber, toInt, toTimestamp, parseBody, parseUrl, extractParam } from './lib/validate.ts';
+import { withSentry } from './lib/sentry.ts';
 
 const MAX_LIST = 50;
 
@@ -188,7 +189,7 @@ async function searchLoads(req: Request) {
   return json(200, { loads: results });
 }
 
-export default async (req: Request) => {
+export default withSentry(async (req: Request) => {
   if (req.method === 'OPTIONS') return options();
 
   const url = parseUrl(req);
@@ -207,7 +208,7 @@ export default async (req: Request) => {
   }
 
   return json(405, { error: 'method_not_allowed' });
-};
+});
 
 export const config: Config = {
   path: ['/api/loads', '/api/loads/search', '/api/loads/:id'],

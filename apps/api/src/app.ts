@@ -463,6 +463,7 @@ function initializeSentry() {
   Sentry.init({
     dsn,
     environment: process.env.NODE_ENV ?? 'development',
+    sendDefaultPii: true,
     tracesSampleRate: 0,
   });
 }

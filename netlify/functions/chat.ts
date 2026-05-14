@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 import type { Config } from '@netlify/functions';
 import type { ChatCompletionChunk } from 'openai/resources/chat/completions';
+import { withSentry, captureException } from './lib/sentry.ts';
 
 type ChatRole = 'system' | 'user' | 'assistant';
 
@@ -52,7 +53,7 @@ const sanitizeMessages = (messages: unknown): ChatMessage[] => {
     }));
 };
 
-export default async (req: Request) => {
+export default withSentry(async (req: Request) => {
   if (req.method !== 'POST') {
     return json(405, { error: 'method_not_allowed', message: 'Use POST to send chat messages.' });
   }
@@ -96,6 +97,7 @@ export default async (req: Request) => {
         controller.enqueue(encoder.encode('data: [DONE]\n\n'));
         controller.close();
       } catch (error) {
+        captureException(error);
         controller.enqueue(
           encoder.encode(`event: error\ndata: ${JSON.stringify({ message: 'Chat response failed.' })}\n\n`)
         );
@@ -112,7 +114,7 @@ export default async (req: Request) => {
       'x-content-type-options': 'nosniff',
     },
   });
-};
+});
 
 export const config: Config = {
   path: '/.netlify/functions/chat',

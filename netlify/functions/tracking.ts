@@ -3,6 +3,7 @@ import type { Config } from '@netlify/functions';
 import { requireAuth } from './lib/auth.ts';
 import { json, options, genId } from './lib/http.ts';
 import { text, toNumber, toInt, parseBody, parseUrl, extractParam } from './lib/validate.ts';
+import { withSentry, captureException } from './lib/sentry.ts';
 
 const MAX_POSITIONS = 100;
 
@@ -125,7 +126,8 @@ async function recordBatch(req: Request) {
           WHERE id = ${driverId}
         `;
       }
-    } catch {
+    } catch (err) {
+      captureException(err);
       skipped.push(i);
     }
   }
@@ -171,7 +173,7 @@ async function getLoadRoute(loadId: string) {
   return json(200, { route, pointCount: route.length });
 }
 
-export default async (req: Request) => {
+export default withSentry(async (req: Request) => {
   if (req.method === 'OPTIONS') return options();
 
   const auth = await requireAuth(req);
@@ -193,7 +195,7 @@ export default async (req: Request) => {
   if (driverLatest && req.method === 'GET') return getDriverLatest(driverLatest);
 
   return json(405, { error: 'method_not_allowed' });
-};
+});
 
 export const config: Config = {
   path: [

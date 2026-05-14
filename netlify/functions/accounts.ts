@@ -3,6 +3,7 @@ import type { Config } from '@netlify/functions';
 import { hashPassword, verifyPassword, createToken, requireAuth, type TokenPayload } from './lib/auth.ts';
 import { json, options, genId } from './lib/http.ts';
 import { text, isEmail, parseBody, parseUrl, extractParam } from './lib/validate.ts';
+import { withSentry } from './lib/sentry.ts';
 
 type RegisterInput = {
   email?: unknown;
@@ -175,7 +176,7 @@ async function updateProfile(req: Request, authUser: TokenPayload) {
   return getMe(authUser);
 }
 
-export default async (req: Request) => {
+export default withSentry(async (req: Request) => {
   if (req.method === 'OPTIONS') return options();
 
   const url = parseUrl(req);
@@ -192,7 +193,7 @@ export default async (req: Request) => {
   }
 
   return json(405, { error: 'method_not_allowed' });
-};
+});
 
 export const config: Config = {
   path: ['/api/auth/register', '/api/auth/login', '/api/auth/me'],

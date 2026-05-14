@@ -4,6 +4,7 @@ import type { Config } from '@netlify/functions';
 import { requireAuth, type TokenPayload } from './lib/auth.ts';
 import { json, options, genId } from './lib/http.ts';
 import { text, parseUrl, extractParam } from './lib/validate.ts';
+import { withSentry, captureException } from './lib/sentry.ts';
 
 const ALLOWED_TYPES = ['BOL', 'POD', 'RATE_CONFIRMATION', 'INSURANCE', 'LICENSE', 'OTHER'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -97,7 +98,8 @@ async function downloadDocument(docId: string) {
         'cache-control': 'private, max-age=3600',
       },
     });
-  } catch {
+  } catch (err) {
+    captureException(err);
     return json(500, { error: 'download_failed', message: 'Unable to retrieve file.' });
   }
 }
@@ -119,15 +121,15 @@ async function deleteDocument(docId: string) {
 
   try {
     await store.delete(doc.blob_key as string);
-  } catch {
-    // blob may already be gone
+  } catch (err) {
+    captureException(err);
   }
 
   await db.sql`DELETE FROM documents WHERE id = ${docId}`;
   return json(200, { deleted: true });
 }
 
-export default async (req: Request) => {
+export default withSentry(async (req: Request) => {
   if (req.method === 'OPTIONS') return options();
 
   const auth = await requireAuth(req);
@@ -151,7 +153,7 @@ export default async (req: Request) => {
   }
 
   return json(405, { error: 'method_not_allowed' });
-};
+});
 
 export const config: Config = {
   path: [

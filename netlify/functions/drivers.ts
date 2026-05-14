@@ -3,6 +3,7 @@ import type { Config } from '@netlify/functions';
 import { requireAuth } from './lib/auth.ts';
 import { json, options, genId } from './lib/http.ts';
 import { text, toNumber, toDate, parseBody, parseUrl, extractParam } from './lib/validate.ts';
+import { withSentry } from './lib/sentry.ts';
 
 const MAX_LIST = 50;
 
@@ -160,7 +161,7 @@ async function getDriverHos(driverId: string) {
   return json(200, { hours: d.hos_remaining_hours ? Number(d.hos_remaining_hours) : 0, status: d.status });
 }
 
-export default async (req: Request) => {
+export default withSentry(async (req: Request) => {
   if (req.method === 'OPTIONS') return options();
 
   const auth = await requireAuth(req);
@@ -182,7 +183,7 @@ export default async (req: Request) => {
   }
 
   return json(405, { error: 'method_not_allowed' });
-};
+});
 
 export const config: Config = {
   path: ['/api/drivers', '/api/drivers/:id', '/api/eld/drivers/:driverId/hos'],

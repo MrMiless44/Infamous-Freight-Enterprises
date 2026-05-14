@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import express from 'express';
+import * as Sentry from '@sentry/node';
 import { createApp } from './app';
 
 dotenv.config();
@@ -17,6 +18,7 @@ try {
     console.log(`Infamous Freight API listening on ${host}:${port}`);
   });
 } catch (error) {
+  Sentry.captureException(error);
   const startupError = error instanceof Error ? error.message : 'unknown_startup_error';
   // Log the underlying error server-side only. Do not return it to clients
   // in the /health response body to avoid leaking config or stack details.

@@ -1,5 +1,6 @@
 import { getDatabase } from '@netlify/database';
 import type { Config } from '@netlify/functions';
+import { withSentry } from './lib/sentry.ts';
 
 const MAX_LIST = 50;
 
@@ -71,7 +72,7 @@ const json = (status: number, body: unknown) =>
     headers: SECURITY_HEADERS,
   });
 
-export default async (req: Request) => {
+export default withSentry(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
@@ -200,7 +201,7 @@ export default async (req: Request) => {
   `;
 
   return json(201, { request: { ...record, createdAt: saved.created_at } });
-};
+});
 
 export const config: Config = {
   path: ['/api/load-requests', '/api/load-requests/:id'],

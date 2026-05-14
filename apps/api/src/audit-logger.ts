@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import * as Sentry from '@sentry/node';
 
 export type AuditEntry = {
   entityType: string;
@@ -31,8 +32,8 @@ class PrismaAuditLogger implements AuditLogger {
             : (entry.requestId ? `[rid:${entry.requestId}]` : undefined),
         },
       });
-    } catch {
-      // Audit logging is best-effort; never block the main operation.
+    } catch (err) {
+      Sentry.captureException(err);
     }
   }
 }

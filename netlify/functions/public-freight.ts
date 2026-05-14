@@ -1,5 +1,6 @@
 import { getDatabase } from '@netlify/database';
 import type { Config } from '@netlify/functions';
+import { withSentry } from './lib/sentry.ts';
 
 type QuoteInput = {
   company?: unknown;
@@ -281,7 +282,7 @@ async function getShipment(tracking: string) {
   });
 }
 
-export default async (req: Request) => {
+export default withSentry(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: SECURITY_HEADERS });
   }
@@ -306,7 +307,7 @@ export default async (req: Request) => {
   }
 
   return json(405, { error: 'method_not_allowed' });
-};
+});
 
 export const config: Config = {
   path: ['/api/public/quote-requests', '/api/public/shipments/:trackingNumber'],

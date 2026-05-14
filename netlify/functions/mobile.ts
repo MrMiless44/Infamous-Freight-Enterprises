@@ -4,6 +4,7 @@ import type { Config } from '@netlify/functions';
 import { requireAuth, type TokenPayload } from './lib/auth.ts';
 import { json, options, genId } from './lib/http.ts';
 import { text, toNumber, parseBody, parseUrl, extractParam } from './lib/validate.ts';
+import { withSentry } from './lib/sentry.ts';
 
 function rowToLoad(row: Record<string, unknown>) {
   return {
@@ -205,7 +206,7 @@ async function getLoadHistory(user: TokenPayload) {
   return json(200, { loads: rows.map((r: Record<string, unknown>) => rowToLoad(r)) });
 }
 
-export default async (req: Request) => {
+export default withSentry(async (req: Request) => {
   if (req.method === 'OPTIONS') return options();
 
   const auth = await requireAuth(req);
@@ -222,7 +223,7 @@ export default async (req: Request) => {
   if (req.method === 'GET' && path === '/api/mobile/load-history') return getLoadHistory(auth);
 
   return json(405, { error: 'method_not_allowed' });
-};
+});
 
 export const config: Config = {
   path: [

@@ -3,6 +3,7 @@ import type { Config } from '@netlify/functions';
 import { requireAuth, type TokenPayload } from './lib/auth.ts';
 import { json, options, genId } from './lib/http.ts';
 import { text, toInt, parseBody, parseUrl, extractParam } from './lib/validate.ts';
+import { withSentry } from './lib/sentry.ts';
 
 const MAX_LIST = 50;
 
@@ -119,7 +120,7 @@ async function deleteNotification(notificationId: string, user: TokenPayload) {
   return json(200, { deleted: true });
 }
 
-export default async (req: Request) => {
+export default withSentry(async (req: Request) => {
   if (req.method === 'OPTIONS') return options();
 
   const auth = await requireAuth(req);
@@ -139,7 +140,7 @@ export default async (req: Request) => {
   if (notifId && req.method === 'DELETE') return deleteNotification(notifId, auth);
 
   return json(405, { error: 'method_not_allowed' });
-};
+});
 
 export const config: Config = {
   path: [
