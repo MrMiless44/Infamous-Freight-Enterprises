@@ -1008,3 +1008,55 @@ High
 
 ## Follow-Up
 B-007 remains open for the two deployed public API paths because production still returns Netlify 404 responses. Trigger a fresh production deploy from the updated repository, then re-run the public route checks. The previous direct-function packaging recommendation has been superseded because normal Netlify deploys intentionally disable repo-owned functions and rely on the Fly API proxy.
+
+---
+
+## Test
+Netlify Production Recommendation Re-check
+
+## Date/Time
+2026-05-14 04:06 UTC
+
+## Owner
+Netlify agent
+
+## Command or Action
+Re-ran the recommended production checks for the canonical web host, apex redirect, proxied API health, public API paths, direct Fly public API origin behavior, and focused routing regression tests. Sensitive values were not recorded.
+
+```bash
+curl --silent --show-error --location --head --max-time 20 https://www.infamousfreight.com
+curl --silent --show-error --location --max-time 20 https://www.infamousfreight.com/api/health
+curl --silent --location --head --max-time 20 --output /dev/null --write-out 'FINAL_URL=%{url_effective}\nHTTP_STATUS=%{http_code}\n' https://infamousfreight.com
+curl --silent --show-error --location --max-time 20 --request OPTIONS --output /tmp/quote_preflight_body.txt --write-out 'HTTP_STATUS=%{http_code}\nCONTENT_TYPE=%{content_type}\n' https://www.infamousfreight.com/api/public/quote-requests
+curl --silent --show-error --location --max-time 20 --output /tmp/invalid_tracking_body.txt --write-out 'HTTP_STATUS=%{http_code}\nCONTENT_TYPE=%{content_type}\n' https://www.infamousfreight.com/api/public/shipments/invalid-tracking
+curl --silent --show-error --max-time 15 https://infamous-freight-api.fly.dev/api/health
+curl --silent --show-error --location --max-time 20 --request OPTIONS --output /dev/null --write-out 'HTTP_STATUS=%{http_code}\nCONTENT_TYPE=%{content_type}\n' https://infamous-freight-api.fly.dev/api/public/quote-requests
+curl --silent --show-error --location --max-time 20 --output /tmp/fly_invalid_tracking_body.txt --write-out 'HTTP_STATUS=%{http_code}\nCONTENT_TYPE=%{content_type}\n' https://infamous-freight-api.fly.dev/api/public/shipments/invalid-tracking
+pnpm --filter @infamous-freight/api test -- --runInBand apps/api/test/quote-intake.test.ts apps/api/test/netlify-csp.test.ts
+```
+
+## Expected Result
+- `https://www.infamousfreight.com/` returns HTTP 200 with configured security headers.
+- `https://infamousfreight.com/` resolves to the canonical `https://www.infamousfreight.com/` host.
+- `https://www.infamousfreight.com/api/health` returns API health JSON.
+- Public quote preflight returns HTTP 204.
+- Invalid public shipment lookup returns HTTP 400 JSON with `invalid_tracking_number`.
+- Direct Fly public routes return the same public API behavior as the Netlify-proxied routes.
+- Regression tests for public routing and quote intake pass.
+
+## Actual Result
+- **Canonical frontend (`https://www.infamousfreight.com/`)**: HTTP 200 from Netlify with the configured CSP, HSTS, frame, content-type, referrer, permissions, and cross-origin policy headers.
+- **Apex redirect (`https://infamousfreight.com/`)**: resolved to `https://www.infamousfreight.com/` with final HTTP 200.
+- **Proxied API health (`https://www.infamousfreight.com/api/health`)**: HTTP 200 JSON with status `ok` and database service `connected`.
+- **Public quote preflight (`OPTIONS /api/public/quote-requests`)**: HTTP 204.
+- **Invalid public shipment lookup (`GET /api/public/shipments/invalid-tracking`)**: HTTP 400 JSON with `invalid_tracking_number`.
+- **Direct Fly API health (`https://infamous-freight-api.fly.dev/api/health`)**: HTTP 200 JSON with status `ok` and database service `connected`.
+- **Direct Fly public quote preflight**: HTTP 204.
+- **Direct Fly invalid shipment lookup**: HTTP 400 JSON with `invalid_tracking_number`.
+- **Regression tests**: `apps/api/test/quote-intake.test.ts` and `apps/api/test/netlify-csp.test.ts` passed with 19 tests.
+
+## Status
+PASS
+
+## Follow-Up
+B-007 production API reachability is resolved for the browser-critical API health path and the public API paths covered by the current recommendation set. No additional repository mitigation was needed in this pass. Full launch readiness still depends on the broader evidence gates, rollback drills, and owner sign-off tracked elsewhere in this log.

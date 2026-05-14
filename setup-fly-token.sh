@@ -7,8 +7,12 @@ ENV_FILE="$ENV_DIR/fly.env"
 mkdir -p "$ENV_DIR"
 chmod 700 "$ENV_DIR"
 
-read -r -s -p "Enter FLY_API_TOKEN: " FLY_API_TOKEN
-echo
+if [ -z "${FLY_API_TOKEN:-}" ]; then
+  read -r -s -p "Enter FLY_API_TOKEN: " FLY_API_TOKEN
+  echo
+else
+  echo "Using FLY_API_TOKEN from the current environment."
+fi
 
 if [ -z "$FLY_API_TOKEN" ]; then
   echo "FLY_API_TOKEN cannot be empty."

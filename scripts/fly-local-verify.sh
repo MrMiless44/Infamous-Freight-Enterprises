@@ -20,15 +20,21 @@ echo "Checking flyctl version..."
 flyctl version
 
 echo
+echo "Checking Fly API token..."
+if [[ -z "${FLY_API_TOKEN:-}" ]]; then
+  cat >&2 <<'EOF'
+FLY_API_TOKEN is required.
+Export a Fly token in the environment before running this script.
+EOF
+  exit 1
+fi
+
+echo
 echo "Checking Fly authentication..."
 if ! flyctl auth whoami; then
   cat >&2 <<'EOF'
-
-Fly authentication is required.
-Run:
-  flyctl auth login
-
-Then rerun this script.
+Fly authentication failed with the token provided in FLY_API_TOKEN.
+Create or rotate the token in Fly, export it as FLY_API_TOKEN, and rerun this script.
 EOF
   exit 1
 fi

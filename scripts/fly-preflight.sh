@@ -16,6 +16,11 @@ else
   exit 1
 fi
 
+if [[ -z "${FLY_API_TOKEN:-}" ]]; then
+  echo "Error: FLY_API_TOKEN is not set. Export a Fly token before running this script." >&2
+  exit 1
+fi
+
 fly auth whoami
 fly status --app "${APP_NAME}"
 

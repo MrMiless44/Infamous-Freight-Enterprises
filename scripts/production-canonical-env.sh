@@ -17,8 +17,13 @@ if ! command -v flyctl >/dev/null 2>&1; then
   exit 1
 fi
 
+if [[ -z "${FLY_API_TOKEN:-}" ]]; then
+  echo "ERROR: FLY_API_TOKEN is not set. Export a Fly token before running this script." >&2
+  exit 1
+fi
+
 if ! flyctl auth whoami >/dev/null 2>&1; then
-  echo "ERROR: flyctl is not authenticated. Run: flyctl auth login" >&2
+  echo "ERROR: flyctl authentication failed with FLY_API_TOKEN." >&2
   exit 1
 fi
 

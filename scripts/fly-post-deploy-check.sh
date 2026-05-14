@@ -6,6 +6,11 @@ APP_URL="${2:-https://infamous-freight-api.fly.dev}"
 API_URL="${3:-https://api.infamousfreight.com}"
 ALLOW_MULTI_IMAGE_DEPLOY="${ALLOW_MULTI_IMAGE_DEPLOY:-false}"
 
+if [[ -z "${FLY_API_TOKEN:-}" ]]; then
+  echo "ERROR: FLY_API_TOKEN is not set. Export a Fly token before running this script." >&2
+  exit 1
+fi
+
 flyctl auth whoami
 flyctl status --app "${APP_NAME}"
 flyctl checks list --app "${APP_NAME}"

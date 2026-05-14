@@ -7,7 +7,12 @@ IMAGE_DIGEST="${IMAGE_DIGEST:-ghcr.io/infaemous-freight/infamous-freight-api@sha
 
 FLY_BIN="$(command -v flyctl || command -v fly || true)"
 if [[ -z "${FLY_BIN}" ]]; then
-  echo "ERROR: Fly CLI is missing. Install flyctl, then run fly auth login." >&2
+  echo "ERROR: Fly CLI is missing. Install flyctl, then rerun this script with FLY_API_TOKEN set." >&2
+  exit 1
+fi
+
+if [[ -z "${FLY_API_TOKEN:-}" ]]; then
+  echo "ERROR: FLY_API_TOKEN is not set. Export a Fly token before running this script." >&2
   exit 1
 fi
 
