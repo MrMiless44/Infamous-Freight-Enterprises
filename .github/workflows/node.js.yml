@@ -9,6 +9,9 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: read
+
 jobs:
   build:
 
@@ -21,11 +24,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Setup pnpm
+      uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d # v4.1.0
+      with:
+        version: 10
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+        cache: 'pnpm'
+    - run: pnpm install --frozen-lockfile
+    - run: pnpm run build --if-present
+    - run: pnpm run test --if-present

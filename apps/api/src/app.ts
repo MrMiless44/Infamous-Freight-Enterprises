@@ -1142,7 +1142,7 @@ export function createApp() {
           ? allowedOrigins
           : allowedOrigins.length
             ? allowedOrigins
-            : true,
+            : /^https?:\/\/localhost(:\d+)?$/,
       credentials: true,
     }),
   );

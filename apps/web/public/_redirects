@@ -15,10 +15,10 @@ https://infamousfreight.com/* https://www.infamousfreight.com/:splat 301!
 /old-page /new-page 301!
 /legacy/* /new-path/:splat 301!
 
-# Browser-critical API health proxy
+# Browser-visible API health proxy (keep above /api/* catch-all)
 /api/health https://infamous-freight.fly.dev/api/health 200!
 
-# Netlify-hosted API endpoints
+# Netlify-hosted public intake/lookup endpoints (not all /api routes)
 /api/load-requests /.netlify/functions/load-requests 200!
 /api/load-requests/* /.netlify/functions/load-requests/:splat 200!
 /api/public/quote-requests /.netlify/functions/public-freight 200!
