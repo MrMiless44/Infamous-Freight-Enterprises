@@ -104,6 +104,7 @@ Follow `CONTRIBUTING.md`:
 
 - `netlify.toml` must keep 301 redirects from `https://infamousfreight.com/*` and `https://infamous-freight.netlify.app/*` to `https://www.infamousfreight.com/:splat` (smoke tests assert this canonical URL).
 - `fly.toml` sets `PORT=3000` and `http_service.internal_port=3000` for the `infamous-freight-api` app — keep them in sync.
+- Canonical Fly deployment identity (app name, direct Fly URL, and port mapping) is maintained at `docs/fly-deployment-runbook.md#canonical-fly-deployment-identity-source-of-truth`; align workflow and doc edits to that section.
 - The Smoke Test workflow writes a markdown evidence table to `$GITHUB_STEP_SUMMARY` and fails on aggregated `OVERALL_STATUS`. Don’t suppress its output.
 
 ---

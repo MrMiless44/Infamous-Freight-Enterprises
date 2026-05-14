@@ -87,6 +87,10 @@ jobs:
         id: api_coverage
         run: pnpm -C apps/api run test:coverage
 
+      - name: Validate Fly deployment consistency
+        id: fly_consistency
+        run: bash scripts/validate-fly-deployment-consistency.sh
+
       - name: Write required-checks summary
         if: always()
         run: |
@@ -102,4 +106,5 @@ jobs:
             echo "- API typecheck: ${{ steps.typecheck_api.outcome }}"
             echo "- web typecheck: ${{ steps.typecheck_web.outcome }}"
             echo "- API coverage: ${{ steps.api_coverage.outcome }}"
+            echo "- Fly deployment consistency: ${{ steps.fly_consistency.outcome }}"
           } >> "$GITHUB_STEP_SUMMARY"

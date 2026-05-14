@@ -1,5 +1,16 @@
 # Fly.io Deployment Runbook
 
+## Canonical Fly deployment identity (source of truth)
+
+Use these values as the authoritative Fly deployment identity across workflows, scripts, and docs:
+
+- Fly app name: `infamous-freight-api`
+- Direct Fly API URL: `https://infamous-freight-api.fly.dev`
+- Runtime port wiring: `$PORT` and `http_service.internal_port` (both `3000`)
+- Public API URL (custom domain): `https://api.infamousfreight.com`
+
+If any deployment configuration changes, update this section first, then update all dependent references.
+
 Run from repo root:
 
 ```bash

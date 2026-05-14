@@ -47,6 +47,9 @@ Add screenshots, logs, links, or notes that prove the change works.
 - [ ] Tracking flow still works or was not touched
 - [ ] Admin/operator flow still works or was not touched
 - [ ] Notifications still work or were not touched
+- [ ] If deployment config or infra docs changed, Fly app name (`infamous-freight-api`) was re-verified.
+- [ ] If deployment config or infra docs changed, direct Fly URL (`https://infamous-freight-api.fly.dev`) was re-verified.
+- [ ] If deployment config or infra docs changed, `PORT` and `http_service.internal_port` were re-verified as `3000`.
 
 ## Follow-up issues
 Link any blockers, deferred tasks, or evidence gaps.

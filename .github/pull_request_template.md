@@ -50,6 +50,12 @@ If production-impacting, document:
 - [ ] Changelog/release notes were reviewed for updated packages.
 - [ ] Risk notes for major/high-risk transitive changes are included in this PR.
 
+## Deployment consistency checks (when touching deployment config/infra docs)
+
+- [ ] Fly app name (`infamous-freight-api`) remains consistent across `fly.toml`, workflows, and docs.
+- [ ] Direct Fly URL (`https://infamous-freight-api.fly.dev`) remains consistent across workflows/docs.
+- [ ] Port mapping remains aligned at `3000` (`PORT` and `http_service.internal_port`).
+
 ## Checklist
 
 - [ ] Branch is up to date with `main`.

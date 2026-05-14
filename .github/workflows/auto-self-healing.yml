@@ -52,7 +52,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          APP_URL="https://infamous-freight.fly.dev"
+          # Source of truth: docs/fly-deployment-runbook.md#canonical-fly-deployment-identity-source-of-truth
+          APP_URL="https://infamous-freight-api.fly.dev"
           API_URL="https://api.infamousfreight.com"
           FAILED=0
           TIMESTAMP="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
@@ -131,7 +132,7 @@ jobs:
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          APP_NAME: infamous-freight
+          APP_NAME: infamous-freight-api
           PRIMARY_REGION: ${{ inputs.primary_region || 'dfw' }}
           CORS_ORIGINS: ${{ inputs.cors_origins || 'https://www.infamousfreight.com,https://infamousfreight.com' }}
         run: bash scripts/fly-runtime-repair.sh
@@ -141,7 +142,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          APP_URL="https://infamous-freight.fly.dev"
+          APP_URL="https://infamous-freight-api.fly.dev"
           FAILED=0
 
           for endpoint in "/health" "/api/health" "/api/health/live"; do
