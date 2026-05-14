@@ -2,6 +2,12 @@
 
 Describe what changed and why.
 
+## Scope and risk
+
+- Scope (single-purpose change statement):
+- Risk level (low/medium/high):
+- Primary rollback trigger:
+
 ## Type of change
 
 - [ ] Feature
@@ -16,10 +22,11 @@ Describe what changed and why.
 Paste the commands you ran and the result.
 
 ```bash
-npm run lint
-npx tsc -p apps/api/tsconfig.json --noEmit
-npx tsc -p apps/web/tsconfig.json --noEmit
-npm --prefix apps/api run test:coverage
+pnpm install --frozen-lockfile
+pnpm run lint
+pnpm -C apps/api exec tsc -p tsconfig.json --noEmit
+pnpm -C apps/web exec tsc -p tsconfig.json --noEmit
+pnpm -C apps/api run test:coverage
 ```
 
 ## Production impact
@@ -37,6 +44,12 @@ If production-impacting, document:
 - rollback plan:
 - smoke-test evidence:
 
+## Dependency update notes (only when applicable)
+
+- [ ] `pnpm-lock.yaml` is updated with any package manifest/dependency changes.
+- [ ] Changelog/release notes were reviewed for updated packages.
+- [ ] Risk notes for major/high-risk transitive changes are included in this PR.
+
 ## Checklist
 
 - [ ] Branch is up to date with `main`.
@@ -45,4 +58,5 @@ If production-impacting, document:
 - [ ] Docs were updated where needed.
 - [ ] Secrets were not committed.
 - [ ] Screenshots/logs are included when useful.
+- [ ] Validation logs/screenshots are attached for infra or UX-impacting changes.
 - [ ] Linked issue is included when applicable.

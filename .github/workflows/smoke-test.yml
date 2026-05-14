@@ -72,8 +72,8 @@ jobs:
 
           run_check 1 "Canonical frontend" "https://www.infamousfreight.com" "200"
           run_check 2 "Bare-domain redirect" "https://infamousfreight.com" "200" "https://www.infamousfreight.com/"
-          run_check 3 "Fly root health" "https://infamous-freight.fly.dev/health" "200"
-          run_check 4 "Fly API health" "https://infamous-freight.fly.dev/api/health" "200"
+          run_check 3 "Fly root health" "https://infamous-freight-api.fly.dev/health" "200"
+          run_check 4 "Fly API health" "https://infamous-freight-api.fly.dev/api/health" "200"
           run_check 5 "Proxied API health" "https://www.infamousfreight.com/api/health" "200"
 
           {

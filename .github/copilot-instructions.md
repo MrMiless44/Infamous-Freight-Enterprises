@@ -103,7 +103,7 @@ Follow `CONTRIBUTING.md`:
 ## 8. Deployment guardrails
 
 - `netlify.toml` must keep 301 redirects from `https://infamousfreight.com/*` and `https://infamous-freight.netlify.app/*` to `https://www.infamousfreight.com/:splat` (smoke tests assert this canonical URL).
-- `fly.toml` sets `PORT=8080` and `http_service.internal_port=8080` for the `infamous-freight` app — keep them in sync.
+- `fly.toml` sets `PORT=3000` and `http_service.internal_port=3000` for the `infamous-freight-api` app — keep them in sync.
 - The Smoke Test workflow writes a markdown evidence table to `$GITHUB_STEP_SUMMARY` and fails on aggregated `OVERALL_STATUS`. Don’t suppress its output.
 
 ---
