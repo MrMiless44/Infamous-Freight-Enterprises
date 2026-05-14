@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/store/app-store';
 import { getSupabase } from '@/hooks/useSupabase';
 import { isPublicPath } from '@/lib/routes';
@@ -8,43 +8,12 @@ import {
   isPaidSubscription,
   normalizeSubscriptionStatus,
 } from '@/lib/paywall';
+import { resolveRouteReadiness } from '@/lib/routeReadiness';
 import Sidebar from '@/components/ui/Sidebar';
 import TopBar from '@/components/ui/TopBar';
 import { BRAND } from '@/lib/brand';
 import { Toaster } from 'react-hot-toast';
 import { LayoutDashboard, MessageSquare, Truck, User } from 'lucide-react';
-
-type RouteReadiness = {
-  tone: 'demo' | 'hardening';
-  message: string;
-};
-
-const routeReadinessMap: Record<string, RouteReadiness> = {
-  '/ops': {
-    tone: 'demo',
-    message: 'This dashboard currently includes sample operational data while live services are being wired in.',
-  },
-  '/analytics': {
-    tone: 'hardening',
-    message: 'Analytics is still being hardened. Treat figures here as non-final until production data verification is complete.',
-  },
-  '/compliance': {
-    tone: 'hardening',
-    message: 'Compliance surfaces are still being hardened. Verify critical actions and records against source systems before relying on them operationally.',
-  },
-  '/carriers': {
-    tone: 'hardening',
-    message: 'Carrier management is still being hardened. Confirm workflow completeness before using it as the sole production workflow.',
-  },
-  '/accounting': {
-    tone: 'hardening',
-    message: 'Accounting surfaces are still being hardened. Validate finance-critical outputs before operational use.',
-  },
-  '/quotes': {
-    tone: 'hardening',
-    message: 'Quote operations are still being hardened. Double-check live quote state before customer-facing use.',
-  },
-};
 
 const AppLayout: React.FC = () => {
   const { sidebarOpen, isLoading, user, setUser, setLoading, logout } = useAppStore();
@@ -138,12 +107,7 @@ const AppLayout: React.FC = () => {
     }
   }, [isLoading, location.pathname, navigate, user]);
 
-  const readinessNotice = useMemo(() => {
-    const matchedPath = Object.keys(routeReadinessMap).find((path) =>
-      location.pathname === path || location.pathname.startsWith(`${path}/`)
-    );
-    return matchedPath ? routeReadinessMap[matchedPath] : null;
-  }, [location.pathname]);
+  const readinessNotice = useMemo(() => resolveRouteReadiness(location.pathname), [location.pathname]);
 
   if (isLoading) {
     return (
@@ -171,13 +135,44 @@ const AppLayout: React.FC = () => {
       role="note"
       aria-live="polite"
       className={`text-sm px-4 py-2 border-b ${
-        readinessNotice.tone === 'demo'
+        readinessNotice.state === 'demo'
           ? 'bg-blue-950/80 text-blue-100 border-blue-800/70'
-          : 'bg-amber-950/80 text-amber-100 border-amber-800/70'
+          : readinessNotice.state === 'live'
+            ? 'bg-emerald-950/80 text-emerald-100 border-emerald-800/70'
+            : 'bg-red-950/80 text-red-100 border-red-800/70'
       }`}
     >
-      {readinessNotice.tone === 'demo' ? 'Demo-backed surface:' : 'Still being hardened:'} {readinessNotice.message}
+      {readinessNotice.state === 'demo'
+        ? 'Demo-backed surface:'
+        : readinessNotice.state === 'live'
+          ? 'Production-ready surface:'
+          : 'Not ready for production:'}{' '}
+      {readinessNotice.message}
     </div>
+  ) : null;
+
+  const notReadyGate = readinessNotice?.state === 'not_ready' ? (
+    <section className="mx-auto mt-6 max-w-3xl rounded-2xl border border-red-800/80 bg-red-950/40 p-6 text-red-50">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-red-200">Authenticated route unavailable</p>
+      <h1 className="mt-2 text-2xl font-bold">This surface is not ready for live operations</h1>
+      <p className="mt-3 text-sm text-red-100/90">
+        {readinessNotice.message} Route readiness statuses are tracked in <code>docs/current-status.md</code>.
+      </p>
+      <div className="mt-5 flex flex-wrap gap-3">
+        <Link
+          to="/ops"
+          className="inline-flex items-center justify-center rounded-xl bg-infamous-red px-4 py-2 text-sm font-semibold text-[#F5E8E8] hover:brightness-110 transition"
+        >
+          Back to operations dashboard
+        </Link>
+        <Link
+          to="/request-quote"
+          className="inline-flex items-center justify-center rounded-xl border border-red-200/30 px-4 py-2 text-sm font-semibold text-red-100 hover:bg-red-900/40 transition"
+        >
+          Open public quote intake
+        </Link>
+      </div>
+    </section>
   ) : null;
 
   if (isPublicPath(location.pathname)) {
@@ -206,7 +201,7 @@ const AppLayout: React.FC = () => {
         {readinessBanner}
         <TopBar />
         <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6">
-          <Outlet />
+          {notReadyGate ?? <Outlet />}
         </main>
       </div>
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-infamous-border bg-infamous-navy md:hidden" aria-label="Mobile navigation">
