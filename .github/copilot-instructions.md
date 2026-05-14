@@ -21,7 +21,7 @@ Supporting areas:
 - `.github/workflows/` — CI/CD, CodeQL, smoke-test, release pipelines.
 - `netlify.toml`, `fly.toml`, `Dockerfile`, `Dockerfile.api` — deployment configuration.
 
-Production deployment: web is deployed to Netlify (`apps/web/dist`), API is deployed to Fly.io (`infamous-freight.fly.dev`) on port `8080`.
+Production deployment: web is deployed to Netlify (`apps/web/dist`), API is deployed to Fly.io (`infamous-freight-api.fly.dev`) on port `3000`.
 
 ---
 
