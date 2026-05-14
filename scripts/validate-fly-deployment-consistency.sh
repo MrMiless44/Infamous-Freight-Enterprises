@@ -11,7 +11,7 @@ require_contains() {
   local file="$1"
   local pattern="$2"
   local description="$3"
-  if ! grep -qE "$pattern" "$file"; then
+  if ! grep -qE -- "$pattern" "$file"; then
     echo "::error::${file} is missing expected ${description} (${pattern})."
     exit 1
   fi
@@ -46,16 +46,18 @@ require_contains ".github/workflows/fly-mpg-repair.yml" "APP_NAME: ${EXPECTED_AP
 
 # Canonical documentation and references
 require_contains "${CANONICAL_DOC}" "^## Canonical Fly deployment identity \\(source of truth\\)$" "canonical section heading"
-require_contains "${CANONICAL_DOC}" "`\\$PORT` and `http_service.internal_port` \\(both ${EXPECTED_PORT}\\)" "canonical port description"
-require_contains "${CANONICAL_DOC}" "`${EXPECTED_APP}`" "canonical app name"
-require_contains "${CANONICAL_DOC}" "`${EXPECTED_FLY_URL}`" "canonical Fly URL"
+require_contains "${CANONICAL_DOC}" '\$PORT' "canonical port variable"
+require_contains "${CANONICAL_DOC}" "http_service.internal_port" "canonical internal port key"
+require_contains "${CANONICAL_DOC}" "both.*${EXPECTED_PORT}" "canonical port value"
+require_contains "${CANONICAL_DOC}" "${EXPECTED_APP}" "canonical app name"
+require_contains "${CANONICAL_DOC}" "${EXPECTED_FLY_URL}" "canonical Fly URL"
 require_contains ".github/copilot-instructions.md" "${CANONICAL_DOC}#${CANONICAL_ANCHOR}" "copilot-instructions canonical runbook link"
 require_contains ".github/workflows/ci-cd.yml" "${CANONICAL_DOC}#${CANONICAL_ANCHOR}" "CI workflow canonical runbook link"
 require_contains ".github/workflows/deploy-ai.yml" "${CANONICAL_DOC}#${CANONICAL_ANCHOR}" "Deploy-AI workflow canonical runbook link"
 
 # Prevent legacy values from drifting back into workflows
 require_absent_in_dir ".github/workflows" "https://infamous-freight\\.fly\\.dev" "legacy Fly URL"
-require_absent_in_dir ".github/workflows" "--app[[:space:]]+infamous-freight(\\b|$)" "legacy Fly app flag"
+require_absent_in_dir ".github/workflows" "--app[[:space:]]+infamous-freight([[:space:]]|$)" "legacy Fly app flag"
 require_absent_in_dir ".github/workflows" "APP_NAME:[[:space:]]*infamous-freight$" "legacy Fly app env"
 
 echo "Fly deployment consistency check passed."
