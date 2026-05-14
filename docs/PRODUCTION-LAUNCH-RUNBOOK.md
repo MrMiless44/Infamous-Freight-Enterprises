@@ -203,9 +203,10 @@ Or run the raw curl checks:
 ```bash
 curl -i https://www.infamousfreight.com
 curl -i https://infamousfreight.com
-curl -i https://infamous-freight-api.fly.dev/health
-curl -i https://infamous-freight-api.fly.dev/api/health
-curl -i https://www.infamousfreight.com/api/health
+curl -i https://infamous-freight-api.fly.dev/api/health/live
+curl -i https://infamous-freight-api.fly.dev/api/health/ready
+curl -i https://www.infamousfreight.com/api/health/live
+curl -i https://www.infamousfreight.com/api/health/ready
 ```
 
 Expected result:
@@ -246,9 +247,10 @@ Do not mark production ready until all of these pass:
 
 - `https://www.infamousfreight.com` returns HTTP 200.
 - `https://infamousfreight.com` redirects to `https://www.infamousfreight.com`.
-- `https://infamous-freight-api.fly.dev/health` returns HTTP 200.
-- `https://infamous-freight-api.fly.dev/api/health` returns HTTP 200.
-- `https://www.infamousfreight.com/api/health` returns HTTP 200.
+- `https://infamous-freight-api.fly.dev/api/health/live` returns HTTP 200.
+- `https://infamous-freight-api.fly.dev/api/health/ready` returns HTTP 200.
+- `https://www.infamousfreight.com/api/health/live` returns HTTP 200.
+- `https://www.infamousfreight.com/api/health/ready` returns HTTP 200.
 
 ## Rollback
 
