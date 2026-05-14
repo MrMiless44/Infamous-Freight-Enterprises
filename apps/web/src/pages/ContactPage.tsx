@@ -10,7 +10,11 @@ const initialForm = {
   phone: '',
   topic: 'Freight quote',
   message: '',
+  contactConsent: false,
 };
+
+type ContactFormKey = keyof typeof initialForm;
+type ContactTextKey = Exclude<ContactFormKey, 'contactConsent'>;
 
 const contactCards = [
   {
@@ -39,7 +43,7 @@ const ContactPage: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const update = (key: keyof typeof initialForm, value: string) => {
+  const update = (key: ContactTextKey, value: string) => {
     setForm((current) => ({ ...current, [key]: value }));
   };
 
@@ -49,7 +53,7 @@ const ContactPage: React.FC = () => {
     setError('');
 
     try {
-      await submitNetlifyForm('contact', form);
+      await submitNetlifyForm('contact', { ...form, contactConsent: form.contactConsent ? 'yes' : 'no' });
       setSubmitted(true);
       setForm(initialForm);
     } catch (err) {
@@ -126,8 +130,8 @@ const ContactPage: React.FC = () => {
                         type={key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'text'}
                         autoComplete={key === 'name' ? 'name' : key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'organization'}
                         maxLength={key === 'email' ? 160 : key === 'phone' ? 40 : 120}
-                        value={form[key as keyof typeof initialForm]}
-                        onChange={(event) => update(key as keyof typeof initialForm, event.target.value)}
+                        value={form[key as ContactTextKey]}
+                        onChange={(event) => update(key as ContactTextKey, event.target.value)}
                         className="w-full rounded-xl border border-infamous-border bg-infamous-panel px-4 py-3 text-[#F5E8E8] outline-none transition focus:border-infamous-orange"
                         placeholder={label}
                         required={key === 'name' || key === 'email'}
@@ -162,6 +166,22 @@ const ContactPage: React.FC = () => {
                     placeholder="Tell us what you need help with."
                     required
                   />
+                </label>
+                <label className="flex gap-3 rounded-xl border border-infamous-border bg-infamous-panel p-4 text-sm leading-6 text-[#F5E8E8]/80">
+                  <input
+                    name="contactConsent"
+                    type="checkbox"
+                    checked={form.contactConsent}
+                    onChange={(event) => setForm((current) => ({ ...current, contactConsent: event.target.checked }))}
+                    required
+                    className="mt-1 h-4 w-4 rounded border-infamous-border bg-infamous-dark text-infamous-orange focus:ring-infamous-orange"
+                  />
+                  <span>
+                    I agree that Infamous Freight may contact me about this request. I have reviewed the{' '}
+                    <Link to="/privacy" className="font-semibold text-infamous-orange hover:underline">Privacy Policy</Link>
+                    {' '}and{' '}
+                    <Link to="/terms" className="font-semibold text-infamous-orange hover:underline">Terms</Link>.
+                  </span>
                 </label>
                 {error ? <p className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">{error}</p> : null}
                 <button
