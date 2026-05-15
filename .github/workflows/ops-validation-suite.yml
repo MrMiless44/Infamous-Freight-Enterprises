@@ -1,0 +1,67 @@
+name: Operations Validation Suite
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Web URL
+        required: false
+        default: https://www.infamousfreight.com
+      api_url:
+        description: API URL
+        required: false
+        default: https://infamous-freight-api.fly.dev
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run smoke tests
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url }}
+          API_URL: ${{ github.event.inputs.api_url }}
+        run: |
+          bash scripts/smoke-production.sh
+
+  realtime-load:
+    runs-on: ubuntu-latest
+    needs: smoke-tests
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run realtime load validation
+        uses: grafana/run-k6-action@v1
+        with:
+          path: load-tests/k6-realtime-check.js
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url }}
+
+  kpi-snapshot:
+    runs-on: ubuntu-latest
+    needs: realtime-load
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate KPI snapshot
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url }}
+          API_URL: ${{ github.event.inputs.api_url }}
+        run: |
+          bash scripts/kpi-snapshot.sh
+
+      - name: Upload KPI snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: kpi-snapshot
+          path: kpi-snapshot.json

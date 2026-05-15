@@ -1,0 +1,56 @@
+name: Netlify Preview Comment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview-comment:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Compute Netlify preview URL
+        id: preview
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          NETLIFY_SITE_NAME: ${{ vars.NETLIFY_SITE_NAME || 'infamous-freight' }}
+          STAGING_API_URL: ${{ vars.STAGING_API_URL || 'https://infamous-freight-api.fly.dev' }}
+        run: |
+          preview_url="https://deploy-preview-${PR_NUMBER}--${NETLIFY_SITE_NAME}.netlify.app"
+          echo "preview_url=${preview_url}" >> "$GITHUB_OUTPUT"
+          echo "api_url=${STAGING_API_URL}" >> "$GITHUB_OUTPUT"
+
+      - name: Comment preview details
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = '<!-- infamous-freight-netlify-preview -->';
+            const previewUrl = '${{ steps.preview.outputs.preview_url }}';
+            const apiUrl = '${{ steps.preview.outputs.api_url }}';
+            const body = `${marker}
+            ## Deploy Preview
+
+            - Web preview: ${previewUrl}
+            - API target: ${apiUrl}
+            - Smoke test command:
+
+            \`\`\`bash
+            BASE_URL=${previewUrl} API_URL=${apiUrl} bash scripts/smoke-production.sh
+            \`\`\`
+
+            Confirm the Netlify deploy has finished before running smoke tests.`;
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.rest.issues.listComments({ owner, repo, issue_number, per_page: 100 });
+            const existing = comments.data.find((comment) => comment.body && comment.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }

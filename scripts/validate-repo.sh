@@ -29,6 +29,14 @@ if should_install_workspace_dependencies "$PACKAGE_MANAGER"; then
 fi
 record_pass "Dependency installation check"
 
+echo "==> Validating database URL shape"
+if bash scripts/check-database-url.sh; then
+  record_pass "Database URL validation"
+else
+  record_fail "Database URL validation"
+  exit 1
+fi
+
 echo "==> Generating Prisma client"
 run_workspace_script "$PACKAGE_MANAGER" prisma:generate
 record_pass "Prisma client generation"
