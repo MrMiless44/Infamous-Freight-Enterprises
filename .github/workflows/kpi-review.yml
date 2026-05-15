@@ -1,0 +1,36 @@
+name: KPI Review Reminder
+
+on:
+  schedule:
+    - cron: '7 8 * * 2'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kpi-review:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Generate KPI review summary
+        run: |
+          {
+            echo "# KPI Review Reminder"
+            echo ""
+            echo "Review the following metrics:"
+            echo "- quote conversion"
+            echo "- dispatch latency"
+            echo "- shipment completion time"
+            echo "- driver utilization"
+            echo "- billing failures"
+            echo "- AI usage efficiency"
+            echo "- API latency and error rate"
+            echo "- realtime connection stability"
+          } > kpi-review.md
+
+      - name: Upload KPI reminder artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kpi-review
+          path: kpi-review.md
