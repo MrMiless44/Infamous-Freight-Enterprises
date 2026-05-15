@@ -19,6 +19,8 @@ DECLARE
   duplicate_row record;
   optimized_using text;
   optimized_with_check text;
+  uid_pattern constant text := 'auth[.]uid[[:space:]]*[(][[:space:]]*[)]';
+  role_pattern constant text := 'auth[.]role[[:space:]]*[(][[:space:]]*[)]';
 BEGIN
   -- Audit + optimize each policy expression on priority tables.
   FOR policy_row IN
@@ -36,13 +38,35 @@ BEGIN
     optimized_with_check := policy_row.with_check;
 
     IF optimized_using IS NOT NULL THEN
-      optimized_using := regexp_replace(optimized_using, 'auth\\.uid\\s*\\(\\s*\\)', '(select auth.uid())', 'g');
-      optimized_using := regexp_replace(optimized_using, 'auth\\.role\\s*\\(\\s*\\)', '(select auth.role())', 'g');
+      optimized_using := regexp_replace(optimized_using, uid_pattern, '(select auth.uid())', 'g');
+      optimized_using := regexp_replace(optimized_using, role_pattern, '(select auth.role())', 'g');
     END IF;
 
     IF optimized_with_check IS NOT NULL THEN
-      optimized_with_check := regexp_replace(optimized_with_check, 'auth\\.uid\\s*\\(\\s*\\)', '(select auth.uid())', 'g');
-      optimized_with_check := regexp_replace(optimized_with_check, 'auth\\.role\\s*\\(\\s*\\)', '(select auth.role())', 'g');
+      optimized_with_check := regexp_replace(optimized_with_check, uid_pattern, '(select auth.uid())', 'g');
+      optimized_with_check := regexp_replace(optimized_with_check, role_pattern, '(select auth.role())', 'g');
+    END IF;
+
+    IF optimized_using IS NOT NULL AND (
+      optimized_using ~ ';'
+      OR optimized_using ~ '--'
+      OR optimized_using ~ '/\\*'
+    ) THEN
+      RAISE EXCEPTION 'Unsafe optimized USING expression detected for policy % on %.%',
+        policy_row.policyname,
+        policy_row.schemaname,
+        policy_row.tablename;
+    END IF;
+
+    IF optimized_with_check IS NOT NULL AND (
+      optimized_with_check ~ ';'
+      OR optimized_with_check ~ '--'
+      OR optimized_with_check ~ '/\\*'
+    ) THEN
+      RAISE EXCEPTION 'Unsafe optimized WITH CHECK expression detected for policy % on %.%',
+        policy_row.policyname,
+        policy_row.schemaname,
+        policy_row.tablename;
     END IF;
 
     IF optimized_using IS DISTINCT FROM policy_row.qual
