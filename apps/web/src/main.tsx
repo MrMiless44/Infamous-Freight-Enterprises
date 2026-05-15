@@ -43,7 +43,7 @@ if (sentryEnabled) {
     Sentry.init({
       dsn: sentryDsn,
       environment: sentryEnvironment,
-      sendDefaultPii: true,
+      sendDefaultPii: false,
       integrations: [
         Sentry.browserTracingIntegration(),
         Sentry.replayIntegration(),

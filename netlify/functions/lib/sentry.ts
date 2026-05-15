@@ -9,7 +9,7 @@ export function initSentry(): void {
   Sentry.init({
     dsn,
     environment: process.env.CONTEXT ?? 'development',
-    sendDefaultPii: true,
+    sendDefaultPii: false,
     tracesSampleRate: 0,
   });
   initialized = true;

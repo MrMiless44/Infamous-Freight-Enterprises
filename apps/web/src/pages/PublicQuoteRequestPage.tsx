@@ -159,24 +159,29 @@ const InputField: React.FC<{
   required?: boolean;
   autoComplete?: string;
   inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
-}> = ({ label, name, type = 'text', value, onChange, placeholder, required, autoComplete, inputMode }) => (
-  <label className="block">
-    <span className="mb-2 block text-sm font-medium text-[#F5E8E8]/80">
-      {label} {required && <span className="text-infamous-orange">*</span>}
-    </span>
-    <input
-      name={name}
-      type={type}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder || label}
-      required={required}
-      autoComplete={autoComplete}
-      inputMode={inputMode}
-      className="input-field"
-    />
-  </label>
-);
+}> = ({ label, name, type = 'text', value, onChange, placeholder, required, autoComplete, inputMode }) => {
+  const id = `quote-${name}`;
+  return (
+    <label htmlFor={id} className="block">
+      <span className="mb-2 block text-sm font-medium text-[#F5E8E8]/80">
+        {label} {required && <span className="text-infamous-orange">*</span>}
+      </span>
+      <input
+        id={id}
+        name={name}
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder || label}
+        required={required}
+        aria-required={required || undefined}
+        autoComplete={autoComplete}
+        inputMode={inputMode}
+        className="input-field"
+      />
+    </label>
+  );
+};
 
 const PublicQuoteRequestPage: React.FC = () => {
   const [form, setForm] = useState(initialForm);
@@ -288,14 +293,16 @@ const PublicQuoteRequestPage: React.FC = () => {
               <InputField label="Destination City / State" name="destination" value={form.destination} onChange={(v) => updateField('destination', v)} required />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <label className="block">
+              <label htmlFor="quote-equipment" className="block">
                 <span className="mb-2 block text-sm font-medium text-[#F5E8E8]/80">Equipment / Service Type <span className="text-infamous-orange">*</span></span>
                 <select
+                  id="quote-equipment"
                   name="equipment"
                   value={form.equipment}
                   onChange={(e) => updateField('equipment', e.target.value)}
                   className="input-field"
                   required
+                  aria-required="true"
                 >
                   <option>Dry van</option>
                   <option>Reefer</option>
@@ -415,13 +422,15 @@ const PublicQuoteRequestPage: React.FC = () => {
                 <p className="mt-1 text-xs text-[#B88989]">Mid: {formatCurrency(estimate.mid)} · {estimate.confidence}% confidence</p>
               </div>
             )}
-            <label className="flex gap-3 rounded-xl border border-infamous-border bg-infamous-panel p-4 text-sm leading-6 text-[#F5E8E8]/80">
+            <label htmlFor="quote-consent" className="flex gap-3 rounded-xl border border-infamous-border bg-infamous-panel p-4 text-sm leading-6 text-[#F5E8E8]/80">
               <input
+                id="quote-consent"
                 name="contactConsent"
                 type="checkbox"
                 checked={form.contactConsent}
                 onChange={(event) => setForm((current) => ({ ...current, contactConsent: event.target.checked }))}
                 required
+                aria-required="true"
                 className="mt-1 h-4 w-4 rounded border-infamous-border bg-infamous-dark text-infamous-red focus:ring-infamous-red"
               />
               <span>
@@ -522,10 +531,10 @@ const PublicQuoteRequestPage: React.FC = () => {
             <form
               name="quote-request"
               method="POST"
-              action="/thank-you/"
+              action="/thank-you/?form=quote-request"
               data-netlify="true"
               data-netlify-form="quote-request"
-              data-success-url="/thank-you/"
+              data-success-url="/thank-you/?form=quote-request"
               netlify-honeypot="bot-field"
               encType="multipart/form-data"
               onSubmit={handleSubmit}

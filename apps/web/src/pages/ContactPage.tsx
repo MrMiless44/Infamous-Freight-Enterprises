@@ -115,7 +115,7 @@ const ContactPage: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <form name="contact" method="POST" action="/thank-you/" data-netlify="true" data-netlify-form="contact" data-success-url="/thank-you/" netlify-honeypot="bot-field" onSubmit={handleSubmit} className="mt-6 space-y-5">
+              <form name="contact" method="POST" action="/thank-you/?form=contact" data-netlify="true" data-netlify-form="contact" data-success-url="/thank-you/?form=contact" netlify-honeypot="bot-field" onSubmit={handleSubmit} className="mt-6 space-y-5">
                 <input type="hidden" name="form-name" value="contact" />
                 <input type="hidden" name="csrf-token" value="netlify-form-contact-v1" />
                 <input type="hidden" name="clientSubmittedAt" />
@@ -129,26 +129,32 @@ const ContactPage: React.FC = () => {
                     ['company', 'Company'],
                     ['email', 'Email'],
                     ['phone', 'Phone'],
-                  ].map(([key, label]) => (
-                    <label key={key} className="block">
-                      <span className="mb-2 block text-sm font-medium text-[#F5E8E8]/80">{label}</span>
-                      <input
-                        name={key}
-                        type={key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'text'}
-                        autoComplete={key === 'name' ? 'name' : key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'organization'}
-                        maxLength={key === 'email' ? 160 : key === 'phone' ? 40 : 120}
-                        value={form[key as ContactTextKey]}
-                        onChange={(event) => update(key as ContactTextKey, event.target.value)}
-                        className="w-full rounded-xl border border-infamous-border bg-infamous-panel px-4 py-3 text-[#F5E8E8] outline-none transition focus:border-infamous-orange"
-                        placeholder={label}
-                        required={key === 'name' || key === 'email'}
-                      />
-                    </label>
-                  ))}
+                  ].map(([key, label]) => {
+                    const isRequired = key === 'name' || key === 'email';
+                    return (
+                      <label key={key} htmlFor={`contact-${key}`} className="block">
+                        <span className="mb-2 block text-sm font-medium text-[#F5E8E8]/80">{label}</span>
+                        <input
+                          id={`contact-${key}`}
+                          name={key}
+                          type={key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'text'}
+                          autoComplete={key === 'name' ? 'name' : key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'organization'}
+                          maxLength={key === 'email' ? 160 : key === 'phone' ? 40 : 120}
+                          value={form[key as ContactTextKey]}
+                          onChange={(event) => update(key as ContactTextKey, event.target.value)}
+                          className="w-full rounded-xl border border-infamous-border bg-infamous-panel px-4 py-3 text-[#F5E8E8] outline-none transition focus:border-infamous-orange"
+                          placeholder={label}
+                          required={isRequired}
+                          aria-required={isRequired || undefined}
+                        />
+                      </label>
+                    );
+                  })}
                 </div>
-                <label className="block">
+                <label htmlFor="contact-topic" className="block">
                   <span className="mb-2 block text-sm font-medium text-[#F5E8E8]/80">Topic</span>
                   <select
+                    id="contact-topic"
                     name="topic"
                     value={form.topic}
                     onChange={(event) => update('topic', event.target.value)}
@@ -162,9 +168,10 @@ const ContactPage: React.FC = () => {
                     <option>General support</option>
                   </select>
                 </label>
-                <label className="block">
+                <label htmlFor="contact-message" className="block">
                   <span className="mb-2 block text-sm font-medium text-[#F5E8E8]/80">Message</span>
                   <textarea
+                    id="contact-message"
                     name="message"
                     maxLength={2000}
                     value={form.message}
@@ -172,15 +179,18 @@ const ContactPage: React.FC = () => {
                     className="min-h-36 w-full rounded-xl border border-infamous-border bg-infamous-panel px-4 py-3 text-[#F5E8E8] outline-none transition focus:border-infamous-orange"
                     placeholder="Tell us what you need help with."
                     required
+                    aria-required="true"
                   />
                 </label>
-                <label className="flex gap-3 rounded-xl border border-infamous-border bg-infamous-panel p-4 text-sm leading-6 text-[#F5E8E8]/80">
+                <label htmlFor="contact-consent" className="flex gap-3 rounded-xl border border-infamous-border bg-infamous-panel p-4 text-sm leading-6 text-[#F5E8E8]/80">
                   <input
+                    id="contact-consent"
                     name="contactConsent"
                     type="checkbox"
                     checked={form.contactConsent}
                     onChange={(event) => setForm((current) => ({ ...current, contactConsent: event.target.checked }))}
                     required
+                    aria-required="true"
                     className="mt-1 h-4 w-4 rounded border-infamous-border bg-infamous-dark text-infamous-orange focus:ring-infamous-orange"
                   />
                   <span>

@@ -106,6 +106,7 @@ function BookDemoModal({ onClose }: { onClose: () => void }) {
                       placeholder="John Smith"
                       className="pl-10 border-infamous-border bg-infamous-panel text-[#F5E8E8]"
                       required
+                      aria-required="true"
                     />
                   </div>
                 </div>
@@ -120,6 +121,7 @@ function BookDemoModal({ onClose }: { onClose: () => void }) {
                       placeholder="Iron Route Logistics"
                       className="pl-10 border-infamous-border bg-infamous-panel text-[#F5E8E8]"
                       required
+                      aria-required="true"
                     />
                   </div>
                 </div>
@@ -129,7 +131,7 @@ function BookDemoModal({ onClose }: { onClose: () => void }) {
                 <label htmlFor="demo-email" className="text-sm text-[#B88989] mb-1 block">Email</label>
                 <div className="relative">
                   <Mail aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#B88989]/70" />
-                  <Input
+                    <Input
                     id="demo-email"
                     type="email"
                     value={formData.email}
@@ -137,6 +139,7 @@ function BookDemoModal({ onClose }: { onClose: () => void }) {
                     placeholder="john@acmetrucking.com"
                     className="pl-10 border-infamous-border bg-infamous-panel text-[#F5E8E8]"
                     required
+                    aria-required="true"
                   />
                 </div>
               </div>
@@ -164,6 +167,7 @@ function BookDemoModal({ onClose }: { onClose: () => void }) {
                   onChange={(e) => setFormData({ ...formData, fleetSize: e.target.value })}
                   className="w-full rounded-md border border-infamous-border bg-infamous-panel px-3 py-2 text-[#F5E8E8] text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
                   required
+                  aria-required="true"
                 >
                   <option value="">Select fleet size</option>
                   <option value="1-5">1-5 trucks</option>
