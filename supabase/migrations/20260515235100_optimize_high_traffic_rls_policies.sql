@@ -1,6 +1,8 @@
 -- Supabase RLS performance hardening for high-traffic tables.
 -- Rewrites auth helper calls to initplan-friendly subselects and removes exact duplicate
 -- permissive policies to reduce policy evaluation overhead.
+-- High-traffic candidates are tables with sustained advisor warnings and frequent
+-- tenant-scoped reads/writes; review and expand this list during monthly RLS review.
 DO $$
 DECLARE
   target_tables constant text[] := ARRAY[
@@ -33,17 +35,18 @@ BEGIN
     optimized_with_check := policy_row.with_check;
 
     IF optimized_using IS NOT NULL THEN
-      optimized_using := regexp_replace(optimized_using, 'auth\\.uid\\(\\)', '(select auth.uid())', 'g');
-      optimized_using := regexp_replace(optimized_using, 'auth\\.role\\(\\)', '(select auth.role())', 'g');
+      optimized_using := regexp_replace(optimized_using, 'auth\\.uid\\s*\\(\\s*\\)', '(select auth.uid())', 'g');
+      optimized_using := regexp_replace(optimized_using, 'auth\\.role\\s*\\(\\s*\\)', '(select auth.role())', 'g');
     END IF;
 
     IF optimized_with_check IS NOT NULL THEN
-      optimized_with_check := regexp_replace(optimized_with_check, 'auth\\.uid\\(\\)', '(select auth.uid())', 'g');
-      optimized_with_check := regexp_replace(optimized_with_check, 'auth\\.role\\(\\)', '(select auth.role())', 'g');
+      optimized_with_check := regexp_replace(optimized_with_check, 'auth\\.uid\\s*\\(\\s*\\)', '(select auth.uid())', 'g');
+      optimized_with_check := regexp_replace(optimized_with_check, 'auth\\.role\\s*\\(\\s*\\)', '(select auth.role())', 'g');
     END IF;
 
     IF optimized_using IS DISTINCT FROM policy_row.qual
       OR optimized_with_check IS DISTINCT FROM policy_row.with_check THEN
+      RAISE NOTICE 'Optimizing policy %.%:%', policy_row.schemaname, policy_row.tablename, policy_row.policyname;
       EXECUTE format(
         'ALTER POLICY %I ON %I.%I %s%s',
         policy_row.policyname,
@@ -62,6 +65,7 @@ BEGIN
   END LOOP;
 
   -- Consolidate overlapping permissive policies where exact duplicates exist.
+  -- Keep the alphabetically first policy name and drop later duplicates.
   FOR duplicate_row IN
     WITH ranked AS (
       SELECT
@@ -88,6 +92,7 @@ BEGIN
     FROM ranked
     WHERE row_rank > 1
   LOOP
+    RAISE NOTICE 'Dropping duplicate permissive policy %.%:%', duplicate_row.schemaname, duplicate_row.tablename, duplicate_row.policyname;
     EXECUTE format(
       'DROP POLICY IF EXISTS %I ON %I.%I',
       duplicate_row.policyname,

@@ -103,6 +103,14 @@ The migration does three things for these tables:
 2. Rewrites `auth.uid()` / `auth.role()` to `(select auth.uid())` / `(select auth.role())`.
 3. Drops exact duplicate permissive policies to consolidate overlaps safely.
 
+How this table group was chosen:
+
+- repeated Supabase advisor RLS-performance warnings
+- high request volume in tenant-scoped operational paths
+- core dispatch tables where policy checks are on hot query paths
+
+Future candidates should be selected with the same criteria during monthly review.
+
 ## RLS benchmark checklist (before/after)
 
 Run on staging before and after applying the migration.
@@ -134,6 +142,22 @@ Repeat for `shipments`, `documents`, `carriers`, `alerts`, `organizations`, and 
 - authenticated user in tenant A must not see tenant B rows
 - admin/dispatcher access patterns must remain unchanged
 - unauthenticated requests must remain blocked where expected
+
+Example API validation flow:
+
+```bash
+# tokenA and tokenB should belong to different tenants with equivalent role scope.
+curl -sS "$API_URL/rest/v1/loads?select=id,tenant_id&limit=20" \
+  -H "apikey: $SUPABASE_ANON_KEY" \
+  -H "Authorization: Bearer $TOKEN_A"
+
+curl -sS "$API_URL/rest/v1/loads?select=id,tenant_id&limit=20" \
+  -H "apikey: $SUPABASE_ANON_KEY" \
+  -H "Authorization: Bearer $TOKEN_B"
+```
+
+Confirm each response only contains rows for that token's tenant and that cross-tenant IDs
+do not appear in either result set.
 
 ## Index cleanup guidance
 
