@@ -2,7 +2,8 @@
 -- Rewrites auth helper calls to initplan-friendly subselects and removes exact duplicate
 -- permissive policies to reduce policy evaluation overhead.
 -- High-traffic candidates are tables with sustained advisor warnings and frequent
--- tenant-scoped reads/writes; review and expand this list during monthly RLS review.
+-- tenant-scoped reads/writes; review and expand this list during the monthly operational
+-- review documented in docs/SUPABASE-HARDENING-RUNBOOK.md.
 DO $$
 DECLARE
   target_tables constant text[] := ARRAY[
@@ -46,7 +47,13 @@ BEGIN
 
     IF optimized_using IS DISTINCT FROM policy_row.qual
       OR optimized_with_check IS DISTINCT FROM policy_row.with_check THEN
-      RAISE NOTICE 'Optimizing policy %.%:%', policy_row.schemaname, policy_row.tablename, policy_row.policyname;
+      RAISE NOTICE '%',
+        'Optimizing policy '
+        || policy_row.schemaname
+        || '.'
+        || policy_row.tablename
+        || ':'
+        || policy_row.policyname;
       EXECUTE format(
         'ALTER POLICY %I ON %I.%I %s%s',
         policy_row.policyname,
@@ -92,7 +99,13 @@ BEGIN
     FROM ranked
     WHERE row_rank > 1
   LOOP
-    RAISE NOTICE 'Dropping duplicate permissive policy %.%:%', duplicate_row.schemaname, duplicate_row.tablename, duplicate_row.policyname;
+    RAISE NOTICE '%',
+      'Dropping duplicate permissive policy '
+      || duplicate_row.schemaname
+      || '.'
+      || duplicate_row.tablename
+      || ':'
+      || duplicate_row.policyname;
     EXECUTE format(
       'DROP POLICY IF EXISTS %I ON %I.%I',
       duplicate_row.policyname,
