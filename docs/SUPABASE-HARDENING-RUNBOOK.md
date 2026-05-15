@@ -90,6 +90,50 @@ Start with:
 - documents
 - carriers
 - alerts
+- organizations
+- bids
+
+Migration applied for this optimization:
+
+- `supabase/migrations/20260515235100_optimize_high_traffic_rls_policies.sql`
+
+The migration does three things for these tables:
+
+1. Audits existing `public` RLS policies.
+2. Rewrites `auth.uid()` / `auth.role()` to `(select auth.uid())` / `(select auth.role())`.
+3. Drops exact duplicate permissive policies to consolidate overlaps safely.
+
+## RLS benchmark checklist (before/after)
+
+Run on staging before and after applying the migration.
+
+1) Capture policy definitions:
+
+```sql
+select schemaname, tablename, policyname, permissive, roles, cmd, qual, with_check
+from pg_policies
+where schemaname = 'public'
+  and tablename in ('loads', 'shipments', 'documents', 'carriers', 'alerts', 'organizations', 'bids')
+order by tablename, policyname;
+```
+
+2) Measure representative tenant-scoped reads:
+
+```sql
+explain (analyze, buffers)
+select *
+from public.loads
+order by created_at desc
+limit 50;
+```
+
+Repeat for `shipments`, `documents`, `carriers`, `alerts`, `organizations`, and `bids`.
+
+3) Validate tenant isolation still holds:
+
+- authenticated user in tenant A must not see tenant B rows
+- admin/dispatcher access patterns must remain unchanged
+- unauthenticated requests must remain blocked where expected
 
 ## Index cleanup guidance
 
