@@ -1,0 +1,26 @@
+name: Load Testing
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Base URL to load test
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  k6-health:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run k6 health check
+        uses: grafana/run-k6-action@v1
+        with:
+          path: load-tests/k6-health-check.js
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url }}
