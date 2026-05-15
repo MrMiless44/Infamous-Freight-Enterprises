@@ -1129,8 +1129,8 @@ pnpm -C apps/api run test -- production-smoke-test-script.test.ts
 
 ## Actual Result
 - `Release Gate`: no recorded runs returned yet (`release-gate.yml` run list count: 0).
-- `Deploy Fly API`: latest manual run `#124` failed (`https://github.com/Infaemous-Freight/Infamous-freight/actions/runs/25892659332`) before deploy because Fly app parsing in `deploy-api.yml` expected double quotes in `fly.toml`.
-- `Smoke Test`: latest non-skipped run `#1086` failed (`https://github.com/Infaemous-Freight/Infamous-freight/actions/runs/25890132844`) while checking legacy health URLs (`https://infamous-freight.fly.dev/health` and `/api/health`).
+- `Deploy Fly API`: latest manual run `#124` failed (`https://github.com/Infaemous-Freight/Infamous-Freight/actions/runs/25892659332`) before deploy because Fly app parsing in `deploy-api.yml` expected double quotes in `fly.toml`.
+- `Smoke Test`: latest non-skipped run `#1086` failed (`https://github.com/Infaemous-Freight/Infamous-Freight/actions/runs/25890132844`) while checking legacy health URLs (`https://infamous-freight.fly.dev/health` and `/api/health`).
 - Local commands in this sandbox are blocked by environment limits (`flyctl` missing, external DNS resolution failure for production hosts).
 - Local regression test for the smoke script passed:
   - `apps/api/test/production-smoke-test-script.test.ts` (2/2 passing).
