@@ -1,0 +1,29 @@
+name: Production Smoke Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Production or staging web URL
+        required: true
+      api_url:
+        description: Optional API URL override
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run smoke tests
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url }}
+          API_URL: ${{ github.event.inputs.api_url }}
+        run: |
+          bash scripts/smoke-production.sh

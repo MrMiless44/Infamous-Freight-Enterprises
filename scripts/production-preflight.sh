@@ -43,6 +43,17 @@ require_file docs/PRODUCTION-LAUNCH-RUNBOOK.md
 require_file docs/PRODUCTION-SECRETS-CHECKLIST.md
 require_file scripts/production-canonical-env.sh
 require_file scripts/production-smoke-test.sh
+require_file scripts/check-database-url.sh
+
+echo
+
+echo "Checking database URL configuration..."
+if bash scripts/check-database-url.sh; then
+  echo "OK: database URL validation"
+else
+  echo "FAILED: database URL validation"
+  failures=$((failures + 1))
+fi
 
 echo
 
