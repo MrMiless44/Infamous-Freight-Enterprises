@@ -86,23 +86,12 @@ describe('Netlify production routing', () => {
     expect(publicFreightContent).toContain("path: ['/api/public/quote-requests', '/api/public/shipments/:trackingNumber']");
   });
 
-  it('keeps generated public redirect rules aligned with the Netlify API proxies', () => {
+  it('keeps _redirects as a placeholder while netlify.toml remains the redirect source of truth', () => {
     const redirectContent = read(publicRedirects);
-
-    const healthProxy = indexOf(redirectContent, '/api/health https://infamous-freight-api.fly.dev/api/health 200!');
-    const loadRequestsProxy = indexOf(redirectContent, '/api/load-requests https://infamous-freight-api.fly.dev/api/load-requests 200!');
-    const quoteRequestsProxy = indexOf(redirectContent, '/api/public/quote-requests https://infamous-freight-api.fly.dev/api/public/quote-requests 200!');
-    const shipmentLookupProxy = indexOf(redirectContent, '/api/public/shipments/:trackingNumber https://infamous-freight-api.fly.dev/api/public/shipments/:trackingNumber 200!');
-    const apiProxy = indexOf(redirectContent, '/api/* https://infamous-freight-api.fly.dev/api/:splat 200!');
-    const socketProxy = indexOf(redirectContent, '/socket.io/* https://infamous-freight-api.fly.dev/socket.io/:splat 200!');
-    const spaFallback = indexOf(redirectContent, '/*    /index.html   200');
-
-    expect(healthProxy).toBeLessThan(apiProxy);
-    expect(loadRequestsProxy).toBeLessThan(apiProxy);
-    expect(quoteRequestsProxy).toBeLessThan(apiProxy);
-    expect(shipmentLookupProxy).toBeLessThan(apiProxy);
-    expect(apiProxy).toBeLessThan(spaFallback);
-    expect(socketProxy).toBeLessThan(spaFallback);
+    expect(redirectContent).toContain('# All redirect rules are managed in netlify.toml (single source of truth).');
+    expect(redirectContent).toContain('# This file is kept as an empty placeholder to prevent accidental re-creation.');
+    expect(redirectContent).not.toContain('/api/*');
+    expect(redirectContent).not.toContain('/socket.io/*');
   });
 
   it('keeps CLI production deploys from uploading repo-owned Netlify functions', () => {
