@@ -21,6 +21,8 @@ describe('supabase RLS optimization migration', () => {
   it('rewrites auth helpers to initplan-friendly select form', () => {
     expect(sql).toContain("regexp_replace(optimized_using, 'auth\\\\.uid\\\\(\\\\)', '(select auth.uid())', 'g')");
     expect(sql).toContain("regexp_replace(optimized_with_check, 'auth\\\\.uid\\\\(\\\\)', '(select auth.uid())', 'g')");
+    expect(sql).toContain("regexp_replace(optimized_using, 'auth\\\\.role\\\\(\\\\)', '(select auth.role())', 'g')");
+    expect(sql).toContain("regexp_replace(optimized_with_check, 'auth\\\\.role\\\\(\\\\)', '(select auth.role())', 'g')");
   });
 
   it('deduplicates exact overlapping permissive policies', () => {
