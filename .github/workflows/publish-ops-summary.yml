@@ -1,0 +1,33 @@
+name: Publish Operations Summary
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish-summary:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Publish summary
+        run: |
+          {
+            echo "# Operations Summary"
+            echo ""
+            echo "Generated: $(date -u)"
+            echo ""
+            echo "## Validation Areas"
+            echo "- Smoke tests"
+            echo "- Realtime load checks"
+            echo "- KPI snapshots"
+            echo "- Dependency audit"
+            echo "- Restore simulation"
+            echo ""
+            echo "## Recommended Actions"
+            echo "1. Review failed workflows"
+            echo "2. Review Sentry exceptions"
+            echo "3. Review dispatch and billing KPIs"
+            echo "4. Open automation issues for recurring friction"
+          } >> "$GITHUB_STEP_SUMMARY"

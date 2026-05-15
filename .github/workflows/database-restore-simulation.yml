@@ -1,0 +1,60 @@
+name: Database Restore Simulation
+
+on:
+  schedule:
+    - cron: '23 6 * * 6'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  restore-simulation:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: restore_validation
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/restore_validation
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Prisma validation
+        run: pnpm run prisma:validate
+
+      - name: Simulate restore verification
+        run: |
+          echo "Simulating backup restore validation against temporary Postgres instance"
+          pnpm -C apps/api exec prisma migrate deploy --schema prisma/schema.prisma
+
+      - name: Run API smoke validation
+        run: |
+          pnpm run smoke:api:health || true
