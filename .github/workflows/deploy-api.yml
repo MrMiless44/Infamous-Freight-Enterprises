@@ -52,7 +52,7 @@ jobs:
         id: fly
         run: |
           set -euo pipefail
-          fly_app_name="$(awk -F'\"' '/^app =/ {print $2}' fly.toml)"
+          fly_app_name="$(sed -nE "s/^[[:space:]]*app[[:space:]]*=[[:space:]]*['\"]([^'\"]+)['\"][[:space:]]*$/\1/p" fly.toml | head -n1)"
           if [ -z "$fly_app_name" ]; then
             echo "::error::Could not determine Fly app name from fly.toml."
             exit 1

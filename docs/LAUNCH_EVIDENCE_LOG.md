@@ -8,7 +8,7 @@ Use this file during production readiness verification. Do not mark the launch r
 |---|---|
 | Verification Date | 2026-04-27 09:15 UTC |
 | Environment | Production |
-| API URL | https://infamous-freight.fly.dev / https://www.infamousfreight.com/api |
+| API URL | https://infamous-freight-api.fly.dev (`/api/health/live`, `/api/health/ready`) / https://www.infamousfreight.com/api |
 | Web URL | https://www.infamousfreight.com |
 | API Version / Commit | main branch — see GitHub Actions deploy-fly.yml |
 | Web Deploy ID | Netlify deploy — etag W/"3bmtbl9viep3f" (deployed 2026-04-23T13:42:28Z) |
@@ -1060,3 +1060,91 @@ PASS
 
 ## Follow-Up
 B-007 production API reachability is resolved for the browser-critical API health path and the public API paths covered by the current recommendation set. No additional repository mitigation was needed in this pass. Full launch readiness still depends on the broader evidence gates, rollback drills, and owner sign-off tracked elsewhere in this log.
+
+---
+
+## Test
+Phase 0 - Release Gate Canonical Hostname and Health Path Confirmation
+
+## Date/Time
+2026-05-15 03:57 UTC
+
+## Owner
+Copilot
+
+## Command or Action
+Reviewed the repository smoke/deploy/release-gate configuration and verified current GitHub Actions run state for `Release Gate`, `Deploy Fly API`, and `Smoke Test`.
+
+## Expected Result
+- Canonical production API hostname is final and shared across release-gate, deploy, and smoke checks.
+- Canonical API health endpoints are final as `/api/health/live` and `/api/health/ready`.
+
+## Actual Result
+- `scripts/production-smoke-test.sh` uses `https://infamous-freight-api.fly.dev` and checks `/api/health/live` + `/api/health/ready`.
+- `.github/workflows/smoke-test.yml` uses the same default API host and path expectations.
+- `.github/workflows/deploy-api.yml` uses the same default API host and verifies deploy health against that host.
+- `.github/workflows/release-gate.yml` is present and uses the same API host plus the same production smoke command.
+
+## Status
+PASS
+
+## Severity
+None
+
+## Follow-Up
+Use these canonical values for all launch evidence and post-deploy checks:
+- API host: `https://infamous-freight-api.fly.dev`
+- Liveness: `/api/health/live`
+- Readiness: `/api/health/ready`
+
+## Notes
+This entry confirms repo-side alignment and final canonical path choices. It does not replace required live production execution evidence.
+
+---
+
+## Test
+Phase 0 - Release Gate Execution Status Snapshot
+
+## Date/Time
+2026-05-15 03:57 UTC
+
+## Owner
+Copilot
+
+## Command or Action
+Collected current run outcomes from GitHub Actions and local command attempts in this sandbox:
+
+```bash
+pnpm run fly:health
+pnpm run production:preflight
+pnpm run production:smoke-test
+pnpm -C apps/api run test -- production-smoke-test-script.test.ts
+```
+
+## Expected Result
+- `Release Gate` workflow runs successfully.
+- `Deploy Fly API` workflow runs successfully.
+- `Smoke Test` workflow runs successfully.
+- Local smoke command passes from a trusted runner.
+
+## Actual Result
+- `Release Gate`: no recorded runs returned yet (`release-gate.yml` run list count: 0).
+- `Deploy Fly API`: latest manual run `#124` failed (`https://github.com/Infaemous-Freight/Infamous-freight/actions/runs/25892659332`) before deploy because Fly app parsing in `deploy-api.yml` expected double quotes in `fly.toml`.
+- `Smoke Test`: latest non-skipped run `#1086` failed (`https://github.com/Infaemous-Freight/Infamous-freight/actions/runs/25890132844`) while checking legacy health URLs (`https://infamous-freight.fly.dev/health` and `/api/health`).
+- Local commands in this sandbox are blocked by environment limits (`flyctl` missing, external DNS resolution failure for production hosts).
+- Local regression test for the smoke script passed:
+  - `apps/api/test/production-smoke-test-script.test.ts` (2/2 passing).
+
+## Status
+FAIL
+
+## Severity
+High
+
+## Follow-Up
+- Re-run `Deploy Fly API` after this parser fix merges.
+- Run `Release Gate` and `Smoke Test` from a trusted CI runner with Fly credentials and external DNS access.
+- Paste successful run summaries into this log and close issue #2212 only after all gate commands/workflows pass.
+
+## Notes
+This sandbox cannot serve as the trusted production verification runner for Fly and external-host smoke checks.
