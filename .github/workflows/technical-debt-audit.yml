@@ -1,0 +1,53 @@
+name: Technical Debt Audit
+
+on:
+  schedule:
+    - cron: '11 8 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  technical-debt:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Detect unused dependencies
+        run: |
+          npx depcheck || true
+
+      - name: Detect unused exports and files
+        run: |
+          npx knip || true
+
+      - name: Audit dependency vulnerabilities
+        run: |
+          pnpm audit || true
+
+      - name: Generate audit summary
+        run: |
+          echo "Technical debt audit completed on $(date -u)" > technical-debt-report.txt
+
+      - name: Upload audit artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: technical-debt-audit
+          path: |
+            technical-debt-report.txt

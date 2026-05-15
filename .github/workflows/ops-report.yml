@@ -1,0 +1,43 @@
+name: Weekly Operations Report
+
+on:
+  schedule:
+    - cron: '41 7 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ops-report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Generate operations summary
+        run: |
+          {
+            echo "# Weekly Operations Summary"
+            echo ""
+            echo "Generated: $(date -u)"
+            echo ""
+            echo "## Review Areas"
+            echo "- Deploy success/failure"
+            echo "- Smoke-test status"
+            echo "- Load-test status"
+            echo "- Dependency/security alerts"
+            echo "- Stripe webhook reliability"
+            echo "- Auth and tenant anomalies"
+            echo "- Dispatch and shipment KPIs"
+            echo "- AI usage trends"
+            echo ""
+            echo "## Recommended Actions"
+            echo "1. Review failed workflows"
+            echo "2. Review operational incidents"
+            echo "3. Create scoped implementation tasks"
+          } > weekly-operations-summary.md
+
+      - name: Upload report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-operations-summary
+          path: weekly-operations-summary.md
