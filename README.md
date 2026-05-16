@@ -29,7 +29,7 @@ If you want one system for **dispatch**, **tracking**, **paperwork**, **analytic
 - `apps/web` — 🌐 React 19 + Vite frontend, strict TypeScript, operator surfaces, and client-side API helpers
 - `apps/mobile` — 📱 reserved mobile surface *(planned)*
 - `netlify/functions` — ⚡ retained function entrypoints for future packaging or emergency fallback; normal Netlify deploys currently keep these disabled and proxy browser API traffic to Fly.io
-- `netlify/database/migrations` — 🗄️ Netlify Database migrations. Applied migrations must remain immutable.
+- `docs/netlify-database-pending-migrations` — 🗄️ pending Netlify Database migration drafts kept outside Netlify's auto-provisioning path.
 - `docs/` — 📚 architecture, launch, operations, Stripe, Netlify, and production-readiness docs
 - `scripts/` — 🔁 local setup, validation, deployment helpers, and operational tooling
 - `.github/` — 🤖 CI workflows, automation, and repository metadata
