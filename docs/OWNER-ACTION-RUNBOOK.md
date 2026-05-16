@@ -97,17 +97,35 @@ curl -fsS https://api.infamousfreight.com/api/health/ready
 
 ## 6. Supabase security migration verify/rollback
 
-### Applied migration
+### Applied migrations
 - `supabase/migrations/20260514043500_harden_remaining_security_definer_rpc.sql`
+- `supabase/migrations/20260516002000_restrict_sensitive_rpc_execution.sql`
 
 ### Verify after deploy
 1. Run Supabase Security Advisors and confirm no SECURITY DEFINER execution warning remains for:
    - `public.review_document(uuid, text, text)`
    - `public.verify_profile(uuid, boolean, text)`
-2. Smoke test admin/dispatcher profile verification and document review flows.
+2. Verify function privileges are locked down:
+
+```sql
+select
+  p.proname as function_name,
+  p.prosecdef as security_definer,
+  pg_get_userbyid(p.proowner) as owner,
+  has_function_privilege('authenticated', p.oid, 'EXECUTE') as authenticated_can_execute,
+  has_function_privilege('service_role', p.oid, 'EXECUTE') as service_role_can_execute
+from pg_proc p
+join pg_namespace n on n.oid = p.pronamespace
+where n.nspname = 'public'
+  and p.proname in ('review_document', 'verify_profile');
+```
+
+Expected: `security_definer = false`, `authenticated_can_execute = false`, `service_role_can_execute = true`.
+
+3. Smoke test admin/dispatcher profile verification and document review flows.
 
 ### Rollback path
-If admin/dispatcher flows regress after deployment, restore previous function privilege model in a rollback migration by setting both functions back to `SECURITY DEFINER` and restoring their prior grants, then rerun advisors and smoke tests.
+If admin/dispatcher flows regress after deployment, restore previous function privilege model in a rollback migration by restoring `authenticated` execute grants for these two functions, then rerun advisors and smoke tests.
 
 ## 7. Decision rule
 

@@ -59,13 +59,14 @@ Current assessment:
 - role-aware checks exist
 - tenant-aware checks exist
 - auth checks exist
+- authenticated execution is **not** intentional for these sensitive review/verification RPCs
 
-Before changing them:
+Hardening decision:
 
-- verify admin/dispatcher workflows
-- verify tenant isolation
-- add regression tests
-- verify audit logging
+- keep both functions as `SECURITY INVOKER`
+- keep functions in `public` for RPC compatibility
+- revoke `EXECUTE` from `authenticated` so only `service_role` can execute
+- cover the auth boundary with migration regression tests
 
 ## RLS optimization guidance
 
