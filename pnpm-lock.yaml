@@ -21,8 +21,8 @@ importers:
         specifier: ^2.105.4
         version: 2.105.4
       openai:
-        specifier: ^6.37.0
-        version: 6.37.0(ws@8.20.0)
+        specifier: ^6.38.0
+        version: 6.38.0(ws@8.20.0)
     devDependencies:
       '@netlify/edge-functions':
         specifier: ^3.0.6
@@ -67,8 +67,8 @@ importers:
         specifier: ^8.1.0
         version: 8.1.0
       openai:
-        specifier: ^6.37.0
-        version: 6.37.0(ws@8.20.0)
+        specifier: ^6.38.0
+        version: 6.38.0(ws@8.20.0)
     devDependencies:
       '@types/cors':
         specifier: ^2.8.17
@@ -3352,8 +3352,8 @@ packages:
     resolution: {integrity: sha512-kbpaSSGJTWdAY5KPVeMOKXSrPtr8C8C7wodJbcsd51jRnmD+GZu8Y0VoU6Dm5Z4vWr0Ig/1NKuWRKf7j5aaYSg==}
     engines: {node: '>=6'}
 
-  openai@6.37.0:
-    resolution: {integrity: sha512-0H5dEGFmmLv6KSd0W1w2nyL8WsLkX6yoLeQpU+dZAOuGcany5qkYQMmj35ZrKgb6yiyYqpUzFOpR8mZQkgqeEQ==}
+  openai@6.38.0:
+    resolution: {integrity: sha512-AoMplt2UalrpgUDMh3L09QWjNRlgJPipclQvA6sYAaeF6nHNBMgmikAZGmcYLn8on4d9sQY9Q8bOLfrBS7Lc8g==}
     hasBin: true
     peerDependencies:
       ws: ^8.18.0
@@ -7751,7 +7751,7 @@ snapshots:
     dependencies:
       mimic-fn: 2.1.0
 
-  openai@6.37.0(ws@8.20.0):
+  openai@6.38.0(ws@8.20.0):
     optionalDependencies:
       ws: 8.20.0
 
