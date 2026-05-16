@@ -6,7 +6,7 @@ set -euo pipefail
 # as the database name instead of `postgres`.
 
 urls=()
-for name in DATABASE_URL DIRECT_URL SHADOW_DATABASE_URL SUPABASE_DB_URL POSTGRES_URL POSTGRES_PRISMA_URL POSTGRES_URL_NON_POOLING; do
+for name in DATABASE_URL Database_URL database_url DIRECT_URL SHADOW_DATABASE_URL SUPABASE_DB_URL POSTGRES_URL POSTGRES_PRISMA_URL POSTGRES_URL_NON_POOLING; do
   if [[ -n "${!name:-}" ]]; then
     urls+=("${name}")
   fi
