@@ -1,0 +1,42 @@
+name: Supabase Security Regression
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 9 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  sensitive-rpc-permissions:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Verify sensitive RPC permissions
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "${DATABASE_URL:-}" ]; then
+            echo "DATABASE_URL secret is required for Supabase security regression checks."
+            exit 1
+          fi
+
+          result="$(psql "$DATABASE_URL" -t -A -F ',' -f scripts/check-sensitive-rpc-permissions.sql | tail -n 1)"
+          echo "RPC permission result: ${result}"
+
+          expected="f,f,t,f,f,t"
+          if [ "$result" != "$expected" ]; then
+            echo "Unexpected sensitive RPC permissions. Expected ${expected}."
+            exit 1
+          fi
+
+          echo "Sensitive RPC permissions are correctly restricted."
