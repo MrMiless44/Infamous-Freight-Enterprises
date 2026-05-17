@@ -7,13 +7,13 @@
     "url": "git+https://github.com/Infaemous-Freight/Infamous-freight.git",
     "directory": "apps/api"
   },
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
     "build": "pnpm run prisma:generate && tsc -p tsconfig.build.json",
     "start:dev": "tsx watch src/server.ts",
     "start:prod": "pnpm run prisma:generate && node dist/src/server.js",
-    "test": "pnpm run prisma:generate && node scripts/run-jest.cjs --runInBand",
-    "test:coverage": "pnpm run prisma:generate && node scripts/run-jest.cjs --coverage",
+    "test": "pnpm run prisma:generate && node --loader tsx scripts/run-jest.mjs --runInBand",
+    "test:coverage": "pnpm run prisma:generate && node --loader tsx scripts/run-jest.mjs --coverage",
     "lint": "pnpm run prisma:generate && tsc -p tsconfig.json --noEmit",
     "prisma:generate": "pnpm exec prisma generate --schema prisma/schema.prisma"
   },
