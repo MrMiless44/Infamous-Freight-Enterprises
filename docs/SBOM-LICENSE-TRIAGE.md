@@ -55,9 +55,9 @@ registry. They are documented separately in `docs/NETLIFY-BUILDHOOKS.md`.
 
 | Package | SBOM result | Concluded license | Source | Outcome | Notes |
 |---------|-------------|-------------------|--------|---------|-------|
-| `async-workloads-buildhooks` | `NOASSERTION` | Proprietary (Netlify) | `docs/NETLIFY-BUILDHOOKS.md` | acceptable | Netlify first-party build integration; retained per provenance review |
-| `launchdarkly-buildhooks` | `NOASSERTION` | Proprietary (LaunchDarkly) | `docs/NETLIFY-BUILDHOOKS.md` | acceptable | LaunchDarkly × Netlify integration; actively used |
-| `prerender-buildhooks` | `NOASSERTION` | Proprietary (Netlify) | `docs/NETLIFY-BUILDHOOKS.md` | acceptable | Netlify Prerender integration; see buildhook doc for removal conditions |
+| `async-workloads-buildhooks` | `NOASSERTION` | Proprietary (Netlify) | `docs/NETLIFY-BUILDHOOKS.md` | acceptable | Historical Netlify generated integration package; not committed in current deploy input |
+| `launchdarkly-buildhooks` | `NOASSERTION` | Proprietary (LaunchDarkly) | `docs/NETLIFY-BUILDHOOKS.md` | acceptable | Historical LaunchDarkly generated integration package; not committed in current deploy input |
+| `prerender-buildhooks` | `NOASSERTION` | Proprietary (Netlify) | `docs/NETLIFY-BUILDHOOKS.md` | acceptable | Historical Netlify generated integration package; not committed in current deploy input |
 
 ---
 

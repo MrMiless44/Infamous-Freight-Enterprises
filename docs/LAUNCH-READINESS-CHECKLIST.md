@@ -16,6 +16,7 @@ These require access to Fly.io, GitHub repository secrets, and Netlify.
 - [ ] Run the `Deploy Fly API` workflow.
 - [ ] Trigger a Netlify production redeploy.
 - [ ] Run the `Smoke Test` workflow.
+- [ ] Capture Netlify launch evidence with `pnpm production:capture-netlify-evidence`.
 
 Netlify tracking markers should reflect the current decision state:
 
@@ -55,6 +56,18 @@ curl -i https://api.infamousfreight.com/api/health
 ```
 
 Direct API checks are operational diagnostics. Do not block the Netlify web launch on `api.infamousfreight.com` until that route is confirmed; the launch-critical browser path is `https://www.infamousfreight.com/api/health`.
+
+## Required production evidence
+
+After the next Netlify production deploy, capture a non-secret evidence file:
+
+```bash
+pnpm production:capture-netlify-evidence
+```
+
+The command writes a timestamped Markdown file under `docs/evidence/`. It records canonical homepage status, apex-to-www redirect behavior, proxied `/api/health` behavior, public quote preflight behavior, invalid tracking validation, security headers, and the active Netlify request identifier. It does not create a quote request or shipment record.
+
+Operations should attach or reference the latest evidence file before closing launch-readiness work. If public quote intake falls back to Netlify Forms, leads should still be reviewed in Netlify Forms and matched to API quote records only when a tracking reference was returned.
 
 ## Production environment expectations
 

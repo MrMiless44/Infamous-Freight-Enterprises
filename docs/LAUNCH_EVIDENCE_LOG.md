@@ -2,6 +2,23 @@
 
 Use this file during production readiness verification. Do not mark the launch ready based on unchecked assumptions. Paste command output, screenshot summaries, dashboard links, timestamps, owners, and blocker notes.
 
+## 2026-05-17 Netlify Production Public Path Retest
+
+Re-ran the recommended public-path checks for the canonical host, apex redirect, proxied API health route, public quote preflight, and invalid tracking lookup. The checks were limited to HTTP status and content type so no secrets or customer data were captured.
+
+Results:
+
+- `https://www.infamousfreight.com/` returned HTTP 200 with `text/html; charset=UTF-8`.
+- `https://infamousfreight.com/` followed to `https://www.infamousfreight.com/` and returned HTTP 200.
+- `https://www.infamousfreight.com/api/health` returned HTTP 200 with JSON content.
+- `OPTIONS https://www.infamousfreight.com/api/public/quote-requests` returned HTTP 204.
+- `GET https://www.infamousfreight.com/api/public/shipments/invalid-tracking` returned HTTP 400 with JSON content.
+
+Follow-up captured in repo:
+
+- `scripts/production-smoke-test.sh` now checks the browser-critical Netlify-proxied API health path, public quote preflight, and invalid tracking validation in addition to the canonical frontend, bare-domain redirect, and direct Fly API health checks.
+- Unit coverage was added for Netlify form encoding and client-side validation that prevents malformed email addresses and impossible delivery dates from being posted.
+
 ## Run Metadata
 
 | Field | Value |

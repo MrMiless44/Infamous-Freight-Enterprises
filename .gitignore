@@ -62,8 +62,9 @@ reports/validation-status.txt
 /tmp/docker-build.log
 apps/api/coverage/
 
-# Local Netlify folder
-.netlify
+# Local Netlify folders and generated extension/plugin state
+.netlify/
+**/.netlify/
 
 # Local CLI bootstrap artifacts
 .tools/

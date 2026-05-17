@@ -103,6 +103,14 @@ The committed `netlify.toml` redirects `https://infamousfreight.com/*` to `https
 
 ## 7) Post-deploy production verification
 
+Capture a non-secret launch evidence file after every production deploy:
+
+```bash
+pnpm production:capture-netlify-evidence
+```
+
+The evidence file is written under `docs/evidence/` and records the canonical host status, apex redirect target, proxied API health response, public quote preflight status, invalid tracking validation, security headers, and the active Netlify request identifier. This command does not submit a production quote request.
+
 Run the canonical checks first:
 
 ```bash
@@ -147,3 +155,13 @@ Also verify in browser:
 - API requests are not blocked by CORS.
 - Forms still work.
 - Billing/auth flows load (if enabled).
+
+## 8) Public lead review
+
+Review incoming public leads in Netlify Forms after every deploy validation:
+
+- `quote-request` is the primary revenue path. Operations should review the Netlify submission first, then match the API quote record by `trackingNumber` when one was returned.
+- `contact` captures general inquiries, tracking questions, partner requests, and support messages. Route active-load issues to dispatch before general support triage.
+- `driver-application` and `partner-application` are onboarding leads. Confirm consent and contact details before moving the lead into operational follow-up.
+
+If the API-backed quote intake is temporarily unavailable but Netlify Forms succeeds, the quote request is still captured for dispatch follow-up. A tracking reference may be assigned later after operations reviews the lead.
