@@ -25,3 +25,5 @@ jobs:
 
       - name: Run actionlint
         uses: reviewdog/action-actionlint@v1
+        with:
+          level: error
