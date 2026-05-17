@@ -18,11 +18,26 @@ Infamous Freight is an AI-driven freight operations platform covering dispatch e
 
 Every change should follow this sequence:
 
-1. Discover — inspect the relevant app, package, script, issue, workflow, and docs before editing.
+1. Discover — inspect the relevant app, package, script, workflow, and docs before editing.
 2. Build — make the smallest useful change that solves the stated outcome.
 3. Verify — run the narrowest relevant checks first, then broader validation when needed.
 4. Optimize — remove duplication, document operational impact, and keep changes focused.
 5. Scale — leave repeatable scripts, templates, tests, or docs when they reduce future work.
+
+## PR-first workflow
+
+Agents should prefer pull requests over direct commits to `main`.
+
+Use this flow for repo-side work:
+
+1. Create a short-lived branch from `main`.
+2. Make focused code, config, documentation, or test changes on that branch.
+3. Open a draft PR for risky, production-impacting, database, auth, billing, deployment, or infrastructure changes.
+4. Include validation steps, production impact, and rollback notes in the PR body.
+5. Let CI and human review run before merge.
+6. Use issues only for work that cannot be represented as a repo diff, such as dashboard-only settings, external account configuration, or operational follow-up requiring credentials.
+
+Direct commits to `main` should be avoided except for emergency fixes explicitly requested by the repository owner.
 
 ## Repo map
 
@@ -62,7 +77,6 @@ pnpm -C apps/api run lint
 - Do not commit secrets, tokens, `.env` files, private keys, database dumps, or production credentials.
 - Do not bypass CI, auth, payments, compliance controls, or approval gates.
 - Do not introduce hidden network calls, credential collection, spam, scraping abuse, or unauthorized data access.
-- Prefer PRs over direct pushes for risky changes.
 - Keep migrations immutable once applied.
 - Document any environment variable, deployment, database, or billing impact in the PR.
 
@@ -88,10 +102,10 @@ Before opening or updating a PR, include:
 
 ## Recommended automation path
 
-1. Convert user requests into GitHub issues with clear acceptance criteria.
-2. Create a short-lived branch per issue.
+1. Convert user requests into scoped implementation tasks.
+2. Create a short-lived branch per task.
 3. Patch the smallest relevant file set.
 4. Run focused checks.
 5. Open a PR using the repository PR template.
 6. Let CI validate before merge.
-7. Capture follow-up work as separate issues.
+7. Capture dashboard-only or credentials-required follow-up work as separate issues only when no repo diff is possible.
