@@ -71,9 +71,9 @@ jobs:
           pnpm -C apps/web exec tsc -p tsconfig.json --noEmit
 
   test:
-    needs: [lint, typecheck]
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 20
+    needs: [lint, typecheck]
 
     services:
       postgres:
@@ -102,12 +102,9 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://${{ secrets.CI_DB_USER }}:${{ secrets.CI_DB_PASSWORD }}@localhost:5432/${{ secrets.CI_DB_NAME }}?schema=public
-      DB_USER: ${{ secrets.CI_DB_USER }}
-      DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD }}
-      DB_NAME: ${{ secrets.CI_DB_NAME }}
       REDIS_HOST: localhost
       REDIS_PORT: 6379
-      REDIS_PASSWORD: ${{ secrets.CI_REDIS_PASSWORD }}
+      REDIS_PASSWORD: ''
       REDIS_DB: 0
       JWT_SECRET: ${{ secrets.CI_JWT_SECRET }}
       NODE_ENV: test
@@ -133,10 +130,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Cache Prisma
-        uses: actions/cache@4b0aecf0e4b8a4c0f0e9b1d2c3e4f5a6b7c8d9e0
+      - name: Cache Prisma client
+        uses: actions/cache@v4
         with:
-          path: apps/api/node_modules/.prisma
+          path: |
+            apps/api/node_modules/.prisma
+            apps/api/prisma/client
           key: prisma-${{ hashFiles('apps/api/prisma/schema.prisma') }}
           restore-keys: |
             prisma-
@@ -150,19 +149,20 @@ jobs:
       - name: Run tests
         run: pnpm run test
 
-      - name: Upload test coverage
-        if: always()
+      - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          files: ./apps/api/coverage/lcov.info
+          files: ./apps/api/coverage/lcov.info,./apps/web/coverage/lcov.info
+          flags: unittests
           fail_ci_if_error: false
           verbose: true
-        continue-on-error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   build:
-    needs: test
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+    needs: test
 
     steps:
       - name: Checkout repository
@@ -179,14 +179,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Cache Prisma
-        uses: actions/cache@4b0aecf0e4b8a4c0f0e9b1d2c3e4f5a6b7c8d9e0
-        with:
-          path: apps/api/node_modules/.prisma
-          key: prisma-${{ hashFiles('apps/api/prisma/schema.prisma') }}
-          restore-keys: |
-            prisma-
 
       - name: Generate Prisma client
         run: pnpm run prisma:generate
@@ -208,3 +200,13 @@ jobs:
             sleep 1
           done
           SITE_URL=http://127.0.0.1:4173 pnpm -C apps/web run smoke:render
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build-artifacts
+          path: |
+            apps/api/dist
+            apps/web/dist
+          retention-days: 7
