@@ -1,18 +1,20 @@
 # Netlify Buildhook Packages — Provenance & Ownership
 
-`apps/web/.netlify/plugins/package.json` lists Netlify build-time plugins. Some of
-these are sourced from URL-hosted tarballs rather than a public npm registry. This
-document records the ownership, source artifact, integrity value, and maintenance
-path for each such package.
+Netlify can generate local build-time plugin state under
+`apps/web/.netlify/plugins/`. Some generated plugins are sourced from URL-hosted
+tarballs rather than a public npm registry. This document records the historical
+ownership, source artifact, integrity value, and maintenance path for packages
+that have appeared in that generated state.
 
 ---
 
 ## Background
 
 Netlify's integration marketplace distributes "buildhook" packages as versioned
-`.tgz` archives hosted on private Netlify deploy previews. Each tarball's SHA-512
-digest is pinned in `package-lock.json`, giving the same tamper-evidence guarantee
-as a `resolved` + `integrity` record from the npm registry.
+`.tgz` archives hosted on private Netlify deploy previews. When generated plugin
+state is present, each tarball's SHA-512 digest is pinned in `package-lock.json`,
+giving the same tamper-evidence guarantee as a `resolved` + `integrity` record
+from the npm registry.
 
 The UUID-shaped subdomain in each URL (e.g.
 `3bd69bc3-080d-4857-a4ab-c6aa5abc63a6.netlify.app`) is the Netlify deploy preview
@@ -30,7 +32,7 @@ ID of the integration's own site. Netlify keeps those deploys immutable.
 | **Source artifact** | `https://3bd69bc3-080d-4857-a4ab-c6aa5abc63a6.netlify.app/packages/buildhooks.tgz` |
 | **Pinned version** | `0.0.0-or1lf` |
 | **lock-file integrity** | `sha512-VOOZi9+Csa998jzzTbrMtPPAsi+vQxXRLUc5Gvd+NTOwMUA/8FICkaCFNf5427j9VvVAeLwmWZOB8Y97hJOh4Q==` |
-| **Status** | ✅ **Retained** — installed automatically by Netlify when the Async Workloads add-on is enabled on the site. Required for the integration to function at build time. |
+| **Status** | 🗑️ **Removed from repo** — generated Netlify plugin state is not committed for the static web deploy. Re-enable only through the Netlify dashboard if the integration is intentionally used. |
 | **Update path** | Re-enable or upgrade the Async Workloads integration via the Netlify dashboard; Netlify will rewrite the tarball URL in `package.json` and regenerate the lockfile. |
 
 ---
@@ -69,7 +71,7 @@ ID of the integration's own site. Netlify keeps those deploys immutable.
 | **Source artifact** | `https://6abe5a43-4668-4f72-b3f7-823e2d8bbbbf.netlify.app/packages/buildhooks.tgz` |
 | **Pinned version** | `0.0.0-mdcn1` |
 | **lock-file integrity** | `sha512-k0IKt0aJgySlRTpJdUfr/Vfq2avo2AH44f2TZc9cvj+NhWGIOX7BDHRUblGdWPnR4DDUVg35pmRx2NNx+MY31g==` |
-| **Status** | ✅ **Retained** — provides Puppeteer-based prerendering at build time. Useful for SEO on this Vite SPA. Active or not, removing it risks breaking existing Netlify integration config; removal should only happen after confirming the integration has been disabled in the Netlify UI. |
+| **Status** | 🗑️ **Removed from repo** — generated Netlify plugin state is not committed for the static web deploy. Re-enable only through the Netlify dashboard if prerendering is intentionally used. |
 | **Update path** | Upgrade via the Netlify Prerender integration settings in the dashboard. |
 
 ---
@@ -106,14 +108,15 @@ ID of the integration's own site. Netlify keeps those deploys immutable.
 
 ## Integrity controls
 
-All retained packages are pinned by **SHA-512 tarball digest** in
-`apps/web/.netlify/plugins/package-lock.json`. npm verifies this hash on every
-`npm install`, rejecting any tarball whose content does not match. This provides
-the same integrity guarantee as registry packages.
+When generated plugin packages are retained, they must be pinned by
+**SHA-512 tarball digest** in `apps/web/.netlify/plugins/package-lock.json`. npm
+verifies this hash on every `npm install`, rejecting any tarball whose content
+does not match. This provides the same integrity guarantee as registry packages.
 
-> **To update a buildhook**: change the tarball URL in `package.json`, run
-> `npm install` inside `apps/web/.netlify/plugins/`, review the new `integrity`
-> value in the updated `package-lock.json`, and commit both files together.
+> **To reintroduce a buildhook**: confirm the Netlify dashboard integration is
+> intentionally enabled, regenerate the local plugin package files, review the
+> new `integrity` value in the updated `package-lock.json`, and commit only if
+> the integration is required for deploys.
 
 ---
 
@@ -127,6 +130,6 @@ integrity hash.
 Future maintainers should:
 1. Cross-check the packages listed here against the integrations enabled in the
    Netlify dashboard.
-2. Ensure no new URL-sourced package appears in `package.json` without a
+2. Ensure no new URL-sourced package appears in generated plugin metadata without a
    corresponding entry in this document.
 3. Immediately investigate any integrity mismatch surfaced by `npm ci` in CI/CD.

@@ -49,6 +49,7 @@
     "production:preflight": "bash scripts/production-preflight.sh",
     "production:canonical-env": "bash scripts/production-canonical-env.sh",
     "production:smoke-test": "bash scripts/production-smoke-test.sh",
+    "production:capture-netlify-evidence": "bash scripts/capture-netlify-launch-evidence.sh",
     "production:deploy-vps": "bash scripts/deploy-vps.sh",
     "production:backup-postgres": "bash scripts/backup-postgres.sh",
     "production:restore-postgres": "bash scripts/restore-postgres.sh",
