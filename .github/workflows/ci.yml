@@ -83,6 +83,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install Playwright browser
+        run: pnpm -C apps/web exec playwright install chromium --with-deps
+
       - name: Generate Prisma client
         run: pnpm run prisma:generate
 
@@ -99,3 +102,18 @@ jobs:
 
       - name: Build
         run: pnpm run build
+
+      - name: Smoke render built web app
+        run: |
+          pnpm -C apps/web exec vite preview --host 127.0.0.1 --port 4173 > /tmp/infamous-web-preview.log 2>&1 &
+          for attempt in {1..30}; do
+            if curl --silent --fail http://127.0.0.1:4173/ >/dev/null; then
+              break
+            fi
+            if [[ "$attempt" == "30" ]]; then
+              cat /tmp/infamous-web-preview.log >&2
+              exit 1
+            fi
+            sleep 1
+          done
+          SITE_URL=http://127.0.0.1:4173 pnpm -C apps/web run smoke:render
