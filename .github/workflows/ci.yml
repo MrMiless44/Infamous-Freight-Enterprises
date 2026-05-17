@@ -21,21 +21,71 @@ env:
   NODE_VERSION: '22'
 
 jobs:
-  validate:
+  lint:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d  # v4.1.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm run lint
+
+  typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d  # v4.1.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm run prisma:generate
+
+      - name: Type check
+        run: |
+          pnpm -C apps/api exec tsc -p tsconfig.json --noEmit
+          pnpm -C apps/web exec tsc -p tsconfig.json --noEmit
+
+  test:
+    needs: [lint, typecheck]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
 
     services:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: infamous
-          POSTGRES_PASSWORD: infamous
-          POSTGRES_DB: infamous_freight_test
+          POSTGRES_USER: ${{ secrets.CI_DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.CI_DB_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.CI_DB_NAME }}
         ports:
           - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U infamous -d infamous_freight_test"
+        options: >
+          --health-cmd "pg_isready -U ${{ secrets.CI_DB_USER }} -d ${{ secrets.CI_DB_NAME }}"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -44,27 +94,27 @@ jobs:
         image: redis:7
         ports:
           - 6379:6379
-        options: >-
+        options: >
           --health-cmd "redis-cli ping"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
 
     env:
-      DATABASE_URL: postgresql://infamous:infamous@localhost:5432/infamous_freight_test?schema=public
-      DB_USER: infamous
-      DB_PASSWORD: infamous
-      DB_NAME: infamous_freight_test
+      DATABASE_URL: postgresql://${{ secrets.CI_DB_USER }}:${{ secrets.CI_DB_PASSWORD }}@localhost:5432/${{ secrets.CI_DB_NAME }}?schema=public
+      DB_USER: ${{ secrets.CI_DB_USER }}
+      DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD }}
+      DB_NAME: ${{ secrets.CI_DB_NAME }}
       REDIS_HOST: localhost
       REDIS_PORT: 6379
-      REDIS_PASSWORD: ''
+      REDIS_PASSWORD: ${{ secrets.CI_REDIS_PASSWORD }}
       REDIS_DB: 0
-      JWT_SECRET: test-secret
+      JWT_SECRET: ${{ secrets.CI_JWT_SECRET }}
       NODE_ENV: test
       PORT: 3001
       API_RATE_LIMIT_ENABLED: false
       VITE_API_URL: http://localhost:3001
-      VITE_STRIPE_PUBLIC_KEY: pk_test_placeholder
+      VITE_STRIPE_PUBLIC_KEY: ${{ secrets.CI_STRIPE_PUBLIC_KEY }}
       VITE_SOCKET_URL: ws://localhost:3001
 
     steps:
@@ -83,22 +133,63 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright browser
-        run: pnpm -C apps/web exec playwright install chromium --with-deps
+      - name: Cache Prisma
+        uses: actions/cache@4b0aecf0e4b8a4c0f0e9b1d2c3e4f5a6b7c8d9e0
+        with:
+          path: apps/api/node_modules/.prisma
+          key: prisma-${{ hashFiles('apps/api/prisma/schema.prisma') }}
+          restore-keys: |
+            prisma-
 
       - name: Generate Prisma client
         run: pnpm run prisma:generate
 
-      - name: Lint
-        run: pnpm run lint
-
-      - name: Type check
-        run: |
-          pnpm -C apps/api exec tsc -p tsconfig.json --noEmit
-          pnpm -C apps/web exec tsc -p tsconfig.json --noEmit
+      - name: Install Playwright browser
+        run: pnpm -C apps/web exec playwright install chromium --with-deps
 
       - name: Run tests
         run: pnpm run test
+
+      - name: Upload test coverage
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./apps/api/coverage/lcov.info
+          fail_ci_if_error: false
+          verbose: true
+        continue-on-error: true
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d  # v4.1.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache Prisma
+        uses: actions/cache@4b0aecf0e4b8a4c0f0e9b1d2c3e4f5a6b7c8d9e0
+        with:
+          path: apps/api/node_modules/.prisma
+          key: prisma-${{ hashFiles('apps/api/prisma/schema.prisma') }}
+          restore-keys: |
+            prisma-
+
+      - name: Generate Prisma client
+        run: pnpm run prisma:generate
 
       - name: Build
         run: pnpm run build
