@@ -57,6 +57,19 @@ wait_for_preview() {
   return 1
 }
 
+smoke_local_preview() {
+  pnpm -C apps/web exec vite preview --host 127.0.0.1 --port 4173 >/tmp/infamous-web-preview.log 2>&1 &
+  local preview_pid=$!
+  trap 'kill ${preview_pid} 2>/dev/null || true' RETURN
+
+  if ! wait_for_preview "$LOCAL_PREVIEW_URL"; then
+    cat /tmp/infamous-web-preview.log >&2 || true
+    return 1
+  fi
+
+  SITE_URL="$LOCAL_PREVIEW_URL" pnpm -C apps/web run smoke:render
+}
+
 if [[ "${ALLOW_LOCKFILE_UPDATE:-false}" == "true" ]]; then
   run_step "Install workspace deps (lockfile updates allowed)" pnpm install --no-frozen-lockfile
 else
@@ -69,15 +82,7 @@ run_step "Type/lint checks" pnpm lint
 run_step "API tests (runInBand)" pnpm -w test --runInBand
 run_step "Strict environment checks" pnpm env:check:strict
 run_step "Web production build" pnpm -C apps/web run build
-
-run_step "Local built web render smoke check" bash -lc '
-  pnpm -C apps/web exec vite preview --host 127.0.0.1 --port 4173 >/tmp/infamous-web-preview.log 2>&1 &
-  preview_pid=$!
-  trap "kill ${preview_pid} 2>/dev/null || true" EXIT
-  wait_for_preview "'"$LOCAL_PREVIEW_URL"'"
-  SITE_URL="'"$LOCAL_PREVIEW_URL"'" pnpm -C apps/web run smoke:render
-'
-
+run_step "Local built web render smoke check" smoke_local_preview
 run_step "Docker build validation" pnpm docker:build
 
 run_step "Site HEAD check" curl_head "$SITE_URL"
