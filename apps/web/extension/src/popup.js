@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   openDashboardBtn?.addEventListener('click', () => {
-    chrome.tabs.create({ url: 'https://infamousfreight.com/dispatch' });
+    chrome.tabs.create({ url: 'https://www.infamousfreight.com/dispatch' });
   });
 
   function showState(connected) {
