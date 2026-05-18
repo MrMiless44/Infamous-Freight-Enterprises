@@ -1,7 +1,9 @@
 name: Ops Snapshot
 
+# Production/operations evidence only. Keep this off PRs so routine code changes
+# are not blocked by snapshot/provider noise.
 on:
-  pull_request:
+  workflow_dispatch:
   push:
     branches: [main]
 
