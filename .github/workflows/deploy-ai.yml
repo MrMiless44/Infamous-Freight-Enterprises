@@ -1,9 +1,8 @@
 name: Deploy AI Dispatch
 
+# Mainline/manual deployment workflow only. Pull requests use Required Checks.
 on:
   push:
-    branches: [main]
-  pull_request:
     branches: [main]
   workflow_dispatch:
 
@@ -18,7 +17,6 @@ env:
   NODE_VERSION: '22'
 
 jobs:
-  # ===== CI =====
   ci:
     name: Lint, type-check & test
     runs-on: ubuntu-latest
@@ -73,12 +71,11 @@ jobs:
             echo "SHA: ${{ github.sha }}"
           } >> "$GITHUB_STEP_SUMMARY"
 
-  # ===== DEPLOY =====
   deploy:
     name: Deploy to Fly.io
     runs-on: ubuntu-latest
     needs: ci
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: github.ref == 'refs/heads/main'
     timeout-minutes: 20
     concurrency:
       group: fly-ai-production
