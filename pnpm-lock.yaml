@@ -19,7 +19,7 @@ importers:
         version: 2.105.4
       openai:
         specifier: ^6.38.0
-        version: 6.38.0(ws@8.20.0)
+        version: 6.38.0(ws@8.20.1)
     devDependencies:
       '@netlify/edge-functions':
         specifier: ^3.0.6
@@ -65,7 +65,7 @@ importers:
         version: 8.1.0
       openai:
         specifier: ^6.38.0
-        version: 6.38.0(ws@8.20.0)
+        version: 6.38.0(ws@8.20.1)
     devDependencies:
       '@types/cors':
         specifier: ^2.8.17
@@ -4333,8 +4333,8 @@ packages:
       utf-8-validate:
         optional: true
 
-  ws@8.20.0:
-    resolution: {integrity: sha512-sAt8BhgNbzCtgGbt2OxmpuryO63ZoDk/sqaB/znQm94T4fCEsy/yV+7CdC1kJhOU9lboAEU7R3kquuycDoibVA==}
+  ws@8.20.1:
+    resolution: {integrity: sha512-It4dO0K5v//JtTXuPkfEOaI3uUN87iYPnqo/ZzqCoG3g8uhA66QUMs/SrM0YK7/NAu+r4LMh/9dq2A7k+rHs+w==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -5065,7 +5065,7 @@ snapshots:
       '@netlify/runtime-utils': 2.3.0
       pg: 8.20.0
       waddler: 0.1.1(@neondatabase/serverless@1.1.0)(mysql2@3.15.3)(pg@8.20.0)(postgres@3.4.7)
-      ws: 8.20.0
+      ws: 8.20.1
     transitivePeerDependencies:
       - '@clickhouse/client'
       - '@cloudflare/workers-types'
@@ -7754,9 +7754,9 @@ snapshots:
     dependencies:
       mimic-fn: 2.1.0
 
-  openai@6.38.0(ws@8.20.0):
+  openai@6.38.0(ws@8.20.1):
     optionalDependencies:
-      ws: 8.20.0
+      ws: 8.20.1
 
   p-limit@2.3.0:
     dependencies:
@@ -8635,7 +8635,7 @@ snapshots:
 
   ws@8.18.3: {}
 
-  ws@8.20.0: {}
+  ws@8.20.1: {}
 
   xml-name-validator@5.0.0: {}
 
