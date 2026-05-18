@@ -229,7 +229,7 @@ importers:
     dependencies:
       '@netlify/database':
         specifier: ^1.0.0
-        version: 1.0.0(@electric-sql/pglite@0.4.1)(mysql2@3.15.3)(postgres@3.4.7)
+        version: 1.0.0(mysql2@3.15.3)(postgres@3.4.7)
 
 packages:
 
@@ -5059,12 +5059,12 @@ snapshots:
 
   '@neondatabase/serverless@1.1.0': {}
 
-  '@netlify/database@1.0.0(@electric-sql/pglite@0.4.1)(mysql2@3.15.3)(postgres@3.4.7)':
+  '@netlify/database@1.0.0(mysql2@3.15.3)(postgres@3.4.7)':
     dependencies:
       '@neondatabase/serverless': 1.1.0
       '@netlify/runtime-utils': 2.3.0
       pg: 8.20.0
-      waddler: 0.1.1(@electric-sql/pglite@0.4.1)(@neondatabase/serverless@1.1.0)(mysql2@3.15.3)(pg@8.20.0)(postgres@3.4.7)
+      waddler: 0.1.1(@neondatabase/serverless@1.1.0)(mysql2@3.15.3)(pg@8.20.0)(postgres@3.4.7)
       ws: 8.20.0
     transitivePeerDependencies:
       - '@clickhouse/client'
@@ -8573,9 +8573,8 @@ snapshots:
     dependencies:
       xml-name-validator: 5.0.0
 
-  waddler@0.1.1(@electric-sql/pglite@0.4.1)(@neondatabase/serverless@1.1.0)(mysql2@3.15.3)(pg@8.20.0)(postgres@3.4.7):
+  waddler@0.1.1(@neondatabase/serverless@1.1.0)(mysql2@3.15.3)(pg@8.20.0)(postgres@3.4.7):
     optionalDependencies:
-      '@electric-sql/pglite': 0.4.1
       '@neondatabase/serverless': 1.1.0
       mysql2: 3.15.3
       pg: 8.20.0
