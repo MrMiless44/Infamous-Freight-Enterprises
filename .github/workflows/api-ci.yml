@@ -1,12 +1,11 @@
 name: API CI
 
+# API-specific deep checks are available on main and manual dispatch. Pull
+# requests use the consolidated `Required Checks` workflow to avoid duplicate
+# install/lint/test/build jobs.
 on:
+  workflow_dispatch:
   push:
-    branches: [main]
-    paths:
-      - 'apps/api/**'
-      - '.github/workflows/api-ci.yml'
-  pull_request:
     branches: [main]
     paths:
       - 'apps/api/**'
