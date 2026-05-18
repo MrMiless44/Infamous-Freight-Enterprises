@@ -1,10 +1,11 @@
 name: Docker Build Check
 
+# Docker image validation is covered by Full Validation on main/manual runs.
+# Keep it off pull_request events to avoid duplicate heavy build checks.
 on:
   workflow_dispatch:
   push:
     branches: [main]
-  pull_request:
 
 jobs:
   docker-build:
