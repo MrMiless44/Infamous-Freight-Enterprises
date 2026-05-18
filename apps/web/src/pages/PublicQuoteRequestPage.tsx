@@ -362,7 +362,7 @@ const PublicQuoteRequestPage: React.FC = () => {
             </label>
             <label className="block rounded-xl border border-dashed border-infamous-border bg-infamous-panel p-5 transition hover:border-infamous-red/30 cursor-pointer">
               <span className="flex items-center gap-2 text-sm font-medium text-[#F5E8E8]/80">
-                <Paperclip size={16} className="text-infamous-red-light" /> Attach freight document
+                <Paperclip size={16} className="text-infamous-red-light" aria-hidden="true" /> Attach freight document
               </span>
               <span className="mt-1 block text-sm text-[#B88989]/70">
                 BOL, rate confirmation, packing list, or freight photo. One file, 8 MB max.
@@ -451,8 +451,8 @@ const PublicQuoteRequestPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-infamous-dark px-5 py-8 text-[#F5E8E8] lg:px-6">
         <div className="mx-auto max-w-2xl">
-          <div className="rounded-xl border border-[#36D399]/30 bg-infamous-card p-8 text-center">
-            <CheckCircle2 className="mx-auto mb-4 text-[#36D399]" size={48} />
+          <div className="rounded-xl border border-[#36D399]/30 bg-infamous-card p-8 text-center" role="status" aria-live="polite">
+            <CheckCircle2 className="mx-auto mb-4 text-[#36D399]" size={48} aria-hidden="true" />
             <h2 className="text-2xl font-black">Quote Request Submitted</h2>
             <p className="mt-3 text-[#B88989]">
               Dispatch will review your lane, confirm equipment, check carrier capacity, and reply with pricing.
@@ -505,6 +505,7 @@ const PublicQuoteRequestPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => { if (i <= step) setStep(i); }}
+                      aria-current={i === step ? 'step' : undefined}
                       className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition ${
                         i === step
                           ? 'bg-infamous-red/10 text-infamous-red-light border border-infamous-red/20'
@@ -549,7 +550,7 @@ const PublicQuoteRequestPage: React.FC = () => {
 
               {renderStepContent()}
 
-              {error && <p className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">{error}</p>}
+              {error && <p role="alert" aria-live="assertive" className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">{error}</p>}
 
               <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 {step > 0 ? (
@@ -586,9 +587,9 @@ const PublicQuoteRequestPage: React.FC = () => {
           {/* Sidebar */}
           <aside className="space-y-5">
             {/* Rate Estimate */}
-            <div className="rounded-xl border border-infamous-border bg-infamous-card p-6">
+            <div className="rounded-xl border border-infamous-border bg-infamous-card p-6" aria-live="polite">
               <div className="mb-3 flex items-center gap-2">
-                <Gauge size={18} className="text-infamous-red-light" />
+                <Gauge size={18} className="text-infamous-red-light" aria-hidden="true" />
                 <h2 className="font-bold">Rate Estimate</h2>
               </div>
               {estimate ? (
@@ -631,7 +632,7 @@ const PublicQuoteRequestPage: React.FC = () => {
             {/* Tip */}
             <div className="rounded-xl border border-infamous-border bg-infamous-panel p-5">
               <div className="flex items-center gap-2 text-sm font-semibold text-[#F5E8E8]">
-                <Truck size={16} className="text-infamous-red-light" /> Tip
+                <Truck size={16} className="text-infamous-red-light" aria-hidden="true" /> Tip
               </div>
               <p className="mt-2 text-xs text-[#B88989]">
                 Fill in as many details as possible — origin, destination, freight type, weight, and pickup date — so dispatch can respond faster.

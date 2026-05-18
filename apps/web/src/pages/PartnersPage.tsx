@@ -232,7 +232,17 @@ const PartnersPage: React.FC = () => {
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form
+              name="partner-application"
+              method="POST"
+              action="/thank-you/?form=partner-application"
+              data-netlify="true"
+              netlify-honeypot="bot-field"
+              onSubmit={handleSubmit}
+              className="space-y-6"
+            >
+              <input type="hidden" name="form-name" value="partner-application" />
+              <p className="hidden"><label>Don&apos;t fill this out: <input name="bot-field" /></label></p>
               <div className="grid gap-4 md:grid-cols-2">
                 {[
                   ['company', 'Company name'],
@@ -245,6 +255,7 @@ const PartnersPage: React.FC = () => {
                   <label key={key} className="block">
                     <span className="mb-2 block text-sm font-medium text-[#F5E8E8]/80">{label}</span>
                     <input
+                      name={key}
                       value={form[key as keyof typeof initialForm]}
                       onChange={(event) => update(key as keyof typeof initialForm, event.target.value)}
                       className="w-full rounded-xl border border-infamous-border bg-infamous-panel px-4 py-3 text-[#F5E8E8] outline-none transition focus:border-infamous-orange"
@@ -256,10 +267,12 @@ const PartnersPage: React.FC = () => {
               <label className="block">
                 <span className="mb-2 block text-sm font-medium text-[#F5E8E8]/80">Notes</span>
                 <textarea
+                  name="notes"
                   value={form.notes}
                   onChange={(event) => update('notes', event.target.value)}
                   className="min-h-32 w-full rounded-xl border border-infamous-border bg-infamous-panel px-4 py-3 text-[#F5E8E8] outline-none transition focus:border-infamous-orange"
                   placeholder="Tell us what your business offers and which placement tier you are interested in."
+                  maxLength={2000}
                 />
               </label>
               {error ? <p className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">{error}</p> : null}

@@ -22,25 +22,25 @@ const contactCards = [
     label: 'Call dispatch',
     value: BRAND.dispatchPhone,
     href: BRAND.dispatchPhoneHref,
-    icon: <Phone size={20} />,
+    icon: <Phone size={20} aria-hidden="true" />,
   },
   {
     label: 'Dispatch and quotes',
     value: BRAND.dispatchEmail,
     href: `mailto:${BRAND.dispatchEmail}`,
-    icon: <Mail size={20} />,
+    icon: <Mail size={20} aria-hidden="true" />,
   },
   {
     label: 'Driver onboarding',
     value: 'drivers@infamousfreight.com',
     href: 'mailto:drivers@infamousfreight.com',
-    icon: <Truck size={20} />,
+    icon: <Truck size={20} aria-hidden="true" />,
   },
   {
     label: 'General support',
     value: BRAND.supportEmail,
     href: `mailto:${BRAND.supportEmail}`,
-    icon: <Mail size={20} />,
+    icon: <Mail size={20} aria-hidden="true" />,
   },
 ];
 
@@ -102,8 +102,8 @@ const ContactPage: React.FC = () => {
             <p className="mt-2 text-sm text-[#B88989]">For urgent active-load issues, call dispatch at <a href={BRAND.dispatchPhoneHref} className="font-semibold text-infamous-orange hover:underline">{BRAND.dispatchPhone}</a> or include the tracking or load number in your message.</p>
 
             {submitted ? (
-              <div className="mt-6 rounded-2xl border border-green-500/30 bg-green-500/10 p-6">
-                <CheckCircle2 className="mb-3 text-green-400" size={32} />
+              <div className="mt-6 rounded-2xl border border-green-500/30 bg-green-500/10 p-6" role="status" aria-live="polite">
+                <CheckCircle2 className="mb-3 text-green-400" size={32} aria-hidden="true" />
                 <h3 className="text-xl font-bold">Message sent</h3>
                 <p className="mt-2 text-[#F5E8E8]/80">Thanks — your message was received. We will route it to the right team.</p>
                 <button
@@ -200,7 +200,7 @@ const ContactPage: React.FC = () => {
                     <Link to="/terms" className="font-semibold text-infamous-orange hover:underline">Terms</Link>.
                   </span>
                 </label>
-                {error ? <p className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">{error}</p> : null}
+                {error ? <p role="alert" aria-live="assertive" className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">{error}</p> : null}
                 <button
                   type="submit"
                   disabled={loading}
@@ -214,12 +214,12 @@ const ContactPage: React.FC = () => {
 
           <aside className="space-y-4">
             <div className="rounded-3xl border border-infamous-border bg-infamous-panel p-6">
-              <Clock3 className="mb-3 text-infamous-orange" size={24} />
+              <Clock3 className="mb-3 text-infamous-orange" size={24} aria-hidden="true" />
               <h2 className="text-lg font-bold">Response expectations</h2>
               <p className="mt-3 text-sm leading-6 text-[#B88989]">Quote and dispatch requests are prioritized first. General support and partner inquiries are routed by topic.</p>
             </div>
             <div className="rounded-3xl border border-infamous-border bg-infamous-panel p-6">
-              <MapPin className="mb-3 text-infamous-orange" size={24} />
+              <MapPin className="mb-3 text-infamous-orange" size={24} aria-hidden="true" />
               <h2 className="text-lg font-bold">Service region</h2>
               <p className="mt-3 text-sm leading-6 text-[#B88989]">Local and regional freight across core U.S. lanes, with emphasis on verified capacity and shipment visibility.</p>
             </div>

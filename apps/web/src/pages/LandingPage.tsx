@@ -313,7 +313,7 @@ const LandingPage: React.FC = () => {
           </div>
 
           {/* Metrics bar */}
-          <div className="mt-20">
+          <div className="mt-20" aria-label="Operating process highlights" role="region">
             <p className="text-[10px] text-infamous-muted uppercase tracking-wider mb-3 text-center lg:text-left">Operating process</p>
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             {workflowHighlights.map((metric) => (
@@ -385,7 +385,7 @@ const LandingPage: React.FC = () => {
                   <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-infamous-red/10 text-sm font-black text-infamous-red-light border border-infamous-red/20">
                     {step.number}
                   </span>
-                  <step.icon size={20} className="text-infamous-muted" />
+                  <step.icon size={20} className="text-infamous-muted" aria-hidden="true" />
                 </div>
                 <h3 className="text-lg font-bold text-[#F5E8E8]">{step.title}</h3>
                 <p className="mt-2 text-sm leading-6 text-[#B88989]">{step.description}</p>
@@ -472,7 +472,7 @@ const LandingPage: React.FC = () => {
             {trustCards.map((card) => (
               <article key={card.title} className="group glass-card-subtle rounded-[18px] p-6 transition hover:border-infamous-red/30">
                 <div className="mb-4 inline-flex rounded-lg bg-infamous-red/10 p-3 text-infamous-red-light">
-                  <card.icon size={22} />
+                  <card.icon size={22} aria-hidden="true" />
                 </div>
                 <h3 className="text-lg font-bold text-[#F5E8E8]">{card.title}</h3>
                 <p className="mt-3 text-sm leading-6 text-[#B88989]">{card.description}</p>
@@ -556,13 +556,23 @@ const LandingPage: React.FC = () => {
             {techFeatures.map((feat) => (
               <div key={feat.title} className="glass-card-subtle rounded-[18px] p-7 transition hover:border-infamous-red/25">
                 <div className="mb-4 inline-flex rounded-lg bg-infamous-red/10 p-3 text-infamous-red-light border border-infamous-red/15">
-                  <feat.icon size={22} />
+                  <feat.icon size={22} aria-hidden="true" />
                 </div>
                 <h3 className="text-xl font-bold text-[#F5E8E8]">{feat.title}</h3>
                 <p className="mt-3 text-sm leading-7 text-[#B88989]">{feat.description}</p>
               </div>
             ))}
 
+          </div>
+
+          <div className="mt-10 text-center">
+            <Link
+              to="/request-quote"
+              onClick={() => trackPublicEvent('quote_cta_click', { source: 'technology_section' })}
+              className="btn-primary inline-flex items-center gap-2 glow-medium"
+            >
+              Get Started with a Quote <ArrowRight size={16} />
+            </Link>
           </div>
         </div>
       </section>

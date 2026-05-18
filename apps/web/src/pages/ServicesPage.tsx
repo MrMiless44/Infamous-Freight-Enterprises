@@ -12,8 +12,11 @@ const ServicesPage: React.FC = () => {
             Freight services built around clear execution.
           </h1>
           <p className="mt-5 text-lg leading-8 text-[#B88989]">
-            From small freight to full truckload, every service starts with clear intake, documented handoffs, shipment updates, and delivery follow-up.
+            Built for shippers, carriers, and dispatch teams. From small freight to full truckload, every service starts with clear intake, documented handoffs, shipment updates, and delivery follow-up.
           </p>
+          <Link to="/request-quote" className="mt-6 inline-flex items-center gap-2 rounded-xl bg-infamous-red px-5 py-3 font-semibold text-[#F5E8E8] transition hover:bg-infamous-red-light">
+            Request a Quote <ArrowRight size={17} />
+          </Link>
         </header>
 
         <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -26,7 +29,7 @@ const ServicesPage: React.FC = () => {
                 className="group flex h-full flex-col rounded-[18px] border border-infamous-border/60 bg-infamous-card p-6 transition hover:border-infamous-red/30 hover:shadow-[0_0_18px_rgba(255,26,26,0.1)]"
               >
                 <div className="mb-4 inline-flex w-fit rounded-xl bg-infamous-red/10 p-3 text-infamous-red-light">
-                  <ServiceIcon size={24} />
+                  <ServiceIcon size={24} aria-hidden="true" />
                 </div>
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-infamous-red-light">{service.eyebrow}</p>
                 <h2 className="mt-2 text-xl font-bold">{service.title}</h2>
@@ -53,7 +56,7 @@ const ServicesPage: React.FC = () => {
                 'Proof of delivery and support follow-up',
               ].map((item) => (
                 <div key={item} className="flex gap-3 rounded-xl border border-infamous-border/60 bg-infamous-card p-4">
-                  <CheckCircle2 className="mt-0.5 flex-shrink-0 text-infamous-green" size={18} />
+                  <CheckCircle2 className="mt-0.5 flex-shrink-0 text-infamous-green" size={18} aria-hidden="true" />
                   <p className="text-sm leading-6 text-[#F5E8E8]/80">{item}</p>
                 </div>
               ))}

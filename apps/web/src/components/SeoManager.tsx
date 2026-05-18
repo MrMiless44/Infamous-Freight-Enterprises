@@ -224,17 +224,37 @@ const INDEXABLE_ROUTES = new Set([
 
 const ORGANIZATION_JSONLD = JSON.stringify({
   '@context': 'https://schema.org',
-  '@type': 'Organization',
+  '@type': 'LocalBusiness',
+  '@id': `${SITE_URL}/#business`,
   name: BRAND.displayName,
   url: SITE_URL,
   logo: `${SITE_URL}/favicon.svg`,
+  image: OG_IMAGE,
   description: BRAND.description,
-  contactPoint: {
-    '@type': 'ContactPoint',
-    email: BRAND.supportEmail,
-    telephone: BRAND.dispatchPhone,
-    contactType: 'customer service',
+  telephone: BRAND.dispatchPhone,
+  email: BRAND.supportEmail,
+  priceRange: '$$',
+  areaServed: {
+    '@type': 'Country',
+    name: 'United States',
   },
+  serviceType: ['Freight Shipping', 'Truck Dispatch', 'Freight Brokerage', 'LTL Freight', 'Full Truckload'],
+  contactPoint: [
+    {
+      '@type': 'ContactPoint',
+      email: BRAND.supportEmail,
+      telephone: BRAND.dispatchPhone,
+      contactType: 'customer service',
+      availableLanguage: 'English',
+    },
+    {
+      '@type': 'ContactPoint',
+      email: BRAND.dispatchEmail,
+      telephone: BRAND.dispatchPhone,
+      contactType: 'sales',
+      availableLanguage: 'English',
+    },
+  ],
   sameAs: [
     'https://www.producthunt.com/posts/infamous-freight',
   ],

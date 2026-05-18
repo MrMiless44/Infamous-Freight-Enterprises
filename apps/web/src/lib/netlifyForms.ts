@@ -141,7 +141,7 @@ export const submitNetlifyForm = async (
     });
 
     if (!response.ok) {
-      throw new Error('We could not submit the form. Please try again or contact dispatch directly.');
+      throw new Error('Form submission failed — please check your connection and try again, or contact dispatch directly.');
     }
 
     lastSubmissionBySignature.set(submissionSignature, Date.now());
@@ -155,7 +155,7 @@ export const submitNetlifyForm = async (
   });
 
   if (!response.ok) {
-    throw new Error('We could not submit the form. Please try again or contact dispatch directly.');
+    throw new Error('Form submission failed — please check your connection and try again, or contact dispatch directly.');
   }
 
   lastSubmissionBySignature.set(submissionSignature, Date.now());
