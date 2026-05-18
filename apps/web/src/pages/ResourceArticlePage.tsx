@@ -12,7 +12,7 @@ const ResourceArticlePage: React.FC = () => {
   }
 
   return (
-    <main className="min-h-screen bg-[#090909] px-6 py-10 text-[#F5E8E8]">
+    <div className="min-h-screen bg-infamous-dark px-6 py-10 text-[#F5E8E8]">
       <div className="mx-auto max-w-3xl">
         <Breadcrumb items={[{ label: 'Resources', href: '/resources' }, { label: article.title }]} />
 
@@ -96,7 +96,7 @@ const ResourceArticlePage: React.FC = () => {
           </div>
         </section>
       </div>
-    </main>
+    </div>
   );
 };
 

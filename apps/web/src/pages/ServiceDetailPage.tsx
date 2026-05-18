@@ -37,7 +37,7 @@ const ServiceDetailPage: React.FC = () => {
     .filter(Boolean);
 
   return (
-    <main className="min-h-screen bg-infamous-dark px-6 py-16 text-[#F5E8E8]">
+    <div className="min-h-screen bg-infamous-dark px-6 py-16 text-[#F5E8E8]">
       <div className="mx-auto max-w-7xl">
         <Breadcrumb items={[{ label: 'Services', href: '/services' }, { label: service.title }]} />
         <section className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
@@ -119,7 +119,7 @@ const ServiceDetailPage: React.FC = () => {
           </div>
         </section>
       </div>
-    </main>
+    </div>
   );
 };
 

@@ -184,7 +184,7 @@ const PublicLoadBoardPage: React.FC = () => {
   };
 
   return (
-    <main className="bg-[#090909] text-[#F5E8E8]">
+    <div className="bg-infamous-dark text-[#F5E8E8]">
       <section className="relative border-b border-white/10">
         <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,61,0,0.18),transparent_42%),linear-gradient(180deg,#11100f_0%,#090909_72%)]" />
         <div className="relative mx-auto max-w-7xl px-5 py-12 lg:px-6 lg:py-16">
@@ -728,7 +728,7 @@ const PublicLoadBoardPage: React.FC = () => {
           </div>
         </div>
       ) : null}
-    </main>
+    </div>
   );
 };
 

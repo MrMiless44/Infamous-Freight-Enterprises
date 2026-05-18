@@ -35,7 +35,7 @@ export default function ThankYouPage() {
   const { heading, body } = formMessages[formName] ?? fallback;
 
   return (
-    <main className="min-h-screen bg-[#090909] px-6 py-16 text-[#F5E8E8]">
+    <div className="min-h-screen bg-infamous-dark px-6 py-16 text-[#F5E8E8]">
       <section className="mx-auto max-w-3xl rounded-3xl border border-infamous-border bg-infamous-card p-8 shadow-2xl">
         <CheckCircle2 className="mb-5 text-green-400" size={42} />
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Submission received</p>
@@ -50,6 +50,6 @@ export default function ThankYouPage() {
           </Link>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

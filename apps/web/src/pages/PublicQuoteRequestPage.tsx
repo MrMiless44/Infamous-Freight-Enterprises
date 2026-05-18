@@ -286,7 +286,7 @@ const PublicQuoteRequestPage: React.FC = () => {
       case 0:
         return (
           <div className="space-y-5">
-            <h2 className="text-xl font-bold">Start Your Quote</h2>
+            <h1 className="text-xl font-bold">Start Your Quote</h1>
             <p className="text-sm text-[#B88989]">Share the lane, equipment, pickup timing, and best contact first. Extra freight details can come next.</p>
             <div className="grid gap-4 sm:grid-cols-2">
               <InputField label="Origin City / State" name="origin" value={form.origin} onChange={(v) => updateField('origin', v)} required />

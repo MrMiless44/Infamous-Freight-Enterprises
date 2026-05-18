@@ -158,6 +158,10 @@ const SEO_BY_PATH: Record<string, SeoConfig> = {
     title: `Shipper Agreement | ${BRAND.displayName}`,
     description: 'Review the shipper agreement for freight services, liability, and terms with Infamous Freight.'
   },
+  '/thank-you': {
+    title: `Submission Received | ${BRAND.displayName}`,
+    description: 'Your form has been received. The Infamous Freight team will review and follow up with next steps.',
+  },
   '/resources': {
     title: `Freight Guides and Resources | ${BRAND.displayName}`,
     description: 'Practical freight knowledge: equipment guides, industry explanations, and decision frameworks for shippers, carriers, and logistics teams.'

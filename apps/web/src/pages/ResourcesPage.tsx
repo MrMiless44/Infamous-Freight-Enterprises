@@ -6,7 +6,7 @@ const ResourcesPage: React.FC = () => {
   const categories = [...new Set(resourceArticles.map((a) => a.category))];
 
   return (
-    <main className="min-h-screen bg-[#090909] px-6 py-10 text-[#F5E8E8]">
+    <div className="min-h-screen bg-infamous-dark px-6 py-10 text-[#F5E8E8]">
       <div className="mx-auto max-w-7xl">
         <div className="mb-5 inline-flex rounded-xl bg-infamous-orange/10 p-3 text-infamous-orange">
           <BookOpen size={24} />
@@ -69,7 +69,7 @@ const ResourcesPage: React.FC = () => {
           </div>
         </section>
       </div>
-    </main>
+    </div>
   );
 };
 

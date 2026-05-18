@@ -71,7 +71,7 @@ const ContactPage: React.FC = () => {
   };
 
   return (
-    <main className="min-h-screen bg-[#090909] px-6 py-10 text-[#F5E8E8]">
+    <div className="min-h-screen bg-infamous-dark px-6 py-10 text-[#F5E8E8]">
       <div className="mx-auto max-w-7xl">
         <header className="mb-10 max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-orange">Contact</p>
@@ -229,7 +229,7 @@ const ContactPage: React.FC = () => {
           </aside>
         </section>
       </div>
-    </main>
+    </div>
   );
 };
 

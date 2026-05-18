@@ -1,7 +1,7 @@
 headersOrigin = "config"
 redirectsOrigin = "config"
 plugins = []
-functionsDirectory = "/opt/build/repo/netlify/functions"
+functionsDirectory = "/opt/build/repo/netlify/disabled-functions"
 functionsDirectoryOrigin = "config-v1"
 
 [functions]
@@ -13,12 +13,13 @@ publish = "/opt/build/repo/apps/web/dist"
 publishOrigin = "config"
 commandOrigin = "config"
 command = "pnpm run build:web"
-functions = "/opt/build/repo/netlify/functions"
+functions = "/opt/build/repo/netlify/disabled-functions"
 
 [build.environment]
 NODE_VERSION = "22"
 NETLIFY_NEXT_PLUGIN_SKIP = "true"
 SENTRY_DISABLE_UPLOAD = "true"
+FEATURE_FLAGS = ""
 
 [build.processing]
 
@@ -41,7 +42,7 @@ X-Content-Type-Options = "nosniff"
 X-XSS-Protection = "1; mode=block"
 Referrer-Policy = "strict-origin-when-cross-origin"
 Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://*.supabase.co https://www.google-analytics.com https://stats.g.doubleclick.net; connect-src 'self' https://infamous-freight.fly.dev https://api.infamousfreight.com https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.sentry.io https://*.ingest.sentry.io https://www.google-analytics.com https://www.googletagmanager.com; frame-src https://js.stripe.com https://hooks.stripe.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; worker-src 'none'; upgrade-insecure-requests"
+Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://www.googletagmanager.com https://*.netlify.app; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://*.supabase.co https://www.google-analytics.com https://stats.g.doubleclick.net; connect-src 'self' https://infamous-freight-api.fly.dev https://api.infamousfreight.com https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.sentry.io https://*.ingest.sentry.io https://www.google-analytics.com https://www.googletagmanager.com https://*.nsvcs.net; frame-src https://js.stripe.com https://hooks.stripe.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; worker-src 'self' blob:; upgrade-insecure-requests"
 Cross-Origin-Embedder-Policy = "credentialless"
 Cross-Origin-Opener-Policy = "same-origin-allow-popups"
 Cross-Origin-Resource-Policy = "same-origin"
@@ -54,7 +55,7 @@ X-Permitted-Cross-Domain-Policies = "none"
 for = "/driver-pwa/*"
 
 [headers.values]
-Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; font-src 'self' data:; img-src 'self' data:; connect-src 'self' https://infamous-freight.fly.dev https://api.infamousfreight.com; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; worker-src 'self'; upgrade-insecure-requests"
+Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; font-src 'self' data:; img-src 'self' data:; connect-src 'self' https://infamous-freight-api.fly.dev https://api.infamousfreight.com https://*.sentry.io https://*.ingest.sentry.io; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; worker-src 'self'; upgrade-insecure-requests"
 X-Frame-Options = "DENY"
 X-Content-Type-Options = "nosniff"
 X-XSS-Protection = "1; mode=block"
@@ -153,6 +154,30 @@ for = "/**/*.woff2"
 Cache-Control = "public, max-age=31536000, immutable"
 
 [[redirects]]
+from = "https://infamousfreight.com/*"
+to = "https://www.infamousfreight.com/:splat"
+status = 301.0
+force = true
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "https://infamous-freight.netlify.app/*"
+to = "https://www.infamousfreight.com/:splat"
+status = 301.0
+force = true
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
 from = "https://app.infamousfreight.com/*"
 to = "https://www.infamousfreight.com/"
 status = 301.0
@@ -225,68 +250,8 @@ force = true
 [redirects.headers]
 
 [[redirects]]
-from = "/old-page"
-to = "/new-page"
-status = 301.0
-force = true
-
-[redirects.query]
-
-[redirects.conditions]
-
-[redirects.headers]
-
-[[redirects]]
-from = "/legacy/*"
-to = "/new-path/:splat"
-status = 301.0
-force = true
-
-[redirects.query]
-
-[redirects.conditions]
-
-[redirects.headers]
-
-[[redirects]]
-from = "/*"
-to = "/index.html"
-status = 200.0
-force = false
-
-[redirects.query]
-
-[redirects.conditions]
-
-[redirects.headers]
-
-[[redirects]]
-from = "https://infamousfreight.com/*"
-to = "https://www.infamousfreight.com/:splat"
-status = 301.0
-force = true
-
-[redirects.query]
-
-[redirects.conditions]
-
-[redirects.headers]
-
-[[redirects]]
-from = "https://infamous-freight.netlify.app/*"
-to = "https://www.infamousfreight.com/:splat"
-status = 301.0
-force = true
-
-[redirects.query]
-
-[redirects.conditions]
-
-[redirects.headers]
-
-[[redirects]]
 from = "/api/health"
-to = "https://infamous-freight.fly.dev/api/health"
+to = "https://infamous-freight-api.fly.dev/api/health"
 status = 200.0
 force = true
 
@@ -298,7 +263,7 @@ force = true
 
 [[redirects]]
 from = "/api/load-requests"
-to = "/.netlify/functions/load-requests"
+to = "https://infamous-freight-api.fly.dev/api/load-requests"
 status = 200.0
 force = true
 
@@ -310,7 +275,7 @@ force = true
 
 [[redirects]]
 from = "/api/load-requests/*"
-to = "/.netlify/functions/load-requests/:splat"
+to = "https://infamous-freight-api.fly.dev/api/load-requests/:splat"
 status = 200.0
 force = true
 
@@ -322,7 +287,7 @@ force = true
 
 [[redirects]]
 from = "/api/public/quote-requests"
-to = "/.netlify/functions/public-freight"
+to = "https://infamous-freight-api.fly.dev/api/public/quote-requests"
 status = 200.0
 force = true
 
@@ -334,7 +299,7 @@ force = true
 
 [[redirects]]
 from = "/api/public/shipments/:trackingNumber"
-to = "/.netlify/functions/public-freight?trackingNumber=:trackingNumber"
+to = "https://infamous-freight-api.fly.dev/api/public/shipments/:trackingNumber"
 status = 200.0
 force = true
 
@@ -346,7 +311,7 @@ force = true
 
 [[redirects]]
 from = "/api/chat"
-to = "/.netlify/functions/chat"
+to = "https://infamous-freight-api.fly.dev/api/chat"
 status = 200.0
 force = true
 
@@ -358,7 +323,7 @@ force = true
 
 [[redirects]]
 from = "/api/auth/*"
-to = "/.netlify/functions/accounts"
+to = "https://infamous-freight-api.fly.dev/api/auth/:splat"
 status = 200.0
 force = true
 
@@ -370,7 +335,7 @@ force = true
 
 [[redirects]]
 from = "/api/loads/*"
-to = "/.netlify/functions/loads"
+to = "https://infamous-freight-api.fly.dev/api/loads/:splat"
 status = 200.0
 force = true
 
@@ -382,7 +347,7 @@ force = true
 
 [[redirects]]
 from = "/api/loads"
-to = "/.netlify/functions/loads"
+to = "https://infamous-freight-api.fly.dev/api/loads"
 status = 200.0
 force = true
 
@@ -394,7 +359,7 @@ force = true
 
 [[redirects]]
 from = "/api/carriers/*"
-to = "/.netlify/functions/carriers"
+to = "https://infamous-freight-api.fly.dev/api/carriers/:splat"
 status = 200.0
 force = true
 
@@ -406,7 +371,7 @@ force = true
 
 [[redirects]]
 from = "/api/carriers"
-to = "/.netlify/functions/carriers"
+to = "https://infamous-freight-api.fly.dev/api/carriers"
 status = 200.0
 force = true
 
@@ -418,7 +383,7 @@ force = true
 
 [[redirects]]
 from = "/api/drivers/*"
-to = "/.netlify/functions/drivers"
+to = "https://infamous-freight-api.fly.dev/api/drivers/:splat"
 status = 200.0
 force = true
 
@@ -430,7 +395,7 @@ force = true
 
 [[redirects]]
 from = "/api/drivers"
-to = "/.netlify/functions/drivers"
+to = "https://infamous-freight-api.fly.dev/api/drivers"
 status = 200.0
 force = true
 
@@ -442,7 +407,7 @@ force = true
 
 [[redirects]]
 from = "/api/eld/*"
-to = "/.netlify/functions/drivers"
+to = "https://infamous-freight-api.fly.dev/api/eld/:splat"
 status = 200.0
 force = true
 
@@ -454,7 +419,7 @@ force = true
 
 [[redirects]]
 from = "/api/tracking/*"
-to = "/.netlify/functions/tracking"
+to = "https://infamous-freight-api.fly.dev/api/tracking/:splat"
 status = 200.0
 force = true
 
@@ -466,7 +431,7 @@ force = true
 
 [[redirects]]
 from = "/api/quotes/*"
-to = "/.netlify/functions/quotes"
+to = "https://infamous-freight-api.fly.dev/api/quotes/:splat"
 status = 200.0
 force = true
 
@@ -478,7 +443,7 @@ force = true
 
 [[redirects]]
 from = "/api/quotes"
-to = "/.netlify/functions/quotes"
+to = "https://infamous-freight-api.fly.dev/api/quotes"
 status = 200.0
 force = true
 
@@ -490,7 +455,7 @@ force = true
 
 [[redirects]]
 from = "/api/documents/*"
-to = "/.netlify/functions/documents"
+to = "https://infamous-freight-api.fly.dev/api/documents/:splat"
 status = 200.0
 force = true
 
@@ -502,7 +467,7 @@ force = true
 
 [[redirects]]
 from = "/api/invoices/*"
-to = "/.netlify/functions/invoices"
+to = "https://infamous-freight-api.fly.dev/api/invoices/:splat"
 status = 200.0
 force = true
 
@@ -514,7 +479,7 @@ force = true
 
 [[redirects]]
 from = "/api/invoices"
-to = "/.netlify/functions/invoices"
+to = "https://infamous-freight-api.fly.dev/api/invoices"
 status = 200.0
 force = true
 
@@ -526,7 +491,7 @@ force = true
 
 [[redirects]]
 from = "/api/notifications/*"
-to = "/.netlify/functions/notifications-api"
+to = "https://infamous-freight-api.fly.dev/api/notifications/:splat"
 status = 200.0
 force = true
 
@@ -538,7 +503,7 @@ force = true
 
 [[redirects]]
 from = "/api/notifications"
-to = "/.netlify/functions/notifications-api"
+to = "https://infamous-freight-api.fly.dev/api/notifications"
 status = 200.0
 force = true
 
@@ -550,7 +515,19 @@ force = true
 
 [[redirects]]
 from = "/api/mobile/*"
-to = "/.netlify/functions/mobile"
+to = "https://infamous-freight-api.fly.dev/api/mobile/:splat"
+status = 200.0
+force = true
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/api/amazon-delivery/*"
+to = "https://infamous-freight-api.fly.dev/api/amazon-delivery/:splat"
 status = 200.0
 force = true
 
@@ -562,7 +539,7 @@ force = true
 
 [[redirects]]
 from = "/api/*"
-to = "https://infamous-freight.fly.dev/api/:splat"
+to = "https://infamous-freight-api.fly.dev/api/:splat"
 status = 200.0
 force = true
 
@@ -574,7 +551,7 @@ force = true
 
 [[redirects]]
 from = "/socket.io/*"
-to = "https://infamous-freight.fly.dev/socket.io/:splat"
+to = "https://infamous-freight-api.fly.dev/socket.io/:splat"
 status = 200.0
 force = true
 
@@ -600,7 +577,7 @@ force = true
 from = "/*"
 to = "/index.html"
 status = 200.0
-force = true
+force = false
 
 [redirects.query]
 

@@ -85,7 +85,7 @@ java -D"dw.graphhopper.datareader.file=berlin-latest.osm.pbf" -jar graphhopper*.
 
 const GraphHopperPage: React.FC = () => {
   return (
-    <main className="min-h-screen bg-[#f5f7ef] text-[#152016]">
+    <div className="min-h-screen bg-[#f5f7ef] text-[#152016]">
       <section className="relative overflow-hidden border-b border-[#d8dfce]">
         <div className="absolute inset-0 opacity-70">
           <div className="absolute left-[-10%] top-[-20%] h-80 w-80 rounded-full bg-[#b9e675]/60 blur-3xl" />
@@ -265,7 +265,7 @@ const GraphHopperPage: React.FC = () => {
           </Link>
         </div>
       </section>
-    </main>
+    </div>
   );
 };
 

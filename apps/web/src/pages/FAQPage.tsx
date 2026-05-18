@@ -159,7 +159,7 @@ const FaqItem: React.FC<{ id: string; question: string; answer: string }> = ({ i
 
 const FAQPage: React.FC = () => {
   return (
-    <main className="min-h-screen bg-[#090909] px-6 py-10 text-[#F5E8E8]">
+    <div className="min-h-screen bg-infamous-dark px-6 py-10 text-[#F5E8E8]">
       <div className="mx-auto max-w-4xl">
         <section className="text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-infamous-red-light">FAQ</p>
@@ -215,7 +215,7 @@ const FAQPage: React.FC = () => {
           </p>
         </section>
       </div>
-    </main>
+    </div>
   );
 };
 

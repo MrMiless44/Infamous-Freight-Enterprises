@@ -43,7 +43,7 @@ const commitments = [
 
 const AboutPage: React.FC = () => {
   return (
-    <main className="min-h-screen bg-[#090909] px-6 py-10 text-[#F5E8E8]">
+    <div className="min-h-screen bg-infamous-dark px-6 py-10 text-[#F5E8E8]">
       <div className="mx-auto max-w-7xl">
         <section className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <div>
@@ -151,7 +151,7 @@ const AboutPage: React.FC = () => {
           </div>
         </section>
       </div>
-    </main>
+    </div>
   );
 };
 

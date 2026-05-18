@@ -60,7 +60,7 @@ const LegalPage: React.FC = () => {
   const page = legalContent[(pathname in legalContent ? pathname : '/terms') as LegalPath];
 
   return (
-    <main className="min-h-screen bg-[#090909] px-6 py-10 text-[#F5E8E8]">
+    <div className="min-h-screen bg-infamous-dark px-6 py-10 text-[#F5E8E8]">
       <div className="mx-auto max-w-5xl">
         <header className="mb-10">
           <div className="mb-4 inline-flex rounded-xl bg-infamous-orange/10 p-3 text-infamous-orange">
@@ -94,7 +94,7 @@ const LegalPage: React.FC = () => {
           </Link>
         </section>
       </div>
-    </main>
+    </div>
   );
 };
 

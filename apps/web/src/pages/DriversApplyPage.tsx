@@ -56,7 +56,7 @@ const DriversApplyPage: React.FC = () => {
   };
 
   return (
-    <main className="min-h-screen bg-[#090909] px-6 py-10 text-[#F5E8E8]">
+    <div className="min-h-screen bg-infamous-dark px-6 py-10 text-[#F5E8E8]">
       <div className="mx-auto max-w-6xl">
         <Link to="/" className="mb-8 inline-flex items-center gap-2 text-sm text-[#B88989] hover:text-[#F5E8E8]">
           <ArrowLeft size={16} /> Back to Infamous Freight
@@ -138,7 +138,7 @@ const DriversApplyPage: React.FC = () => {
           </aside>
         </section>
       </div>
-    </main>
+    </div>
   );
 };
 
