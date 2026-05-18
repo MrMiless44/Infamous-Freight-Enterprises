@@ -1,10 +1,11 @@
 name: Full Validation
 
+# Deep validation is intentionally kept off pull_request events. PRs use
+# `Required Checks`; this workflow remains available for mainline verification
+# and manual release-gate runs.
 on:
   workflow_dispatch:
   push:
-    branches: [main, develop]
-  pull_request:
     branches: [main, develop]
 
 permissions:
