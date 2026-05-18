@@ -1,9 +1,9 @@
 name: SBOM and Dependency Audit
 
+# Dependency artifacts are useful release evidence, but duplicate PR audit jobs
+# add noise. Dependency review remains in the Phase 1 gate for dependency-file PRs.
 on:
   push:
-    branches: [main]
-  pull_request:
     branches: [main]
   workflow_dispatch:
 
