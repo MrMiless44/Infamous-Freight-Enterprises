@@ -1,10 +1,9 @@
 # Netlify Buildhook Packages — Provenance & Ownership
 
-Netlify can generate local build-time plugin state under
-`apps/web/.netlify/plugins/`. Some generated plugins are sourced from URL-hosted
-tarballs rather than a public npm registry. This document records the historical
-ownership, source artifact, integrity value, and maintenance path for packages
-that have appeared in that generated state.
+Netlify may install build-time integration packages in local `.netlify/plugins`
+directories. Those directories are generated CLI state and are not repo-owned
+source. This document records the known ownership, source artifact, integrity
+value, and maintenance path for URL-hosted packages that have appeared there.
 
 ---
 
@@ -32,7 +31,7 @@ ID of the integration's own site. Netlify keeps those deploys immutable.
 | **Source artifact** | `https://3bd69bc3-080d-4857-a4ab-c6aa5abc63a6.netlify.app/packages/buildhooks.tgz` |
 | **Pinned version** | `0.0.0-or1lf` |
 | **lock-file integrity** | `sha512-VOOZi9+Csa998jzzTbrMtPPAsi+vQxXRLUc5Gvd+NTOwMUA/8FICkaCFNf5427j9VvVAeLwmWZOB8Y97hJOh4Q==` |
-| **Status** | 🗑️ **Removed from repo** — generated Netlify plugin state is not committed for the static web deploy. Re-enable only through the Netlify dashboard if the integration is intentionally used. |
+| **Status** | Dashboard-managed — installed automatically by Netlify when the Async Workloads add-on is enabled on the site. Do not commit generated `.netlify/plugins` files for it. |
 | **Update path** | Re-enable or upgrade the Async Workloads integration via the Netlify dashboard; Netlify will rewrite the tarball URL in `package.json` and regenerate the lockfile. |
 
 ---
@@ -71,7 +70,7 @@ ID of the integration's own site. Netlify keeps those deploys immutable.
 | **Source artifact** | `https://6abe5a43-4668-4f72-b3f7-823e2d8bbbbf.netlify.app/packages/buildhooks.tgz` |
 | **Pinned version** | `0.0.0-mdcn1` |
 | **lock-file integrity** | `sha512-k0IKt0aJgySlRTpJdUfr/Vfq2avo2AH44f2TZc9cvj+NhWGIOX7BDHRUblGdWPnR4DDUVg35pmRx2NNx+MY31g==` |
-| **Status** | 🗑️ **Removed from repo** — generated Netlify plugin state is not committed for the static web deploy. Re-enable only through the Netlify dashboard if prerendering is intentionally used. |
+| **Status** | Dashboard-managed — provides Puppeteer-based prerendering at build time when enabled in Netlify. Do not commit generated `.netlify/plugins` files for it. |
 | **Update path** | Upgrade via the Netlify Prerender integration settings in the dashboard. |
 
 ---
@@ -84,8 +83,8 @@ ID of the integration's own site. Netlify keeps those deploys immutable.
 | **Source artifact** | `https://abfbde63-a3d0-4974-a9f9-57f108242e67.netlify.app/packages/buildhooks.tgz` |
 | **Pinned version** | `0.0.0-h7ovu` |
 | **lock-file integrity** | `sha512-pz6fSHzWMrOeuRCRH2bUCtgqBcLmVwjMFC5+O6dOk4iO0t8FFQEnLAFjh/f/YyG7CBTAbZhe8bSsR0RMlDK8NQ==` |
-| **Status** | 🗑️ **Removed** — `apps/api` uses Prisma, but the API is deployed to **Fly.io**, not Netlify. The Netlify build only produces the static Vite frontend. This build hook was auto-installed when the Prisma × Netlify integration was evaluated and has no effect on the actual deploy. |
-| **Update path** | N/A — removed. If the API is ever migrated to Netlify Functions, re-enable the Prisma Netlify integration from the dashboard. |
+| **Status** | 🗑️ **Removed from repo source** — `apps/api` uses Prisma, but the API is deployed to **Fly.io**, not Netlify. The Netlify build only produces the static Vite frontend. A generated `apps/web/.netlify/plugins` copy of this hook caused deploy previews to provision a Prisma Postgres branch before the Vite build and fail on Netlify API errors. |
+| **Update path** | N/A for this frontend deploy. If the API is ever migrated to Netlify Functions, re-enable the Prisma Netlify integration from the dashboard and keep generated `.netlify` state out of source control. |
 
 ---
 
@@ -108,28 +107,26 @@ ID of the integration's own site. Netlify keeps those deploys immutable.
 
 ## Integrity controls
 
-When generated plugin packages are retained, they must be pinned by
-**SHA-512 tarball digest** in `apps/web/.netlify/plugins/package-lock.json`. npm
-verifies this hash on every `npm install`, rejecting any tarball whose content
-does not match. This provides the same integrity guarantee as registry packages.
+When Netlify installs integration packages locally, package-lock entries pin them
+by **SHA-512 tarball digest**. npm verifies this hash on every install, rejecting
+any tarball whose content does not match. This provides the same integrity
+guarantee as registry packages.
 
-> **To reintroduce a buildhook**: confirm the Netlify dashboard integration is
-> intentionally enabled, regenerate the local plugin package files, review the
-> new `integrity` value in the updated `package-lock.json`, and commit only if
-> the integration is required for deploys.
+> **To update a buildhook**: update the integration from the Netlify dashboard,
+> verify the generated package metadata and integrity locally, and document any
+> provenance change here. Do not commit generated `.netlify/plugins` directories.
 
 ---
 
 ## Maintenance responsibilities
 
 The Netlify integration dashboard is the authoritative source of truth for which
-integrations are active on this site. When Netlify updates an integration it will
-open a PR (or update the lockfile automatically) with the new tarball URL and
-integrity hash.
+integrations are active on this site. Generated `.netlify` folders should remain
+local CLI state and are ignored by the repository.
 
 Future maintainers should:
 1. Cross-check the packages listed here against the integrations enabled in the
    Netlify dashboard.
-2. Ensure no new URL-sourced package appears in generated plugin metadata without a
-   corresponding entry in this document.
-3. Immediately investigate any integrity mismatch surfaced by `npm ci` in CI/CD.
+2. Ensure no generated `.netlify/plugins` package metadata is committed.
+3. Immediately investigate any integrity mismatch surfaced by Netlify or local
+   integration package installation.

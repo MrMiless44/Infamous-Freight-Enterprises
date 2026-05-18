@@ -1,0 +1,9 @@
+{
+  "name": "@infamous-freight/netlify-functions",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@netlify/database": "^1.0.0"
+  }
+}

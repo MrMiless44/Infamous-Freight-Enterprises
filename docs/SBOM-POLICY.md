@@ -173,7 +173,9 @@ Examples:
 
 Classify a dependency as **external provenance required** when it is fetched from a non-registry URL or otherwise lacks normal package registry provenance.
 
-Examples include generated Netlify buildhook tarballs under `apps/web/.netlify/plugins/` when that local integration state is intentionally committed.
+Examples historically included Netlify buildhook tarballs generated under
+`apps/web/.netlify/plugins/`; those generated `.netlify` directories are local
+CLI state and should not be committed.
 
 These packages must always have:
 

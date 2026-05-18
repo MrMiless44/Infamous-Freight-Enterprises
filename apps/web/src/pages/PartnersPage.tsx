@@ -232,7 +232,24 @@ const PartnersPage: React.FC = () => {
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form
+              name="partner-application"
+              method="POST"
+              action="/thank-you/?form=partner-application"
+              data-netlify="true"
+              data-netlify-form="partner-application"
+              data-success-url="/thank-you/?form=partner-application"
+              netlify-honeypot="bot-field"
+              onSubmit={handleSubmit}
+              className="space-y-6"
+            >
+              <input type="hidden" name="form-name" value="partner-application" />
+              <input type="hidden" name="csrf-token" value="netlify-form-partner-application-v1" />
+              <input type="hidden" name="clientSubmittedAt" />
+              <input type="hidden" name="pageUrl" />
+              <p className="hidden">
+                <label>Do not fill this out: <input name="bot-field" tabIndex={-1} autoComplete="off" /></label>
+              </p>
               <div className="grid gap-4 md:grid-cols-2">
                 {[
                   ['company', 'Company name'],
@@ -242,20 +259,30 @@ const PartnersPage: React.FC = () => {
                   ['category', 'Partner category (e.g. fuel cards, insurance)'],
                   ['region', 'Region or coverage area'],
                 ].map(([key, label]) => (
-                  <label key={key} className="block">
+                  <label key={key} htmlFor={`partner-${key}`} className="block">
                     <span className="mb-2 block text-sm font-medium text-[#F5E8E8]/80">{label}</span>
                     <input
+                      id={`partner-${key}`}
+                      name={key}
+                      type={key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'text'}
+                      autoComplete={key === 'company' ? 'organization' : key === 'contact' ? 'name' : key === 'email' ? 'email' : key === 'phone' ? 'tel' : undefined}
+                      maxLength={key === 'email' ? 160 : key === 'phone' ? 40 : 120}
                       value={form[key as keyof typeof initialForm]}
                       onChange={(event) => update(key as keyof typeof initialForm, event.target.value)}
                       className="w-full rounded-xl border border-infamous-border bg-infamous-panel px-4 py-3 text-[#F5E8E8] outline-none transition focus:border-infamous-orange"
                       placeholder={label}
+                      required={key === 'company' || key === 'contact' || key === 'email'}
+                      aria-required={key === 'company' || key === 'contact' || key === 'email' || undefined}
                     />
                   </label>
                 ))}
               </div>
-              <label className="block">
+              <label htmlFor="partner-notes" className="block">
                 <span className="mb-2 block text-sm font-medium text-[#F5E8E8]/80">Notes</span>
                 <textarea
+                  id="partner-notes"
+                  name="notes"
+                  maxLength={2000}
                   value={form.notes}
                   onChange={(event) => update('notes', event.target.value)}
                   className="min-h-32 w-full rounded-xl border border-infamous-border bg-infamous-panel px-4 py-3 text-[#F5E8E8] outline-none transition focus:border-infamous-orange"

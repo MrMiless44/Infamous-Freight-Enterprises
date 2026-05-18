@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
-import { encodeNetlifyForm, submitNetlifyForm } from '../netlifyForms';
+import { encodeNetlifyForm, submitNetlifyForm } from '@/lib/netlifyForms';
 
-describe('netlify form helper', () => {
-  it('adds encoded form metadata and submitted values', () => {
+describe('Netlify form submissions', () => {
+  it('encodes submitted fields for Netlify form processing', () => {
     const encoded = encodeNetlifyForm({
       'form-name': 'contact',
       email: 'ops@example.com',
@@ -14,16 +14,19 @@ describe('netlify form helper', () => {
     expect(encoded).toContain('message=Need+a+quote+for+a+dry+van+lane');
   });
 
-  it('rejects invalid email addresses before posting lead data', async () => {
-    const fetchMock = vi.spyOn(globalThis, 'fetch');
+  it('rejects invalid email addresses before posting', async () => {
+    await expect(submitNetlifyForm('contact', { email: 'bad-address' })).rejects.toThrow('Enter a valid email address.');
+  });
 
-    await expect(submitNetlifyForm('contact', {
-      email: 'not-an-email',
-      phone: '2145551212',
-      message: 'Need dispatch follow-up',
-    })).rejects.toThrow('Enter a valid email address.');
+  it('rejects honeypot submissions before posting', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
 
+    await expect(submitNetlifyForm('contact', { email: 'lead@example.com', 'bot-field': 'spam' }))
+      .rejects.toThrow('Submission blocked by spam protection.');
     expect(fetchMock).not.toHaveBeenCalled();
+
+    vi.unstubAllGlobals();
   });
 
   it('rejects delivery dates that are before pickup dates', async () => {

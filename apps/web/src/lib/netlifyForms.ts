@@ -58,6 +58,10 @@ const validateFile = (file: File) => {
 };
 
 const validatePayload = (data: NetlifyFormPayload) => {
+  if (getStringValue(data['bot-field'])) {
+    throw new Error('Submission blocked by spam protection.');
+  }
+
   validateEmail(getStringValue(data.email));
   validatePhone(getStringValue(data.phone));
   validateNonNegativeNumber('Weight', getStringValue(data.weight));
