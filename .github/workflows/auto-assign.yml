@@ -1,10 +1,10 @@
 name: Auto Assign
 
+# Keep issue auto-assignment, but do not create a PR status check for assignment.
 on:
   issues:
     types: [opened]
-  pull_request:
-    types: [opened]
+  workflow_dispatch:
 
 jobs:
   assign-issue:
@@ -19,15 +19,3 @@ jobs:
         with:
           assignees: MrMiless44
           numOfAssignee: 1
-
-  assign-pr:
-    name: Assign Pull Request
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-    steps:
-      - name: Auto-assign PR
-        uses: kentaro-m/auto-assign-action@60730395fd3afb76c7407e16cd4b144fbbcf28a6 # v1.2.3
-        with:
-          configuration-path: .github/auto_assign.yml
